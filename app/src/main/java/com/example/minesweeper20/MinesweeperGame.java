@@ -1,0 +1,210 @@
+package com.example.minesweeper20;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+class MinesweeperGame {
+	class Tile {
+		private boolean isRevealed, isFlagged;
+		boolean isBomb;
+		private Integer numberSurroundingBombs;
+		Tile() {
+			isRevealed = false;
+			isFlagged = false;
+			isBomb = false;
+			numberSurroundingBombs = 0;
+		}
+		boolean isRevealed() {
+			return isRevealed;
+		}
+		boolean isFlagged() throws Exception {
+			if(isFlagged && isRevealed) {
+				throw new Exception("invalid state: flagged && revealed");
+			}
+			return isFlagged;
+		}
+		void revealTile() {
+			isRevealed = true;
+			isFlagged = false;
+		}
+		void toggleFlag() throws Exception {
+			if(isRevealed) {
+				isFlagged = false;
+				return;
+			}
+			isFlagged = !isFlagged;
+		}
+		Integer getNumberSurroundingBombs() {
+			return numberSurroundingBombs;
+		}
+	}
+	private int numberOfRows, numberOfCols, numberOfBombs;
+	private boolean firstClick, isGameOver;
+	private Tile[][] grid;
+
+
+	MinesweeperGame(int _numberOfRows, int _numberOfCols, int _numberOfBombs) {
+		numberOfRows = _numberOfRows;
+		numberOfCols = _numberOfCols;
+		numberOfBombs = _numberOfBombs;
+		firstClick = true;
+		isGameOver = false;
+		grid = new Tile[numberOfRows][numberOfCols];
+		for(int i = 0; i < numberOfRows; ++i) {
+			for(int j = 0; j < numberOfCols; ++j) {
+				grid[i][j] = new Tile();
+			}
+		}
+	}
+
+	int getNumberOfRows() {
+		return numberOfRows;
+	}
+
+	int getNumberOfCols() {
+		return numberOfCols;
+	}
+
+	Tile getCell(int row, int col) {
+		if(row < 0 || row >= numberOfRows || col < 0 || col >= numberOfCols) {
+			throw new ArrayIndexOutOfBoundsException();
+		}
+		return grid[row][col];
+	}
+
+	void clickCell(int row, int col, boolean toggleBombs) throws Exception {
+		if(firstClick && !toggleBombs) {
+			firstClick = false;
+			firstClickedCell(row, col);
+			return;
+		}
+		if(getCell(row, col).isRevealed) {
+			checkToRevealAdjacentBombs(row, col);
+		}
+		if(toggleBombs) {
+			getCell(row, col).toggleFlag();
+			return;
+		}
+		if(getCell(row, col).isBomb) {
+			isGameOver = true;
+			return;
+		}
+		revealCell(row, col);
+	}
+
+	private void checkToRevealAdjacentBombs(int row, int col) throws Exception {
+		for (int dRow = -1; dRow <= 1; ++dRow) {
+			for (int dCol = -1; dCol <= 1; ++dCol) {
+				if (dRow == 0 && dCol == 0) {
+					continue;
+				}
+				try {
+					Tile adj = getCell(row + dRow, col + dCol);
+					if (adj.isRevealed) {
+						continue;
+					}
+					if (adj.isFlagged && !adj.isBomb) {
+						isGameOver = true;
+					}
+					if (adj.isFlagged != adj.isBomb) {
+						return;
+					}
+				} catch (ArrayIndexOutOfBoundsException ignored) {
+				}
+			}
+		}
+		for (int dRow = -1; dRow <= 1; ++dRow) {
+			for (int dCol = -1; dCol <= 1; ++dCol) {
+				if (dRow == 0 && dCol == 0) {
+					continue;
+				}
+				try {
+					Tile adj = getCell(row+dRow, col+dCol);
+					if(adj.isBomb) {
+						continue;
+					}
+					revealCell(row+dRow, col+dCol);
+				} catch (ArrayIndexOutOfBoundsException ignored) {
+				}
+			}
+		}
+	}
+
+	private void firstClickedCell(int row, int col) throws Exception {
+		ArrayList<Integer> spotsI = new ArrayList<>();
+		ArrayList<Integer> spotsJ = new ArrayList<>();
+		ArrayList<Integer> permutation = new ArrayList<>();
+		for(int i = 0; i < numberOfRows; ++i) {
+			for(int j = 0; j < numberOfCols; ++j) {
+				if(Math.abs(row-i) <= 1 && Math.abs(col-j) <= 1) {
+					continue;
+				}
+				permutation.add(spotsI.size());
+				spotsI.add(i);
+				spotsJ.add(j);
+			}
+		}
+
+		if(spotsI.size() != spotsJ.size() || permutation.size() != spotsJ.size()) {
+			throw new Exception("array list not working as expected");
+		}
+
+		if(spotsI.size() < numberOfBombs) {
+			throw new Exception("too many bombs to have a zero start");
+		}
+
+		Collections.shuffle(permutation);
+
+		for(int i = 0; i < numberOfBombs; ++i) {
+			int bombRow = spotsI.get(permutation.get(i));
+			int bombCol = spotsJ.get(permutation.get(i));
+			getCell(bombRow, bombCol).isBomb = true;
+			for(int dRow = -1; dRow <= 1; ++dRow) {
+				for(int dCol = -1; dCol <= 1; ++dCol) {
+					if(dRow == 0 && dCol == 0) {
+						continue;
+					}
+					try {
+						getCell(bombRow+dRow, bombCol+dCol).numberSurroundingBombs++;
+					} catch(ArrayIndexOutOfBoundsException ignored) {
+					}
+				}
+			}
+		}
+		if(getCell(row, col).isBomb) {
+			throw new Exception("starting click shouldn't be a bomb");
+		}
+		revealCell(row, col);
+	}
+
+	private void revealCell(int row, int col) throws Exception {
+		Tile curr = getCell(row, col);
+		if(curr.isBomb) {
+			throw new Exception("can't reveal a bomb");
+		}
+		curr.revealTile();
+		if(curr.numberSurroundingBombs > 0) {
+			return;
+		}
+		for(int dRow = -1; dRow <= 1; ++dRow) {
+			for(int dCol = -1; dCol <= 1; ++dCol) {
+				if (dRow == 0 && dCol == 0) {
+					continue;
+				}
+				try {
+					final int adjRow = row + dRow;
+					final int adjCol = col + dCol;
+					Tile adjacent = getCell(adjRow, adjCol);
+					if (!adjacent.isRevealed()) {
+						revealCell(adjRow, adjCol);
+					}
+				} catch (ArrayIndexOutOfBoundsException ignored) {
+				}
+			}
+		}
+	}
+
+	boolean getIsGameOver() {
+		return isGameOver;
+	}
+}

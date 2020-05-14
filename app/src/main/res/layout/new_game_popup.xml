@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/new_game_popup"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/reallyLightGrey"
+	android:orientation="vertical">
+
+	<TableRow
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/rows"/>
+		<EditText
+			android:id="@+id/rowsInput"
+			android:layout_width="100dp"
+			android:layout_height="wrap_content"
+			android:inputType="number"
+			android:text="@string/_5"/>
+	</TableRow>
+
+	<TableRow
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/cols"/>
+		<EditText
+			android:id="@+id/colsInput"
+			android:layout_width="100dp"
+			android:layout_height="wrap_content"
+			android:inputType="number"
+			android:text="@string/_5"/>
+	</TableRow>
+
+	<TableRow
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Bombs:"/>
+		<EditText
+			android:id="@+id/bombsInput"
+			android:layout_width="100dp"
+			android:layout_height="wrap_content"
+			android:inputType="number"
+			android:text="@string/_5"/>
+	</TableRow>
+
+	<Button
+		android:id="@+id/startNewGameButton"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/start_new_game"/>
+
+</LinearLayout>
