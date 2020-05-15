@@ -107,6 +107,7 @@ class MinesweeperGame {
 					}
 					if (adj.isFlagged && !adj.isBomb) {
 						isGameOver = true;
+						return;
 					}
 					if (adj.isFlagged != adj.isBomb) {
 						revealSurroundingCells = false;
