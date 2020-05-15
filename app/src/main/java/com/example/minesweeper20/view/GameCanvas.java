@@ -1,4 +1,4 @@
-package com.example.minesweeper20;
+package com.example.minesweeper20.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -17,6 +17,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+
+import com.example.minesweeper20.activity.GameActivity;
+import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
+import com.example.minesweeper20.R;
+import com.example.minesweeper20.activity.ScaleListener;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 

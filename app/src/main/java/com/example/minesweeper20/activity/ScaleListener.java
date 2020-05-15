@@ -1,4 +1,4 @@
-package com.example.minesweeper20;
+package com.example.minesweeper20.activity;
 
 import android.content.Context;
 import android.graphics.Matrix;
@@ -6,7 +6,9 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
+import com.example.minesweeper20.view.GameCanvas;
+
+public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
 
 	//variables to hand a swipe (translate) and pinch (scale)
 	private final Matrix matrix = new Matrix();
@@ -19,7 +21,7 @@ class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener im
 	private Boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
 	private Float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
 
-	ScaleListener(Context context, GameCanvas _gameCanvas) {
+	public ScaleListener(Context context, GameCanvas _gameCanvas) {
 		SGD = new ScaleGestureDetector(context, this);
 		gameCanvas = _gameCanvas;
 	}
@@ -118,7 +120,7 @@ class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener im
 		return true;
 	}
 
-	Matrix getMatrix() {
+	public Matrix getMatrix() {
 		return matrix;
 	}
 }

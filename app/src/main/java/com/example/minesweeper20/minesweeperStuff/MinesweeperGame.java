@@ -1,12 +1,12 @@
-package com.example.minesweeper20;
+package com.example.minesweeper20.minesweeperStuff;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-class MinesweeperGame {
-	static class Tile {
+public class MinesweeperGame {
+	public static class Tile {
 		private boolean isRevealed, isFlagged;
-		boolean isBomb;
+		public boolean isBomb;
 		private Integer numberSurroundingBombs;
 		Tile() {
 			isRevealed = false;
@@ -14,10 +14,10 @@ class MinesweeperGame {
 			isBomb = false;
 			numberSurroundingBombs = 0;
 		}
-		boolean isRevealed() {
+		public boolean isRevealed() {
 			return isRevealed;
 		}
-		boolean isFlagged() throws Exception {
+		public boolean isFlagged() throws Exception {
 			if(isFlagged && isRevealed) {
 				throw new Exception("invalid state: flagged && revealed");
 			}
@@ -34,7 +34,7 @@ class MinesweeperGame {
 			}
 			isFlagged = !isFlagged;
 		}
-		Integer getNumberSurroundingBombs() {
+		public Integer getNumberSurroundingBombs() {
 			return numberSurroundingBombs;
 		}
 	}
@@ -43,7 +43,7 @@ class MinesweeperGame {
 	private final Tile[][] grid;
 
 
-	MinesweeperGame(int _numberOfRows, int _numberOfCols, int _numberOfBombs) {
+	public MinesweeperGame(int _numberOfRows, int _numberOfCols, int _numberOfBombs) {
 		numberOfRows = _numberOfRows;
 		numberOfCols = _numberOfCols;
 		numberOfBombs = _numberOfBombs;
@@ -57,22 +57,22 @@ class MinesweeperGame {
 		}
 	}
 
-	int getNumberOfRows() {
+	public int getNumberOfRows() {
 		return numberOfRows;
 	}
 
-	int getNumberOfCols() {
+	public int getNumberOfCols() {
 		return numberOfCols;
 	}
 
-	Tile getCell(int row, int col) {
+	public Tile getCell(int row, int col) {
 		if(row < 0 || row >= numberOfRows || col < 0 || col >= numberOfCols) {
 			throw new ArrayIndexOutOfBoundsException();
 		}
 		return grid[row][col];
 	}
 
-	void clickCell(int row, int col, boolean toggleBombs) throws Exception {
+	public void clickCell(int row, int col, boolean toggleBombs) throws Exception {
 		if(firstClick && !toggleBombs) {
 			firstClick = false;
 			firstClickedCell(row, col);
@@ -210,7 +210,7 @@ class MinesweeperGame {
 		}
 	}
 
-	boolean getIsGameOver() {
+	public boolean getIsGameOver() {
 		return isGameOver;
 	}
 }

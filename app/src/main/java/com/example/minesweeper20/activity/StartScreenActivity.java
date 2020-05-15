@@ -1,4 +1,4 @@
-package com.example.minesweeper20;
+package com.example.minesweeper20.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -14,6 +14,8 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.minesweeper20.R;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: make translate + scale less laggy (maybe look into making it parallel)
