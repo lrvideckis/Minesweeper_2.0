@@ -24,6 +24,8 @@ import com.example.minesweeper20.R;
 //TODO: for the solver, also implement row reduce solver
 //TODO: show bomb percentage on start screen new game popup (bombs/(rows*cols))
 //TODO: add settings page were you can choose whether or not to have a zero-start
+//TODO: only draw part of canvas which screen can see
+//TODO: when game is over, put an 'X' over the incorrect flags
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
 
