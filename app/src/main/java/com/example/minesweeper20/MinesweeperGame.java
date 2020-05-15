@@ -27,7 +27,7 @@ class MinesweeperGame {
 			isRevealed = true;
 			isFlagged = false;
 		}
-		void toggleFlag() throws Exception {
+		void toggleFlag() {
 			if(isRevealed) {
 				isFlagged = false;
 				return;
@@ -78,14 +78,15 @@ class MinesweeperGame {
 			firstClickedCell(row, col);
 			return;
 		}
-		if(getCell(row, col).isRevealed) {
+		final Tile curr = getCell(row, col);
+		if(curr.isRevealed) {
 			checkToRevealAdjacentBombs(row, col);
 		}
 		if(toggleBombs) {
-			getCell(row, col).toggleFlag();
+			curr.toggleFlag();
 			return;
 		}
-		if(getCell(row, col).isBomb) {
+		if(curr.isBomb && !curr.isFlagged) {
 			isGameOver = true;
 			return;
 		}
