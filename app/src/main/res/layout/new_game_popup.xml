@@ -20,8 +20,8 @@
 			android:layout_height="wrap_content"
 			android:inputType="number"
 			android:text="@string/_5"
-			android:autofillHints="number of rows"
-			tools:ignore="LabelFor" />
+			android:autofillHints="@string/number_of_rows"
+			android:hint="@string/number_of_rows"/>
 	</TableRow>
 
 	<TableRow
@@ -37,8 +37,8 @@
 			android:layout_height="wrap_content"
 			android:inputType="number"
 			android:text="@string/_5"
-			android:autofillHints="number of columns"
-			tools:ignore="LabelFor" />
+			android:autofillHints="@string/number_of_columns"
+			android:hint="@string/number_of_columns"/>
 	</TableRow>
 
 	<TableRow
@@ -54,8 +54,8 @@
 			android:layout_height="wrap_content"
 			android:inputType="number"
 			android:text="@string/_5"
-			android:autofillHints="number of bombs"
-			tools:ignore="LabelFor" />
+			android:autofillHints="@string/number_of_bombs"
+			android:hint="@string/number_of_bombs"/>
 	</TableRow>
 
 	<Button

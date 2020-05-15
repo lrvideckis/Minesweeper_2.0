@@ -132,23 +132,16 @@ public class GameCanvas extends View {
 	}
 
 	public void handleTap(Float tapX, Float tapY) throws Exception {
-		System.out.println("click at: " + tapX + " " + tapY);
-		System.out.println(minesweeperGame.getNumberOfRows() * cellPixelLength);
-		System.out.println(minesweeperGame.getNumberOfCols() * cellPixelLength);
 		//eventually I won't need this check, as the grid always fills the screen
 		if(tapX < 0f ||
 				tapY < 0f ||
 				tapX > minesweeperGame.getNumberOfCols() * cellPixelLength ||
 				tapY > minesweeperGame.getNumberOfRows() * cellPixelLength) {
-			System.out.println("tap is out of bounds");
 			return;
 		}
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
-		System.out.println("tap row, col: " + row + " " + col);
-
 		GameActivity gameActivity = (GameActivity) getContext();
-
 		minesweeperGame.clickCell(row, col, gameActivity.getToggleBombsOn());
 		invalidate();
 	}

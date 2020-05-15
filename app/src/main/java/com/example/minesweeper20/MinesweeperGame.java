@@ -94,6 +94,7 @@ class MinesweeperGame {
 	}
 
 	private void checkToRevealAdjacentBombs(int row, int col) throws Exception {
+		boolean revealSurroundingCells = true;
 		for (int dRow = -1; dRow <= 1; ++dRow) {
 			for (int dCol = -1; dCol <= 1; ++dCol) {
 				if (dRow == 0 && dCol == 0) {
@@ -108,11 +109,14 @@ class MinesweeperGame {
 						isGameOver = true;
 					}
 					if (adj.isFlagged != adj.isBomb) {
-						return;
+						revealSurroundingCells = false;
 					}
 				} catch (ArrayIndexOutOfBoundsException ignored) {
 				}
 			}
+		}
+		if(!revealSurroundingCells) {
+			return;
 		}
 		for (int dRow = -1; dRow <= 1; ++dRow) {
 			for (int dCol = -1; dCol <= 1; ++dCol) {
