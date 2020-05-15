@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 class MinesweeperGame {
-	class Tile {
+	static class Tile {
 		private boolean isRevealed, isFlagged;
 		boolean isBomb;
 		private Integer numberSurroundingBombs;
@@ -38,9 +38,9 @@ class MinesweeperGame {
 			return numberSurroundingBombs;
 		}
 	}
-	private int numberOfRows, numberOfCols, numberOfBombs;
+	private final int numberOfRows, numberOfCols, numberOfBombs;
 	private boolean firstClick, isGameOver;
-	private Tile[][] grid;
+	private final Tile[][] grid;
 
 
 	MinesweeperGame(int _numberOfRows, int _numberOfCols, int _numberOfBombs) {

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -21,13 +22,14 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 public class GameCanvas extends View {
 
-	private ScaleListener scaleListener;
-	private MinesweeperGame minesweeperGame;
+	private final ScaleListener scaleListener;
+	private final MinesweeperGame minesweeperGame;
 	private final Integer cellPixelLength = 150;
-	private Paint blankCell = new Paint(), black = new Paint(), backgroundGray = new Paint(), redFlag = new Paint();
-	private Rect rect = new Rect();
+	private final Paint blankCell = new Paint(), black = new Paint(), backgroundGray = new Paint(), redFlag = new Paint();
+	private final Rect rect = new Rect();
 	private Paint[] numberColors;
 	private PopupWindow popupWindow;
+	private final Matrix copyOfScale = new Matrix();
 
 	public GameCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -38,7 +40,6 @@ public class GameCanvas extends View {
 				gameActivity.getNumberOfRows(),
 				gameActivity.getNumberOfCols(),
 				gameActivity.getNumberOfBombs());
-
 		setUpColors();
 		setUpEndGamePopup();
 	}
@@ -190,7 +191,9 @@ public class GameCanvas extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		canvas.setMatrix(scaleListener.getMatrix());
+		copyOfScale.set(scaleListener.getMatrix());
+		copyOfScale.preConcat(canvas.getMatrix());
+		canvas.setMatrix(copyOfScale);
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
 		final int numberOfCols = minesweeperGame.getNumberOfCols();

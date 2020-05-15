@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/new_game_popup"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
@@ -18,7 +19,9 @@
 			android:layout_width="100dp"
 			android:layout_height="wrap_content"
 			android:inputType="number"
-			android:text="@string/_5"/>
+			android:text="@string/_5"
+			android:autofillHints="number of rows"
+			tools:ignore="LabelFor" />
 	</TableRow>
 
 	<TableRow
@@ -33,7 +36,9 @@
 			android:layout_width="100dp"
 			android:layout_height="wrap_content"
 			android:inputType="number"
-			android:text="@string/_5"/>
+			android:text="@string/_5"
+			android:autofillHints="number of columns"
+			tools:ignore="LabelFor" />
 	</TableRow>
 
 	<TableRow
@@ -42,13 +47,15 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Bombs:"/>
+			android:text="@string/bombs"/>
 		<EditText
 			android:id="@+id/bombsInput"
 			android:layout_width="100dp"
 			android:layout_height="wrap_content"
 			android:inputType="number"
-			android:text="@string/_5"/>
+			android:text="@string/_5"
+			android:autofillHints="number of bombs"
+			tools:ignore="LabelFor" />
 	</TableRow>
 
 	<Button

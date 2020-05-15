@@ -10,4 +10,5 @@
 	<string name="start_new_game">Start New Game</string>
 	<string name="_5">5</string>
 	<string name="new_puzzle">New Puzzle</string>
+	<string name="bombs">Bombs:</string>
 </resources>

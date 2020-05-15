@@ -6,21 +6,18 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
+class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
 
 	//variables to hand a swipe (translate) and pinch (scale)
-	private Matrix matrix = new Matrix();
-	private ScaleGestureDetector SGD;
+	private final Matrix matrix = new Matrix();
+	private final ScaleGestureDetector SGD;
 	private Float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
-	private GameCanvas gameCanvas;
+	private final GameCanvas gameCanvas;
 	private Integer prevPointerCount = 0;
-	private final Integer halfScreenWidth = 720, halfScreenHeight = 1200;
 
 	//variables to handle a tap
 	private Boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
 	private Float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
-	private View v;
-
 
 	ScaleListener(Context context, GameCanvas _gameCanvas) {
 		SGD = new ScaleGestureDetector(context, this);
@@ -65,6 +62,8 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		}
 		prevPointerCount = event.getPointerCount();
 
+		final Integer halfScreenWidth = 720;
+		final Integer halfScreenHeight = 1200;
 		if (event.getPointerCount() == 1) {
 			switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
@@ -86,11 +85,6 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 					if(checkIfTap(event)) {
 						absoluteX = startAbsoluteX;
 						absoluteY = startAbsoluteY;
-						//System.out.println("hi absolute: " + absoluteX + " " + absoluteY);
-						//System.out.println("click at: " + startOfTapX + " " + startOfTapY);
-
-
-						//System.out.println("tap x,y: " + event.getX() + " " + event.getY());
 
 						Float newX = startOfTapX;
 						newX -= halfScreenWidth;
@@ -98,8 +92,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						newX += halfScreenWidth;
 						newX -= absoluteX;
 
-
-						Float newY = startOfTapY + 200;
+						Float newY = startOfTapY;
 						newY -= halfScreenHeight;
 						newY /= scale;
 						newY += halfScreenHeight;
@@ -117,8 +110,6 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 			seenMoreThanOnePointer = true;
 			SGD.onTouchEvent(event);
 		}
-		//System.out.println("absolute X,Y: " + absoluteX + " " + absoluteY);
-		//System.out.println("scale " + scale);
 		if(!checkIfTap(event)) {
 			matrix.setTranslate(absoluteX, absoluteY);
 			matrix.postScale(scale, scale, halfScreenWidth, halfScreenHeight);
@@ -130,5 +121,5 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	Matrix getMatrix() {
 		return matrix;
 	}
-};
+}
 

@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -18,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 //TODO: implement # bombs input
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
-//TODO: make translate + scale less laggy (maybe look into parallelizing it)
+//TODO: make translate + scale less laggy (maybe look into making it parallel)
 //TODO: organize colors + styles in values folder
 //TODO: undo button
 //TODO: redo start menu screen
