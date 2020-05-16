@@ -90,9 +90,9 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		beginner.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				rowsInput.setText("9");
-				colsInput.setText("9");
-				bombsInput.setText("10");
+				rowsInput.setText(R.string._9);
+				colsInput.setText(R.string._9);
+				bombsInput.setText(R.string._10);
 			}
 		});
 
@@ -100,9 +100,9 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		intermediate.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				rowsInput.setText("14");
-				colsInput.setText("16");
-				bombsInput.setText("40");
+				rowsInput.setText(R.string._14);
+				colsInput.setText(R.string._16);
+				bombsInput.setText(R.string._40);
 			}
 		});
 
@@ -110,9 +110,9 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		expert.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				rowsInput.setText("16");
-				colsInput.setText("30");
-				bombsInput.setText("99");
+				rowsInput.setText(R.string._16);
+				colsInput.setText(R.string._30);
+				bombsInput.setText(R.string._99);
 			}
 		});
 	}
