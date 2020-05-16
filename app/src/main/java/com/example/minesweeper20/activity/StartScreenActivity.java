@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.minesweeper20.R;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
-//TODO: make translate + scale less laggy (maybe look into making it parallel)
+//TODO: make translate + scale less laggy
 //TODO: organize colors + styles in values folder
 //TODO: undo button
 //TODO: for the solver, also implement row reduce solver
@@ -82,11 +82,44 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 				startActivity(intent);
 			}
 		});
+		final EditText rowsInput = newGamePopup.findViewById(R.id.rowsInput);
+		final EditText colsInput = newGamePopup.findViewById(R.id.colsInput);
+		final EditText bombsInput = newGamePopup.findViewById(R.id.bombsInput);
+
+		Button beginner = newGamePopup.findViewById(R.id.beginner);
+		beginner.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				rowsInput.setText("9");
+				colsInput.setText("9");
+				bombsInput.setText("10");
+			}
+		});
+
+		Button intermediate = newGamePopup.findViewById(R.id.intermediate);
+		intermediate.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				rowsInput.setText("14");
+				colsInput.setText("16");
+				bombsInput.setText("40");
+			}
+		});
+
+		Button expert = newGamePopup.findViewById(R.id.expert);
+		expert.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				rowsInput.setText("16");
+				colsInput.setText("30");
+				bombsInput.setText("99");
+			}
+		});
 	}
 
 	private int getNumberInput(String input) {
 		if(input.equals("")) {
-			return 5;
+			return 1;
 		}
 		return Integer.parseInt(input);
 	}

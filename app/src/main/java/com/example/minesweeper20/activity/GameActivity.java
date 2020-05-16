@@ -19,9 +19,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		numberOfRows = getIntent().getIntExtra("numberOfRows", 5);
-		numberOfCols = getIntent().getIntExtra("numberOfCols", 5);
-		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 5);
+		numberOfRows = getIntent().getIntExtra("numberOfRows", 1);
+		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
+		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 1);
 		toggleBombsOn = false;
 		setContentView(R.layout.game);
 		Button backToStartScreen = findViewById(R.id.backToStartScreen);

@@ -57,10 +57,34 @@
 			android:hint="@string/number_of_bombs"/>
 	</TableRow>
 
-	<Button
-		android:id="@+id/startNewGameButton"
+	<TableRow
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:text="@string/start_new_game"/>
+		android:layout_height="wrap_content">
+		<Button
+			android:id="@+id/beginner"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/beginner"/>
+		<Button
+			android:id="@+id/intermediate"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/intermediate"/>
+		<Button
+			android:id="@+id/expert"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/expert"/>
+	</TableRow>
+
+	<TableRow
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+		<Button
+			android:id="@+id/startNewGameButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/start_new_game"/>
+	</TableRow>
 
 </LinearLayout>
