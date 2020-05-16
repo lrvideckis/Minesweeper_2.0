@@ -10,8 +10,8 @@ import com.example.minesweeper20.view.GameCanvas;
 
 public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
 
+
 	//variables to hand a swipe (translate) and pinch (scale)
-	private final Matrix matrix = new Matrix();
 	private final ScaleGestureDetector SGD;
 	private Float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
 	private final GameCanvas gameCanvas;
@@ -21,7 +21,13 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private Boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
 	private Float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
 
-	public ScaleListener(Context context, GameCanvas _gameCanvas) {
+	private final Matrix matrix = new Matrix();
+	private final Integer halfScreenWidth, halfScreenHeight;
+	private Float topNavBarHeight;
+
+	public ScaleListener(Context context, GameCanvas _gameCanvas, Integer _screenWidth, Integer _screenHeight) {
+		halfScreenWidth = _screenWidth / 2;
+		halfScreenHeight = _screenHeight / 2;
 		SGD = new ScaleGestureDetector(context, this);
 		gameCanvas = _gameCanvas;
 	}
@@ -36,7 +42,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	@Override
 	public boolean onScale(ScaleGestureDetector detector) {
 		scale = scale * detector.getScaleFactor();
-		scale = Math.max(0.1f, Math.min(scale, 5f));
+		scale = Math.max(0.1f, Math.min(scale, 3.3f));
 		absoluteX += (detector.getFocusX() - prevFocusX) / scale;
 		absoluteY += (detector.getFocusY() - prevFocusY) / scale;
 		prevFocusX = detector.getFocusX();
@@ -58,14 +64,12 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		v.performClick();
-		if (prevPointerCount == 2 && event.getPointerCount() == 1) {
+		if (prevPointerCount > 1 && event.getPointerCount() == 1) {
 			prevFocusX = event.getX();
 			prevFocusY = event.getY();
 		}
 		prevPointerCount = event.getPointerCount();
 
-		final Integer halfScreenWidth = 720;
-		final Integer halfScreenHeight = 1200;
 		if (event.getPointerCount() == 1) {
 			switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
@@ -95,10 +99,12 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						newX -= absoluteX;
 
 						Float newY = startOfTapY;
+						newY += topNavBarHeight;
 						newY -= halfScreenHeight;
 						newY /= scale;
 						newY += halfScreenHeight;
 						newY -= absoluteY;
+						newY -= topNavBarHeight;
 
 						try {
 							gameCanvas.handleTap(newX, newY);
@@ -123,5 +129,8 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	public Matrix getMatrix() {
 		return matrix;
 	}
-}
 
+	public void setTopNavBarHeight(float _topNavBarHeight) {
+		topNavBarHeight = _topNavBarHeight;
+	}
+}

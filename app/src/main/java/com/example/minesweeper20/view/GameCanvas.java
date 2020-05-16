@@ -34,12 +34,15 @@ public class GameCanvas extends View {
 	private final Rect rect = new Rect();
 	private Paint[] numberColors;
 	private PopupWindow popupWindow;
-	private final Matrix copyOfScale = new Matrix();
+	private final float[] matrixValues = new float[9];
+	private final Matrix canvasTransitionScale = new Matrix();
 
 	public GameCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		final GameActivity gameActivity = (GameActivity) getContext();
-		scaleListener = new ScaleListener(context, this);
+		Integer screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+		Integer screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+		scaleListener = new ScaleListener(context, this, screenWidth, screenHeight);
 		setOnTouchListener(scaleListener);
 		minesweeperGame = new MinesweeperGame(
 				gameActivity.getNumberOfRows(),
@@ -189,9 +192,12 @@ public class GameCanvas extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		copyOfScale.set(scaleListener.getMatrix());
-		copyOfScale.preConcat(canvas.getMatrix());
-		canvas.setMatrix(copyOfScale);
+		Matrix canvasM = canvas.getMatrix();
+		canvasM.getValues(matrixValues);
+		scaleListener.setTopNavBarHeight(matrixValues[5]);
+		canvasTransitionScale.set(scaleListener.getMatrix());
+		canvasTransitionScale.preConcat(canvasM);
+		canvas.setMatrix(canvasTransitionScale);
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
 		final int numberOfCols = minesweeperGame.getNumberOfCols();
