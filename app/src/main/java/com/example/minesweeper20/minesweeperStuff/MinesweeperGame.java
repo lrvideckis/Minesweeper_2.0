@@ -5,8 +5,8 @@ import java.util.Collections;
 
 public class MinesweeperGame {
 	public static class Tile {
-		private boolean isRevealed, isFlagged;
-		public boolean isBomb;
+		private Boolean isRevealed, isFlagged;
+		public Boolean isBomb;
 		private Integer numberSurroundingBombs;
 		Tile() {
 			isRevealed = false;
