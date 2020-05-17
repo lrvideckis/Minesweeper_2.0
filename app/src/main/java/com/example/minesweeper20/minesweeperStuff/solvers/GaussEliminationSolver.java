@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class GaussEliminationSolver  implements MinesweeperSolver {
 	@Override
-	public void solvePosition(ArrayList<ArrayList<visibleTile>> board) throws Exception {
+	public void solvePosition(ArrayList<ArrayList<VisibleTile>> board) throws Exception {
 
 	}
 }

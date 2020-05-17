@@ -22,6 +22,11 @@ import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.ScaleListener;
+import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.helpers.ConvertGameBoardFormat;
+import com.example.minesweeper20.minesweeperStuff.solvers.BacktrackingSolver;
+
+import java.util.ArrayList;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -30,15 +35,18 @@ public class GameCanvas extends View {
 	private final ScaleListener scaleListener;
 	private final MinesweeperGame minesweeperGame;
 	private final Integer cellPixelLength = 150;
-	private final Paint blankCell = new Paint(), black = new Paint(), backgroundGray = new Paint(), redFlag = new Paint();
-	private final Rect rect = new Rect();
-	private Paint[] numberColors;
+	private final Paint black = new Paint();
 	private PopupWindow popupWindow;
 	private final float[] matrixValues = new float[9];
 	private final Matrix canvasTransitionScale = new Matrix();
+	private ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
+	private BacktrackingSolver backtrackingSolver;
+	private DrawCellHelpers drawCellHelpers;
 
 	public GameCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		black.setColor(Color.BLACK);
+		black.setStrokeWidth(3);
 		final GameActivity gameActivity = (GameActivity) getContext();
 		Integer screenWidth = context.getResources().getDisplayMetrics().widthPixels;
 		Integer screenHeight = context.getResources().getDisplayMetrics().heightPixels;
@@ -48,37 +56,12 @@ public class GameCanvas extends View {
 				gameActivity.getNumberOfRows(),
 				gameActivity.getNumberOfCols(),
 				gameActivity.getNumberOfBombs());
-		setUpColors();
+		drawCellHelpers = new DrawCellHelpers();
+		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+		backtrackingSolver = new BacktrackingSolver(
+				minesweeperGame.getNumberOfRows(),
+				minesweeperGame.getNumberOfCols());
 		setUpEndGamePopup();
-	}
-
-	private void setUpColors() {
-		black.setColor(Color.BLACK);
-		black.setStrokeWidth(3);
-
-		backgroundGray.setColor(Color.parseColor("#cccccc"));
-		backgroundGray.setStyle(Paint.Style.FILL);
-
-		redFlag.setTextSize(cellPixelLength / 2f);
-		redFlag.setTextAlign(Paint.Align.CENTER);
-
-		numberColors = new Paint[9];
-		for(int i = 1; i <= 8; ++i) {
-			numberColors[i] = new Paint();
-			numberColors[i].setStyle(Paint.Style.FILL);
-			numberColors[i].setTextSize(cellPixelLength * 5 / 6f);
-			numberColors[i].setTextAlign(Paint.Align.CENTER);
-			numberColors[i].setTypeface(Typeface.create("Arial", Typeface.BOLD));
-		}
-		//TODO: move these colors to colors.xml file
-		numberColors[1].setColor(Color.BLUE);
-		numberColors[2].setColor(Color.parseColor("#009933"));
-		numberColors[3].setColor(Color.RED);
-		numberColors[4].setColor(Color.parseColor("#000099"));
-		numberColors[5].setColor(Color.parseColor("#800000"));
-		numberColors[6].setColor(Color.parseColor("#009999"));
-		numberColors[7].setColor(Color.BLACK);
-		numberColors[8].setColor(Color.GRAY);
 	}
 
 	private void setUpEndGamePopup() {
@@ -103,41 +86,6 @@ public class GameCanvas extends View {
 		});
 	}
 
-	private void drawBlankCell(Canvas canvas, int startX, int startY) {
-		blankCell.setColor(Color.parseColor("#666666"));
-		blankCell.setStyle(Paint.Style.FILL_AND_STROKE);
-		blankCell.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
-
-		Path path = new Path();
-		path.setFillType(Path.FillType.WINDING);
-		path.moveTo(startX, startY + cellPixelLength);
-		path.lineTo(startX + cellPixelLength, startY + cellPixelLength);
-		path.lineTo(startX + cellPixelLength, startY);
-		path.lineTo(startX, startY + cellPixelLength);
-		path.close();
-
-		canvas.drawPath(path, blankCell);
-
-
-		blankCell.setColor(Color.parseColor("#f2f2f2"));
-		Path path1 = new Path();
-		path1.setFillType(Path.FillType.WINDING);
-		path1.moveTo(startX, startY);
-		path1.lineTo(startX, startY + cellPixelLength);
-		path1.lineTo(startX + cellPixelLength, startY);
-		path1.lineTo(startX, startY);
-		path1.close();
-
-		canvas.drawPath(path1, blankCell);
-
-
-		rect.set(startX + cellPixelLength*88/100,
-				 startY + cellPixelLength*88/100,
-				startX + cellPixelLength*12/100,
-				startY + cellPixelLength*12/100);
-		blankCell.setColor(Color.parseColor("#b3b3b3"));
-		canvas.drawRect(rect, blankCell);
-	}
 
 	public void handleTap(Float tapX, Float tapY) throws Exception {
 		//eventually I won't need this check, as the grid always fills the screen
@@ -151,40 +99,36 @@ public class GameCanvas extends View {
 		final int col = (int) (tapX / cellPixelLength);
 		GameActivity gameActivity = (GameActivity) getContext();
 		minesweeperGame.clickCell(row, col, gameActivity.getToggleBombsOn());
+		if(gameActivity.getToggleHintsOn()) {
+		    updateSolvedBoard();
+		}
 		invalidate();
 	}
 
-	private void drawNumberedCell(Canvas canvas, Integer numberSurroundingBombs, int startX, int startY) {
-		Rect background = new Rect(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
-		canvas.drawRect(background, backgroundGray);
-		if(numberSurroundingBombs > 0) {
-			final int xPos = startX + cellPixelLength / 2;
-			final int yPos = (int) (startY + cellPixelLength / 2 - ((numberColors[numberSurroundingBombs].descent() + numberColors[numberSurroundingBombs].ascent()) / 2)) ;
-			canvas.drawText(numberSurroundingBombs.toString(), xPos, yPos, numberColors[numberSurroundingBombs]);
-		}
+	public void updateSolvedBoard() throws Exception {
+		//TODO: only run solver if board has changed since last time
+		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+		backtrackingSolver.solvePosition(board);
 	}
 
-	private void drawFlag(Canvas canvas, int startX, int startY) {
-		final int xPos = startX + cellPixelLength / 2;
-		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
-		canvas.drawText(new String(Character.toChars(0x1F6A9)), xPos, yPos, redFlag);
-	}
-
-	private void drawBomb(Canvas canvas, int startX, int startY) {
-		final int xPos = startX + cellPixelLength / 2;
-		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
-		canvas.drawText(new String(Character.toChars(0x1F4A3)), xPos, yPos, redFlag);
-	}
-
-	private void drawCell(Canvas canvas, MinesweeperGame.Tile cell, int startX, int startY) throws Exception {
-		if(cell.isRevealed()) {
-			drawNumberedCell(canvas, cell.getNumberSurroundingBombs(), startX, startY);
+	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int startX, int startY) throws Exception {
+		if(gameCell.isRevealed()) {
+			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), startX, startY);
 		} else {
-			drawBlankCell(canvas, startX, startY);
-			if(cell.isFlagged()) {
-				drawFlag(canvas, startX, startY);
-			} else if(cell.isBomb && minesweeperGame.getIsGameOver()) {
-				drawBomb(canvas, startX, startY);
+			drawCellHelpers.drawBlankCell(canvas, startX, startY);
+			if(gameCell.isFlagged()) {
+				drawCellHelpers.drawFlag(canvas, startX, startY);
+			} else if(gameCell.isBomb && minesweeperGame.getIsGameOver()) {
+				drawCellHelpers.drawBomb(canvas, startX, startY);
+			}
+
+			GameActivity gameActivity = (GameActivity) getContext();
+			if(gameActivity.getToggleHintsOn()) {
+				if(solverCell.isLogicalBomb) {
+					drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
+				} else if(solverCell.isLogicalFree) {
+					drawCellHelpers.drawLogicalFree(canvas, startX, startY);
+				}
 			}
 		}
 	}
@@ -204,7 +148,7 @@ public class GameCanvas extends View {
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				try {
-					drawCell(canvas, minesweeperGame.getCell(i,j), j * cellPixelLength, i * cellPixelLength);
+					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), j * cellPixelLength, i * cellPixelLength);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

@@ -17,12 +17,17 @@
 			android:layout_height="wrap_content"
 			android:text="@string/back"
 			android:layout_weight="1"/>
-
 		<Switch
 			android:id="@+id/toggleBombs"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/toggle_bombs"
+			android:layout_weight="1"/>
+		<Switch
+			android:id="@+id/toggleHints"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/toggle_hints"
 			android:layout_weight="1"/>
 	</LinearLayout>
 

@@ -1,5 +1,7 @@
 package com.example.minesweeper20.minesweeperStuff;
 
+import com.example.minesweeper20.minesweeperStuff.helpers.ArrayBounds;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -66,7 +68,7 @@ public class MinesweeperGame {
 	}
 
 	public Tile getCell(int row, int col) {
-		if(row < 0 || row >= numberOfRows || col < 0 || col >= numberOfCols) {
+		if(ArrayBounds.outOfBounds(row,col,numberOfRows,numberOfCols)) {
 			throw new ArrayIndexOutOfBoundsException();
 		}
 		return grid[row][col];

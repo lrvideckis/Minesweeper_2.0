@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class GetConnectedComponents {
-	private static class dsu {
-		dsu(int size) {
+	private static class Dsu {
+		ArrayList<Integer> parent;
+		Dsu(int size) {
 			parent = new ArrayList<>(Collections.nCopies(size, -1));
 		}
-		ArrayList<Integer> parent;
 		int find(int node) {
 			return parent.get(node) < 0 ? node : parent.set(node, find(parent.get(node)));
 		}
@@ -31,18 +31,18 @@ public class GetConnectedComponents {
 	private static Integer rows, cols;
 
 	private static int getNode(int i, int j) {
-		if(i < 0 || j < 0 || i >= rows || j >= cols) {
+		if(ArrayBounds.outOfBounds(i,j,rows,cols)) {
 			throw new ArrayIndexOutOfBoundsException("throwing from getConnectedComponents.getNode()");
 		}
 		return i*cols + j;
 	}
 
 	//TODO: play around with the order of cells in a single CC to make the backtracking faster
-	public static ArrayList<ArrayList<Pair<Integer,Integer>>> getComponents(ArrayList<ArrayList<MinesweeperSolver.visibleTile>> board) throws Exception {
+	public static ArrayList<ArrayList<Pair<Integer,Integer>>> getComponents(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board) throws Exception {
 		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
 		cols = dimensions.second;
-		dsu disjointSet = new dsu(rows * cols);
+		Dsu disjointSet = new Dsu(rows * cols);
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
 				if(!board.get(i).get(j).isVisible) {
@@ -55,10 +55,10 @@ public class GetConnectedComponents {
 						}
 						final int adjI = i + di;
 						final int adjJ = j + dj;
-						if(!ArrayBounds.inBounds(adjI, adjJ, rows, cols)) {
+						if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 							continue;
 						}
-						MinesweeperSolver.visibleTile adjTile = board.get(adjI).get(adjJ);
+						MinesweeperSolver.VisibleTile adjTile = board.get(adjI).get(adjJ);
 						if(adjTile.isVisible) {
 							continue;
 						}
@@ -68,40 +68,43 @@ public class GetConnectedComponents {
 			}
 		}
 		ArrayList<ArrayList<Pair<Integer,Integer>>> tempComponents = new ArrayList<>(rows * cols);
+		for(int i = 0; i < rows*cols; ++i) {
+			tempComponents.add(new ArrayList<Pair<Integer,Integer>>());
+		}
+
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				MinesweeperSolver.visibleTile currTile = board.get(i).get(j);
+				MinesweeperSolver.VisibleTile currTile = board.get(i).get(j);
 				if (!currTile.isVisible) {
 					continue;
 				}
 				boolean foundAdjVis = false;
 				for(int di = -1; di <= 1 && !foundAdjVis; ++di) {
-					for(int dj = -1; dj <= 1 && !foundAdjVis; ++dj) {
+					for(int dj = -1; dj <= 1; ++dj) {
 						if(di == 0 && dj == 0) {
 							continue;
 						}
 						final int adjI = i + di;
 						final int adjJ = j + dj;
-						if(!ArrayBounds.inBounds(adjI, adjJ, rows, cols)) {
+						if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 							continue;
 						}
 						if(board.get(adjI).get(adjJ).isVisible) {
 							foundAdjVis = true;
+							break;
 						}
 					}
 				}
-				if(!foundAdjVis) {
-					continue;
+				if (foundAdjVis) {
+					tempComponents.get(disjointSet.find(getNode(i, j))).add(new Pair<>(i, j));
 				}
-				tempComponents.get(disjointSet.find(getNode(i,j))).add(new Pair<>(i,j));
 			}
 		}
 		ArrayList<ArrayList<Pair<Integer,Integer>>> components = new ArrayList<>();
-		for(int i = 0; i < rows*cols; ++i) {
-			if(tempComponents.get(i).isEmpty()) {
-				continue;
+		for(ArrayList<Pair<Integer,Integer>> component : tempComponents) {
+			if(!component.isEmpty()) {
+				components.add(component);
 			}
-			components.add(tempComponents.get(i));
 		}
 		return components;
 	}

@@ -5,12 +5,12 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import java.util.ArrayList;
 
 public class ArrayBounds {
-	public static Pair<Integer,Integer> getArrayBounds(ArrayList<ArrayList<MinesweeperSolver.visibleTile>> board) throws Exception {
-		Integer rows = board.size();
+	public static Pair<Integer,Integer> getArrayBounds(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board) throws Exception {
+		int rows = board.size();
 		if(rows == 0) {
 			throw new Exception("board has 0 rows");
 		}
-		Integer cols = board.get(0).size();
+		int cols = board.get(0).size();
 		if(cols == 0) {
 			throw new Exception("board has 0 columns");
 		}
@@ -22,7 +22,7 @@ public class ArrayBounds {
 		return new Pair<>(rows, cols);
 	}
 
-	public static boolean inBounds(int i, int j, int rows, int cols) {
-		return (i >= 0 && j >= 0 && i < rows && j < cols);
+	public static boolean outOfBounds(int i, int j, int rows, int cols) {
+		return (i < 0 || j < 0 || i >= rows || j >= cols);
 	}
 }

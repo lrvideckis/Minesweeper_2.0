@@ -26,4 +26,5 @@
 	<string name="beginner">beginner</string>
 	<string name="intermediate">intermediate</string>
 	<string name="expert">expert</string>
+    <string name="toggle_hints">Toggle Hints</string>
 </resources>

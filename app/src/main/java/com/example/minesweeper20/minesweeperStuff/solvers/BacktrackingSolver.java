@@ -13,24 +13,28 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
 
-	private ArrayList<ArrayList<Integer>> numberOfBombPositions;
 	private ArrayList<ArrayList<Boolean>> isBomb;
-	private ArrayList<ArrayList<visibleTile>> board;
+	private ArrayList<ArrayList<VisibleTile>> board;
+
+	public BacktrackingSolver(int rows, int cols) {
+		isBomb = new ArrayList<>(rows);
+		for(int i = 0; i < rows; ++i) {
+			ArrayList<Boolean> currRow = new ArrayList<>(Collections.nCopies(cols, false));
+			isBomb.add(currRow);
+		}
+	}
 
 	@Override
-	public void solvePosition(ArrayList<ArrayList<visibleTile>> _board) throws Exception {
+	public void solvePosition(ArrayList<ArrayList<VisibleTile>> _board) throws Exception {
 		board = _board;
 		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
 		cols = dimensions.second;
-		numberOfBombPositions = new ArrayList<>(rows);
-		for(int i = 0; i < rows; ++i) {
-			numberOfBombPositions.set(i, new ArrayList<>(Collections.nCopies(cols, 0)));
-		}
 
-		isBomb = new ArrayList<>(rows);
 		for(int i = 0; i < rows; ++i) {
-			isBomb.set(i, new ArrayList<>(Collections.nCopies(cols, false)));
+			for(int j = 0; j < cols; ++j) {
+				isBomb.get(i).set(j,false);
+			}
 		}
 
 		ArrayList<ArrayList<Pair<Integer,Integer>>> components = GetConnectedComponents.getComponents(board);
@@ -40,7 +44,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				MinesweeperSolver.visibleTile curr = board.get(i).get(j);
+				VisibleTile curr = board.get(i).get(j);
 				if(curr.numberOfTotalConfigs == 0) {
 					continue;
 				}
@@ -60,7 +64,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 		final int i = component.get(pos).first;
 		final int j = component.get(pos).second;
-		MinesweeperSolver.visibleTile tile = board.get(i).get(j);
+		VisibleTile tile = board.get(i).get(j);
 
 		//try bomb
 		isBomb.get(i).set(j, true);
@@ -84,10 +88,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					}
 					int adjI = i + di;
 					int adjJ = j + dj;
-					if (!ArrayBounds.inBounds(adjI, adjJ, rows, cols)) {
+					if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 						continue;
 					}
-					MinesweeperSolver.visibleTile adjTile = board.get(adjI).get(adjJ);
+					VisibleTile adjTile = board.get(adjI).get(adjJ);
 					if(!adjTile.isVisible) {
 						continue;
 					}
@@ -97,7 +101,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				}
 			}
 		}
-		System.out.println("here, found solution");
 		for(int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
@@ -117,7 +120,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				}
 				int adjI = i + di;
 				int adjJ = j + dj;
-				if(!ArrayBounds.inBounds(adjI, adjJ, rows, cols)) {
+				if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 					continue;
 				}
 				if(isBomb.get(adjI).get(adjJ)) {
