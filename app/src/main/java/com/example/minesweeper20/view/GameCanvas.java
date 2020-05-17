@@ -95,7 +95,18 @@ public class GameCanvas extends View {
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
 		GameActivity gameActivity = (GameActivity) getContext();
-		minesweeperGame.clickCell(row, col, gameActivity.getToggleBombsOn());
+		String[] gameChoices = getResources().getStringArray(R.array.game_type);
+		if(gameActivity.getGameMode().equals(gameChoices[0])) {//normal mode
+			minesweeperGame.clickCell(row, col, gameActivity.getToggleBombsOn());
+		} else if(gameActivity.getGameMode().equals(gameChoices[1])) {//always guess wrong mode
+
+
+			//updateSolvedBoard();
+
+
+
+		} else if(gameActivity.getGameMode().equals(gameChoices[2])){//always guess correctly mode
+		}
 		if(gameActivity.getToggleHintsOn()) {
 		    updateSolvedBoard();
 		}

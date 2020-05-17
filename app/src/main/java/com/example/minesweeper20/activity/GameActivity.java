@@ -17,6 +17,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	private Boolean toggleBombsOn, toggleHintsOn;
 	private Integer numberOfRows, numberOfCols, numberOfBombs;
+	private String gameMode;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -24,6 +25,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfRows = getIntent().getIntExtra("numberOfRows", 1);
 		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
 		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 1);
+		gameMode = getIntent().getStringExtra("gameMode");
 		toggleBombsOn = toggleHintsOn = false;
 		setContentView(R.layout.game);
 		Button backToStartScreen = findViewById(R.id.backToStartScreen);
@@ -66,7 +68,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void updateNumberOfBombs(int numberOfBombsLeft) {
 		TextView numberOfBombs = findViewById(R.id.showNumberOfBombs);
-		String bombsLeft = "bombs: " + numberOfBombsLeft;
+		final String bombsLeft = "bombs: " + numberOfBombsLeft;
 		numberOfBombs.setText(bombsLeft);
 	}
 
@@ -88,5 +90,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public Boolean getToggleHintsOn() {
 		return toggleHintsOn;
+	}
+
+	public String getGameMode() {
+		return gameMode;
 	}
 }

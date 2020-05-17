@@ -73,12 +73,6 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 
 				Spinner gameType = newGamePopup.findViewById(R.id.game_type);
 				String selectedGameType = gameType.getSelectedItem().toString();
-				String[] gameChoices = getResources().getStringArray(R.array.game_type);
-				if(selectedGameType.equals(gameChoices[0])) {
-					System.out.println("here, mercury");
-				} else if(selectedGameType.equals(gameChoices[1])) {
-					System.out.println("here, venus");
-				}
 
 				popupWindow.dismiss();
 
@@ -86,6 +80,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 				intent.putExtra("numberOfRows", numberOfRows);
 				intent.putExtra("numberOfCols", numberOfCols);
 				intent.putExtra("numberOfBombs", numberOfBombs);
+				intent.putExtra("gameMode", selectedGameType);
 				startActivity(intent);
 			}
 		});

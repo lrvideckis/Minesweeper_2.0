@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class MinesweeperGame {
+	//TODO: rethink this class to be a derived from MinesweeperSolver.VisibleTile - it has everything VisibleTile has and more
 	public static class Tile {
 		private Boolean isRevealed, isFlagged;
 		public Boolean isBomb;
 		private Integer numberSurroundingBombs;
 		Tile() {
-			isRevealed = false;
-			isFlagged = false;
-			isBomb = false;
+			isRevealed = isFlagged = isBomb = false;
 			numberSurroundingBombs = 0;
 		}
 		public boolean isRevealed() {
@@ -93,13 +92,15 @@ public class MinesweeperGame {
 		if(curr.isRevealed()) {
 			checkToRevealAdjacentBombs(row, col);
 		}
-		if(toggleBombs && !curr.isRevealed()) {
-			if(curr.isFlagged()) {
-				--numberOfFlags;
-			} else {
-				++numberOfFlags;
+		if(toggleBombs) {
+			if(!curr.isRevealed()) {
+				if (curr.isFlagged()) {
+					--numberOfFlags;
+				} else {
+					++numberOfFlags;
+				}
+				curr.toggleFlag();
 			}
-			curr.toggleFlag();
 			return;
 		}
 		if(curr.isBomb && !curr.isFlagged()) {
@@ -172,6 +173,7 @@ public class MinesweeperGame {
 		}
 
 		if(spotsI.size() < numberOfBombs) {
+			//TODO: display this error to user instead of just failing
 			throw new Exception("too many bombs to have a zero start");
 		}
 
@@ -225,6 +227,44 @@ public class MinesweeperGame {
 					}
 				} catch (ArrayIndexOutOfBoundsException ignored) {
 				}
+			}
+		}
+	}
+
+	public void changeBombLocations(ArrayList<ArrayList<Boolean>> newBombLocations) throws Exception {
+		for(int i = 0; i < numberOfRows; ++i) {
+			for(int j = 0; j < numberOfCols; ++j) {
+				Tile curr = getCell(i,j);
+				if(!curr.isRevealed()) {
+					continue;
+				}
+				int cntSurroundingBombs = 0;
+				for(int di = -1; di <= 1; ++di) {
+					for(int dj = -1; dj <= 1; ++dj) {
+						if(di == 0 && dj == 0) {
+							continue;
+						}
+						final int adjI = i+di;
+						final int adjJ = j+dj;
+						if(ArrayBounds.outOfBounds(adjI,adjJ,numberOfRows, numberOfCols)) {
+							continue;
+						}
+						if(newBombLocations.get(adjI).get(adjJ)) {
+							++cntSurroundingBombs;
+						}
+					}
+				}
+				if(cntSurroundingBombs != getCell(i, j).numberSurroundingBombs) {
+					throw new Exception("bad bomb configuration");
+				}
+			}
+		}
+		for(int i = 0; i < numberOfRows; ++i) {
+			for(int j = 0; j < numberOfCols; ++j) {
+				if(newBombLocations.get(i).get(j) && getCell(i,j).isRevealed()) {
+						throw new Exception("bad bomb configuration");
+				}
+				getCell(i,j).isBomb = newBombLocations.get(i).get(j);
 			}
 		}
 	}
