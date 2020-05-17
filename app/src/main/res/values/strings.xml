@@ -27,4 +27,17 @@
 	<string name="intermediate">intermediate</string>
 	<string name="expert">expert</string>
     <string name="toggle_hints">Toggle Hints</string>
+
+
+	<string-array name="game_type">
+		<item>Mercury</item>
+		<item>Venus</item>
+		<item>Earth</item>
+		<item>Mars</item>
+		<item>Jupiter</item>
+		<item>Saturn</item>
+		<item>Uranus</item>
+		<item>Neptune</item>
+	</string-array>
+
 </resources>

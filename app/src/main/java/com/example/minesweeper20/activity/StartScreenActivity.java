@@ -7,11 +7,13 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -60,6 +62,16 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		);
 		popupWindow.setFocusable(true);
 		popupWindow.setElevation(5.0f);
+
+		/*
+		Spinner gameType = findViewById(R.id.game_type);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.game_type, android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		gameType.setAdapter(adapter);
+		 */
+
+
+
 		Button okButton = newGamePopup.findViewById(R.id.startNewGameButton);
 		okButton.setOnClickListener(new View.OnClickListener() {
 			@SuppressLint("InflateParams")

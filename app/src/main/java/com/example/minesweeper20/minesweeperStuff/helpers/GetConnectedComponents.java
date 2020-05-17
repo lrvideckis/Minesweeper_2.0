@@ -14,7 +14,11 @@ public class GetConnectedComponents {
 			parent = new ArrayList<>(Collections.nCopies(size, -1));
 		}
 		int find(int node) {
-			return parent.get(node) < 0 ? node : parent.set(node, find(parent.get(node)));
+			if(parent.get(node) < 0) {
+				return node;
+			}
+			parent.set(node, find(parent.get(node)));
+			return parent.get(node);
 		}
 		void merge(int x, int y) {
 			if((x=find(x)) == (y=find(y))) return;
@@ -75,7 +79,7 @@ public class GetConnectedComponents {
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
 				MinesweeperSolver.VisibleTile currTile = board.get(i).get(j);
-				if (!currTile.isVisible) {
+				if (currTile.isVisible) {
 					continue;
 				}
 				boolean foundAdjVis = false;

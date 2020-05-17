@@ -87,6 +87,16 @@
 	<TableRow
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content">
+		<Spinner
+			android:id="@+id/game_type"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:entries="@array/game_type"/>
+	</TableRow>
+
+	<TableRow
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
 		<Button
 			android:id="@+id/startNewGameButton"
 			android:layout_width="wrap_content"

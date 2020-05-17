@@ -121,7 +121,6 @@ public class GameCanvas extends View {
 			} else if(gameCell.isBomb && minesweeperGame.getIsGameOver()) {
 				drawCellHelpers.drawBomb(canvas, startX, startY);
 			}
-
 			GameActivity gameActivity = (GameActivity) getContext();
 			if(gameActivity.getToggleHintsOn()) {
 				if(solverCell.isLogicalBomb) {
@@ -145,6 +144,7 @@ public class GameCanvas extends View {
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
 		final int numberOfCols = minesweeperGame.getNumberOfCols();
+		System.out.println("\n\n\n");
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				try {

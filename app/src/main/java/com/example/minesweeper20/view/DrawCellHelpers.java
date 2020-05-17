@@ -8,13 +8,14 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 
-public class DrawCellHelpers {
+class DrawCellHelpers {
     private final Integer cellPixelLength = 150;
     private final Paint blankCell = new Paint(), backgroundGray = new Paint(), redFlag = new Paint(), black = new Paint();
     private Paint[] numberColors;
     private final Rect rect = new Rect();
     DrawCellHelpers() {
         black.setColor(Color.BLACK);
+        black.setTextSize(cellPixelLength / 3f);
         backgroundGray.setStyle(Paint.Style.FILL);
 
         backgroundGray.setColor(Color.parseColor("#cccccc"));
@@ -101,14 +102,14 @@ public class DrawCellHelpers {
     }
 
     void drawLogicalBomb(Canvas canvas, int startX, int startY) {
-        final int xPos = startX + 10;
-        final int yPos = startY + 10;
+        final int xPos = startX;
+        final int yPos = startY+cellPixelLength/3;
         canvas.drawText("B", xPos, yPos, black);
     }
 
     void drawLogicalFree(Canvas canvas, int startX, int startY) {
-        final int xPos = startX + 10;
-        final int yPos = startY + 10;
+        final int xPos = startX;
+        final int yPos = startY+cellPixelLength/3;
         canvas.drawText("F", xPos, yPos, black);
     }
 }
