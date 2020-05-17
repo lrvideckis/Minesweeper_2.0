@@ -1,5 +1,6 @@
 package com.example.minesweeper20.view;
 
+import android.content.Context;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,12 +9,16 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 
+import androidx.core.content.ContextCompat;
+
+import com.example.minesweeper20.R;
+
 class DrawCellHelpers {
     private final Integer cellPixelLength = 150;
     private final Paint blankCell = new Paint(), backgroundGray = new Paint(), redFlag = new Paint(), black = new Paint(), redX = new Paint();
     private final Paint[] numberColors;
     private final Rect rect = new Rect();
-    DrawCellHelpers() {
+    DrawCellHelpers(Context context) {
         black.setColor(Color.BLACK);
         black.setTextSize(cellPixelLength / 3f);
 
@@ -38,14 +43,14 @@ class DrawCellHelpers {
             numberColors[i].setTypeface(Typeface.create("Arial", Typeface.BOLD));
         }
         //TODO: move these colors to colors.xml file
-        numberColors[1].setColor(Color.BLUE);
-        numberColors[2].setColor(Color.parseColor("#009933"));
-        numberColors[3].setColor(Color.RED);
-        numberColors[4].setColor(Color.parseColor("#000099"));
-        numberColors[5].setColor(Color.parseColor("#800000"));
-        numberColors[6].setColor(Color.parseColor("#009999"));
-        numberColors[7].setColor(Color.BLACK);
-        numberColors[8].setColor(Color.GRAY);
+		numberColors[1].setColor(ContextCompat.getColor(context, R.color.one));
+        numberColors[2].setColor(ContextCompat.getColor(context, R.color.two));
+        numberColors[3].setColor(ContextCompat.getColor(context, R.color.three));
+        numberColors[4].setColor(ContextCompat.getColor(context, R.color.four));
+        numberColors[5].setColor(ContextCompat.getColor(context, R.color.five));
+        numberColors[6].setColor(ContextCompat.getColor(context, R.color.six));
+        numberColors[7].setColor(ContextCompat.getColor(context, R.color.seven));
+        numberColors[8].setColor(ContextCompat.getColor(context, R.color.eight));
     }
 
     void drawBlankCell(Canvas canvas, int startX, int startY) {

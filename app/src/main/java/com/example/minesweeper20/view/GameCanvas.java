@@ -52,7 +52,7 @@ public class GameCanvas extends View {
 				gameActivity.getNumberOfRows(),
 				gameActivity.getNumberOfCols(),
 				gameActivity.getNumberOfBombs());
-		drawCellHelpers = new DrawCellHelpers();
+		drawCellHelpers = new DrawCellHelpers(context);
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 		backtrackingSolver = new BacktrackingSolver(
 				minesweeperGame.getNumberOfRows(),

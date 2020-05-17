@@ -8,4 +8,14 @@
 	<color name="reallyLightGrey">#e6e6e6</color>
 	<color name="white">#ffffff</color>
 	<color name="black">#000000</color>
+
+    <!-- colors for the numbers -->
+	<color name="one">#0000FF</color>
+	<color name="two">#009933</color>
+	<color name="three">#FF0000</color>
+	<color name="four">#000099</color>
+	<color name="five">#800000</color>
+	<color name="six">#009999</color>
+	<color name="seven">#000000</color>
+	<color name="eight">#808080</color>
 </resources>
