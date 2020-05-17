@@ -40,15 +40,16 @@ public class MinesweeperGame {
 			return numberSurroundingBombs;
 		}
 	}
-	private final int numberOfRows, numberOfCols, numberOfBombs;
+	private final Integer numberOfRows, numberOfCols, numberOfBombs;
+	private Integer numberOfFlags;
 	private boolean firstClick, isGameOver;
 	private final Tile[][] grid;
-
 
 	public MinesweeperGame(int _numberOfRows, int _numberOfCols, int _numberOfBombs) {
 		numberOfRows = _numberOfRows;
 		numberOfCols = _numberOfCols;
 		numberOfBombs = _numberOfBombs;
+		numberOfFlags = 0;
 		firstClick = true;
 		isGameOver = false;
 		grid = new Tile[numberOfRows][numberOfCols];
@@ -67,6 +68,14 @@ public class MinesweeperGame {
 		return numberOfCols;
 	}
 
+	public int getNumberOfBombs() {
+		return numberOfBombs;
+	}
+
+	public int getNumberOfFlags() {
+		return numberOfFlags;
+	}
+
 	public Tile getCell(int row, int col) {
 		if(ArrayBounds.outOfBounds(row,col,numberOfRows,numberOfCols)) {
 			throw new ArrayIndexOutOfBoundsException();
@@ -81,14 +90,19 @@ public class MinesweeperGame {
 			return;
 		}
 		final Tile curr = getCell(row, col);
-		if(curr.isRevealed) {
+		if(curr.isRevealed()) {
 			checkToRevealAdjacentBombs(row, col);
 		}
-		if(toggleBombs) {
+		if(toggleBombs && !curr.isRevealed()) {
+			if(curr.isFlagged()) {
+				--numberOfFlags;
+			} else {
+				++numberOfFlags;
+			}
 			curr.toggleFlag();
 			return;
 		}
-		if(curr.isBomb && !curr.isFlagged) {
+		if(curr.isBomb && !curr.isFlagged()) {
 			isGameOver = true;
 			return;
 		}
@@ -104,14 +118,14 @@ public class MinesweeperGame {
 				}
 				try {
 					Tile adj = getCell(row + dRow, col + dCol);
-					if (adj.isRevealed) {
+					if (adj.isRevealed()) {
 						continue;
 					}
-					if (adj.isFlagged && !adj.isBomb) {
+					if (adj.isFlagged() && !adj.isBomb) {
 						isGameOver = true;
 						return;
 					}
-					if (adj.isFlagged != adj.isBomb) {
+					if (adj.isFlagged() != adj.isBomb) {
 						revealSurroundingCells = false;
 					}
 				} catch (ArrayIndexOutOfBoundsException ignored) {
@@ -189,6 +203,9 @@ public class MinesweeperGame {
 		Tile curr = getCell(row, col);
 		if(curr.isBomb) {
 			throw new Exception("can't reveal a bomb");
+		}
+		if(curr.isFlagged()) {
+			--numberOfFlags;
 		}
 		curr.revealTile();
 		if(curr.numberSurroundingBombs > 0) {

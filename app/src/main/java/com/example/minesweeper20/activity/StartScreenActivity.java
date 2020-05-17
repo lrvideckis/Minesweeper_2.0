@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -62,16 +61,6 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		);
 		popupWindow.setFocusable(true);
 		popupWindow.setElevation(5.0f);
-
-		/*
-		Spinner gameType = findViewById(R.id.game_type);
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.game_type, android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		gameType.setAdapter(adapter);
-		 */
-
-
-
 		Button okButton = newGamePopup.findViewById(R.id.startNewGameButton);
 		okButton.setOnClickListener(new View.OnClickListener() {
 			@SuppressLint("InflateParams")
@@ -84,6 +73,15 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 				final int numberOfRows = getNumberInput(rowInput.getText().toString());
 				final int numberOfCols = getNumberInput(colInput.getText().toString());
 				final int numberOfBombs = getNumberInput(bombInput.getText().toString());
+
+				Spinner gameType = newGamePopup.findViewById(R.id.game_type);
+				String selectedGameType = gameType.getSelectedItem().toString();
+				String[] gameChoices = getResources().getStringArray(R.array.game_type);
+				if(selectedGameType.equals(gameChoices[0])) {
+					System.out.println("here, mercury");
+				} else if(selectedGameType.equals(gameChoices[1])) {
+					System.out.println("here, venus");
+				}
 
 				popupWindow.dismiss();
 

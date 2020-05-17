@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -33,6 +34,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		Switch toggleHints = findViewById(R.id.toggleHints);
 		toggleHints.setOnCheckedChangeListener(this);
+
+		updateNumberOfBombs(numberOfBombs);
 	}
 
 	@Override
@@ -59,6 +62,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				}
 				break;
 		}
+	}
+
+	public void updateNumberOfBombs(int numberOfBombsLeft) {
+		TextView numberOfBombs = findViewById(R.id.showNumberOfBombs);
+		String bombsLeft = "bombs: " + numberOfBombsLeft;
+		numberOfBombs.setText(bombsLeft);
 	}
 
 	public Integer getNumberOfRows() {

@@ -11,7 +11,7 @@ import android.graphics.Typeface;
 class DrawCellHelpers {
     private final Integer cellPixelLength = 150;
     private final Paint blankCell = new Paint(), backgroundGray = new Paint(), redFlag = new Paint(), black = new Paint();
-    private Paint[] numberColors;
+    private final Paint[] numberColors;
     private final Rect rect = new Rect();
     DrawCellHelpers() {
         black.setColor(Color.BLACK);
@@ -101,15 +101,12 @@ class DrawCellHelpers {
         canvas.drawText(new String(Character.toChars(0x1F4A3)), xPos, yPos, redFlag);
     }
 
+    //TODO: make this look better
     void drawLogicalBomb(Canvas canvas, int startX, int startY) {
-        final int xPos = startX;
-        final int yPos = startY+cellPixelLength/3;
-        canvas.drawText("B", xPos, yPos, black);
+        canvas.drawText("B", startX, startY+cellPixelLength/3f, black);
     }
 
     void drawLogicalFree(Canvas canvas, int startX, int startY) {
-        final int xPos = startX;
-        final int yPos = startY+cellPixelLength/3;
-        canvas.drawText("F", xPos, yPos, black);
+        canvas.drawText("F", startX, startY+cellPixelLength/3f, black);
     }
 }

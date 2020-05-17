@@ -21,14 +21,19 @@
 			android:id="@+id/toggleBombs"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/toggle_bombs"
-			android:layout_weight="1"/>
+			android:text="@string/flag_mode"
+			android:layout_weight="3"/>
 		<Switch
 			android:id="@+id/toggleHints"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/toggle_hints"
-			android:layout_weight="1"/>
+			android:text="@string/show_hints"
+			android:layout_weight="3"/>
+		<TextView
+			android:id="@+id/showNumberOfBombs"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="3"/>
 	</LinearLayout>
 
 	<com.example.minesweeper20.view.GameCanvas

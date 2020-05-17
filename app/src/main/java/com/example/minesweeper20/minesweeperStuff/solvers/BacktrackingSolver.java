@@ -13,9 +13,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
 
-	private ArrayList<ArrayList<Boolean>> isBomb;
-	private ArrayList<ArrayList<Integer>> cntSurroundingBombs;
+	private final ArrayList<ArrayList<Boolean>> isBomb;
+	private final ArrayList<ArrayList<Integer>> cntSurroundingBombs;
 	private ArrayList<ArrayList<VisibleTile>> board;
+	private Integer numberOfBombs;
 
 	public BacktrackingSolver(int rows, int cols) {
 		isBomb = new ArrayList<>(rows);
@@ -32,8 +33,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	@Override
-	public void solvePosition(ArrayList<ArrayList<VisibleTile>> _board) throws Exception {
+	public void solvePosition(ArrayList<ArrayList<VisibleTile>> _board, int _numberOfBombs) throws Exception {
 		board = _board;
+		numberOfBombs = _numberOfBombs;
 		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
 		cols = dimensions.second;
@@ -156,8 +158,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	private void checkSolution(ArrayList<Pair<Integer,Integer>> component) {
-		//System.out.println("here before check");
-		//printBoardDebug();
 		for(int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
@@ -166,8 +166,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					if (di == 0 && dj == 0) {
 						continue;
 					}
-					int adjI = i + di;
-					int adjJ = j + dj;
+					final int adjI = i + di;
+					final int adjJ = j + dj;
 					if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 						continue;
 					}
@@ -181,8 +181,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				}
 			}
 		}
-		System.out.println("here after check");
-		printBoardDebug();
 		for(int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;

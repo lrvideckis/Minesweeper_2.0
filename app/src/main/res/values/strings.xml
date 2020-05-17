@@ -8,9 +8,7 @@
 	<string name="_40">40</string>
 	<string name="_99">99</string>
 
-
 	<string name="app_name">Minesweeper 2.0</string>
-	<string name="toggle_bombs">Toggle Bombs</string>
 	<string name="back">Back</string>
 	<string name="ok">OK</string>
 	<string name="you_lose">You lose!</string>
@@ -26,8 +24,8 @@
 	<string name="beginner">beginner</string>
 	<string name="intermediate">intermediate</string>
 	<string name="expert">expert</string>
-    <string name="toggle_hints">Toggle Hints</string>
-
+	<string name="flag_mode">Flag Mode</string>
+	<string name="show_hints">Show Hints</string>
 
 	<string-array name="game_type">
 		<item>Mercury</item>
@@ -39,5 +37,4 @@
 		<item>Uranus</item>
 		<item>Neptune</item>
 	</string-array>
-
 </resources>

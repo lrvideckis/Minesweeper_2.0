@@ -9,7 +9,7 @@ import java.util.Collections;
 
 public class GetConnectedComponents {
 	private static class Dsu {
-		ArrayList<Integer> parent;
+		private final ArrayList<Integer> parent;
 		Dsu(int size) {
 			parent = new ArrayList<>(Collections.nCopies(size, -1));
 		}
@@ -24,6 +24,7 @@ public class GetConnectedComponents {
 			if((x=find(x)) == (y=find(y))) return;
 			if(parent.get(y) < parent.get(x)) {
 				int temp = x;
+				//noinspection SuspiciousNameCombination
 				x = y;
 				y = temp;
 			}

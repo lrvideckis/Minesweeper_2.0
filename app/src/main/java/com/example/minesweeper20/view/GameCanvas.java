@@ -2,14 +2,10 @@ package com.example.minesweeper20.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -39,9 +35,9 @@ public class GameCanvas extends View {
 	private PopupWindow popupWindow;
 	private final float[] matrixValues = new float[9];
 	private final Matrix canvasTransitionScale = new Matrix();
-	private ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
-	private BacktrackingSolver backtrackingSolver;
-	private DrawCellHelpers drawCellHelpers;
+	private final ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
+	private final BacktrackingSolver backtrackingSolver;
+	private final DrawCellHelpers drawCellHelpers;
 
 	public GameCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -88,6 +84,7 @@ public class GameCanvas extends View {
 
 
 	public void handleTap(Float tapX, Float tapY) throws Exception {
+		//TODO: have grid always fill screen
 		//eventually I won't need this check, as the grid always fills the screen
 		if(tapX < 0f ||
 				tapY < 0f ||
@@ -102,13 +99,14 @@ public class GameCanvas extends View {
 		if(gameActivity.getToggleHintsOn()) {
 		    updateSolvedBoard();
 		}
+		gameActivity.updateNumberOfBombs(minesweeperGame.getNumberOfBombs() - minesweeperGame.getNumberOfFlags());
 		invalidate();
 	}
 
 	public void updateSolvedBoard() throws Exception {
 		//TODO: only run solver if board has changed since last time
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-		backtrackingSolver.solvePosition(board);
+		backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfBombs());
 	}
 
 	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int startX, int startY) throws Exception {
