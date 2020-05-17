@@ -20,7 +20,6 @@ import com.example.minesweeper20.R;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: make translate + scale less laggy
-//TODO: organize colors + styles in values folder
 //TODO: undo button
 //TODO: show bomb percentage on start screen new game popup (bombs/(rows*cols))
 //TODO: add settings page were you can choose whether or not to have a zero-start

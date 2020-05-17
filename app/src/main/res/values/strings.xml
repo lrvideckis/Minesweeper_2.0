@@ -28,9 +28,9 @@
 	<string name="show_hints">Show Hints</string>
 
 	<string-array name="game_type">
-		<item>Mercury</item>
-		<item>Venus</item>
-		<item>Earth</item>
+		<item>Normal Mode</item>
+		<item>Hard Mode</item>
+		<item>Never Guess Mode</item>
 		<item>Mars</item>
 		<item>Jupiter</item>
 		<item>Saturn</item>
