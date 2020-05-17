@@ -112,20 +112,25 @@ public class GameCanvas extends View {
 	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int startX, int startY) throws Exception {
 		if(gameCell.isRevealed()) {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), startX, startY);
-		} else {
-			drawCellHelpers.drawBlankCell(canvas, startX, startY);
-			if(gameCell.isFlagged()) {
-				drawCellHelpers.drawFlag(canvas, startX, startY);
-			} else if(gameCell.isBomb && minesweeperGame.getIsGameOver()) {
-				drawCellHelpers.drawBomb(canvas, startX, startY);
+			return;
+		}
+		drawCellHelpers.drawBlankCell(canvas, startX, startY);
+
+		if(gameCell.isFlagged()) {
+			drawCellHelpers.drawFlag(canvas, startX, startY);
+			if(minesweeperGame.getIsGameOver() && !gameCell.isBomb) {
+				drawCellHelpers.drawRedX(canvas, startX, startY);
 			}
-			GameActivity gameActivity = (GameActivity) getContext();
-			if(gameActivity.getToggleHintsOn()) {
-				if(solverCell.isLogicalBomb) {
-					drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
-				} else if(solverCell.isLogicalFree) {
-					drawCellHelpers.drawLogicalFree(canvas, startX, startY);
-				}
+		} else if(gameCell.isBomb && minesweeperGame.getIsGameOver()) {
+			drawCellHelpers.drawBomb(canvas, startX, startY);
+		}
+
+		GameActivity gameActivity = (GameActivity) getContext();
+		if(gameActivity.getToggleHintsOn()) {
+			if(solverCell.isLogicalBomb) {
+				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
+			} else if(solverCell.isLogicalFree) {
+				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
 			}
 		}
 	}
@@ -142,7 +147,6 @@ public class GameCanvas extends View {
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
 		final int numberOfCols = minesweeperGame.getNumberOfCols();
-		System.out.println("\n\n\n");
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				try {
