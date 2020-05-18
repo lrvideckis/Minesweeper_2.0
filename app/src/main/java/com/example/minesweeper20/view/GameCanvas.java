@@ -98,7 +98,7 @@ public class GameCanvas extends View {
 		GameActivity gameActivity = (GameActivity) getContext();
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
 
-		//TODO: bug here: when you click a visible cell which results in revealing extra cells in eary/hard mode - make sure you win/lose
+		//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
 		if(!gameActivity.getGameMode().equals(gameChoices[0])) {
 			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 			boolean wantBomb = gameActivity.getGameMode().equals(gameChoices[1]);
@@ -122,7 +122,14 @@ public class GameCanvas extends View {
 	public void updateSolvedBoard() throws Exception {
 		//TODO: only run solver if board has changed since last time
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-		backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfBombs());
+		try {
+			backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfBombs());
+		} catch (Exception e) {
+			System.out.println("exiting game as solver failed: " + e.getMessage());
+			e.printStackTrace();
+			GameActivity gameActivity = (GameActivity) getContext();
+			gameActivity.solverHasJustFailed();
+		}
 	}
 
 	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int startX, int startY) throws Exception {

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/solver_hit_limit_popup"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/lightGrey"
+	android:orientation="vertical">
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/hitIterationLimit"/>
+
+	<Button
+		android:id="@+id/solverHitLimitOkButton"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/ok"/>
+
+</LinearLayout>

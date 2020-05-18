@@ -263,10 +263,17 @@ public class MinesweeperGame {
 				}
 			}
 		}
+		int numberOfNewBombs = 0;
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				getCell(i,j).numberSurroundingBombs = 0;
+				if(newBombLocations.get(i).get(j)) {
+					++numberOfNewBombs;
+				}
 			}
+		}
+		if(numberOfNewBombs != numberOfBombs) {
+			throw new Exception("bad bomb configuration: wrong # of bombs");
 		}
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {

@@ -1,10 +1,15 @@
 package com.example.minesweeper20.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -15,9 +20,10 @@ import com.example.minesweeper20.view.GameCanvas;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn;
+	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn, solverHasFailed;
 	private Integer numberOfRows, numberOfCols, numberOfBombs;
 	private String gameMode;
+	private PopupWindow popupWindow;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -25,6 +31,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfRows = getIntent().getIntExtra("numberOfRows", 1);
 		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
 		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 1);
+		solverHasFailed = false;
 		gameMode = getIntent().getStringExtra("gameMode");
 		toggleBombsOn = toggleFlagModeOn = toggleHintsOn = false;
 		setContentView(R.layout.game);
@@ -41,6 +48,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		toggleBombs.setOnCheckedChangeListener(this);
 
 		updateNumberOfBombs(numberOfBombs);
+		setUpIterationLimitPopup();
 	}
 
 	@Override
@@ -56,6 +64,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				toggleFlagModeOn = isChecked;
 				break;
 			case R.id.toggleHints:
+				if(solverHasFailed) {
+					buttonView.setChecked(false);
+					popupWindow.showAtLocation(findViewById(R.id.gameLayout), Gravity.CENTER,0,0);
+					break;
+				}
 				toggleHintsOn = isChecked;
 				if(isChecked) {
 					GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
@@ -70,6 +83,39 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				toggleBombsOn = isChecked;
 				break;
 		}
+	}
+
+	private void setUpIterationLimitPopup() {
+		final LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		assert inflater != null;
+		@SuppressLint("InflateParams") final View solverHitLimitPopup = inflater.inflate(R.layout.solver_hit_limit_popup,null);
+		popupWindow = new PopupWindow(
+				solverHitLimitPopup,
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT
+		);
+		popupWindow.setFocusable(true);
+		popupWindow.setElevation(5.0f);
+		Button okButton = solverHitLimitPopup.findViewById(R.id.solverHitLimitOkButton);
+		okButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				popupWindow.dismiss();
+			}
+		});
+	}
+
+	public void solverHasJustFailed() {
+		String[] gameChoices = getResources().getStringArray(R.array.game_type);
+		if(!gameMode.equals(gameChoices[0])) {
+			onClick(findViewById(R.id.gameLayout));
+			return;
+		}
+		solverHasFailed = true;
+		Switch toggleHints = findViewById(R.id.toggleHints);
+		toggleHints.setChecked(false);
+		toggleHintsOn = false;
+		popupWindow.showAtLocation(findViewById(R.id.gameLayout), Gravity.CENTER,0,0);
 	}
 
 	public void updateNumberOfBombs(int numberOfBombsLeft) {

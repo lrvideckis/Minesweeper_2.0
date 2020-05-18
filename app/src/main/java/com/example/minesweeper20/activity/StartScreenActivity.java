@@ -22,7 +22,7 @@ import com.example.minesweeper20.R;
 //TODO: make translate + scale less laggy
 //TODO: undo button
 //TODO: show bomb percentage on start screen new game popup (bombs/(rows*cols))
-//TODO: add settings page were you can choose whether or not to have a zero-start
+//TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver
 //TODO: only draw part of canvas which screen can see
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
