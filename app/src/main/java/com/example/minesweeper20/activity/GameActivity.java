@@ -15,7 +15,7 @@ import com.example.minesweeper20.view.GameCanvas;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-	private Boolean toggleBombsOn, toggleHintsOn;
+	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn;
 	private Integer numberOfRows, numberOfCols, numberOfBombs;
 	private String gameMode;
 
@@ -26,16 +26,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
 		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 1);
 		gameMode = getIntent().getStringExtra("gameMode");
-		toggleBombsOn = toggleHintsOn = false;
+		toggleBombsOn = toggleFlagModeOn = toggleHintsOn = false;
 		setContentView(R.layout.game);
 		Button backToStartScreen = findViewById(R.id.backToStartScreen);
 		backToStartScreen.setOnClickListener(this);
 
-		Switch toggleBombs = findViewById(R.id.toggleBombs);
-		toggleBombs.setOnCheckedChangeListener(this);
+		Switch toggleFlagMode = findViewById(R.id.toggleFlagMode);
+		toggleFlagMode.setOnCheckedChangeListener(this);
 
 		Switch toggleHints = findViewById(R.id.toggleHints);
 		toggleHints.setOnCheckedChangeListener(this);
+
+		Switch toggleBombs = findViewById(R.id.toggleBombs);
+		toggleBombs.setOnCheckedChangeListener(this);
 
 		updateNumberOfBombs(numberOfBombs);
 	}
@@ -49,8 +52,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		switch (buttonView.getId()) {
-			case R.id.toggleBombs:
-				toggleBombsOn = isChecked;
+			case R.id.toggleFlagMode:
+				toggleFlagModeOn = isChecked;
 				break;
 			case R.id.toggleHints:
 				toggleHintsOn = isChecked;
@@ -62,6 +65,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 						e.printStackTrace();
 					}
 				}
+				break;
+			case R.id.toggleBombs:
+				toggleBombsOn = isChecked;
 				break;
 		}
 	}
@@ -82,6 +88,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public Integer getNumberOfBombs() {
 		return numberOfBombs;
+	}
+
+	public Boolean getToggleFlagModeOn() {
+		return toggleFlagModeOn;
 	}
 
 	public Boolean getToggleBombsOn() {

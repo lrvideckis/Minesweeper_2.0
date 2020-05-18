@@ -94,22 +94,25 @@ public class GameCanvas extends View {
 		}
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
+
 		GameActivity gameActivity = (GameActivity) getContext();
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
-		if(gameActivity.getGameMode().equals(gameChoices[0])) {//normal mode
-			minesweeperGame.clickCell(row, col, gameActivity.getToggleBombsOn());
-		} else if(gameActivity.getGameMode().equals(gameChoices[1])) {//always guess wrong mode
 
-
-			//updateSolvedBoard();
-
-
-
-		} else if(gameActivity.getGameMode().equals(gameChoices[2])){//always guess correctly mode
+		if(!gameActivity.getGameMode().equals(gameChoices[0])) {
+			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+			boolean wantBomb = gameActivity.getGameMode().equals(gameChoices[1]);
+			ArrayList<ArrayList<Boolean>> newBombLocations = backtrackingSolver.getBombConfiguration(board, 0, row, col, wantBomb);
+			if(newBombLocations != null) {
+				minesweeperGame.changeBombLocations(newBombLocations);
+			}
 		}
-		if(gameActivity.getToggleHintsOn()) {
-		    updateSolvedBoard();
+
+		minesweeperGame.clickCell(row, col, gameActivity.getToggleFlagModeOn());
+
+		if(!minesweeperGame.getIsGameOver() && gameActivity.getToggleHintsOn()) {
+			updateSolvedBoard();
 		}
+
 		gameActivity.updateNumberOfBombs(minesweeperGame.getNumberOfBombs() - minesweeperGame.getNumberOfFlags());
 		invalidate();
 	}
@@ -127,6 +130,8 @@ public class GameCanvas extends View {
 		}
 		drawCellHelpers.drawBlankCell(canvas, startX, startY);
 
+		GameActivity gameActivity = (GameActivity) getContext();
+
 		if(gameCell.isFlagged()) {
 			drawCellHelpers.drawFlag(canvas, startX, startY);
 			if(minesweeperGame.getIsGameOver() && !gameCell.isBomb) {
@@ -134,9 +139,10 @@ public class GameCanvas extends View {
 			}
 		} else if(gameCell.isBomb && minesweeperGame.getIsGameOver()) {
 			drawCellHelpers.drawBomb(canvas, startX, startY);
+		} else if(gameCell.isBomb && gameActivity.getToggleBombsOn()) {
+			drawCellHelpers.drawBomb(canvas, startX, startY);
 		}
 
-		GameActivity gameActivity = (GameActivity) getContext();
 		if(gameActivity.getToggleHintsOn()) {
 			if(solverCell.isLogicalBomb) {
 				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);

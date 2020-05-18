@@ -26,6 +26,7 @@
 	<string name="expert">expert</string>
 	<string name="flag_mode">Flag Mode</string>
 	<string name="show_hints">Show Hints</string>
+	<string name="show_bombs">Show Bombs</string>
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>

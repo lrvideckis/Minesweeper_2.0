@@ -183,22 +183,26 @@ public class MinesweeperGame {
 			int bombRow = spotsI.get(permutation.get(i));
 			int bombCol = spotsJ.get(permutation.get(i));
 			getCell(bombRow, bombCol).isBomb = true;
-			for(int dRow = -1; dRow <= 1; ++dRow) {
-				for(int dCol = -1; dCol <= 1; ++dCol) {
-					if(dRow == 0 && dCol == 0) {
-						continue;
-					}
-					try {
-						getCell(bombRow+dRow, bombCol+dCol).numberSurroundingBombs++;
-					} catch(ArrayIndexOutOfBoundsException ignored) {
-					}
-				}
-			}
+			incrementSurroundingBombCounts(bombRow, bombCol);
 		}
 		if(getCell(row, col).isBomb) {
 			throw new Exception("starting click shouldn't be a bomb");
 		}
 		revealCell(row, col);
+	}
+
+	private void incrementSurroundingBombCounts(int bombRow, int bombCol) {
+		for(int dRow = -1; dRow <= 1; ++dRow) {
+			for(int dCol = -1; dCol <= 1; ++dCol) {
+				if(dRow == 0 && dCol == 0) {
+					continue;
+				}
+				try {
+					getCell(bombRow+dRow, bombCol+dCol).numberSurroundingBombs++;
+				} catch(ArrayIndexOutOfBoundsException ignored) {
+				}
+			}
+		}
 	}
 
 	private void revealCell(int row, int col) throws Exception {
@@ -255,16 +259,24 @@ public class MinesweeperGame {
 					}
 				}
 				if(cntSurroundingBombs != getCell(i, j).numberSurroundingBombs) {
-					throw new Exception("bad bomb configuration");
+					throw new Exception("bad bomb configuration: surrounding bomb count doesn't match");
 				}
 			}
 		}
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
+				getCell(i,j).numberSurroundingBombs = 0;
+			}
+		}
+		for(int i = 0; i < numberOfRows; ++i) {
+			for(int j = 0; j < numberOfCols; ++j) {
 				if(newBombLocations.get(i).get(j) && getCell(i,j).isRevealed()) {
-						throw new Exception("bad bomb configuration");
+						throw new Exception("bad bomb configuration: bomb is in revealed cell");
 				}
 				getCell(i,j).isBomb = newBombLocations.get(i).get(j);
+				if(getCell(i,j).isBomb) {
+					incrementSurroundingBombCounts(i, j);
+				}
 			}
 		}
 	}
