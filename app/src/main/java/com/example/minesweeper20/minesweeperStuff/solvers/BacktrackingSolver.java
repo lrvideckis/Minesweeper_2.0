@@ -54,7 +54,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			}
 			lastUnvisitedSpot.add(currRow);
 		}
-
 	}
 
 	@Override
@@ -102,7 +101,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			}
 			solveComponent(0, component);
 		}
-
 		return (foundBombConfiguration ? saveIsBomb : null);
 	}
 

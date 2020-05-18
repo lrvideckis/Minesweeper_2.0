@@ -98,9 +98,11 @@ public class GameCanvas extends View {
 		GameActivity gameActivity = (GameActivity) getContext();
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
 
+		//TODO: bug here: when you click a visible cell which results in revealing extra cells in eary/hard mode - make sure you win/lose
 		if(!gameActivity.getGameMode().equals(gameChoices[0])) {
 			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 			boolean wantBomb = gameActivity.getGameMode().equals(gameChoices[1]);
+			//TODO: bug: when toggle flags is on + hard mode: this will always put a bomb under the cell you just flagged
 			ArrayList<ArrayList<Boolean>> newBombLocations = backtrackingSolver.getBombConfiguration(board, 0, row, col, wantBomb);
 			if(newBombLocations != null) {
 				minesweeperGame.changeBombLocations(newBombLocations);
