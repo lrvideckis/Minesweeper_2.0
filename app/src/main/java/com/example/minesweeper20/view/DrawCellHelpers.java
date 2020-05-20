@@ -42,7 +42,7 @@ class DrawCellHelpers {
 			numberColors[i].setTextAlign(Paint.Align.CENTER);
 			numberColors[i].setTypeface(Typeface.create("Arial", Typeface.BOLD));
 		}
-		//TODO: move these colors to colors.xml file
+
 		numberColors[1].setColor(ContextCompat.getColor(context, R.color.one));
 		numberColors[2].setColor(ContextCompat.getColor(context, R.color.two));
 		numberColors[3].setColor(ContextCompat.getColor(context, R.color.three));
@@ -126,8 +126,8 @@ class DrawCellHelpers {
 		canvas.drawText("X", xPos, yPos, redX);
 	}
 
-	void drawBombProbability(Canvas canvas, int startX, int startY, int numerator, int demoninator) {
-		String probability = numerator + "/" + demoninator;
+	void drawBombProbability(Canvas canvas, int startX, int startY, int numerator, int denominator) {
+		String probability = numerator + "/" + denominator;
 		canvas.drawText(probability, startX, startY+cellPixelLength/3f, black);
 	}
 }

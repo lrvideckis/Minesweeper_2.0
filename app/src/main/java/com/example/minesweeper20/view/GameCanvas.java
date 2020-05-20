@@ -14,10 +14,10 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
-import com.example.minesweeper20.activity.GameActivity;
-import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.R;
+import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
+import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.minesweeperStuff.helpers.ConvertGameBoardFormat;
 import com.example.minesweeper20.minesweeperStuff.solvers.BacktrackingSolver;
@@ -34,10 +34,9 @@ public class GameCanvas extends View {
 	private final Integer cellPixelLength = 150;
 	private final Paint black = new Paint();
 	private PopupWindow popupWindow;
-	private final float[] matrixValues = new float[9];
 	private final Matrix canvasTransitionScale = new Matrix();
 	private final ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
-	private final BacktrackingSolver backtrackingSolver;
+	private final MinesweeperSolver backtrackingSolver;
 	private final DrawCellHelpers drawCellHelpers;
 
 	public GameCanvas(Context context, AttributeSet attrs) {
@@ -47,7 +46,7 @@ public class GameCanvas extends View {
 		final GameActivity gameActivity = (GameActivity) getContext();
 		Integer screenWidth = context.getResources().getDisplayMetrics().widthPixels;
 		Integer screenHeight = context.getResources().getDisplayMetrics().heightPixels;
-		scaleListener = new ScaleListener(context, this, screenWidth, screenHeight);
+		scaleListener = new ScaleListener(context, this, screenWidth, screenHeight, (float)(getTop() + getStatusBarHeight()));
 		setOnTouchListener(scaleListener);
 		minesweeperGame = new MinesweeperGame(
 				gameActivity.getNumberOfRows(),
@@ -167,6 +166,7 @@ public class GameCanvas extends View {
 			} else if(gameActivity.getToggleBombProbabilityOn()) {
 				final int numerator = solverCell.numberOfBombConfigs;
 				final int denominator = solverCell.numberOfTotalConfigs;
+				//TODO: fix divide by zero error
 				final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
 				drawCellHelpers.drawBombProbability(canvas, startX, startY, numerator/gcd, denominator/gcd);
 			}
@@ -176,11 +176,8 @@ public class GameCanvas extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		Matrix canvasM = canvas.getMatrix();
-		canvasM.getValues(matrixValues);
-		scaleListener.setTopNavBarHeight(matrixValues[5]);
 		canvasTransitionScale.set(scaleListener.getMatrix());
-		canvasTransitionScale.preConcat(canvasM);
+		canvasTransitionScale.preTranslate(0, getTop() + getStatusBarHeight());
 		canvas.setMatrix(canvasTransitionScale);
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
@@ -205,5 +202,14 @@ public class GameCanvas extends View {
 			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 			popupWindow.showAtLocation(gameCanvas, Gravity.CENTER,0,0);
 		}
+	}
+
+	private int getStatusBarHeight() {
+		int statusBarHeight = 0;
+		int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+		if (resourceId > 0) {
+			statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+		}
+		return statusBarHeight;
 	}
 }

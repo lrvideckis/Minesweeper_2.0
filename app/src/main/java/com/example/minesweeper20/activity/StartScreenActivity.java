@@ -24,6 +24,7 @@ import com.example.minesweeper20.R;
 //TODO: for bomb percentage: handle before the first click
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver
 //TODO: only draw part of canvas which screen can see
+//TODO: gauss elimination solver
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
 

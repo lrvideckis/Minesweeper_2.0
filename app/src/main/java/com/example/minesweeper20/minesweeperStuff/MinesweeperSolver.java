@@ -15,4 +15,12 @@ public interface MinesweeperSolver {
 		}
 	}
 	void solvePosition(ArrayList<ArrayList<VisibleTile>> board, int numberOfBombs) throws Exception;
+
+	ArrayList<ArrayList<Boolean>> getBombConfiguration(
+			ArrayList<ArrayList<VisibleTile>> _board,
+			int _numberOfBombs,
+			int _spotI,
+			int _spotJ,
+			boolean _wantBomb
+	) throws Exception;
 }

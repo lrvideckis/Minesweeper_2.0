@@ -23,11 +23,12 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 	private final Matrix matrix = new Matrix();
 	private final Integer halfScreenWidth, halfScreenHeight;
-	private Float topNavBarHeight;
+	private final Float topNavBarHeight;
 
-	public ScaleListener(Context context, GameCanvas _gameCanvas, Integer _screenWidth, Integer _screenHeight) {
+	public ScaleListener(Context context, GameCanvas _gameCanvas, Integer _screenWidth, Integer _screenHeight, Float _topNavBarHeight) {
 		halfScreenWidth = _screenWidth / 2;
 		halfScreenHeight = _screenHeight / 2;
+		topNavBarHeight = _topNavBarHeight;
 		SGD = new ScaleGestureDetector(context, this);
 		gameCanvas = _gameCanvas;
 	}
@@ -128,9 +129,5 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 	public Matrix getMatrix() {
 		return matrix;
-	}
-
-	public void setTopNavBarHeight(float _topNavBarHeight) {
-		topNavBarHeight = _topNavBarHeight;
 	}
 }

@@ -16,6 +16,7 @@ import java.util.TreeSet;
 //TODO: also break out early the moment we find a (conditioned) solution
 //TODO: split components by cells we know: like if we know these 4 cells in a row, then we can split it into 2 components
 //TODO: handle away cells
+//TODO: extra pruning idea: prune out if there's only n spots left adjacent to a clue, and (clue - bombs placed) > n
 public class BacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
@@ -397,6 +398,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
+	/*
 	private void printBoardDebug() {
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
@@ -416,4 +418,5 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 		System.out.println();
 	}
+	 */
 }
