@@ -2,9 +2,9 @@ package com.example.minesweeper20.minesweeperStuff.solvers;
 
 import android.util.Pair;
 
+import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.minesweeperStuff.helpers.ArrayBounds;
 import com.example.minesweeper20.minesweeperStuff.helpers.GetConnectedComponents;
-import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +15,7 @@ import java.util.TreeSet;
 //TODO: break out of backtracking if a limit is hit (probably around ~10^5 recursions)
 //TODO: also break out early the moment we find a (conditioned) solution
 //TODO: split components by cells we know: like if we know these 4 cells in a row, then we can split it into 2 components
+//TODO: handle away cells
 public class BacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
@@ -26,6 +27,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final ArrayList<ArrayList<Pair<Integer,Integer>>> lastUnvisitedSpot;
 	private ArrayList<ArrayList<Pair<Integer,Integer>>> components;
 	private Integer numberOfBombs, currIterations;
+	private Boolean isSecondPass;
 
 
 	//variables for saving specific bomb position
@@ -73,35 +75,22 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponents(board);
 		initializeLastUnvisitedSpot(components);
 
-		TreeSet<Integer> prevDpRow = new TreeSet<>(), newDpRow = new TreeSet<>();
-		prevDpRow.add(0);
 		for(int i = 0; i < components.size(); ++i) {
+			//TODO: make these not member variables
 			currIterations = 0;
+			isSecondPass = false;
 			solveComponent(0, i);
 			if(currIterations >= iterationLimit) {
-				throw new Exception("too many iterations");
+				throw new Exception("too many iterations, limit is: " + iterationLimit);
 			}
-			System.out.println("iterations: " + currIterations);
-			newDpRow.clear();
-			System.out.print("number of bombs: ");
-			for(Map.Entry<Integer,ArrayList<Pair<Integer,Integer>>> entry : bombConfig.get(i).entrySet()) {
-				System.out.print(entry.getKey() + " ");
-				for(Integer val : prevDpRow) {
-					newDpRow.add(val + entry.getKey());
-				}
-			}
-			System.out.println();
-
-
-			TreeSet<Integer> temp = prevDpRow;
-			prevDpRow = newDpRow;
-			newDpRow = temp;
 		}
-		System.out.print("final dp row:");
-		for(Integer val : prevDpRow) {
-			System.out.print(val + " ");
+
+		removeBombNumbersFromComponent();
+
+		for(int i = 0; i < components.size(); ++i) {
+			isSecondPass = true;
+			solveComponent(0, i);
 		}
-		System.out.println();
 
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
@@ -114,6 +103,66 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				} else if(curr.numberOfFreeConfigs.equals(curr.numberOfTotalConfigs)) {
 					curr.isLogicalFree = true;
 				}
+			}
+		}
+	}
+
+	private void removeBombNumbersFromComponent() throws Exception {
+		ArrayList<TreeSet<Integer>> dpTable = new ArrayList<>(components.size()+1);
+		for(int i = 0; i <= components.size(); ++i) {
+			dpTable.add(new TreeSet<Integer>());
+		}
+
+		dpTable.get(0).add(0);
+		for(int i = 0; i < components.size(); ++i) {
+			for(Map.Entry<Integer,ArrayList<Pair<Integer,Integer>>> entry : bombConfig.get(i).entrySet()) {
+				for(Integer val : dpTable.get(i)) {
+					dpTable.get(i+1).add(val + entry.getKey());
+				}
+			}
+		}
+		TreeSet<Integer> validSpots = new TreeSet<>();
+		for(int bombCnt : dpTable.get(components.size())) {
+			if (bombCnt <= numberOfBombs && numberOfBombs <= bombCnt + GetConnectedComponents.getNumberOfAwayCells(board)) {
+				validSpots.add(bombCnt);
+			}
+		}
+		dpTable.get(components.size()).clear();
+		dpTable.set(components.size(), validSpots);
+
+		for(int i = components.size()-1; i >= 0; --i) {
+			TreeSet<Integer> spotsToRemove = new TreeSet<>();
+			for(Map.Entry<Integer,ArrayList<Pair<Integer,Integer>>> entry : bombConfig.get(i).entrySet()) {
+				boolean found = false;
+				for(int val : dpTable.get(i)) {
+					if(dpTable.get(i+1).contains(val + entry.getKey())) {
+						found = true;
+						break;
+					}
+				}
+				if(!found) {
+					spotsToRemove.add(entry.getKey());
+				}
+			}
+			for(int val : spotsToRemove) {
+				bombConfig.get(i).remove(val);
+			}
+
+			spotsToRemove.clear();
+			for(int val : dpTable.get(i)) {
+				boolean found = false;
+				for(Map.Entry<Integer, ArrayList<Pair<Integer, Integer>>> entry : bombConfig.get(i).entrySet()) {
+					if(dpTable.get(i+1).contains(val + entry.getKey())) {
+						found = true;
+						break;
+					}
+				}
+				if(!found) {
+					spotsToRemove.add(val);
+				}
+			}
+			for(int val : spotsToRemove) {
+				dpTable.get(i).remove(val);
 			}
 		}
 	}
@@ -269,16 +318,33 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
 		checkPositionValidity(component);
 
+		//TODO: keep a running total of bombs instead of doing this
 		int currNumberOfBombs = 0;
 		for(int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
 			if(isBomb.get(i).get(j)) {
 				++currNumberOfBombs;
-			} else {
-				++board.get(i).get(j).numberOfFreeConfigs;
 			}
-			++board.get(i).get(j).numberOfTotalConfigs;
+		}
+
+		if(isSecondPass && !bombConfig.get(componentPos).containsKey(currNumberOfBombs)) {
+			return;
+		}
+
+		if(isSecondPass) {
+			for (int pos = 0; pos < component.size(); ++pos) {
+				final int i = component.get(pos).first;
+				final int j = component.get(pos).second;
+				if (!isBomb.get(i).get(j)) {
+					++board.get(i).get(j).numberOfFreeConfigs;
+				}
+				++board.get(i).get(j).numberOfTotalConfigs;
+			}
+		}
+
+		if(isSecondPass) {
+			return;
 		}
 
 		if(!bombConfig.get(componentPos).containsKey(currNumberOfBombs)) {

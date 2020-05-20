@@ -113,4 +113,36 @@ public class GetConnectedComponents {
 		}
 		return components;
 	}
+
+	public static Integer getNumberOfAwayCells(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board) throws Exception {
+		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
+		rows = dimensions.first;
+		cols = dimensions.second;
+		int cntAwayCells = 0;
+		for(int i = 0; i < rows; ++i) {
+			for(int j = 0; j < cols; ++j) {
+				boolean foundAdjacentVisible = false;
+				for(int di = -1; di <= 1 && !foundAdjacentVisible; ++di) {
+					for(int dj = -1; dj <= 1; ++dj) {
+						if(di == 0 && dj == 0) {
+							continue;
+						}
+						final int adjI = i+di;
+						final int adjJ = j+dj;
+						if(ArrayBounds.outOfBounds(adjI,adjJ,rows,cols)) {
+							continue;
+						}
+						if(board.get(adjI).get(adjJ).isVisible) {
+							foundAdjacentVisible = true;
+							break;
+						}
+					}
+				}
+				if(!foundAdjacentVisible) {
+					++cntAwayCells;
+				}
+			}
+		}
+		return cntAwayCells;
+	}
 }

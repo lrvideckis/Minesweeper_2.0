@@ -4,9 +4,9 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 
 import java.util.ArrayList;
 
-public class GaussEliminationSolver  implements MinesweeperSolver {
+public class GaussEliminationSolver implements MinesweeperSolver {
 	@Override
-	public void solvePosition(ArrayList<ArrayList<VisibleTile>> board, int numberOfBombs) throws Exception {
+	public void solvePosition(ArrayList<ArrayList<VisibleTile>> board, int numberOfBombs) {
 
 	}
 }
