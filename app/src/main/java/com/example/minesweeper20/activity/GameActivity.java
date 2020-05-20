@@ -20,7 +20,7 @@ import com.example.minesweeper20.view.GameCanvas;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn, solverHasFailed;
+	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn, toggleBombProbabilityOn, solverHasFailed;
 	private Integer numberOfRows, numberOfCols, numberOfBombs;
 	private String gameMode;
 	private PopupWindow popupWindow;
@@ -47,6 +47,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleBombs = findViewById(R.id.toggleBombs);
 		toggleBombs.setOnCheckedChangeListener(this);
 
+		Switch toggleProbability = findViewById(R.id.toggleBombProbability);
+		toggleProbability.setOnCheckedChangeListener(this);
+
 		updateNumberOfBombs(numberOfBombs);
 		setUpIterationLimitPopup();
 	}
@@ -64,24 +67,44 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				toggleFlagModeOn = isChecked;
 				break;
 			case R.id.toggleHints:
-				if(solverHasFailed) {
-					buttonView.setChecked(false);
-					popupWindow.showAtLocation(findViewById(R.id.gameLayout), Gravity.CENTER,0,0);
-					break;
-				}
-				toggleHintsOn = isChecked;
-				if(isChecked) {
-					GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
-					try {
-						gameCanvas.updateSolvedBoard();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
+				handleHintToggle(buttonView, isChecked);
 				break;
 			case R.id.toggleBombs:
 				toggleBombsOn = isChecked;
 				break;
+			case R.id.toggleBombProbability:
+				handleProbabilityToggle(isChecked);
+				break;
+		}
+	}
+
+	private void handleHintToggle(CompoundButton buttonView, boolean isChecked) {
+		if(solverHasFailed) {
+			buttonView.setChecked(false);
+			popupWindow.showAtLocation(findViewById(R.id.gameLayout), Gravity.CENTER,0,0);
+			return;
+		}
+		toggleHintsOn = isChecked;
+		if(isChecked) {
+			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
+			try {
+				gameCanvas.updateSolvedBoard();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			Switch bombProbability = findViewById(R.id.toggleBombProbability);
+			bombProbability.setChecked(false);
+			toggleBombProbabilityOn = false;
+		}
+	}
+
+	private void handleProbabilityToggle(boolean isChecked) {
+		toggleBombProbabilityOn = isChecked;
+		if(isChecked) {
+			Switch showHints = findViewById(R.id.toggleHints);
+			showHints.setChecked(true);
+			toggleHintsOn = true;
 		}
 	}
 
@@ -146,6 +169,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public Boolean getToggleHintsOn() {
 		return toggleHintsOn;
+	}
+
+	public Boolean getToggleBombProbabilityOn() {
+		return toggleBombProbabilityOn;
 	}
 
 	public String getGameMode() {

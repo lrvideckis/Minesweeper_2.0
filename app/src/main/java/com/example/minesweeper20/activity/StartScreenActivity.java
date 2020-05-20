@@ -20,8 +20,8 @@ import com.example.minesweeper20.R;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: make translate + scale less laggy
-//TODO: undo button
-//TODO: show bomb percentage on start screen new game popup (bombs/(rows*cols))
+//TODO: undo button - only when you lose
+//TODO: for bomb percentage: handle before the first click
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver
 //TODO: only draw part of canvas which screen can see
 

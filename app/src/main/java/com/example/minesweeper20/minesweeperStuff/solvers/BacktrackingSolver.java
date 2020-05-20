@@ -98,10 +98,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				if(curr.numberOfTotalConfigs == 0) {
 					continue;
 				}
-				if(curr.numberOfFreeConfigs == 0) {
-					curr.isLogicalBomb = true;
-				} else if(curr.numberOfFreeConfigs.equals(curr.numberOfTotalConfigs)) {
+				if(curr.numberOfBombConfigs == 0) {
 					curr.isLogicalFree = true;
+				} else if(curr.numberOfBombConfigs.equals(curr.numberOfTotalConfigs)) {
+					curr.isLogicalBomb = true;
 				}
 			}
 		}
@@ -336,8 +336,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			for (int pos = 0; pos < component.size(); ++pos) {
 				final int i = component.get(pos).first;
 				final int j = component.get(pos).second;
-				if (!isBomb.get(i).get(j)) {
-					++board.get(i).get(j).numberOfFreeConfigs;
+				if (isBomb.get(i).get(j)) {
+					++board.get(i).get(j).numberOfBombConfigs;
 				}
 				++board.get(i).get(j).numberOfTotalConfigs;
 			}

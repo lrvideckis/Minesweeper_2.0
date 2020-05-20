@@ -22,6 +22,7 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.minesweeperStuff.helpers.ConvertGameBoardFormat;
 import com.example.minesweeper20.minesweeperStuff.solvers.BacktrackingSolver;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
@@ -154,9 +155,20 @@ public class GameCanvas extends View {
 
 		if(gameActivity.getToggleHintsOn()) {
 			if(solverCell.isLogicalBomb) {
+				if(!gameCell.isBomb) {
+					throw new Exception("solver says: logical bomb, but it's not a bomb");
+				}
 				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
 			} else if(solverCell.isLogicalFree) {
+				if(gameCell.isBomb) {
+					throw new Exception("solver says: logical free, but it's not free");
+				}
 				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
+			} else if(gameActivity.getToggleBombProbabilityOn()) {
+				final int numerator = solverCell.numberOfBombConfigs;
+				final int denominator = solverCell.numberOfTotalConfigs;
+				final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
+				drawCellHelpers.drawBombProbability(canvas, startX, startY, numerator/gcd, denominator/gcd);
 			}
 		}
 	}

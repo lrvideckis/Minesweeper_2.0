@@ -125,4 +125,9 @@ class DrawCellHelpers {
 		final int yPos = (int) (startY + cellPixelLength / 2 - ((redX.descent() + redX.ascent()) / 2)) ;
 		canvas.drawText("X", xPos, yPos, redX);
 	}
+
+	void drawBombProbability(Canvas canvas, int startX, int startY, int numerator, int demoninator) {
+		String probability = numerator + "/" + demoninator;
+		canvas.drawText(probability, startX, startY+cellPixelLength/3f, black);
+	}
 }
