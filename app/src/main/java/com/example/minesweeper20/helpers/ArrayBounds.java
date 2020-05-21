@@ -1,7 +1,7 @@
 package com.example.minesweeper20.helpers;
 
 import android.util.Pair;
-import com.example.minesweeper20.minesweeperStuff.solvers.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import java.util.ArrayList;
 
 public class ArrayBounds {

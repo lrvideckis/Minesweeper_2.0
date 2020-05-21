@@ -6,35 +6,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class MinesweeperGame {
-	//TODO: rethink this class to be a derived from MinesweeperSolver.VisibleTile - it has everything VisibleTile has and more
-	public static class Tile {
-		private Boolean isRevealed, isFlagged, isBomb;
-		private Integer numberSurroundingBombs;
+	public static class Tile extends MinesweeperSolver.VisibleTile {
+		private Boolean isFlagged, isBomb;
 		private Tile() {
-			isRevealed = isFlagged = isBomb = false;
+			isFlagged = isBomb = false;
 			numberSurroundingBombs = 0;
-		}
-		public boolean isRevealed() {
-			return isRevealed;
 		}
 		public boolean isBomb() {
 			return isBomb;
 		}
-		public boolean isFlagged() throws Exception {
-			if(isFlagged && isRevealed) {
-				throw new Exception("invalid state: flagged && revealed");
+		public boolean isFlagged() {
+			if(isVisible) {
+				isFlagged = false;
 			}
 			return isFlagged;
 		}
-		public Integer getNumberSurroundingBombs() {
-			return numberSurroundingBombs;
-		}
 		private void revealTile() {
-			isRevealed = true;
+			isVisible = true;
 			isFlagged = false;
 		}
 		private void toggleFlag() {
-			if(isRevealed) {
+			if(isVisible) {
 				isFlagged = false;
 				return;
 			}
@@ -96,11 +88,11 @@ public class MinesweeperGame {
 			return;
 		}
 		final Tile curr = getCell(row, col);
-		if(curr.isRevealed()) {
+		if(curr.getIsVisible()) {
 			checkToRevealAdjacentBombs(row, col);
 		}
 		if(toggleBombs) {
-			if(!curr.isRevealed()) {
+			if(!curr.getIsVisible()) {
 				if (curr.isFlagged()) {
 					--numberOfFlags;
 				} else {
@@ -126,7 +118,7 @@ public class MinesweeperGame {
 				}
 				try {
 					Tile adj = getCell(row + dRow, col + dCol);
-					if (adj.isRevealed()) {
+					if (adj.getIsVisible()) {
 						continue;
 					}
 					if (adj.isFlagged() && !adj.isBomb) {
@@ -232,7 +224,7 @@ public class MinesweeperGame {
 					final int adjRow = row + dRow;
 					final int adjCol = col + dCol;
 					Tile adjacent = getCell(adjRow, adjCol);
-					if (!adjacent.isRevealed()) {
+					if (!adjacent.getIsVisible()) {
 						revealCell(adjRow, adjCol);
 					}
 				} catch (ArrayIndexOutOfBoundsException ignored) {
@@ -245,7 +237,7 @@ public class MinesweeperGame {
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				Tile curr = getCell(i,j);
-				if(!curr.isRevealed()) {
+				if(!curr.getIsVisible()) {
 					continue;
 				}
 				int cntSurroundingBombs = 0;
@@ -283,8 +275,8 @@ public class MinesweeperGame {
 		}
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
-				if(newBombLocations.get(i).get(j) && getCell(i,j).isRevealed()) {
-						throw new Exception("bad bomb configuration: bomb is in revealed cell");
+				if(newBombLocations.get(i).get(j) && getCell(i,j).getIsVisible()) {
+					throw new Exception("bad bomb configuration: bomb is in revealed cell");
 				}
 				getCell(i,j).isBomb = newBombLocations.get(i).get(j);
 				if(getCell(i,j).isBomb) {

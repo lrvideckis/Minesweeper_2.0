@@ -126,6 +126,7 @@ class DrawCellHelpers {
 		canvas.drawText("X", xPos, yPos, redX);
 	}
 
+	//TODO: if text is too long, this will draw over into the next cell
 	void drawBombProbability(Canvas canvas, int startX, int startY, int numerator, int denominator) {
 		String probability = numerator + "/" + denominator;
 		canvas.drawText(probability, startX, startY+cellPixelLength/3f, black);

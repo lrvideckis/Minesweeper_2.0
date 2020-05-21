@@ -1,8 +1,8 @@
 /*
 package com.example.minesweeper20;
 
-import com.example.minesweeper20.minesweeperStuff.solvers.MinesweeperSolver;
-import com.example.minesweeper20.minesweeperStuff.solvers.BacktrackingSolver;
+import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 
 import org.junit.Test;
 

@@ -16,10 +16,10 @@ import com.example.minesweeper20.activity.ScaleListener;
 import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.PopupHelper;
-import com.example.minesweeper20.minesweeperStuff.HitIterationLimitException;
+import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.example.minesweeper20.minesweeperStuff.solvers.MinesweeperSolver;
-import com.example.minesweeper20.minesweeperStuff.solvers.BacktrackingSolver;
+import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -118,7 +118,7 @@ public class GameCanvas extends View {
 	}
 
 	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int startX, int startY, Boolean awayCell) throws Exception {
-		if(gameCell.isRevealed()) {
+		if(gameCell.getIsVisible()) {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), startX, startY);
 			return;
 		}

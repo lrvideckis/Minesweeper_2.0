@@ -1,6 +1,4 @@
-package com.example.minesweeper20.minesweeperStuff.solvers;
-
-import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
+package com.example.minesweeper20.minesweeperStuff;
 
 import java.util.ArrayList;
 
@@ -11,7 +9,7 @@ public interface MinesweeperSolver {
 		public VisibleTile() {
 			reset();
 		}
-		public void reset() {
+		private void reset() {
 			isLogicalFree = isLogicalBomb = isVisible = false;
 			numberSurroundingBombs = numberOfBombConfigs = numberOfTotalConfigs = 0;
 		}
@@ -30,10 +28,14 @@ public interface MinesweeperSolver {
 		public int getNumberOfTotalConfigs() {
 			return numberOfTotalConfigs;
 		}
-		public void updateCell(MinesweeperGame.Tile gameTile) {
-			isVisible = gameTile.isRevealed();
-			if(gameTile.isRevealed()) {
-				numberSurroundingBombs = gameTile.getNumberSurroundingBombs();
+		public int getNumberSurroundingBombs() {
+			return numberSurroundingBombs;
+		}
+		public void updateVisibilityAndSurroundingBombs(MinesweeperGame.Tile tile) {
+			reset();
+			isVisible = tile.isVisible;
+			if(isVisible) {
+				numberSurroundingBombs = tile.numberSurroundingBombs;
 			}
 		}
 	}

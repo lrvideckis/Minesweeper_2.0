@@ -1,8 +1,8 @@
-package com.example.minesweeper20.minesweeperStuff.solvers;
+package com.example.minesweeper20.minesweeperStuff;
 
 import android.util.Pair;
 
-import com.example.minesweeper20.minesweeperStuff.HitIterationLimitException;
+import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 
@@ -237,7 +237,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			return;
 		}
 		if(currIterations.incrementAndGet() >= iterationLimit.get()) {
-			throw new HitIterationLimitException("too many iterations");
+			throw new HitIterationLimitException();
 		}
 		final int i = component.get(pos).first;
 		final int j = component.get(pos).second;

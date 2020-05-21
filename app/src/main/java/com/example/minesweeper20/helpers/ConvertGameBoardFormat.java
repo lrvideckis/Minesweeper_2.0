@@ -1,7 +1,7 @@
 package com.example.minesweeper20.helpers;
 
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.example.minesweeper20.minesweeperStuff.solvers.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 
 import java.util.ArrayList;
 
@@ -13,9 +13,9 @@ public class ConvertGameBoardFormat {
 		for(int i = 0; i < rows; ++i) {
 			ArrayList<MinesweeperSolver.VisibleTile> currRow = new ArrayList<>(cols);
 			for(int j = 0; j < cols; ++j) {
-				MinesweeperSolver.VisibleTile currTile = new MinesweeperSolver.VisibleTile();
-				currTile.updateCell(minesweeperGame.getCell(i,j));
-				currRow.add(currTile);
+				MinesweeperSolver.VisibleTile visibleTile = new MinesweeperSolver.VisibleTile();
+				visibleTile.updateVisibilityAndSurroundingBombs(minesweeperGame.getCell(i,j));
+				currRow.add(visibleTile);
 			}
 			board.add(currRow);
 		}
@@ -36,9 +36,7 @@ public class ConvertGameBoardFormat {
 				if(board.get(i).get(j) == null) {
 					throw new Exception("cell is null");
 				}
-				MinesweeperSolver.VisibleTile solverTile = board.get(i).get(j);
-				solverTile.reset();
-				solverTile.updateCell(minesweeperGame.getCell(i,j));
+				board.get(i).get(j).updateVisibilityAndSurroundingBombs(minesweeperGame.getCell(i,j));
 			}
 		}
 	}
