@@ -8,15 +8,17 @@ import java.util.Collections;
 public class MinesweeperGame {
 	//TODO: rethink this class to be a derived from MinesweeperSolver.VisibleTile - it has everything VisibleTile has and more
 	public static class Tile {
-		private Boolean isRevealed, isFlagged;
-		public Boolean isBomb;
+		private Boolean isRevealed, isFlagged, isBomb;
 		private Integer numberSurroundingBombs;
-		Tile() {
+		private Tile() {
 			isRevealed = isFlagged = isBomb = false;
 			numberSurroundingBombs = 0;
 		}
 		public boolean isRevealed() {
 			return isRevealed;
+		}
+		public boolean isBomb() {
+			return isBomb;
 		}
 		public boolean isFlagged() throws Exception {
 			if(isFlagged && isRevealed) {
@@ -24,19 +26,19 @@ public class MinesweeperGame {
 			}
 			return isFlagged;
 		}
-		void revealTile() {
+		public Integer getNumberSurroundingBombs() {
+			return numberSurroundingBombs;
+		}
+		private void revealTile() {
 			isRevealed = true;
 			isFlagged = false;
 		}
-		void toggleFlag() {
+		private void toggleFlag() {
 			if(isRevealed) {
 				isFlagged = false;
 				return;
 			}
 			isFlagged = !isFlagged;
-		}
-		public Integer getNumberSurroundingBombs() {
-			return numberSurroundingBombs;
 		}
 	}
 	private final Integer numberOfRows, numberOfCols, numberOfBombs;

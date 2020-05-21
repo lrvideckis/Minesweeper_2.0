@@ -1,7 +1,7 @@
 package com.example.minesweeper20.helpers;
 
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.solvers.MinesweeperSolver;
 
 import java.util.ArrayList;
 
@@ -14,7 +14,7 @@ public class ConvertGameBoardFormat {
 			ArrayList<MinesweeperSolver.VisibleTile> currRow = new ArrayList<>(cols);
 			for(int j = 0; j < cols; ++j) {
 				MinesweeperSolver.VisibleTile currTile = new MinesweeperSolver.VisibleTile();
-				updateCell(currTile, minesweeperGame.getCell(i,j));
+				currTile.updateCell(minesweeperGame.getCell(i,j));
 				currRow.add(currTile);
 			}
 			board.add(currRow);
@@ -38,15 +38,8 @@ public class ConvertGameBoardFormat {
 				}
 				MinesweeperSolver.VisibleTile solverTile = board.get(i).get(j);
 				solverTile.reset();
-				updateCell(solverTile, minesweeperGame.getCell(i,j));
+				solverTile.updateCell(minesweeperGame.getCell(i,j));
 			}
-		}
-	}
-
-	private static void updateCell(MinesweeperSolver.VisibleTile solverTile, MinesweeperGame.Tile gameTile) {
-		solverTile.isVisible = gameTile.isRevealed();
-		if(gameTile.isRevealed()) {
-			solverTile.numberSurroundingBombs = gameTile.getNumberSurroundingBombs();
 		}
 	}
 }

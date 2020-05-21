@@ -2,7 +2,7 @@ package com.example.minesweeper20.helpers;
 
 import android.util.Pair;
 
-import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.solvers.MinesweeperSolver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +50,7 @@ public class GetConnectedComponents {
 		Dsu disjointSet = new Dsu(rows * cols);
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				if(!board.get(i).get(j).isVisible) {
+				if(!board.get(i).get(j).getIsVisible()) {
 					continue;
 				}
 				for(int di = -1; di <= 1; ++di) {
@@ -64,7 +64,7 @@ public class GetConnectedComponents {
 							continue;
 						}
 						MinesweeperSolver.VisibleTile adjTile = board.get(adjI).get(adjJ);
-						if(adjTile.isVisible) {
+						if(adjTile.getIsVisible()) {
 							continue;
 						}
 						disjointSet.merge(getNode(i,j),getNode(adjI,adjJ));
@@ -80,7 +80,7 @@ public class GetConnectedComponents {
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
 				MinesweeperSolver.VisibleTile currTile = board.get(i).get(j);
-				if (currTile.isVisible) {
+				if (currTile.getIsVisible()) {
 					continue;
 				}
 				boolean foundAdjVis = false;
@@ -94,7 +94,7 @@ public class GetConnectedComponents {
 						if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 							continue;
 						}
-						if(board.get(adjI).get(adjJ).isVisible) {
+						if(board.get(adjI).get(adjJ).getIsVisible()) {
 							foundAdjVis = true;
 							break;
 						}
@@ -144,7 +144,7 @@ public class GetConnectedComponents {
 				if(ArrayBounds.outOfBounds(adjI,adjJ,rows,cols)) {
 					continue;
 				}
-				if(board.get(adjI).get(adjJ).isVisible) {
+				if(board.get(adjI).get(adjJ).getIsVisible()) {
 					return false;
 				}
 			}

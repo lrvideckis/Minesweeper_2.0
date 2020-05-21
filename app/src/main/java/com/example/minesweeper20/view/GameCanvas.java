@@ -18,7 +18,7 @@ import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.PopupHelper;
 import com.example.minesweeper20.minesweeperStuff.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.solvers.MinesweeperSolver;
 import com.example.minesweeper20.minesweeperStuff.solvers.BacktrackingSolver;
 
 import java.math.BigInteger;
@@ -128,29 +128,29 @@ public class GameCanvas extends View {
 
 		if(gameCell.isFlagged()) {
 			drawCellHelpers.drawFlag(canvas, startX, startY);
-			if(minesweeperGame.getIsGameOver() && !gameCell.isBomb) {
+			if(minesweeperGame.getIsGameOver() && !gameCell.isBomb()) {
 				drawCellHelpers.drawRedX(canvas, startX, startY);
 			}
-		} else if(gameCell.isBomb && (minesweeperGame.getIsGameOver() || gameActivity.getToggleBombsOn())) {
+		} else if(gameCell.isBomb() && (minesweeperGame.getIsGameOver() || gameActivity.getToggleBombsOn())) {
 			drawCellHelpers.drawBomb(canvas, startX, startY);
 		}
 
 		if(gameActivity.getToggleHintsOn()) {
-			if(solverCell.isLogicalBomb) {
-				if(!gameCell.isBomb) {
+			if(solverCell.getIsLogicalBomb()) {
+				if(!gameCell.isBomb()) {
 					throw new Exception("solver says: logical bomb, but it's not a bomb");
 				}
 				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
-			} else if(solverCell.isLogicalFree) {
+			} else if(solverCell.getIsLogicalFree()) {
 				//TODO: this was thrown on expert
-				if(gameCell.isBomb) {
+				if(gameCell.isBomb()) {
 					throw new Exception("solver says: logical free, but it's not free");
 				}
 				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
 			} else if(gameActivity.getToggleBombProbabilityOn()) {
 				if(!awayCell) {
-					final int numerator = solverCell.numberOfBombConfigs;
-					final int denominator = solverCell.numberOfTotalConfigs;
+					final int numerator = solverCell.getNumberOfBombConfigs();
+					final int denominator = solverCell.getNumberOfTotalConfigs();
 					final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
 					drawCellHelpers.drawBombProbability(canvas, startX, startY, numerator/gcd, denominator/gcd);
 				}

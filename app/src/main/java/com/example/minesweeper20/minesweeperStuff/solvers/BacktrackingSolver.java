@@ -3,7 +3,6 @@ package com.example.minesweeper20.minesweeperStuff.solvers;
 import android.util.Pair;
 
 import com.example.minesweeper20.minesweeperStuff.HitIterationLimitException;
-import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 
@@ -21,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
-	private final AtomicInteger iterationLimit = new AtomicInteger(20000);
+	private final static AtomicInteger iterationLimit = new AtomicInteger(20000);
 
 	private final ArrayList<ArrayList<Boolean>> isBomb;
 	private final ArrayList<ArrayList<Integer>> cntSurroundingBombs;
@@ -293,7 +292,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 					continue;
 				}
-				MinesweeperSolver.VisibleTile adjTile = board.get(adjI).get(adjJ);
+				VisibleTile adjTile = board.get(adjI).get(adjJ);
 				if(!adjTile.isVisible) {
 					continue;
 				}
