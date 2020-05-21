@@ -8,9 +8,7 @@ import android.view.View;
 
 import com.example.minesweeper20.view.GameCanvas;
 
-//TODO: bug: clicking no longer works after top nav bar height no longer uses canvas.get matrix
 public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
-
 
 	//variables to hand a swipe (translate) and pinch (scale)
 	private final ScaleGestureDetector SGD;
@@ -111,11 +109,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						newY -= absoluteY;
 						newY -= topNavBarHeight;
 
-						try {
-							gameCanvas.handleTap(newX, newY);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						gameCanvas.handleTap(newX, newY);
 					}
 					break;
 			}

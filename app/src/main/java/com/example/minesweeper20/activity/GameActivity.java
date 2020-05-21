@@ -2,6 +2,7 @@ package com.example.minesweeper20.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -15,12 +16,15 @@ import com.example.minesweeper20.R;
 import com.example.minesweeper20.helpers.PopupHelper;
 import com.example.minesweeper20.view.GameCanvas;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
 	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn, toggleBombProbabilityOn, solverHitIterationLimit;
 	private Integer numberOfRows, numberOfCols, numberOfBombs;
 	private String gameMode;
-	private PopupWindow solverHitLimitPopup;
+	private PopupWindow solverHitLimitPopup, stackStacePopup;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -49,6 +53,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		updateNumberOfBombs(numberOfBombs);
 		setUpIterationLimitPopup();
+		setUpStackTracePopup();
 	}
 
 	@Override
@@ -90,6 +95,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			try {
 				gameCanvas.updateSolvedBoard();
 			} catch (Exception e) {
+				displayStackTracePopup(e);
 				e.printStackTrace();
 			}
 		} else {
@@ -97,6 +103,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			bombProbability.setChecked(false);
 			toggleBombProbabilityOn = false;
 		}
+	}
+
+	public void displayStackTracePopup(Exception e) {
+		TextView textView = stackStacePopup.getContentView().findViewById(R.id.stackTrace);
+		StringWriter sw = new StringWriter();
+		e.printStackTrace(new PrintWriter(sw));
+		textView.setText(sw.toString());
+		textView.setMovementMethod(new ScrollingMovementMethod());
+		PopupHelper.displayPopup(stackStacePopup, findViewById(R.id.gameLayout), getResources());
 	}
 
 	private void handleProbabilityToggle(boolean isChecked) {
@@ -117,6 +132,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				solverHitLimitPopup.dismiss();
 			}
 		});
+	}
+
+	private void setUpStackTracePopup() {
+		stackStacePopup = PopupHelper.initializePopup(this, R.layout.stack_trace_popup);
 	}
 
 	public void solverHasJustHitIterationLimit() {

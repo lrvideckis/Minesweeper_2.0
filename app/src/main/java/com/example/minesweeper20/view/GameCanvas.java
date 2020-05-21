@@ -70,7 +70,7 @@ public class GameCanvas extends View {
 		});
 	}
 
-	public void handleTap(Float tapX, Float tapY) throws Exception {
+	public void handleTap(Float tapX, Float tapY) {
 		//TODO: have grid always fill screen
 		//eventually I won't need this check, as the grid always fills the screen
 		if(tapX < 0f ||
@@ -85,21 +85,26 @@ public class GameCanvas extends View {
 		GameActivity gameActivity = (GameActivity) getContext();
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
 
-		//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
-		if(!gameActivity.getGameMode().equals(gameChoices[0])) {
-			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-			boolean wantBomb = gameActivity.getGameMode().equals(gameChoices[1]);
-			//TODO: bug: when toggle flags is on + hard mode: this will always put a bomb under the cell you just flagged
-			ArrayList<ArrayList<Boolean>> newBombLocations = backtrackingSolver.getBombConfiguration(board, 0, row, col, wantBomb);
-			if(newBombLocations != null) {
-				minesweeperGame.changeBombLocations(newBombLocations);
+		try {
+			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
+			if (!gameActivity.getGameMode().equals(gameChoices[0])) {
+				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+				boolean wantBomb = gameActivity.getGameMode().equals(gameChoices[1]);
+				//TODO: bug: when toggle flags is on + hard mode: this will always put a bomb under the cell you just flagged
+				ArrayList<ArrayList<Boolean>> newBombLocations = backtrackingSolver.getBombConfiguration(board, 0, row, col, wantBomb);
+				if (newBombLocations != null) {
+					minesweeperGame.changeBombLocations(newBombLocations);
+				}
 			}
-		}
 
-		minesweeperGame.clickCell(row, col, gameActivity.getToggleFlagModeOn());
+			minesweeperGame.clickCell(row, col, gameActivity.getToggleFlagModeOn());
 
-		if(!minesweeperGame.getIsGameOver() && gameActivity.getToggleHintsOn()) {
-			updateSolvedBoard();
+			if (!minesweeperGame.getIsGameOver() && gameActivity.getToggleHintsOn()) {
+				updateSolvedBoard();
+			}
+		} catch(Exception e) {
+			gameActivity.displayStackTracePopup(e);
+			e.printStackTrace();
 		}
 
 		gameActivity.updateNumberOfBombs(minesweeperGame.getNumberOfBombs() - minesweeperGame.getNumberOfFlags());
@@ -174,6 +179,8 @@ public class GameCanvas extends View {
 				try {
 					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), j * cellPixelLength, i * cellPixelLength, GetConnectedComponents.isAwayCell(board, i, j));
 				} catch (Exception e) {
+					GameActivity gameActivity = (GameActivity) getContext();
+					gameActivity.displayStackTracePopup(e);
 					e.printStackTrace();
 				}
 			}
