@@ -43,7 +43,7 @@ public class GameCanvas extends View {
 		final GameActivity gameActivity = (GameActivity) getContext();
 		Integer screenWidth = context.getResources().getDisplayMetrics().widthPixels;
 		Integer screenHeight = context.getResources().getDisplayMetrics().heightPixels;
-		scaleListener = new ScaleListener(context, this, screenWidth, screenHeight, (float)(getTop() + getStatusBarHeight()));
+		scaleListener = new ScaleListener(context, this, screenWidth, screenHeight);
 		setOnTouchListener(scaleListener);
 		minesweeperGame = new MinesweeperGame(
 				gameActivity.getNumberOfRows(),
@@ -161,8 +161,10 @@ public class GameCanvas extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		final float topNavBarHeight = getTop() + getStatusBarHeight();
+		scaleListener.setTopNavBarHeight(topNavBarHeight);
 		canvasTransitionScale.set(scaleListener.getMatrix());
-		canvasTransitionScale.preTranslate(0, getTop() + getStatusBarHeight());
+		canvasTransitionScale.preTranslate(0, topNavBarHeight);
 		canvas.setMatrix(canvasTransitionScale);
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
