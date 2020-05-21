@@ -1,22 +1,20 @@
 package com.example.minesweeper20.activity;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
+import com.example.minesweeper20.helpers.PopupHelper;
+import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: make translate + scale less laggy
@@ -28,7 +26,8 @@ import com.example.minesweeper20.R;
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
 
-	private PopupWindow popupWindow;
+	private PopupWindow newGamePopup;
+	private PopupWindow gridTooSmallPopup;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -39,43 +38,39 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		startGameButton.setOnClickListener(this);
 
 		setUpNewGamePopup();
+		setUpGridTooSmallPopup();
 	}
 
 	@Override
 	public void onClick(View v) {
 		LinearLayout startScreen = findViewById(R.id.start_screen);
-		popupWindow.showAtLocation(startScreen, Gravity.CENTER,0,0);
+		PopupHelper.displayPopup(newGamePopup, startScreen, getResources());
 	}
 
 	private void setUpNewGamePopup() {
-		Context context = getApplicationContext();
-		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-		assert inflater != null;
-		@SuppressLint("InflateParams") final View newGamePopup = inflater.inflate(R.layout.new_game_popup,null);
-		popupWindow = new PopupWindow(
-				newGamePopup,
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT
-		);
-		popupWindow.setFocusable(true);
-		popupWindow.setElevation(5.0f);
-		Button okButton = newGamePopup.findViewById(R.id.startNewGameButton);
+		newGamePopup = PopupHelper.initializePopup(getApplicationContext(), R.layout.new_game_popup);
+		Button okButton = newGamePopup.getContentView().findViewById(R.id.startNewGameButton);
 		okButton.setOnClickListener(new View.OnClickListener() {
 			@SuppressLint("InflateParams")
 			@Override
 			public void onClick(View view) {
-				popupWindow.setContentView(inflater.inflate(R.layout.new_game_popup, null, false));
-				EditText rowInput = newGamePopup.findViewById(R.id.rowsInput);
-				EditText colInput = newGamePopup.findViewById(R.id.colsInput);
-				EditText bombInput = newGamePopup.findViewById(R.id.bombsInput);
+				EditText rowInput = newGamePopup.getContentView().findViewById(R.id.rowsInput);
+				EditText colInput = newGamePopup.getContentView().findViewById(R.id.colsInput);
+				EditText bombInput = newGamePopup.getContentView().findViewById(R.id.bombsInput);
 				final int numberOfRows = getNumberInput(rowInput.getText().toString());
 				final int numberOfCols = getNumberInput(colInput.getText().toString());
 				final int numberOfBombs = getNumberInput(bombInput.getText().toString());
 
-				Spinner gameType = newGamePopup.findViewById(R.id.game_type);
+				if(MinesweeperGame.tooManyBombsForZeroStart(numberOfRows, numberOfCols, numberOfBombs)) {
+					LinearLayout startScreen = findViewById(R.id.start_screen);
+					PopupHelper.displayPopup(gridTooSmallPopup, startScreen, getResources());
+					return;
+				}
+
+				Spinner gameType = newGamePopup.getContentView().findViewById(R.id.game_type);
 				String selectedGameType = gameType.getSelectedItem().toString();
 
-				popupWindow.dismiss();
+				StartScreenActivity.this.newGamePopup.dismiss();
 
 				Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
 				intent.putExtra("numberOfRows", numberOfRows);
@@ -85,11 +80,11 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 				startActivity(intent);
 			}
 		});
-		final EditText rowsInput = newGamePopup.findViewById(R.id.rowsInput);
-		final EditText colsInput = newGamePopup.findViewById(R.id.colsInput);
-		final EditText bombsInput = newGamePopup.findViewById(R.id.bombsInput);
+		final EditText rowsInput = newGamePopup.getContentView().findViewById(R.id.rowsInput);
+		final EditText colsInput = newGamePopup.getContentView().findViewById(R.id.colsInput);
+		final EditText bombsInput = newGamePopup.getContentView().findViewById(R.id.bombsInput);
 
-		Button beginner = newGamePopup.findViewById(R.id.beginner);
+		Button beginner = newGamePopup.getContentView().findViewById(R.id.beginner);
 		beginner.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -99,7 +94,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 			}
 		});
 
-		Button intermediate = newGamePopup.findViewById(R.id.intermediate);
+		Button intermediate = newGamePopup.getContentView().findViewById(R.id.intermediate);
 		intermediate.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -109,13 +104,24 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 			}
 		});
 
-		Button expert = newGamePopup.findViewById(R.id.expert);
+		Button expert = newGamePopup.getContentView().findViewById(R.id.expert);
 		expert.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				rowsInput.setText(R.string._16);
 				colsInput.setText(R.string._30);
 				bombsInput.setText(R.string._99);
+			}
+		});
+	}
+
+	private void setUpGridTooSmallPopup() {
+		gridTooSmallPopup = PopupHelper.initializePopup(getApplicationContext(), R.layout.grid_too_small_for_zero_start_popup);
+		Button okButton = gridTooSmallPopup.getContentView().findViewById(R.id.gridTooSmallOkButton);
+		okButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				gridTooSmallPopup.dismiss();
 			}
 		});
 	}

@@ -1,6 +1,6 @@
 package com.example.minesweeper20.minesweeperStuff;
 
-import com.example.minesweeper20.minesweeperStuff.helpers.ArrayBounds;
+import com.example.minesweeper20.helpers.ArrayBounds;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +44,11 @@ public class MinesweeperGame {
 	private boolean firstClick, isGameOver;
 	private final Tile[][] grid;
 
+	public static boolean tooManyBombsForZeroStart(int numberOfRows, int numberOfCols, int numberOfBombs) {
+		return(numberOfBombs > numberOfRows * numberOfCols - 9);
+	}
+
+	//TODO: constructor with bomb placements as param for testing - you can test the same board over multiple runs
 	public MinesweeperGame(int _numberOfRows, int _numberOfCols, int _numberOfBombs) {
 		numberOfRows = _numberOfRows;
 		numberOfCols = _numberOfCols;
@@ -173,7 +178,6 @@ public class MinesweeperGame {
 		}
 
 		if(spotsI.size() < numberOfBombs) {
-			//TODO: display this error to user instead of just failing
 			throw new Exception("too many bombs to have a zero start");
 		}
 

@@ -31,8 +31,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfRows = getIntent().getIntExtra("numberOfRows", 1);
 		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
 		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 1);
-		solverHasFailed = false;
 		gameMode = getIntent().getStringExtra("gameMode");
+		solverHasFailed = false;
 		toggleBombsOn = toggleFlagModeOn = toggleHintsOn = false;
 		setContentView(R.layout.game);
 		Button backToStartScreen = findViewById(R.id.backToStartScreen);

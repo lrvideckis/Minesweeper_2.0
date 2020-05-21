@@ -1,4 +1,4 @@
-package com.example.minesweeper20.minesweeperStuff.helpers;
+package com.example.minesweeper20.helpers;
 
 import android.util.Pair;
 

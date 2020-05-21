@@ -3,8 +3,8 @@ package com.example.minesweeper20.minesweeperStuff.solvers;
 import android.util.Pair;
 
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
-import com.example.minesweeper20.minesweeperStuff.helpers.ArrayBounds;
-import com.example.minesweeper20.minesweeperStuff.helpers.GetConnectedComponents;
+import com.example.minesweeper20.helpers.ArrayBounds;
+import com.example.minesweeper20.helpers.GetConnectedComponents;
 
 import java.util.ArrayList;
 import java.util.Collections;

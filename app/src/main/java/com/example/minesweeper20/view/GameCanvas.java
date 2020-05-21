@@ -19,7 +19,7 @@ import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
-import com.example.minesweeper20.minesweeperStuff.helpers.ConvertGameBoardFormat;
+import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
 import com.example.minesweeper20.minesweeperStuff.solvers.BacktrackingSolver;
 
 import java.math.BigInteger;

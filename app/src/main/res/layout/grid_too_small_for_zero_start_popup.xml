@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/start_screen"
+	android:id="@+id/gridTooSmallPopup"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@color/white"
-	android:tag="@string/is_linear_layout"
+	android:background="@color/lightGrey"
 	android:orientation="vertical">
 
-	<Button
-		android:id="@+id/startNewGame"
+	<TextView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="@string/new_game"/>
+		android:text="@string/grid_too_small"/>
 
 	<Button
-		android:id="@+id/startNewPuzzle"
+		android:id="@+id/gridTooSmallOkButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="@string/new_puzzle"/>
+		android:text="@string/ok"/>
 
 </LinearLayout>
