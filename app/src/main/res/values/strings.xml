@@ -31,6 +31,7 @@
 	<string name="show_bomb_probability">Show Bomb Probability</string>
 	<string name="grid_too_small">Zero start isn\'t possible with grid size and number of bombs.</string>
 	<string name="is_linear_layout">is_linear_layout</string>
+	<string name="is_game_canvas_layout">is_game_canvas_layout</string>
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>

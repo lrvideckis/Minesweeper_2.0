@@ -1,31 +1,28 @@
 package com.example.minesweeper20.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
+import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
+import com.example.minesweeper20.helpers.GetConnectedComponents;
+import com.example.minesweeper20.helpers.PopupHelper;
+import com.example.minesweeper20.minesweeperStuff.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
-import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
 import com.example.minesweeper20.minesweeperStuff.solvers.BacktrackingSolver;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 public class GameCanvas extends View {
 
@@ -33,7 +30,7 @@ public class GameCanvas extends View {
 	private final MinesweeperGame minesweeperGame;
 	private final Integer cellPixelLength = 150;
 	private final Paint black = new Paint();
-	private PopupWindow popupWindow;
+	private PopupWindow endGamePopup;
 	private final Matrix canvasTransitionScale = new Matrix();
 	private final ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
 	private final MinesweeperSolver backtrackingSolver;
@@ -61,27 +58,17 @@ public class GameCanvas extends View {
 	}
 
 	private void setUpEndGamePopup() {
-		Context mContext = getContext().getApplicationContext();
-		LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
-		assert inflater != null;
-		@SuppressLint("InflateParams") View endGamePopup = inflater.inflate(R.layout.end_game_popup,null);
-		popupWindow = new PopupWindow(
-				endGamePopup,
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT
-		);
-		popupWindow.setElevation(5.0f);
-		Button okButton = endGamePopup.findViewById(R.id.closeEndGamePopup);
+		endGamePopup = PopupHelper.initializePopup(getContext().getApplicationContext(), R.layout.end_game_popup);
+		Button okButton = endGamePopup.getContentView().findViewById(R.id.closeEndGamePopup);
 		okButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				popupWindow.dismiss();
+				endGamePopup.dismiss();
 				GameActivity gameActivity = (GameActivity) getContext();
 				gameActivity.onClick(null);
 			}
 		});
 	}
-
 
 	public void handleTap(Float tapX, Float tapY) throws Exception {
 		//TODO: have grid always fill screen
@@ -124,15 +111,13 @@ public class GameCanvas extends View {
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		try {
 			backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfBombs());
-		} catch (Exception e) {
-			System.out.println("exiting game as solver failed: " + e.getMessage());
-			e.printStackTrace();
+		} catch (HitIterationLimitException e) {
 			GameActivity gameActivity = (GameActivity) getContext();
-			gameActivity.solverHasJustFailed();
+			gameActivity.solverHasJustHitIterationLimit();
 		}
 	}
 
-	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int startX, int startY) throws Exception {
+	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int startX, int startY, Boolean awayCell) throws Exception {
 		if(gameCell.isRevealed()) {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), startX, startY);
 			return;
@@ -146,9 +131,7 @@ public class GameCanvas extends View {
 			if(minesweeperGame.getIsGameOver() && !gameCell.isBomb) {
 				drawCellHelpers.drawRedX(canvas, startX, startY);
 			}
-		} else if(gameCell.isBomb && minesweeperGame.getIsGameOver()) {
-			drawCellHelpers.drawBomb(canvas, startX, startY);
-		} else if(gameCell.isBomb && gameActivity.getToggleBombsOn()) {
+		} else if(gameCell.isBomb && (minesweeperGame.getIsGameOver() || gameActivity.getToggleBombsOn())) {
 			drawCellHelpers.drawBomb(canvas, startX, startY);
 		}
 
@@ -159,16 +142,18 @@ public class GameCanvas extends View {
 				}
 				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
 			} else if(solverCell.isLogicalFree) {
+				//TODO: this was thrown on expert
 				if(gameCell.isBomb) {
 					throw new Exception("solver says: logical free, but it's not free");
 				}
 				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
 			} else if(gameActivity.getToggleBombProbabilityOn()) {
-				final int numerator = solverCell.numberOfBombConfigs;
-				final int denominator = solverCell.numberOfTotalConfigs;
-				//TODO: fix divide by zero error
-				final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
-				drawCellHelpers.drawBombProbability(canvas, startX, startY, numerator/gcd, denominator/gcd);
+				if(!awayCell) {
+					final int numerator = solverCell.numberOfBombConfigs;
+					final int denominator = solverCell.numberOfTotalConfigs;
+					final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
+					drawCellHelpers.drawBombProbability(canvas, startX, startY, numerator/gcd, denominator/gcd);
+				}
 			}
 		}
 	}
@@ -185,7 +170,7 @@ public class GameCanvas extends View {
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				try {
-					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), j * cellPixelLength, i * cellPixelLength);
+					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), j * cellPixelLength, i * cellPixelLength, GetConnectedComponents.isAwayCell(board, i, j));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -199,8 +184,7 @@ public class GameCanvas extends View {
 		}
 
 		if(minesweeperGame.getIsGameOver()) {
-			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
-			popupWindow.showAtLocation(gameCanvas, Gravity.CENTER,0,0);
+			PopupHelper.displayPopup(endGamePopup, findViewById(R.id.gridCanvas), getResources());
 		}
 	}
 

@@ -2,6 +2,7 @@ package com.example.minesweeper20.minesweeperStuff.solvers;
 
 import android.util.Pair;
 
+import com.example.minesweeper20.minesweeperStuff.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
@@ -11,8 +12,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
-//TODO: break out of backtracking if a limit is hit (probably around ~10^5 recursions)
 //TODO: also break out early the moment we find a (conditioned) solution
 //TODO: split components by cells we know: like if we know these 4 cells in a row, then we can split it into 2 components
 //TODO: handle away cells
@@ -20,16 +21,14 @@ import java.util.TreeSet;
 public class BacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
-	private final Integer iterationLimit = 20000;
+	private final AtomicInteger iterationLimit = new AtomicInteger(20000);
 
 	private final ArrayList<ArrayList<Boolean>> isBomb;
 	private final ArrayList<ArrayList<Integer>> cntSurroundingBombs;
 	private ArrayList<ArrayList<VisibleTile>> board;
 	private final ArrayList<ArrayList<Pair<Integer,Integer>>> lastUnvisitedSpot;
 	private ArrayList<ArrayList<Pair<Integer,Integer>>> components;
-	private Integer numberOfBombs, currIterations;
-	private Boolean isSecondPass;
-
+	private Integer numberOfBombs;
 
 	//variables for saving specific bomb position
 	private final ArrayList<ArrayList<Boolean>> saveIsBomb;
@@ -78,19 +77,16 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		for(int i = 0; i < components.size(); ++i) {
 			//TODO: make these not member variables
-			currIterations = 0;
-			isSecondPass = false;
-			solveComponent(0, i);
-			if(currIterations >= iterationLimit) {
-				throw new Exception("too many iterations, limit is: " + iterationLimit);
-			}
+			AtomicInteger currIterations = new AtomicInteger(0);
+			solveComponent(0, i, currIterations, false);
+			System.out.println("here, iterations: " + currIterations);
 		}
 
 		removeBombNumbersFromComponent();
 
 		for(int i = 0; i < components.size(); ++i) {
-			isSecondPass = true;
-			solveComponent(0, i);
+			AtomicInteger currIterations = new AtomicInteger(0);
+			solveComponent(0, i, currIterations, true);
 		}
 
 		for(int i = 0; i < rows; ++i) {
@@ -168,6 +164,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
+	//TODO: update this to do backtracking twice with dp in the middle
 	public ArrayList<ArrayList<Boolean>> getBombConfiguration(ArrayList<ArrayList<VisibleTile>> _board, int _numberOfBombs, int _spotI, int _spotJ, boolean _wantBomb) throws Exception {
 		initialize(_board, _numberOfBombs);
 		components = GetConnectedComponents.getComponents(board);
@@ -187,11 +184,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					break;
 				}
 			}
-			currIterations = 0;
-			solveComponent(0, i);
-			if(currIterations >= iterationLimit) {
-				throw new Exception("too many iterations");
-			}
+			AtomicInteger currIterations = new AtomicInteger(0);
+			solveComponent(0, i, currIterations, false);
 		}
 		return (foundBombConfiguration ? saveIsBomb : null);
 	}
@@ -237,14 +231,14 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	//TODO: only re-run component solve if the component has changed
-	private void solveComponent(int pos, int componentPos) throws Exception {
+	private void solveComponent(int pos, int componentPos, AtomicInteger currIterations, boolean isSecondPass) throws Exception {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
 		if(pos == component.size()) {
-			checkSolution(componentPos);
+			checkSolution(componentPos, isSecondPass);
 			return;
 		}
-		if((currIterations++) >= iterationLimit) {
-			return;
+		if(currIterations.incrementAndGet() >= iterationLimit.get()) {
+			throw new HitIterationLimitException("too many iterations");
 		}
 		final int i = component.get(pos).first;
 		final int j = component.get(pos).second;
@@ -253,14 +247,14 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		isBomb.get(i).set(j, true);
 		if(checkSurroundingConditions(i,j,component.get(pos),1)) {
 			updateSurroundingBombCnt(i,j,1);
-			solveComponent(pos+1, componentPos);
+			solveComponent(pos+1, componentPos, currIterations, isSecondPass);
 			updateSurroundingBombCnt(i,j,-1);
 		}
 
 		//try free
 		isBomb.get(i).set(j, false);
 		if(checkSurroundingConditions(i,j,component.get(pos),0)) {
-			solveComponent(pos + 1, componentPos);
+			solveComponent(pos + 1, componentPos, currIterations, isSecondPass);
 		}
 	}
 
@@ -315,7 +309,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return true;
 	}
 
-	private void checkSolution(int componentPos) throws Exception {
+	private void checkSolution(int componentPos, boolean isSecondPass) throws Exception {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
 		checkPositionValidity(component);
 

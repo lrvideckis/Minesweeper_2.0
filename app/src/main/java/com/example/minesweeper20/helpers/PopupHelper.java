@@ -11,6 +11,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
 import com.example.minesweeper20.R;
+import com.example.minesweeper20.view.GameCanvas;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -32,9 +33,11 @@ public class PopupHelper {
 
 	public static void displayPopup(PopupWindow popup, View parentView, Resources resources) {
 		if(parentView.getTag().equals(resources.getString(R.string.is_linear_layout))) {
-			System.out.println("here, linear layout");
 			LinearLayout linearLayout = (LinearLayout) parentView;
 			popup.showAtLocation(linearLayout, Gravity.CENTER,0,0);
+		} else if(parentView.getTag().equals(resources.getString(R.string.is_game_canvas_layout))) {
+			GameCanvas gameCanvasLayout = (GameCanvas) parentView;
+			popup.showAtLocation(gameCanvasLayout, Gravity.CENTER,0,0);
 		}
 	}
 }

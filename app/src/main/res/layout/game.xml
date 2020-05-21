@@ -4,6 +4,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:background="@color/white"
+	android:tag="@string/is_linear_layout"
 	android:orientation="vertical">
 
 	<LinearLayout
@@ -56,6 +57,7 @@
 	<com.example.minesweeper20.view.GameCanvas
 		android:id="@+id/gridCanvas"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"/>
+		android:layout_height="match_parent"
+		android:tag="@string/is_game_canvas_layout"/>
 
 </LinearLayout>

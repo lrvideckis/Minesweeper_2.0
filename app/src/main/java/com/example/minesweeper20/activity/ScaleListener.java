@@ -8,6 +8,7 @@ import android.view.View;
 
 import com.example.minesweeper20.view.GameCanvas;
 
+//TODO: bug: clicking no longer works after top nav bar height no longer uses canvas.get matrix
 public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
 
 

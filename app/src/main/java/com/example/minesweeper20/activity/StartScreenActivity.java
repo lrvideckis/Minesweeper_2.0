@@ -23,6 +23,8 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver
 //TODO: only draw part of canvas which screen can see
 //TODO: gauss elimination solver
+//TODO: make rows/cols/bombs be the same as the last played game
+//TODO: make sure back button on bottom nav bar works
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -70,7 +72,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 				Spinner gameType = newGamePopup.getContentView().findViewById(R.id.game_type);
 				String selectedGameType = gameType.getSelectedItem().toString();
 
-				StartScreenActivity.this.newGamePopup.dismiss();
+				newGamePopup.dismiss();
 
 				Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
 				intent.putExtra("numberOfRows", numberOfRows);

@@ -1,29 +1,26 @@
 package com.example.minesweeper20.activity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
+import com.example.minesweeper20.helpers.PopupHelper;
 import com.example.minesweeper20.view.GameCanvas;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn, toggleBombProbabilityOn, solverHasFailed;
+	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn, toggleBombProbabilityOn, solverHitIterationLimit;
 	private Integer numberOfRows, numberOfCols, numberOfBombs;
 	private String gameMode;
-	private PopupWindow popupWindow;
+	private PopupWindow solverHitLimitPopup;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -32,8 +29,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
 		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 1);
 		gameMode = getIntent().getStringExtra("gameMode");
-		solverHasFailed = false;
-		toggleBombsOn = toggleFlagModeOn = toggleHintsOn = false;
+		solverHitIterationLimit = false;
+		toggleBombsOn = toggleFlagModeOn = toggleHintsOn = toggleBombProbabilityOn = false;
 		setContentView(R.layout.game);
 		Button backToStartScreen = findViewById(R.id.backToStartScreen);
 		backToStartScreen.setOnClickListener(this);
@@ -79,9 +76,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void handleHintToggle(CompoundButton buttonView, boolean isChecked) {
-		if(solverHasFailed) {
+		if(solverHitIterationLimit) {
 			buttonView.setChecked(false);
-			popupWindow.showAtLocation(findViewById(R.id.gameLayout), Gravity.CENTER,0,0);
+			Switch bombProbability = findViewById(R.id.toggleBombProbability);
+			bombProbability.setChecked(false);
+			toggleBombProbabilityOn = false;
+			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 			return;
 		}
 		toggleHintsOn = isChecked;
@@ -109,36 +109,28 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void setUpIterationLimitPopup() {
-		final LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		assert inflater != null;
-		@SuppressLint("InflateParams") final View solverHitLimitPopup = inflater.inflate(R.layout.solver_hit_limit_popup,null);
-		popupWindow = new PopupWindow(
-				solverHitLimitPopup,
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT
-		);
-		popupWindow.setFocusable(true);
-		popupWindow.setElevation(5.0f);
-		Button okButton = solverHitLimitPopup.findViewById(R.id.solverHitLimitOkButton);
+		solverHitLimitPopup = PopupHelper.initializePopup(this, R.layout.solver_hit_limit_popup);
+		Button okButton = solverHitLimitPopup.getContentView().findViewById(R.id.solverHitLimitOkButton);
 		okButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				popupWindow.dismiss();
+				solverHitLimitPopup.dismiss();
 			}
 		});
 	}
 
-	public void solverHasJustFailed() {
+	public void solverHasJustHitIterationLimit() {
+		System.out.println("here, solver just failed");
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
 		if(!gameMode.equals(gameChoices[0])) {
 			onClick(findViewById(R.id.gameLayout));
 			return;
 		}
-		solverHasFailed = true;
+		solverHitIterationLimit = true;
 		Switch toggleHints = findViewById(R.id.toggleHints);
 		toggleHints.setChecked(false);
 		toggleHintsOn = false;
-		popupWindow.showAtLocation(findViewById(R.id.gameLayout), Gravity.CENTER,0,0);
+		PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 	}
 
 	public void updateNumberOfBombs(int numberOfBombsLeft) {
