@@ -8,8 +8,7 @@ import com.example.minesweeper20.helpers.GetConnectedComponents;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,7 +32,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final ArrayList<ArrayList<Boolean>> saveIsBomb;
 	//one hash-map for each component:
 	//for each component: we map the number of bombs to a configuration of bombs for that component
-	private final ArrayList<HashMap<Integer,ArrayList<Pair<Integer,Integer>>>> bombConfig;
+	private final ArrayList<HashSet<Integer>> bombConfig;
 	private Boolean needToCheckSpotCondition, wantBomb, foundBombConfiguration;
 	private Integer spotI, spotJ;
 
@@ -75,17 +74,17 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		initializeLastUnvisitedSpot(components);
 
 		for(int i = 0; i < components.size(); ++i) {
-			//TODO: make these not member variables
 			AtomicInteger currIterations = new AtomicInteger(0);
-			solveComponent(0, i, currIterations, false);
-			System.out.println("here, iterations: " + currIterations);
+			AtomicInteger currNumberOfBombs = new AtomicInteger(0);
+			solveComponent(0, i, currIterations, currNumberOfBombs, false);
 		}
 
 		removeBombNumbersFromComponent();
 
 		for(int i = 0; i < components.size(); ++i) {
 			AtomicInteger currIterations = new AtomicInteger(0);
-			solveComponent(0, i, currIterations, true);
+			AtomicInteger currNumberOfBombs = new AtomicInteger(0);
+			solveComponent(0, i, currIterations, currNumberOfBombs, true);
 		}
 
 		for(int i = 0; i < rows; ++i) {
@@ -111,9 +110,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		dpTable.get(0).add(0);
 		for(int i = 0; i < components.size(); ++i) {
-			for(Map.Entry<Integer,ArrayList<Pair<Integer,Integer>>> entry : bombConfig.get(i).entrySet()) {
+			for(Integer entry : bombConfig.get(i)) {
 				for(Integer val : dpTable.get(i)) {
-					dpTable.get(i+1).add(val + entry.getKey());
+					dpTable.get(i+1).add(val + entry);
 				}
 			}
 		}
@@ -128,16 +127,16 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		for(int i = components.size()-1; i >= 0; --i) {
 			TreeSet<Integer> spotsToRemove = new TreeSet<>();
-			for(Map.Entry<Integer,ArrayList<Pair<Integer,Integer>>> entry : bombConfig.get(i).entrySet()) {
+			for(Integer entry : bombConfig.get(i)) {
 				boolean found = false;
 				for(int val : dpTable.get(i)) {
-					if(dpTable.get(i+1).contains(val + entry.getKey())) {
+					if(dpTable.get(i+1).contains(val + entry)) {
 						found = true;
 						break;
 					}
 				}
 				if(!found) {
-					spotsToRemove.add(entry.getKey());
+					spotsToRemove.add(entry);
 				}
 			}
 			for(int val : spotsToRemove) {
@@ -147,8 +146,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			spotsToRemove.clear();
 			for(int val : dpTable.get(i)) {
 				boolean found = false;
-				for(Map.Entry<Integer, ArrayList<Pair<Integer, Integer>>> entry : bombConfig.get(i).entrySet()) {
-					if(dpTable.get(i+1).contains(val + entry.getKey())) {
+				for(Integer entry : bombConfig.get(i)) {
+					if(dpTable.get(i+1).contains(val + entry)) {
 						found = true;
 						break;
 					}
@@ -184,7 +183,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				}
 			}
 			AtomicInteger currIterations = new AtomicInteger(0);
-			solveComponent(0, i, currIterations, false);
+			AtomicInteger currNumberOfBombs = new AtomicInteger(0);
+			solveComponent(0, i, currIterations, currNumberOfBombs, false);
 		}
 		return (foundBombConfiguration ? saveIsBomb : null);
 	}
@@ -208,7 +208,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private void initializeLastUnvisitedSpot(ArrayList<ArrayList<Pair<Integer,Integer>>> components) {
 		bombConfig.clear();
 		for(ArrayList<Pair<Integer,Integer>> component : components) {
-			bombConfig.add(new HashMap<Integer, ArrayList<Pair<Integer, Integer>>>());
+			bombConfig.add(new HashSet<Integer>());
 			for (Pair<Integer, Integer> spot : component) {
 				for (int di = -1; di <= 1; ++di) {
 					for (int dj = -1; dj <= 1; ++dj) {
@@ -230,10 +230,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	//TODO: only re-run component solve if the component has changed
-	private void solveComponent(int pos, int componentPos, AtomicInteger currIterations, boolean isSecondPass) throws Exception {
+	private void solveComponent(int pos, int componentPos, AtomicInteger currIterations, AtomicInteger currNumberOfBombs, boolean isSecondPass) throws Exception {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
 		if(pos == component.size()) {
-			checkSolution(componentPos, isSecondPass);
+			checkSolution(componentPos, currNumberOfBombs.get(), isSecondPass);
 			return;
 		}
 		if(currIterations.incrementAndGet() >= iterationLimit.get()) {
@@ -245,15 +245,17 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		//try bomb
 		isBomb.get(i).set(j, true);
 		if(checkSurroundingConditions(i,j,component.get(pos),1)) {
+			currNumberOfBombs.incrementAndGet();
 			updateSurroundingBombCnt(i,j,1);
-			solveComponent(pos+1, componentPos, currIterations, isSecondPass);
+			solveComponent(pos+1, componentPos, currIterations, currNumberOfBombs, isSecondPass);
 			updateSurroundingBombCnt(i,j,-1);
+			currNumberOfBombs.decrementAndGet();
 		}
 
 		//try free
 		isBomb.get(i).set(j, false);
 		if(checkSurroundingConditions(i,j,component.get(pos),0)) {
-			solveComponent(pos + 1, componentPos, currIterations, isSecondPass);
+			solveComponent(pos + 1, componentPos, currIterations, currNumberOfBombs, isSecondPass);
 		}
 	}
 
@@ -308,25 +310,15 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return true;
 	}
 
-	private void checkSolution(int componentPos, boolean isSecondPass) throws Exception {
+	private void checkSolution(int componentPos, int currNumberOfBombs, boolean isSecondPass) throws Exception {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
-		checkPositionValidity(component);
-
-		//TODO: keep a running total of bombs instead of doing this
-		int currNumberOfBombs = 0;
-		for(int pos = 0; pos < component.size(); ++pos) {
-			final int i = component.get(pos).first;
-			final int j = component.get(pos).second;
-			if(isBomb.get(i).get(j)) {
-				++currNumberOfBombs;
-			}
-		}
-
-		if(isSecondPass && !bombConfig.get(componentPos).containsKey(currNumberOfBombs)) {
-			return;
-		}
+		//TODO: remove this extra computation once there is sufficient testing
+		checkPositionValidity(component, currNumberOfBombs);
 
 		if(isSecondPass) {
+			if(!bombConfig.get(componentPos).contains(currNumberOfBombs)) {
+				return;
+			}
 			for (int pos = 0; pos < component.size(); ++pos) {
 				final int i = component.get(pos).first;
 				final int j = component.get(pos).second;
@@ -335,23 +327,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				}
 				++board.get(i).get(j).numberOfTotalConfigs;
 			}
-		}
-
-		if(isSecondPass) {
 			return;
 		}
 
-		if(!bombConfig.get(componentPos).containsKey(currNumberOfBombs)) {
-			ArrayList<Pair<Integer,Integer>> currBombConfig = new ArrayList<>();
-			for(int pos = 0; pos < component.size(); ++pos) {
-				final int i = component.get(pos).first;
-				final int j = component.get(pos).second;
-				if(isBomb.get(i).get(j)) {
-					currBombConfig.add(component.get(pos));
-				}
-			}
-			bombConfig.get(componentPos).put(currNumberOfBombs, currBombConfig);
-		}
+		bombConfig.get(componentPos).add(currNumberOfBombs);
 
 		if(!needToCheckSpotCondition || isBomb.get(spotI).get(spotJ) == wantBomb) {
 			if(needToCheckSpotCondition) {
@@ -365,7 +344,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	private void checkPositionValidity(ArrayList<Pair<Integer,Integer>> component) throws Exception {
+	private void checkPositionValidity(ArrayList<Pair<Integer,Integer>> component, int currNumberOfBombs) throws Exception {
 		for(int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
@@ -388,6 +367,17 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					}
 				}
 			}
+		}
+		int prevNumberOfBombs = 0;
+		for(int pos = 0; pos < component.size(); ++pos) {
+			final int i = component.get(pos).first;
+			final int j = component.get(pos).second;
+			if(isBomb.get(i).get(j)) {
+				++prevNumberOfBombs;
+			}
+		}
+		if(prevNumberOfBombs != currNumberOfBombs) {
+			throw new Exception("number of bombs doesn't match");
 		}
 	}
 
