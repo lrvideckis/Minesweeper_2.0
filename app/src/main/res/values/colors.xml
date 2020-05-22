@@ -18,4 +18,10 @@
 	<color name="six">#009999</color>
 	<color name="seven">#000000</color>
 	<color name="eight">#808080</color>
+
+	<color name="lowerTriangleColor">#666666</color>
+	<color name="upperTriangleColor">#f2f2f2</color>
+	<color name="middleSquareColor">#b3b3b3</color>
+
+	<color name="backGroundGreyBlankVisibleCell">#cccccc</color>
 </resources>

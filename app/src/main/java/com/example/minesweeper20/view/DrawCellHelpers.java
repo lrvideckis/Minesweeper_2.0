@@ -18,7 +18,7 @@ import java.util.ArrayList;
 class DrawCellHelpers {
 	private final Integer cellPixelLength = 150;
 	private final Paint
-			backgroundGray = new Paint(),
+			backgroundGrey = new Paint(),
 			lowerTriangle = new Paint(),
 			upperTriangle = new Paint(),
 			middleSquare = new Paint(),
@@ -33,19 +33,19 @@ class DrawCellHelpers {
 		black.setColor(Color.BLACK);
 		black.setTextSize(cellPixelLength / 3f);
 
-		backgroundGray.setStyle(Paint.Style.FILL);
-		backgroundGray.setColor(Color.parseColor("#cccccc"));
-		backgroundGray.setStyle(Paint.Style.FILL);
+		backgroundGrey.setStyle(Paint.Style.FILL);
+		backgroundGrey.setColor(ContextCompat.getColor(context, R.color.backGroundGreyBlankVisibleCell));
+		backgroundGrey.setStyle(Paint.Style.FILL);
 
-		lowerTriangle.setColor(Color.parseColor("#666666"));
+		lowerTriangle.setColor(ContextCompat.getColor(context, R.color.lowerTriangleColor));
 		lowerTriangle.setStyle(Paint.Style.FILL_AND_STROKE);
 		lowerTriangle.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
 
-		upperTriangle.setColor(Color.parseColor("#f2f2f2"));
+		upperTriangle.setColor(ContextCompat.getColor(context, R.color.upperTriangleColor));
 		upperTriangle.setStyle(Paint.Style.FILL_AND_STROKE);
 		upperTriangle.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
 
-		middleSquare.setColor(Color.parseColor("#b3b3b3"));
+		middleSquare.setColor(ContextCompat.getColor(context, R.color.middleSquareColor));
 		middleSquare.setStyle(Paint.Style.FILL_AND_STROKE);
 		middleSquare.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
 
@@ -130,7 +130,7 @@ class DrawCellHelpers {
 
 	void drawNumberedCell(Canvas canvas, Integer numberSurroundingBombs, int startX, int startY) {
 		Rect background = new Rect(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
-		canvas.drawRect(background, backgroundGray);
+		canvas.drawRect(background, backgroundGrey);
 		if(numberSurroundingBombs > 0) {
 			final int xPos = startX + cellPixelLength / 2;
 			final int yPos = (int) (startY + cellPixelLength / 2 - ((numberColors[numberSurroundingBombs].descent() + numberColors[numberSurroundingBombs].ascent()) / 2)) ;
