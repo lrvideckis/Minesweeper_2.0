@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -173,22 +172,23 @@ public class GameCanvas extends View {
 	}
 
 	private boolean cellIsOffScreen(int startX, int startY) {
-		RectF r = new RectF();
-		r.set(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
 		final float topNavBarHeight = getTop() + getStatusBarHeight();
-		canvasTransitionScale.invert(scaleListener.getMatrix());
-		canvasTransitionScale.mapRect(r);
+		final float absoluteX = scaleListener.getAbsoluteX();
+		final float absoluteY = scaleListener.getAbsoluteY();
+		final float scale = scaleListener.getScale();
+		final float halfOfScreenWidth = scaleListener.getHalfOfScreenWidth();
+		final float halfOfScreenHeight = scaleListener.getHalfOfScreenHeight();
 
-		if(r.right < 0) {
+		if((startX + cellPixelLength + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth < 0) {
 			return true;
 		}
-		if(r.bottom - topNavBarHeight < 0) {
+		if((startY + cellPixelLength + topNavBarHeight + absoluteY - halfOfScreenHeight) * scale + halfOfScreenHeight - topNavBarHeight < 0) {
 			return true;
 		}
-		if(r.left > getWidth()) {
+		if((startX + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth > getWidth()) {
 			return true;
 		}
-		return (r.top - topNavBarHeight > getHeight());
+		return ((startY + absoluteY + topNavBarHeight - halfOfScreenHeight) * scale + halfOfScreenHeight - topNavBarHeight > getHeight());
 	}
 
 	@Override

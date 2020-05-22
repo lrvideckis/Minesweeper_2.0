@@ -45,7 +45,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	@Override
 	public boolean onScale(ScaleGestureDetector detector) {
 		scale = scale * detector.getScaleFactor();
-		scale = Math.max(0.1f, Math.min(scale, 1.8f));
+		scale = Math.max(0.1f, Math.min(scale, 3.3f));
 		System.out.println("scale: " + scale);
 		absoluteX += (detector.getFocusX() - prevFocusX) / scale;
 		absoluteY += (detector.getFocusY() - prevFocusY) / scale;
@@ -120,6 +120,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		}
 		if(!checkIfTap(event)) {
 			matrix.setTranslate(absoluteX, absoluteY);
+			System.out.println("ScaleListener half screen width, height: " + halfScreenWidth + " " + halfScreenHeight);
 			matrix.postScale(scale, scale, halfScreenWidth, halfScreenHeight);
 			gameCanvas.invalidate();
 		}
@@ -128,5 +129,25 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 	public Matrix getMatrix() {
 		return matrix;
+	}
+
+	public float getAbsoluteX() {
+		return absoluteX;
+	}
+
+	public float getAbsoluteY() {
+		return absoluteY;
+	}
+
+	public float getScale() {
+		return scale;
+	}
+
+	public float getHalfOfScreenWidth() {
+		return halfScreenWidth;
+	}
+
+	public float getHalfOfScreenHeight() {
+		return halfScreenHeight;
 	}
 }
