@@ -28,9 +28,9 @@ class DrawCellHelpers {
 	private ArrayList<ArrayList<ArrayList<Path>>> trianglePaths;
 	private ArrayList<ArrayList<Rect>> middleSquareRectangles, backgroundRectangles;
 	private final Paint[] numberColors;
-	private String
-			flagEmoji = new String(Character.toChars(0x1F6A9)),
-			bombEmoji = new String(Character.toChars(0x1F4A3));
+	private final String
+			flagSymbol = new String(Character.toChars(0x1F6A9)),
+			bombSymbol = new String(Character.toChars(0x1F4A3));
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
@@ -150,13 +150,13 @@ class DrawCellHelpers {
 	void drawFlag(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
 		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
-		canvas.drawText(flagEmoji, xPos, yPos, redFlag);
+		canvas.drawText(flagSymbol, xPos, yPos, redFlag);
 	}
 
 	void drawBomb(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
 		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
-		canvas.drawText(bombEmoji, xPos, yPos, redFlag);
+		canvas.drawText(bombSymbol, xPos, yPos, redFlag);
 	}
 
 	//TODO: make this look better

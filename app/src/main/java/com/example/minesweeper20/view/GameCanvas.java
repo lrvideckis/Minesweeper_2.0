@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -125,6 +126,12 @@ public class GameCanvas extends View {
 	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, Boolean awayCell) throws Exception {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
+
+		if(cellIsOffScreen(startX, startY)) {
+			System.out.println("not drawing cell " + i + " " + j);
+			return;
+		}
+
 		if(gameCell.getIsVisible()) {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), i, j);
 			return;
@@ -163,6 +170,25 @@ public class GameCanvas extends View {
 				}
 			}
 		}
+	}
+
+	private boolean cellIsOffScreen(int startX, int startY) {
+		RectF r = new RectF();
+		r.set(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
+		final float topNavBarHeight = getTop() + getStatusBarHeight();
+		canvasTransitionScale.invert(scaleListener.getMatrix());
+		canvasTransitionScale.mapRect(r);
+
+		if(r.right < 0) {
+			return true;
+		}
+		if(r.bottom - topNavBarHeight < 0) {
+			return true;
+		}
+		if(r.left > getWidth()) {
+			return true;
+		}
+		return (r.top - topNavBarHeight > getHeight());
 	}
 
 	@Override
