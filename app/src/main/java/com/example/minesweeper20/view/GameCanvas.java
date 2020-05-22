@@ -10,16 +10,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.PopupWindow;
 
+import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
 import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.PopupHelper;
-import com.example.minesweeper20.HitIterationLimitException;
+import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
-import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class GameCanvas extends View {
 				gameActivity.getNumberOfRows(),
 				gameActivity.getNumberOfCols(),
 				gameActivity.getNumberOfBombs());
-		drawCellHelpers = new DrawCellHelpers(context);
+		drawCellHelpers = new DrawCellHelpers(context, gameActivity.getNumberOfRows(), gameActivity.getNumberOfCols());
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 		backtrackingSolver = new BacktrackingSolver(
 				minesweeperGame.getNumberOfRows(),
@@ -122,12 +122,14 @@ public class GameCanvas extends View {
 		}
 	}
 
-	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int startX, int startY, Boolean awayCell) throws Exception {
+	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, Boolean awayCell) throws Exception {
+		final int startX = j * cellPixelLength;
+		final int startY = i * cellPixelLength;
 		if(gameCell.getIsVisible()) {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), startX, startY);
 			return;
 		}
-		drawCellHelpers.drawBlankCell(canvas, startX, startY);
+		drawCellHelpers.drawBlankCell(canvas, i, j);
 
 		GameActivity gameActivity = (GameActivity) getContext();
 
@@ -177,7 +179,7 @@ public class GameCanvas extends View {
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				try {
-					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), j * cellPixelLength, i * cellPixelLength, GetConnectedComponents.isAwayCell(board, i, j));
+					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), i, j, GetConnectedComponents.isAwayCell(board, i, j));
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);

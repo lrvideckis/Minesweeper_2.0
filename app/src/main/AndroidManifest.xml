@@ -10,6 +10,7 @@
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme"
 		android:fullBackupContent="true">
+		<!--android:hardwareAccelerated="true"-->
 		<activity android:name=".activity.StartScreenActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
