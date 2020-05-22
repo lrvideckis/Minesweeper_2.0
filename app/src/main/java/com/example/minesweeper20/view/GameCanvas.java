@@ -126,7 +126,7 @@ public class GameCanvas extends View {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
 		if(gameCell.getIsVisible()) {
-			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), startX, startY);
+			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), i, j);
 			return;
 		}
 		drawCellHelpers.drawBlankCell(canvas, i, j);

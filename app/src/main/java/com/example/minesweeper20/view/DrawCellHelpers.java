@@ -18,7 +18,7 @@ import java.util.ArrayList;
 class DrawCellHelpers {
 	private final Integer cellPixelLength = 150;
 	private final Paint
-			backgroundGrey = new Paint(),
+			backgroundGreyForVisibleCells = new Paint(),
 			lowerTriangle = new Paint(),
 			upperTriangle = new Paint(),
 			middleSquare = new Paint(),
@@ -26,16 +26,19 @@ class DrawCellHelpers {
 			black = new Paint(),
 			redX = new Paint();
 	private ArrayList<ArrayList<ArrayList<Path>>> trianglePaths;
-	private ArrayList<ArrayList<Rect>> middleSquareRectangles;
+	private ArrayList<ArrayList<Rect>> middleSquareRectangles, backgroundRectangles;
 	private final Paint[] numberColors;
+	private String
+			flagEmoji = new String(Character.toChars(0x1F6A9)),
+			bombEmoji = new String(Character.toChars(0x1F4A3));
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
 		black.setTextSize(cellPixelLength / 3f);
 
-		backgroundGrey.setStyle(Paint.Style.FILL);
-		backgroundGrey.setColor(ContextCompat.getColor(context, R.color.backGroundGreyBlankVisibleCell));
-		backgroundGrey.setStyle(Paint.Style.FILL);
+		backgroundGreyForVisibleCells.setStyle(Paint.Style.FILL);
+		backgroundGreyForVisibleCells.setColor(ContextCompat.getColor(context, R.color.backGroundGreyBlankVisibleCell));
+		backgroundGreyForVisibleCells.setStyle(Paint.Style.FILL);
 
 		lowerTriangle.setColor(ContextCompat.getColor(context, R.color.lowerTriangleColor));
 		lowerTriangle.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -80,9 +83,10 @@ class DrawCellHelpers {
 	private void initializeTrianglesAndRectangles(int rows, int cols) {
 		trianglePaths = new ArrayList<>(rows);
 		middleSquareRectangles = new ArrayList<>(rows);
+		backgroundRectangles = new ArrayList<>(rows);
 		for(int i = 0; i < rows; ++i) {
 			ArrayList<ArrayList<Path>> currTriangleRow = new ArrayList<>(cols);
-			ArrayList<Rect> currRectRow = new ArrayList<>(cols);
+			ArrayList<Rect> currRectRow = new ArrayList<>(cols), currBackgroundRow = new ArrayList<>(cols);
 			for(int j = 0; j < cols; ++j) {
 				final int startX = j * cellPixelLength;
 				final int startY = i * cellPixelLength;
@@ -111,14 +115,18 @@ class DrawCellHelpers {
 						startX + cellPixelLength*12/100,
 						startY + cellPixelLength*12/100);
 
+				Rect currBackground = new Rect(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
+
 				currSpot.add(lowerTrianglePath);
 				currSpot.add(upperTrianglePath);
 
 				currTriangleRow.add(currSpot);
 				currRectRow.add(middleSquare);
+				currBackgroundRow.add(currBackground);
 			}
 			trianglePaths.add(currTriangleRow);
 			middleSquareRectangles.add(currRectRow);
+			backgroundRectangles.add(currBackgroundRow);
 		}
 	}
 
@@ -128,9 +136,10 @@ class DrawCellHelpers {
 		canvas.drawRect(middleSquareRectangles.get(i).get(j), middleSquare);
 	}
 
-	void drawNumberedCell(Canvas canvas, Integer numberSurroundingBombs, int startX, int startY) {
-		Rect background = new Rect(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
-		canvas.drawRect(background, backgroundGrey);
+	void drawNumberedCell(Canvas canvas, Integer numberSurroundingBombs, int i, int j) {
+		final int startX = j * cellPixelLength;
+		final int startY = i * cellPixelLength;
+		canvas.drawRect(backgroundRectangles.get(i).get(j), backgroundGreyForVisibleCells);
 		if(numberSurroundingBombs > 0) {
 			final int xPos = startX + cellPixelLength / 2;
 			final int yPos = (int) (startY + cellPixelLength / 2 - ((numberColors[numberSurroundingBombs].descent() + numberColors[numberSurroundingBombs].ascent()) / 2)) ;
@@ -141,13 +150,13 @@ class DrawCellHelpers {
 	void drawFlag(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
 		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
-		canvas.drawText(new String(Character.toChars(0x1F6A9)), xPos, yPos, redFlag);
+		canvas.drawText(flagEmoji, xPos, yPos, redFlag);
 	}
 
 	void drawBomb(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
 		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
-		canvas.drawText(new String(Character.toChars(0x1F4A3)), xPos, yPos, redFlag);
+		canvas.drawText(bombEmoji, xPos, yPos, redFlag);
 	}
 
 	//TODO: make this look better
