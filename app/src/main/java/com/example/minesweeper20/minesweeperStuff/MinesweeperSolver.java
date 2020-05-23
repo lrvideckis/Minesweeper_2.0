@@ -5,7 +5,6 @@ import java.util.ArrayList;
 public interface MinesweeperSolver {
 	class VisibleTile {
 		Boolean isVisible, isLogicalBomb, isLogicalFree;
-		//TODO: make bomb config a Fraction
 		Integer numberSurroundingBombs, numberOfBombConfigs, numberOfTotalConfigs;
 		public VisibleTile() {
 			reset();

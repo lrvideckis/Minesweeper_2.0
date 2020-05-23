@@ -112,8 +112,11 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					board.get(i).get(j).numberOfTotalConfigs = awayBombProbability.getDenominator();
 				}
 				VisibleTile curr = board.get(i).get(j);
-				if(curr.numberOfTotalConfigs == 0) {
+				if(curr.getIsVisible()) {
 					continue;
+				}
+				if(curr.numberOfTotalConfigs == 0) {
+					throw new Exception("There should be at least one bomb configuration for non-visible cells");
 				}
 				if(curr.numberOfBombConfigs == 0) {
 					curr.isLogicalFree = true;

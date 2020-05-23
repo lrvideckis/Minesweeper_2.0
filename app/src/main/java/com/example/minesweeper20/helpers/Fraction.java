@@ -25,20 +25,20 @@ public class Fraction {
 		final int prevDenominator = denominator;
 		numerator = prevNumerator * delta.getDenominator() + prevDenominator * delta.getNumerator();
 		denominator = prevDenominator * delta.getDenominator();
-		reduce();
 	}
 
 	public void multiplyWith(Fraction quotient) throws Exception {
 		numerator *= quotient.getNumerator();
 		denominator *= quotient.getDenominator();
-		reduce();
 	}
 
-	public Integer getNumerator() {
+	public int getNumerator() throws Exception {
+		reduce();
 		return numerator;
 	}
 
-	public Integer getDenominator() {
+	public int getDenominator() throws Exception {
+		reduce();
 		return denominator;
 	}
 
