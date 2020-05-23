@@ -301,7 +301,11 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private void solveComponent(int pos, int componentPos, MutableInt currIterations, MutableInt currNumberOfBombs, boolean isSecondPass) throws Exception {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
 		if(pos == component.size()) {
-			checkSolution(componentPos, currNumberOfBombs.get(), isSecondPass);
+			if(isSecondPass) {
+				checkSolutionSecondPass(componentPos, currNumberOfBombs.get());
+			} else {
+				checkSolutionFirstPass(componentPos, currNumberOfBombs.get());
+			}
 			return;
 		}
 		currIterations.addWith(1);
@@ -379,26 +383,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return true;
 	}
 
-	//TODO: split this into 2 functions: one for first pass, one for second pass
-	private void checkSolution(int componentPos, int currNumberOfBombs, boolean isSecondPass) throws Exception {
+	private void checkSolutionFirstPass(int componentPos, int currNumberOfBombs) throws Exception {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
 		//TODO: remove this extra computation once there is sufficient testing
 		checkPositionValidity(component, currNumberOfBombs);
-
-		if(isSecondPass) {
-			if(!bombConfig.get(componentPos).containsKey(currNumberOfBombs)) {
-				return;
-			}
-			for (int pos = 0; pos < component.size(); ++pos) {
-				final int i = component.get(pos).first;
-				final int j = component.get(pos).second;
-				if (isBomb.get(i).get(j)) {
-					++board.get(i).get(j).numberOfBombConfigs;
-				}
-				++board.get(i).get(j).numberOfTotalConfigs;
-			}
-			return;
-		}
 
 		MutableInt count = bombConfig.get(componentPos).get(currNumberOfBombs);
 		if(count == null) {
@@ -416,6 +404,23 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				final int j = component.get(pos).second;
 				saveIsBomb.get(i).set(j, isBomb.get(i).get(j));
 			}
+		}
+	}
+	private void checkSolutionSecondPass(int componentPos, int currNumberOfBombs) throws Exception {
+		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
+		//TODO: remove this extra computation once there is sufficient testing
+		checkPositionValidity(component, currNumberOfBombs);
+
+		if(!bombConfig.get(componentPos).containsKey(currNumberOfBombs)) {
+			return;
+		}
+		for (int pos = 0; pos < component.size(); ++pos) {
+			final int i = component.get(pos).first;
+			final int j = component.get(pos).second;
+			if (isBomb.get(i).get(j)) {
+				++board.get(i).get(j).numberOfBombConfigs;
+			}
+			++board.get(i).get(j).numberOfTotalConfigs;
 		}
 	}
 

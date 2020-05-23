@@ -15,7 +15,6 @@ import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
 import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
-import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.PopupHelper;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
@@ -123,7 +122,7 @@ public class GameCanvas extends View {
 	}
 
 	//TODO: don't re-run solver on flag mode click
-	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, Boolean awayCell) throws Exception {
+	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j) throws Exception {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
 
@@ -164,7 +163,6 @@ public class GameCanvas extends View {
 			} else if(gameActivity.getToggleBombProbabilityOn()) {
 				if(!solverCell.getIsVisible()) {
 					//TODO: use fraction class here
-					System.out.println("here, i,j: " + i + " " + j);
 					final int numerator = solverCell.getNumberOfBombConfigs();
 					final int denominator = solverCell.getNumberOfTotalConfigs();
 					final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
@@ -208,7 +206,7 @@ public class GameCanvas extends View {
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				try {
-					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), i, j, GetConnectedComponents.isAwayCell(board, i, j));
+					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), i, j);
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);
