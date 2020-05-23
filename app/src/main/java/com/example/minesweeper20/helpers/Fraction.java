@@ -12,7 +12,7 @@ public class Fraction {
 		setValues(_numerator, _denominator);
 	}
 
-	private void setValues(int _numerator, int _denominator) throws Exception {
+	public void setValues(int _numerator, int _denominator) throws Exception {
 		numerator = _numerator;
 		denominator = _denominator;
 		if(denominator == 0) {

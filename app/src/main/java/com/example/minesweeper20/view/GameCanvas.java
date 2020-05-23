@@ -15,12 +15,12 @@ import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
 import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
+import com.example.minesweeper20.helpers.Fraction;
 import com.example.minesweeper20.helpers.PopupHelper;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 
 public class GameCanvas extends View {
@@ -34,8 +34,9 @@ public class GameCanvas extends View {
 	private final ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
 	private final MinesweeperSolver backtrackingSolver;
 	private final DrawCellHelpers drawCellHelpers;
+	private final Fraction bombProbability = new Fraction(0);
 
-	public GameCanvas(Context context, AttributeSet attrs) {
+	public GameCanvas(Context context, AttributeSet attrs) throws Exception {
 		super(context, attrs);
 		black.setColor(Color.BLACK);
 		black.setStrokeWidth(3);
@@ -162,11 +163,8 @@ public class GameCanvas extends View {
 				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
 			} else if(gameActivity.getToggleBombProbabilityOn()) {
 				if(!solverCell.getIsVisible()) {
-					//TODO: use fraction class here
-					final int numerator = solverCell.getNumberOfBombConfigs();
-					final int denominator = solverCell.getNumberOfTotalConfigs();
-					final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
-					drawCellHelpers.drawBombProbability(canvas, startX, startY, numerator/gcd, denominator/gcd);
+					bombProbability.setValues(solverCell.getNumberOfBombConfigs(), solverCell.getNumberOfTotalConfigs());
+					drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability);
 				}
 			}
 		}

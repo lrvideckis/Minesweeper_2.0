@@ -12,6 +12,7 @@ import android.graphics.Typeface;
 import androidx.core.content.ContextCompat;
 
 import com.example.minesweeper20.R;
+import com.example.minesweeper20.helpers.Fraction;
 
 import java.util.ArrayList;
 
@@ -175,7 +176,7 @@ class DrawCellHelpers {
 	}
 
 	//TODO: if text is too long, this will draw over into the next cell
-	void drawBombProbability(Canvas canvas, int startX, int startY, int numerator, int denominator) {
-		canvas.drawText(numerator + "/" + denominator, startX, startY+cellPixelLength/3f, black);
+	void drawBombProbability(Canvas canvas, int startX, int startY, Fraction probability) throws Exception {
+		canvas.drawText(probability.getNumerator() + "/" + probability.getDenominator(), startX, startY+cellPixelLength/3f, black);
 	}
 }
