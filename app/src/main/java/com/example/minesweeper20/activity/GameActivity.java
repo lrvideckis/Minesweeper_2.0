@@ -139,7 +139,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	public void solverHasJustHitIterationLimit() {
-		System.out.println("here, solver just failed");
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
 		if(!gameMode.equals(gameChoices[0])) {
 			onClick(findViewById(R.id.gameLayout));

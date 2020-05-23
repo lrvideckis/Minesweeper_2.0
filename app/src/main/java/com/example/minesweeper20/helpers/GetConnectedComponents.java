@@ -83,24 +83,7 @@ public class GetConnectedComponents {
 				if (currTile.getIsVisible()) {
 					continue;
 				}
-				boolean foundAdjVis = false;
-				for(int di = -1; di <= 1 && !foundAdjVis; ++di) {
-					for(int dj = -1; dj <= 1; ++dj) {
-						if(di == 0 && dj == 0) {
-							continue;
-						}
-						final int adjI = i + di;
-						final int adjJ = j + dj;
-						if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
-							continue;
-						}
-						if(board.get(adjI).get(adjJ).getIsVisible()) {
-							foundAdjVis = true;
-							break;
-						}
-					}
-				}
-				if (foundAdjVis) {
+				if(!isAwayCell(board, i, j)) {
 					tempComponents.get(disjointSet.find(getNode(i, j))).add(new Pair<>(i, j));
 				}
 			}
@@ -145,6 +128,20 @@ public class GetConnectedComponents {
 					continue;
 				}
 				if(board.get(adjI).get(adjJ).getIsVisible()) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public static Boolean allCellsAreHidden(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board) throws Exception {
+		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
+		rows = dimensions.first;
+		cols = dimensions.second;
+		for(int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if(board.get(i).get(j).getIsVisible()) {
 					return false;
 				}
 			}

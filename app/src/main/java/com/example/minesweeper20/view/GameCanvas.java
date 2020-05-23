@@ -122,12 +122,13 @@ public class GameCanvas extends View {
 		}
 	}
 
+	//TODO: don't re-run solver on flag mode click
 	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, Boolean awayCell) throws Exception {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
 
+		//it seems this is making it more laggy
 		if(cellIsOffScreen(startX, startY)) {
-			System.out.println("not drawing cell " + i + " " + j);
 			return;
 		}
 
@@ -161,7 +162,9 @@ public class GameCanvas extends View {
 				}
 				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
 			} else if(gameActivity.getToggleBombProbabilityOn()) {
-				if(!awayCell) {
+				if(!solverCell.getIsVisible()) {
+					//TODO: use fraction class here
+					System.out.println("here, i,j: " + i + " " + j);
 					final int numerator = solverCell.getNumberOfBombConfigs();
 					final int denominator = solverCell.getNumberOfTotalConfigs();
 					final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
@@ -228,7 +231,7 @@ public class GameCanvas extends View {
 	private int getStatusBarHeight() {
 		int statusBarHeight = 0;
 		int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-		if (resourceId > 0) {
+		if(resourceId > 0) {
 			statusBarHeight = getResources().getDimensionPixelSize(resourceId);
 		}
 		return statusBarHeight;

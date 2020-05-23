@@ -1,0 +1,53 @@
+package com.example.minesweeper20.helpers;
+
+import java.math.BigInteger;
+
+public class Fraction {
+	private int numerator, denominator;
+	public Fraction(int value) throws Exception {
+		setValues(value, 1);
+	}
+
+	public Fraction(int _numerator, int _denominator) throws Exception {
+		setValues(_numerator, _denominator);
+	}
+
+	private void setValues(int _numerator, int _denominator) throws Exception {
+		numerator = _numerator;
+		denominator = _denominator;
+		if(denominator == 0) {
+			throw new Exception("fraction with 0 as denominator");
+		}
+	}
+
+	public void addWith(Fraction delta) throws Exception {
+		final int prevNumerator = numerator;
+		final int prevDenominator = denominator;
+		numerator = prevNumerator * delta.getDenominator() + prevDenominator * delta.getNumerator();
+		denominator = prevDenominator * delta.getDenominator();
+		reduce();
+	}
+
+	public void multiplyWith(Fraction quotient) throws Exception {
+		numerator *= quotient.getNumerator();
+		denominator *= quotient.getDenominator();
+		reduce();
+	}
+
+	public Integer getNumerator() {
+		return numerator;
+	}
+
+	public Integer getDenominator() {
+		return denominator;
+	}
+
+	private void reduce() throws Exception {
+		final int gcd = BigInteger.valueOf(numerator).gcd(BigInteger.valueOf(denominator)).intValue();
+		numerator /= gcd;
+		denominator /= gcd;
+		if(denominator == 0) {
+			throw new Exception("fraction with 0 as denominator");
+		}
+	}
+}
