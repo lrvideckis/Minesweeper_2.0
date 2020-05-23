@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO: also break out early the moment we find a (conditioned) solution
 //TODO: split components by cells we know: like if we know these 4 cells in a row, then we can split it into 2 components
@@ -23,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
-	private final static AtomicInteger iterationLimit = new AtomicInteger(20000);
+	private final static Integer iterationLimit = 20000;
 
 	private final ArrayList<ArrayList<Boolean>> isBomb;
 	private final ArrayList<ArrayList<Integer>> cntSurroundingBombs;
@@ -88,9 +87,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 
 		for(int i = 0; i < components.size(); ++i) {
-			//TODO: change this to MutableInt
-			AtomicInteger currIterations = new AtomicInteger(0);
-			AtomicInteger currNumberOfBombs = new AtomicInteger(0);
+			MutableInt currIterations = new MutableInt(0);
+			MutableInt currNumberOfBombs = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfBombs, false);
 		}
 
@@ -101,8 +99,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 
 		for(int i = 0; i < components.size(); ++i) {
-			AtomicInteger currIterations = new AtomicInteger(0);
-			AtomicInteger currNumberOfBombs = new AtomicInteger(0);
+			MutableInt currIterations = new MutableInt(0);
+			MutableInt currNumberOfBombs = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfBombs, true);
 		}
 
@@ -252,8 +250,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					break;
 				}
 			}
-			AtomicInteger currIterations = new AtomicInteger(0);
-			AtomicInteger currNumberOfBombs = new AtomicInteger(0);
+			MutableInt currIterations = new MutableInt(0);
+			MutableInt currNumberOfBombs = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfBombs, false);
 		}
 		return (foundBombConfiguration ? saveIsBomb : null);
@@ -300,13 +298,14 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	//TODO: only re-run component solve if the component has changed
-	private void solveComponent(int pos, int componentPos, AtomicInteger currIterations, AtomicInteger currNumberOfBombs, boolean isSecondPass) throws Exception {
+	private void solveComponent(int pos, int componentPos, MutableInt currIterations, MutableInt currNumberOfBombs, boolean isSecondPass) throws Exception {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
 		if(pos == component.size()) {
 			checkSolution(componentPos, currNumberOfBombs.get(), isSecondPass);
 			return;
 		}
-		if(currIterations.incrementAndGet() >= iterationLimit.get()) {
+		currIterations.addWith(1);
+		if(currIterations.get() >= iterationLimit) {
 			throw new HitIterationLimitException();
 		}
 		final int i = component.get(pos).first;
@@ -315,11 +314,11 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		//try bomb
 		isBomb.get(i).set(j, true);
 		if(checkSurroundingConditions(i,j,component.get(pos),1)) {
-			currNumberOfBombs.incrementAndGet();
+			currNumberOfBombs.addWith(1);
 			updateSurroundingBombCnt(i,j,1);
 			solveComponent(pos+1, componentPos, currIterations, currNumberOfBombs, isSecondPass);
 			updateSurroundingBombCnt(i,j,-1);
-			currNumberOfBombs.decrementAndGet();
+			currNumberOfBombs.addWith(-1);
 		}
 
 		//try free
