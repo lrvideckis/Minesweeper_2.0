@@ -98,8 +98,7 @@ public class GameCanvas extends View {
 			}
 
 			minesweeperGame.clickCell(row, col, gameActivity.getToggleFlagModeOn());
-
-			if (!minesweeperGame.getIsGameOver() && gameActivity.getToggleHintsOn()) {
+			if (!minesweeperGame.getIsGameOver() && gameActivity.getToggleHintsOn() && !(gameActivity.getToggleFlagModeOn() && !minesweeperGame.getCell(row,col).getIsVisible())) {
 				updateSolvedBoard();
 			}
 		} catch(Exception e) {
@@ -122,7 +121,6 @@ public class GameCanvas extends View {
 		}
 	}
 
-	//TODO: don't re-run solver on flag mode click
 	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j) throws Exception {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
