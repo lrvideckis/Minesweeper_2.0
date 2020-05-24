@@ -13,7 +13,7 @@ import java.util.Collections;
 public class SlowBacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
-	private final static Integer iterationLimit = 2000000;
+	private final static Integer iterationLimit = 1000000;
 
 	private final ArrayList<ArrayList<Pair<Integer,Integer>>> lastUnvisitedSpot;
 	private final ArrayList<ArrayList<Boolean>> isBomb;

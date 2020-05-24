@@ -18,9 +18,9 @@ public class Test {
 			System.out.println("test number: " + testID);
 			//3 - 8
 			rows = r.nextInt(6) + 3;
-			cols = 25 / rows;
-			//3 - 8
-			final int bombs = r.nextInt(6) + 3;
+			cols = 28 / rows;
+			//3 - 9
+			final int bombs = r.nextInt(7) + 3;
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
