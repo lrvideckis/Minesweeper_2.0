@@ -10,7 +10,6 @@ import com.example.minesweeper20.helpers.MutableInt;
 import java.util.ArrayList;
 import java.util.Collections;
 
-//TODO: add some pruning to allow larger test grids
 public class SlowBacktrackingSolver implements MinesweeperSolver {
 
 	private Integer rows, cols;
