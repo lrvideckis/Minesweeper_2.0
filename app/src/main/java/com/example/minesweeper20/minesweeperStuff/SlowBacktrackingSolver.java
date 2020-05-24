@@ -16,6 +16,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 	private Integer rows, cols;
 	private final static Integer iterationLimit = 2000000;
 
+	private final ArrayList<ArrayList<Pair<Integer,Integer>>> lastUnvisitedSpot;
 	private final ArrayList<ArrayList<Boolean>> isBomb;
 	private final ArrayList<ArrayList<Integer>> cntSurroundingBombs;
 	private ArrayList<ArrayList<VisibleTile>> board;
@@ -33,6 +34,14 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 			ArrayList<Integer> currRow = new ArrayList<>(Collections.nCopies(cols, 0));
 			cntSurroundingBombs.add(currRow);
 		}
+		lastUnvisitedSpot = new ArrayList<>(rows);
+		for(int i = 0; i < rows; ++i) {
+			ArrayList<Pair<Integer,Integer>> currRow = new ArrayList<>(cols);
+			for(int j = 0; j < cols; ++j) {
+				currRow.add(null);
+			}
+			lastUnvisitedSpot.add(currRow);
+		}
 	}
 
 	@Override
@@ -49,9 +58,19 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 			return;
 		}
 
+		ArrayList<Pair<Integer,Integer>> component = new ArrayList<>();
+		for(int i = 0; i < rows; ++i) {
+			for(int j = 0; j < cols; ++j) {
+				if(!board.get(i).get(j).getIsVisible()) {
+					component.add(new Pair<>(i,j));
+				}
+			}
+		}
+		initializeLastUnvisitedSpot(component);
+
 		MutableInt currIterations = new MutableInt(0);
 		MutableInt currNumberOfBombs = new MutableInt(0);
-		solveComponent(0, currIterations, currNumberOfBombs);
+		solveComponent(0, component, currIterations, currNumberOfBombs);
 
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
@@ -66,6 +85,26 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 					curr.isLogicalFree = true;
 				} else if(curr.numberOfBombConfigs.equals(curr.numberOfTotalConfigs)) {
 					curr.isLogicalBomb = true;
+				}
+			}
+		}
+	}
+
+	private void initializeLastUnvisitedSpot(ArrayList<Pair<Integer,Integer>> component) {
+		for (Pair<Integer,Integer> spot : component) {
+			for (int di = -1; di <= 1; ++di) {
+				for (int dj = -1; dj <= 1; ++dj) {
+					if (di == 0 && dj == 0) {
+						continue;
+					}
+					final int adjI = spot.first + di;
+					final int adjJ = spot.second + dj;
+					if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
+						continue;
+					}
+					if (board.get(adjI).get(adjJ).isVisible) {
+						lastUnvisitedSpot.get(adjI).set(adjJ, spot);
+					}
 				}
 			}
 		}
@@ -89,8 +128,8 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	private void solveComponent(int pos, MutableInt currIterations, MutableInt currNumberOfBombs) throws Exception {
-		if(pos == rows * cols) {
+	private void solveComponent(int pos, ArrayList<Pair<Integer,Integer>> component, MutableInt currIterations, MutableInt currNumberOfBombs) throws Exception {
+		if(pos == component.size()) {
 			checkSolution(currNumberOfBombs.get());
 			return;
 		}
@@ -98,28 +137,23 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		if(currIterations.get() >= iterationLimit) {
 			throw new HitIterationLimitException();
 		}
-		final int i = pos/cols;
-		final int j = pos%cols;
-
-		if(board.get(i).get(j).getIsVisible() ) {
-			solveComponent(pos+1, currIterations, currNumberOfBombs);
-			return;
-		}
+		final int i = component.get(pos).first;
+		final int j = component.get(pos).second;
 
 		//try bomb
 		isBomb.get(i).set(j, true);
-		if(checkSurroundingConditions(i,j,1)) {
+		if(checkSurroundingConditions(i,j, component.get(pos), 1)) {
 			currNumberOfBombs.addWith(1);
 			updateSurroundingBombCnt(i,j,1);
-			solveComponent(pos+1, currIterations, currNumberOfBombs);
+			solveComponent(pos+1, component, currIterations, currNumberOfBombs);
 			updateSurroundingBombCnt(i,j,-1);
 			currNumberOfBombs.addWith(-1);
 		}
 
 		//try free
 		isBomb.get(i).set(j, false);
-		if(checkSurroundingConditions(i,j,0)) {
-			solveComponent(pos+1, currIterations, currNumberOfBombs);
+		if(checkSurroundingConditions(i,j,component.get(pos), 0)) {
+			solveComponent(pos+1, component, currIterations, currNumberOfBombs);
 		}
 	}
 
@@ -142,7 +176,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	private boolean checkSurroundingConditions(int i, int j, int arePlacingABomb) {
+	private boolean checkSurroundingConditions(int i, int j, Pair<Integer,Integer> currSpot, int arePlacingABomb) {
 		for(int di = -1; di <= 1; ++di) {
 			for(int dj = -1; dj <= 1; ++dj) {
 				if (di == 0 && dj == 0) {
@@ -159,6 +193,9 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 				}
 				final int currBacktrackingCount = cntSurroundingBombs.get(adjI).get(adjJ);
 				if(currBacktrackingCount + arePlacingABomb > adjTile.numberSurroundingBombs) {
+					return false;
+				}
+				if(lastUnvisitedSpot.get(adjI).get(adjJ).equals(currSpot) && currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs) {
 					return false;
 				}
 			}

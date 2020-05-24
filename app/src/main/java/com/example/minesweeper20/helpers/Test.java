@@ -28,17 +28,15 @@ public class Test {
 			MinesweeperGame minesweeperGame = new MinesweeperGame(rows, cols, bombs);
 			try {
 				int numberOfClicks = r.nextInt(4)+1;
-				while(numberOfClicks-- > 0) {
+				while(numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					minesweeperGame.clickCell(r.nextInt(rows), r.nextInt(cols), false);
-					if(minesweeperGame.getIsGameOver()) {
-						break;
-					}
 				}
 				if(minesweeperGame.getIsGameOver()) {
 					continue;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				return;
 			}
 			ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 			ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
@@ -51,6 +49,7 @@ public class Test {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				return;
 			}
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
@@ -67,12 +66,6 @@ public class Test {
 				if(boardFast.get(i).get(j).getIsVisible()) {
 					continue;
 				}
-
-				/*
-				if(!GetConnectedComponents.isAwayCell(boardSlow, i, j, rows, cols)) {
-					continue;
-				}
-				 */
 
 				MinesweeperSolver.VisibleTile fastTile = boardFast.get(i).get(j);
 				Fraction fast = new Fraction(fastTile.getNumberOfBombConfigs(), fastTile.getNumberOfTotalConfigs());
