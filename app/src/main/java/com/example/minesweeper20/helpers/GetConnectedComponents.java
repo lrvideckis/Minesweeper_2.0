@@ -83,7 +83,7 @@ public class GetConnectedComponents {
 				if (currTile.getIsVisible()) {
 					continue;
 				}
-				if(!isAwayCell(board, i, j)) {
+				if(!isAwayCell(board, i, j, rows, cols)) {
 					tempComponents.get(disjointSet.find(getNode(i, j))).add(new Pair<>(i, j));
 				}
 			}
@@ -104,7 +104,7 @@ public class GetConnectedComponents {
 		int cntAwayCells = 0;
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				if(isAwayCell(board, i, j)) {
+				if(isAwayCell(board, i, j, rows, cols)) {
 					++cntAwayCells;
 				}
 			}
@@ -113,10 +113,10 @@ public class GetConnectedComponents {
 	}
 
 	//returns true if cell has no visible neighbors
-	public static Boolean isAwayCell(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board, int row, int col) throws Exception {
-		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
-		rows = dimensions.first;
-		cols = dimensions.second;
+	public static Boolean isAwayCell(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board, int row, int col, int rows, int cols) {
+		if(board.get(row).get(col).getIsVisible()) {
+			return false;
+		}
 		for(int di = -1; di <= 1; ++di) {
 			for(int dj = -1; dj <= 1; ++dj) {
 				if(di == 0 && dj == 0) {

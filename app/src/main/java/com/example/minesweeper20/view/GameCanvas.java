@@ -154,7 +154,6 @@ public class GameCanvas extends View {
 				}
 				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
 			} else if(solverCell.getIsLogicalFree()) {
-				//TODO: this was thrown on expert
 				if(gameCell.isBomb()) {
 					throw new Exception("solver says: logical free, but it's not free");
 				}

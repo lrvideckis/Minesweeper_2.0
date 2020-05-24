@@ -4,6 +4,7 @@ import android.util.Pair;
 
 import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.helpers.ArrayBounds;
+import com.example.minesweeper20.helpers.Combinatorics;
 import com.example.minesweeper20.helpers.Fraction;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.MutableInt;
@@ -36,6 +37,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	//one hash-map for each component:
 	//for each component: we map the number of bombs to a configuration of bombs for that component
 	private final ArrayList<TreeMap<Integer,MutableInt>> bombConfig;
+	private final ArrayList<TreeMap<Integer,Integer>> numberOfConfigsForCurrent;
 	private Boolean needToCheckSpotCondition, wantBomb, foundBombConfiguration;
 	private Integer spotI, spotJ;
 
@@ -68,6 +70,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 
 		bombConfig = new ArrayList<>();
+		numberOfConfigsForCurrent = new ArrayList<>();
 	}
 
 	@Override
@@ -97,6 +100,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		if(GetConnectedComponents.getNumberOfAwayCells(board) > 0) {
 			awayBombProbability = calculateAwayBombProbability();
 		}
+		updateNumberOfConfigsForCurrent(GetConnectedComponents.getNumberOfAwayCells(board));
 
 		for(int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
@@ -106,7 +110,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				if(GetConnectedComponents.isAwayCell(board, i, j)) {
+				if(GetConnectedComponents.isAwayCell(board, i, j, rows, cols)) {
 					assert awayBombProbability != null;
 					board.get(i).get(j).numberOfBombConfigs = awayBombProbability.getNumerator();
 					board.get(i).get(j).numberOfTotalConfigs = awayBombProbability.getDenominator();
@@ -124,6 +128,25 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					curr.isLogicalBomb = true;
 				}
 			}
+		}
+	}
+
+	private void updateNumberOfConfigsForCurrent(int numberOfAwayCells) throws Exception {
+		for(int i = 0; i < components.size(); ++i) {
+			TreeMap<Integer,MutableInt> saveBombConfigs = new TreeMap<>(bombConfig.get(i));
+			for(TreeMap.Entry<Integer,MutableInt> entry : saveBombConfigs.entrySet()) {
+				int totalConfigs = 0;
+				bombConfig.get(i).clear();
+				bombConfig.get(i).put(entry.getKey(), new MutableInt(1));
+				TreeMap<Integer,MutableInt> configsPerBombCount = calculateNumberOfBombConfigs();
+				for(TreeMap.Entry<Integer,MutableInt> total : configsPerBombCount.entrySet()) {
+					//TODO: check for overflow, (also check everywhere else)
+					totalConfigs += total.getValue().get() * Combinatorics.BinomialCoefficient(numberOfAwayCells, numberOfBombs - total.getKey());
+				}
+				numberOfConfigsForCurrent.get(i).put(entry.getKey(), totalConfigs);
+			}
+			bombConfig.get(i).clear();
+			bombConfig.set(i, saveBombConfigs);
 		}
 	}
 
@@ -189,20 +212,21 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	private Fraction calculateAwayBombProbability() throws Exception {
+		final int numberOfAwayCells = GetConnectedComponents.getNumberOfAwayCells(board);
+
 		TreeMap<Integer,MutableInt> configsPerBombCount = calculateNumberOfBombConfigs();
-		int totalNumberOfConfigs = 0;
-		for(MutableInt val : configsPerBombCount.values()) {
-			totalNumberOfConfigs += val.get();
+		long totalNumberOfConfigs = 0;
+		for(TreeMap.Entry<Integer,MutableInt> val : configsPerBombCount.entrySet()) {
+			totalNumberOfConfigs += val.getValue().get() * Combinatorics.BinomialCoefficient(numberOfAwayCells, numberOfBombs - val.getKey());
 		}
 		Fraction awayBombProbability = new Fraction(0);
-		final int numberOfAwayCells = GetConnectedComponents.getNumberOfAwayCells(board);
 		for(TreeMap.Entry<Integer,MutableInt> entry : configsPerBombCount.entrySet()) {
 			final int currNumberOfBombs = entry.getKey();
-			final int numberOfConfigs = entry.getValue().get();
+			final int numberOfConfigs = (int)(entry.getValue().get() * Combinatorics.BinomialCoefficient(numberOfAwayCells, numberOfBombs - entry.getKey()));
 			if(numberOfBombs - currNumberOfBombs < 0 || numberOfBombs - currNumberOfBombs > numberOfAwayCells) {
 				throw new Exception("number of remaining bombs is more than number of away cells (or negative)");
 			}
-			Fraction delta = new Fraction(numberOfConfigs, totalNumberOfConfigs);
+			Fraction delta = new Fraction(numberOfConfigs, (int)totalNumberOfConfigs);
 			delta.multiplyWith(new Fraction(numberOfBombs - currNumberOfBombs, numberOfAwayCells));
 			awayBombProbability.addWith(delta);
 		}
@@ -212,7 +236,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private TreeMap<Integer,MutableInt> calculateNumberOfBombConfigs() {
 		TreeMap<Integer,MutableInt> prevWays = new TreeMap<>(), newWays = new TreeMap<>();
 		prevWays.put(0, new MutableInt(1));
-
 		for(int i = 0; i < components.size(); ++i) {
 			for(TreeMap.Entry<Integer,MutableInt> bombVal : bombConfig.get(i).entrySet()) {
 				for(TreeMap.Entry<Integer,MutableInt> waysVal : prevWays.entrySet()) {
@@ -278,8 +301,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 	private void initializeLastUnvisitedSpot(ArrayList<ArrayList<Pair<Integer,Integer>>> components) {
 		bombConfig.clear();
+		numberOfConfigsForCurrent.clear();
 		for(ArrayList<Pair<Integer,Integer>> component : components) {
 			bombConfig.add(new TreeMap<Integer,MutableInt>());
+			numberOfConfigsForCurrent.add(new TreeMap<Integer,Integer>());
 			for (Pair<Integer, Integer> spot : component) {
 				for (int di = -1; di <= 1; ++di) {
 					for (int dj = -1; dj <= 1; ++dj) {
@@ -409,6 +434,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			}
 		}
 	}
+
 	private void checkSolutionSecondPass(int componentPos, int currNumberOfBombs) throws Exception {
 		ArrayList<Pair<Integer,Integer>> component = components.get(componentPos);
 		//TODO: remove this extra computation once there is sufficient testing
@@ -421,9 +447,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
 			if (isBomb.get(i).get(j)) {
-				++board.get(i).get(j).numberOfBombConfigs;
+				board.get(i).get(j).numberOfBombConfigs += numberOfConfigsForCurrent.get(componentPos).get(currNumberOfBombs);
 			}
-			++board.get(i).get(j).numberOfTotalConfigs;
+			board.get(i).get(j).numberOfTotalConfigs += numberOfConfigsForCurrent.get(componentPos).get(currNumberOfBombs);
 		}
 	}
 

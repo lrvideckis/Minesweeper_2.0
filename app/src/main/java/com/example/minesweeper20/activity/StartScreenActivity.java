@@ -41,6 +41,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 
 		setUpNewGamePopup();
 		setUpGridTooSmallPopup();
+		//Test.perform100SolverTestsForProbability();
 	}
 
 	@Override
@@ -59,6 +60,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 				EditText rowInput = newGamePopup.getContentView().findViewById(R.id.rowsInput);
 				EditText colInput = newGamePopup.getContentView().findViewById(R.id.colsInput);
 				EditText bombInput = newGamePopup.getContentView().findViewById(R.id.bombsInput);
+				//TODO: limit size of grid to a reasonable size
 				final int numberOfRows = getNumberInput(rowInput.getText().toString());
 				final int numberOfCols = getNumberInput(colInput.getText().toString());
 				final int numberOfBombs = getNumberInput(bombInput.getText().toString());
