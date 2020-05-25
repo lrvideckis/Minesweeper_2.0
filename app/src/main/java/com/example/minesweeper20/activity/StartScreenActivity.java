@@ -14,12 +14,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.helpers.PopupHelper;
+import com.example.minesweeper20.helpers.Test;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: make translate + scale less laggy
 //TODO: undo button - only when you lose
-//TODO: for bomb percentage: handle before the first click
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
 //TODO: gauss elimination solver
 //TODO: make rows/cols/bombs be the same as the last played game
@@ -41,7 +41,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 
 		setUpNewGamePopup();
 		setUpGridTooSmallPopup();
-		//Test.perform100SolverTestsForProbability();
+		Test.perform100SolverTestsForProbability();
 	}
 
 	@Override

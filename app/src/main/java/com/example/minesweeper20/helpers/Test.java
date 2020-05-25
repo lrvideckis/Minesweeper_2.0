@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Test {
-	private final static int numberOfTests = 100;
+	private final static int numberOfTests = 20;
 	private static int rows, cols;
 
 	public static void perform100SolverTestsForProbability() {

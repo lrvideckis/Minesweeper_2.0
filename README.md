@@ -10,6 +10,6 @@ Features:
 
 * Bomb probabilities for unknown cells. Let's say there's nothing more to be figured out, and you have to guess. The app will tell you which cell has the lowest probability of being a bomb.
 
-* Never guess mode. Consider this situation: you tap on a cell which happens to be a bomb, but there exists a configuration of bombs such that the tapped cell isn't a bomb. Then in never guess mode, the app will rearange the bombs such that your tapped cell is free, effectively resulting in you always guessing correctly. No more 50-50 guesses at the end!
+* Never guess mode. Consider this situation: you tap on a cell which happens to be a bomb, but there exists a configuration of bombs such that the tapped cell isn't a bomb. Then in never guess mode, the app will rearrange the bombs such that your tapped cell is free, effectively resulting in you always guessing correctly. No more 50-50 guesses at the end!
 
 * Always guess wrong mode. Basically the same as above, but you always guess wrong. Effectively, this results in you having to always logically figure out stuff.

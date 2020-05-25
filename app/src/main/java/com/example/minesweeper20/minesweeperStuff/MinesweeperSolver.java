@@ -5,13 +5,15 @@ import java.util.ArrayList;
 public interface MinesweeperSolver {
 	class VisibleTile {
 		Boolean isVisible, isLogicalBomb, isLogicalFree;
-		Integer numberSurroundingBombs, numberOfBombConfigs, numberOfTotalConfigs;
+		Integer numberSurroundingBombs;
+		Long numberOfBombConfigs, numberOfTotalConfigs;
 		public VisibleTile() {
 			reset();
 		}
 		private void reset() {
 			isLogicalFree = isLogicalBomb = isVisible = false;
-			numberSurroundingBombs = numberOfBombConfigs = numberOfTotalConfigs = 0;
+			numberSurroundingBombs = 0;
+			numberOfBombConfigs = numberOfTotalConfigs = 0L;
 		}
 		public boolean getIsVisible() {
 			return isVisible;
@@ -22,10 +24,10 @@ public interface MinesweeperSolver {
 		public boolean getIsLogicalFree() {
 			return isLogicalFree;
 		}
-		public int getNumberOfBombConfigs() {
+		public long getNumberOfBombConfigs() {
 			return numberOfBombConfigs;
 		}
-		public int getNumberOfTotalConfigs() {
+		public long getNumberOfTotalConfigs() {
 			return numberOfTotalConfigs;
 		}
 		public int getNumberSurroundingBombs() {

@@ -32,6 +32,7 @@
 	<string name="grid_too_small">Zero start isn\'t possible with grid size and number of bombs.</string>
 	<string name="is_linear_layout">is_linear_layout</string>
 	<string name="is_game_canvas_layout">is_game_canvas_layout</string>
+	<string name="two_decimal_places">%.2f</string>
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>

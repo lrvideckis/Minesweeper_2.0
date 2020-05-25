@@ -161,7 +161,7 @@ public class GameCanvas extends View {
 			} else if(gameActivity.getToggleBombProbabilityOn()) {
 				if(!solverCell.getIsVisible()) {
 					bombProbability.setValues(solverCell.getNumberOfBombConfigs(), solverCell.getNumberOfTotalConfigs());
-					drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability);
+					drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
 				}
 			}
 		}

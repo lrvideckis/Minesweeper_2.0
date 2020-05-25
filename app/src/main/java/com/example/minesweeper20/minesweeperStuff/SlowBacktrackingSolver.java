@@ -50,8 +50,8 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		if(GetConnectedComponents.allCellsAreHidden(board)) {
 			for(int i = 0; i < rows; ++i) {
 				for(int j = 0; j < cols; ++j) {
-					board.get(i).get(j).numberOfBombConfigs = numberOfBombs;
-					board.get(i).get(j).numberOfTotalConfigs = rows * cols;
+					board.get(i).get(j).numberOfBombConfigs = (long)numberOfBombs;
+					board.get(i).get(j).numberOfTotalConfigs = (long)(rows * cols);
 				}
 			}
 			return;

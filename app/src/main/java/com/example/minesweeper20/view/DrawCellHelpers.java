@@ -1,6 +1,7 @@
 package com.example.minesweeper20.view;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,6 +14,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.helpers.Fraction;
+import com.example.minesweeper20.helpers.MyMath;
 
 import java.util.ArrayList;
 
@@ -30,8 +32,8 @@ class DrawCellHelpers {
 	private ArrayList<ArrayList<Rect>> middleSquareRectangles, backgroundRectangles;
 	private final Paint[] numberColors;
 	private final String
-			flagSymbol = new String(Character.toChars(0x1F6A9)),
-			bombSymbol = new String(Character.toChars(0x1F4A3));
+			flagEmoji = new String(Character.toChars(0x1F6A9)),
+			bombEmoji = new String(Character.toChars(0x1F4A3));
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
@@ -151,13 +153,13 @@ class DrawCellHelpers {
 	void drawFlag(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
 		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
-		canvas.drawText(flagSymbol, xPos, yPos, redFlag);
+		canvas.drawText(flagEmoji, xPos, yPos, redFlag);
 	}
 
 	void drawBomb(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
 		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
-		canvas.drawText(bombSymbol, xPos, yPos, redFlag);
+		canvas.drawText(bombEmoji, xPos, yPos, redFlag);
 	}
 
 	//TODO: make this look better
@@ -175,8 +177,13 @@ class DrawCellHelpers {
 		canvas.drawText("X", xPos, yPos, redX);
 	}
 
-	//TODO: if text is too long, this will draw over into the next cell
-	void drawBombProbability(Canvas canvas, int startX, int startY, Fraction probability) throws Exception {
-		canvas.drawText(probability.getNumerator() + "/" + probability.getDenominator(), startX, startY+cellPixelLength/3f, black);
+	void drawBombProbability(Canvas canvas, int startX, int startY, Fraction probability, Resources resources) throws Exception {
+		//fraction has too many digits, displaying double format
+		if(MyMath.MyLog10MinWith4(probability.getNumerator()) + MyMath.MyLog10MinWith4(probability.getDenominator()) >= 5) {
+			double prob = probability.getNumerator() / (double)probability.getDenominator();
+			canvas.drawText(String.format(resources.getString(R.string.two_decimal_places), prob), startX, startY+cellPixelLength/3f, black);
+		} else {
+			canvas.drawText(probability.getNumerator() + "/" + probability.getDenominator(), startX, startY+cellPixelLength/3f, black);
+		}
 	}
 }
