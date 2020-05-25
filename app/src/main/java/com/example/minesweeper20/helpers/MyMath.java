@@ -47,7 +47,7 @@ public class MyMath {
 		return a;
 	}
 
-	private static int gcd(int a, int b) {
+	public static int gcd(int a, int b) {
 		while (b > 0) {
 			a %= b;
 

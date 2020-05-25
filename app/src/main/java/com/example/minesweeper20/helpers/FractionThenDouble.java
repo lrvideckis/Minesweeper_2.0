@@ -1,6 +1,5 @@
 package com.example.minesweeper20.helpers;
 
-//TODO: code this with bigInts to test double logic
 public class FractionThenDouble {
 
 	private int numerator, denominator;
