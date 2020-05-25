@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Test {
-	private final static int numberOfTests = 100;
+	private final static int numberOfTests = 50;
 	private static int rows, cols;
 
 	public static void perform100SolverTestsForProbability() {
@@ -22,8 +22,9 @@ public class Test {
 			try {
 				rows = Combinatorics.getRand(3, 8);
 				cols = Combinatorics.getRand(3, 40 / rows);
-				bombs = Combinatorics.getRand(2, Math.min(9, rows*cols-9));
+				bombs = Combinatorics.getRand(2, 9);
 			} catch(Exception ignored) {}
+			bombs = Math.min(bombs, rows*cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
