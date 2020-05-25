@@ -8,15 +8,19 @@ public interface MinesweeperSolver {
 	class VisibleTile {
 		Boolean isVisible, isLogicalBomb, isLogicalFree;
 		Integer numberSurroundingBombs;
-		FractionThenDouble numberOfBombConfigs, numberOfTotalConfigs;
+		final FractionThenDouble numberOfBombConfigs = new FractionThenDouble(0), numberOfTotalConfigs = new FractionThenDouble(0);
 		public VisibleTile() {
 			reset();
 		}
 		private void reset() {
 			isLogicalFree = isLogicalBomb = isVisible = false;
 			numberSurroundingBombs = 0;
-			numberOfBombConfigs = new FractionThenDouble(0);
-			numberOfTotalConfigs = new FractionThenDouble(0);
+			try {
+				numberOfBombConfigs.setValues(0,1);
+				numberOfTotalConfigs.setValues(0,1);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		public boolean getIsVisible() {
 			return isVisible;

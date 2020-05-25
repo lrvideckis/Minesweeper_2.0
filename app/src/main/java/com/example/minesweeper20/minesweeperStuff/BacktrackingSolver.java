@@ -230,7 +230,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			}
 			FractionThenDouble numberOfConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - entry.getKey());
 			numberOfConfigs.multiplyWith(entry.getValue());
-			numberOfConfigs.divideWith(totalNumberOfConfigs);//this is now delta
+			numberOfConfigs.divideWith(totalNumberOfConfigs);
 			numberOfConfigs.multiplyWith(numberOfBombs - currNumberOfBombs, numberOfAwayCells);
 			awayBombProbability.addWith(numberOfConfigs);
 		}

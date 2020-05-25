@@ -13,6 +13,10 @@ public class FractionThenDouble {
 	}
 
 	FractionThenDouble(FractionThenDouble other) throws Exception {
+		setValue(other);
+	}
+
+	public void setValue(FractionThenDouble other) throws Exception {
 		hasOverflowed = other.hasOverflowed;
 		if(other.hasOverflowed) {
 			value = other.value;
@@ -28,17 +32,9 @@ public class FractionThenDouble {
 		}
 	}
 
-	public void setValue(FractionThenDouble other) {
-		hasOverflowed = other.hasOverflowed;
-		if(other.hasOverflowed) {
-			value = other.value;
-		} else {
-			numerator = other.numerator;
-			denominator = other.denominator;
-		}
-	}
-
+	//this should only throw if _denominator is 0
 	public void setValues(int _numerator, int _denominator) throws Exception {
+		hasOverflowed = false;
 		reduceAndSet(_numerator, _denominator);
 	}
 
@@ -47,9 +43,18 @@ public class FractionThenDouble {
 			value += delta;
 			return;
 		}
+		long currNumerator;
 		try {
-			reduceAndSet(Math.addExact(numerator, Math.multiplyExact(delta, (long)denominator)), denominator);
-		} catch (Exception e) {
+			currNumerator = Math.addExact(numerator, Math.multiplyExact(delta, (long)denominator));
+		} catch (ArithmeticException ignored) {
+			hasOverflowed = true;
+			value = numerator / (double) denominator;
+			value += delta;
+			return;
+		}
+		try {
+			reduceAndSet(currNumerator, denominator);
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -63,7 +68,7 @@ public class FractionThenDouble {
 						Math.multiplyExact((long) denominator, delta.numerator)
 				);
 				newDenominator = Math.multiplyExact((long) denominator, delta.denominator);
-			} catch(ArithmeticException e) {
+			} catch(ArithmeticException ignored) {
 				hasOverflowed = true;
 				value = numerator / (double) denominator;
 				value += delta.numerator / (double) delta.denominator;
@@ -115,11 +120,11 @@ public class FractionThenDouble {
 	}
 
 	//only will throw if quotient == 0 (divide by zero error)
-	public void divideWith(FractionThenDouble quotient) {
+	public void divideWith(FractionThenDouble quotient) throws ArithmeticException {
 		if(!quotient.hasOverflowed) {
 			try {
 				multiplyWith(quotient.getDenominator(), quotient.getNumerator());
-			} catch (Exception e) {
+			} catch (Exception ignored) {
 				throw new ArithmeticException("divide by zero");
 			}
 			return;

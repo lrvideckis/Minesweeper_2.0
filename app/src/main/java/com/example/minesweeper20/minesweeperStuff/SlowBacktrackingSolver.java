@@ -77,7 +77,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 				if(curr.getIsVisible()) {
 					continue;
 				}
-				if(curr.numberOfTotalConfigs.getNumerator() == 0) {
+				if(curr.numberOfTotalConfigs.equals(0)) {
 					throw new Exception("There should be at least one bomb configuration for non-visible cells");
 				}
 				if(curr.numberOfBombConfigs.equals(0)) {

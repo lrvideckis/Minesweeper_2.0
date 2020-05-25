@@ -181,8 +181,8 @@ class DrawCellHelpers {
 		//fraction has too many digits, displaying double format
 		boolean displayFloat = probability.getHasOverflowed();
 		if(!displayFloat) {
-			int digitsNumerator = MyMath.MyLog10MinWith4(probability.getNumerator());
-			int digitsDenominator = MyMath.MyLog10MinWith4(probability.getDenominator());
+			final int digitsNumerator = MyMath.MyLog10MinWith4(probability.getNumerator());
+			final int digitsDenominator = MyMath.MyLog10MinWith4(probability.getDenominator());
 			if(digitsNumerator + digitsDenominator >= 5) {
 				displayFloat = true;
 			}

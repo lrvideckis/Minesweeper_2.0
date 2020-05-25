@@ -6,11 +6,9 @@ public class MyMath {
 			throw new Exception("invalid input");
 		}
 		if((n == k) || (k == 0)) {
-			//return 1;
 			return new FractionThenDouble(1);
 		}
 		if((k == 1) || (k == n - 1)) {
-			//return n;
 			return new FractionThenDouble(n);
 		}
 		if(k > n / 2) {
@@ -21,7 +19,6 @@ public class MyMath {
 		int i = n - k + 1;
 		for (int j = 1; j <= k; j++) {
 			final int gcd = gcd(i,j);
-			//result = Math.multiplyExact(result / (j / gcd), (i / gcd));
 			result.multiplyWith(1, j/gcd);
 			result.multiplyWith(i/gcd, 1);
 			i++;
