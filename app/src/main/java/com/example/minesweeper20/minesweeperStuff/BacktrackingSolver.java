@@ -449,10 +449,11 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			if(currConfigs == null) {
 				throw new Exception("number of configs value is null");
 			}
+			VisibleTile curr = board.get(i).get(j);
 			if (isBomb.get(i).get(j)) {
-				board.get(i).get(j).numberOfBombConfigs = Math.addExact(board.get(i).get(j).numberOfBombConfigs, currConfigs);
+				curr.numberOfBombConfigs = Math.addExact(curr.numberOfBombConfigs, currConfigs);
 			}
-			board.get(i).get(j).numberOfTotalConfigs = Math.addExact(board.get(i).get(j).numberOfTotalConfigs, currConfigs);
+			curr.numberOfTotalConfigs = Math.addExact(curr.numberOfTotalConfigs, currConfigs);
 		}
 	}
 
