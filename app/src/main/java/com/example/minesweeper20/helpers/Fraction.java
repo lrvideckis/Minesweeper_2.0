@@ -23,7 +23,7 @@ public class Fraction {
 		final long prevDenominator = denominator;
 		numerator = Math.multiplyExact(prevNumerator, delta.getDenominator());
 		numerator = Math.addExact(numerator, Math.multiplyExact(prevDenominator, delta.getNumerator()));
-		denominator = Math.addExact(prevDenominator, delta.getDenominator());
+		denominator = Math.multiplyExact(prevDenominator, delta.getDenominator());
 	}
 
 	public void multiplyWith(Fraction quotient) throws Exception {
