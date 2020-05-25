@@ -27,7 +27,7 @@ public class Test {
 
 			MinesweeperGame minesweeperGame = new MinesweeperGame(rows, cols, bombs);
 			try {
-				int numberOfClicks = r.nextInt(4)+1;
+				int numberOfClicks = r.nextInt(5);
 				while(numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					minesweeperGame.clickCell(r.nextInt(rows), r.nextInt(cols), false);
 				}
