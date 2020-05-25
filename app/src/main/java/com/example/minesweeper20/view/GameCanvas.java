@@ -15,7 +15,7 @@ import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
 import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
-import com.example.minesweeper20.helpers.Fraction;
+import com.example.minesweeper20.helpers.FractionThenDouble;
 import com.example.minesweeper20.helpers.PopupHelper;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
@@ -34,9 +34,9 @@ public class GameCanvas extends View {
 	private final ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
 	private final MinesweeperSolver backtrackingSolver;
 	private final DrawCellHelpers drawCellHelpers;
-	private final Fraction bombProbability = new Fraction(0);
+	private final FractionThenDouble bombProbability = new FractionThenDouble(0);
 
-	public GameCanvas(Context context, AttributeSet attrs) throws Exception {
+	public GameCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		black.setColor(Color.BLACK);
 		black.setStrokeWidth(3);
@@ -158,11 +158,10 @@ public class GameCanvas extends View {
 					throw new Exception("solver says: logical free, but it's not free");
 				}
 				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
-			} else if(gameActivity.getToggleBombProbabilityOn()) {
-				if(!solverCell.getIsVisible()) {
-					bombProbability.setValues(solverCell.getNumberOfBombConfigs(), solverCell.getNumberOfTotalConfigs());
-					drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
-				}
+			} else if(gameActivity.getToggleBombProbabilityOn() && !solverCell.getIsVisible()) {
+				bombProbability.setValue(solverCell.getNumberOfBombConfigs());
+				bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
+				drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
 			}
 		}
 	}

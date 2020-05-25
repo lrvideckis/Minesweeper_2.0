@@ -4,10 +4,9 @@ import android.util.Pair;
 
 import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.helpers.ArrayBounds;
-import com.example.minesweeper20.helpers.Fraction;
+import com.example.minesweeper20.helpers.FractionThenDouble;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.MutableInt;
-import com.example.minesweeper20.helpers.MutableLong;
 import com.example.minesweeper20.helpers.MyMath;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	//one hash-map for each component:
 	//for each component: we map the number of bombs to a configuration of bombs for that component
 	private final ArrayList<TreeMap<Integer,MutableInt>> bombConfig;
-	private final ArrayList<TreeMap<Integer,Long>> numberOfConfigsForCurrent;
+	private final ArrayList<TreeMap<Integer,FractionThenDouble>> numberOfConfigsForCurrent;
 	private Boolean needToCheckSpotCondition, wantBomb, foundBombConfiguration;
 	private Integer spotI, spotJ;
 
@@ -81,8 +80,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		if(GetConnectedComponents.allCellsAreHidden(board)) {
 			for(int i = 0; i < rows; ++i) {
 				for(int j = 0; j < cols; ++j) {
-					board.get(i).get(j).numberOfBombConfigs = (long)numberOfBombs;
-					board.get(i).get(j).numberOfTotalConfigs = (long)(rows * cols);
+					board.get(i).get(j).numberOfBombConfigs.setValues(numberOfBombs,1);
+					board.get(i).get(j).numberOfTotalConfigs.setValues(rows*cols,1);
 				}
 			}
 			return;
@@ -95,7 +94,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 
 		removeBombNumbersFromComponent();
-		Fraction awayBombProbability = null;
+		FractionThenDouble awayBombProbability = null;
 		if(GetConnectedComponents.getNumberOfAwayCells(board) > 0) {
 			awayBombProbability = calculateAwayBombProbability();
 		}
@@ -109,19 +108,21 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				if(GetConnectedComponents.isAwayCell(board, i, j, rows, cols)) {
-					assert awayBombProbability != null;
-					board.get(i).get(j).numberOfBombConfigs = awayBombProbability.getNumerator();
-					board.get(i).get(j).numberOfTotalConfigs = awayBombProbability.getDenominator();
-				}
 				VisibleTile curr = board.get(i).get(j);
+				if(GetConnectedComponents.isAwayCell(board, i, j, rows, cols)) {
+					if(awayBombProbability == null) {
+						throw new Exception("away probability is null, but this was checked above");
+					}
+					curr.numberOfBombConfigs.setValue(awayBombProbability);
+					curr.numberOfTotalConfigs.setValues(1,1);
+				}
 				if(curr.getIsVisible()) {
 					continue;
 				}
-				if(curr.numberOfTotalConfigs == 0) {
+				if(curr.numberOfTotalConfigs.equals(0)) {
 					throw new Exception("There should be at least one bomb configuration for non-visible cells");
 				}
-				if(curr.numberOfBombConfigs == 0) {
+				if(curr.numberOfBombConfigs.equals(0)) {
 					curr.isLogicalFree = true;
 				} else if(curr.numberOfBombConfigs.equals(curr.numberOfTotalConfigs)) {
 					curr.isLogicalBomb = true;
@@ -134,13 +135,14 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for(int i = 0; i < components.size(); ++i) {
 			TreeMap<Integer,MutableInt> saveBombConfigs = new TreeMap<>(bombConfig.get(i));
 			for(TreeMap.Entry<Integer,MutableInt> entry : saveBombConfigs.entrySet()) {
-				long totalConfigs = 0;
+				FractionThenDouble totalConfigs = new FractionThenDouble(0);
 				bombConfig.get(i).clear();
 				bombConfig.get(i).put(entry.getKey(), new MutableInt(1));
-				TreeMap<Integer,MutableLong> configsPerBombCount = calculateNumberOfBombConfigs();
-				for(TreeMap.Entry<Integer,MutableLong> total : configsPerBombCount.entrySet()) {
-					long currConfigs = Math.multiplyExact(total.getValue().get(), MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - total.getKey()));
-					totalConfigs = Math.addExact(totalConfigs, currConfigs);
+				TreeMap<Integer,FractionThenDouble> configsPerBombCount = calculateNumberOfBombConfigs();
+				for(TreeMap.Entry<Integer,FractionThenDouble> total : configsPerBombCount.entrySet()) {
+					FractionThenDouble currConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - total.getKey());
+					currConfigs.multiplyWith(total.getValue());
+					totalConfigs.addWith(currConfigs);
 				}
 				numberOfConfigsForCurrent.get(i).put(entry.getKey(), totalConfigs);
 			}
@@ -210,40 +212,44 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	private Fraction calculateAwayBombProbability() throws Exception {
+	private FractionThenDouble calculateAwayBombProbability() throws Exception {
 		final int numberOfAwayCells = GetConnectedComponents.getNumberOfAwayCells(board);
 
-		TreeMap<Integer, MutableLong> configsPerBombCount = calculateNumberOfBombConfigs();
-		long totalNumberOfConfigs = 0L;
-		for(TreeMap.Entry<Integer,MutableLong> val : configsPerBombCount.entrySet()) {
-			long newConfigs = Math.multiplyExact(val.getValue().get(), MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - val.getKey()));
-			totalNumberOfConfigs = Math.addExact(totalNumberOfConfigs, newConfigs);
+		TreeMap<Integer, FractionThenDouble> configsPerBombCount = calculateNumberOfBombConfigs();
+		FractionThenDouble totalNumberOfConfigs = new FractionThenDouble(0);
+		for(TreeMap.Entry<Integer,FractionThenDouble> val : configsPerBombCount.entrySet()) {
+			FractionThenDouble newConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - val.getKey());
+			newConfigs.multiplyWith(val.getValue());
+			totalNumberOfConfigs.addWith(newConfigs);
 		}
-		Fraction awayBombProbability = new Fraction(0L);
-		for(TreeMap.Entry<Integer,MutableLong> entry : configsPerBombCount.entrySet()) {
+		FractionThenDouble awayBombProbability = new FractionThenDouble(0);
+		for(TreeMap.Entry<Integer,FractionThenDouble> entry : configsPerBombCount.entrySet()) {
 			final int currNumberOfBombs = entry.getKey();
-			final long numberOfConfigs = Math.multiplyExact(entry.getValue().get(), MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - entry.getKey()));
 			if(numberOfBombs - currNumberOfBombs < 0 || numberOfBombs - currNumberOfBombs > numberOfAwayCells) {
 				throw new Exception("number of remaining bombs is more than number of away cells (or negative)");
 			}
-			Fraction delta = new Fraction(numberOfConfigs, totalNumberOfConfigs);
-			delta.multiplyWith(new Fraction(numberOfBombs - currNumberOfBombs, numberOfAwayCells));
-			awayBombProbability.addWith(delta);
+			FractionThenDouble numberOfConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - entry.getKey());
+			numberOfConfigs.multiplyWith(entry.getValue());
+			numberOfConfigs.divideWith(totalNumberOfConfigs);//this is now delta
+			numberOfConfigs.multiplyWith(numberOfBombs - currNumberOfBombs, numberOfAwayCells);
+			awayBombProbability.addWith(numberOfConfigs);
 		}
 		return awayBombProbability;
 	}
 
-	private TreeMap<Integer,MutableLong> calculateNumberOfBombConfigs() {
-		TreeMap<Integer,MutableLong> prevWays = new TreeMap<>(), newWays = new TreeMap<>();
-		prevWays.put(0, new MutableLong(1L));
+	private TreeMap<Integer,FractionThenDouble> calculateNumberOfBombConfigs() {
+		TreeMap<Integer,FractionThenDouble> prevWays = new TreeMap<>(), newWays = new TreeMap<>();
+		prevWays.put(0, new FractionThenDouble(1));
 		for(int i = 0; i < components.size(); ++i) {
 			for(TreeMap.Entry<Integer,MutableInt> bombVal : bombConfig.get(i).entrySet()) {
-				for(TreeMap.Entry<Integer,MutableLong> waysVal : prevWays.entrySet()) {
+				for(TreeMap.Entry<Integer,FractionThenDouble> waysVal : prevWays.entrySet()) {
 					final int nextKey = bombVal.getKey() + waysVal.getKey();
-					final long nextValueDiff = Math.multiplyExact(bombVal.getValue().get(), waysVal.getValue().get());
-					MutableLong nextVal = newWays.get(nextKey);
+					FractionThenDouble nextValueDiff = new FractionThenDouble(bombVal.getValue().get());
+					nextValueDiff.multiplyWith(waysVal.getValue());
+
+					FractionThenDouble nextVal = newWays.get(nextKey);
 					if(nextVal == null) {
-						newWays.put(nextKey, new MutableLong(nextValueDiff));
+						newWays.put(nextKey, nextValueDiff);
 					} else {
 						nextVal.addWith(nextValueDiff);
 					}
@@ -304,7 +310,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		numberOfConfigsForCurrent.clear();
 		for(ArrayList<Pair<Integer,Integer>> component : components) {
 			bombConfig.add(new TreeMap<Integer,MutableInt>());
-			numberOfConfigsForCurrent.add(new TreeMap<Integer,Long>());
+			numberOfConfigsForCurrent.add(new TreeMap<Integer,FractionThenDouble>());
 			for (Pair<Integer, Integer> spot : component) {
 				for (int di = -1; di <= 1; ++di) {
 					for (int dj = -1; dj <= 1; ++dj) {
@@ -445,15 +451,15 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for (int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
-			Long currConfigs = numberOfConfigsForCurrent.get(componentPos).get(currNumberOfBombs);
+			FractionThenDouble currConfigs = numberOfConfigsForCurrent.get(componentPos).get(currNumberOfBombs);
 			if(currConfigs == null) {
 				throw new Exception("number of configs value is null");
 			}
 			VisibleTile curr = board.get(i).get(j);
 			if (isBomb.get(i).get(j)) {
-				curr.numberOfBombConfigs = Math.addExact(curr.numberOfBombConfigs, currConfigs);
+				curr.numberOfBombConfigs.addWith(currConfigs);
 			}
-			curr.numberOfTotalConfigs = Math.addExact(curr.numberOfTotalConfigs, currConfigs);
+			curr.numberOfTotalConfigs.addWith(currConfigs);
 		}
 	}
 
@@ -493,26 +499,4 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			throw new Exception("number of bombs doesn't match");
 		}
 	}
-
-	/*
-	private void printBoardDebug() {
-		for(int i = 0; i < rows; ++i) {
-			for(int j = 0; j < cols; ++j) {
-				if(board.get(i).get(j).isVisible) {
-					if(board.get(i).get(j).numberSurroundingBombs == 0) {
-						System.out.print('.');
-					} else {
-						System.out.print(board.get(i).get(j).numberSurroundingBombs);
-					}
-				} else if(isBomb.get(i).get(j)){
-					System.out.print('B');
-				} else {
-					System.out.print('F');
-				}
-			}
-			System.out.println();
-		}
-		System.out.println();
-	}
-	 */
 }

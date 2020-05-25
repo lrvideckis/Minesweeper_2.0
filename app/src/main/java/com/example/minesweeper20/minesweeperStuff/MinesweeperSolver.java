@@ -1,19 +1,22 @@
 package com.example.minesweeper20.minesweeperStuff;
 
+import com.example.minesweeper20.helpers.FractionThenDouble;
+
 import java.util.ArrayList;
 
 public interface MinesweeperSolver {
 	class VisibleTile {
 		Boolean isVisible, isLogicalBomb, isLogicalFree;
 		Integer numberSurroundingBombs;
-		Long numberOfBombConfigs, numberOfTotalConfigs;
+		FractionThenDouble numberOfBombConfigs, numberOfTotalConfigs;
 		public VisibleTile() {
 			reset();
 		}
 		private void reset() {
 			isLogicalFree = isLogicalBomb = isVisible = false;
 			numberSurroundingBombs = 0;
-			numberOfBombConfigs = numberOfTotalConfigs = 0L;
+			numberOfBombConfigs = new FractionThenDouble(0);
+			numberOfTotalConfigs = new FractionThenDouble(0);
 		}
 		public boolean getIsVisible() {
 			return isVisible;
@@ -24,10 +27,10 @@ public interface MinesweeperSolver {
 		public boolean getIsLogicalFree() {
 			return isLogicalFree;
 		}
-		public long getNumberOfBombConfigs() {
+		public FractionThenDouble getNumberOfBombConfigs() {
 			return numberOfBombConfigs;
 		}
-		public long getNumberOfTotalConfigs() {
+		public FractionThenDouble getNumberOfTotalConfigs() {
 			return numberOfTotalConfigs;
 		}
 		public int getNumberSurroundingBombs() {

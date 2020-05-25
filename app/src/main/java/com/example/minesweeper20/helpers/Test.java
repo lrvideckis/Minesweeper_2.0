@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Test {
-	private final static int numberOfTests = 50;
+	private final static int numberOfTests = 20;
 	private static int rows, cols;
 
 	public static void perform100SolverTestsForProbability() {
@@ -77,10 +77,12 @@ public class Test {
 				}
 
 				MinesweeperSolver.VisibleTile fastTile = boardFast.get(i).get(j);
-				Fraction fast = new Fraction(fastTile.getNumberOfBombConfigs(), fastTile.getNumberOfTotalConfigs());
+				FractionThenDouble fast = new FractionThenDouble(fastTile.getNumberOfBombConfigs());
+				fast.divideWith(fastTile.getNumberOfTotalConfigs());
 
 				MinesweeperSolver.VisibleTile slowTile = boardSlow.get(i).get(j);
-				Fraction slow = new Fraction(slowTile.getNumberOfBombConfigs(), slowTile.getNumberOfTotalConfigs());
+				FractionThenDouble slow = new FractionThenDouble(slowTile.getNumberOfBombConfigs());
+				slow.divideWith(slowTile.getNumberOfTotalConfigs());
 
 				if(fast.getNumerator() != slow.getNumerator() || fast.getDenominator() != slow.getDenominator()) {
 					passedTest = false;

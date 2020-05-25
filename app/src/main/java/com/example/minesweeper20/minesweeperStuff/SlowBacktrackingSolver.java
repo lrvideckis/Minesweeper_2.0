@@ -50,8 +50,8 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		if(GetConnectedComponents.allCellsAreHidden(board)) {
 			for(int i = 0; i < rows; ++i) {
 				for(int j = 0; j < cols; ++j) {
-					board.get(i).get(j).numberOfBombConfigs = (long)numberOfBombs;
-					board.get(i).get(j).numberOfTotalConfigs = (long)(rows * cols);
+					board.get(i).get(j).numberOfBombConfigs.setValues(numberOfBombs, 1);
+					board.get(i).get(j).numberOfTotalConfigs.setValues(rows*cols, 1);
 				}
 			}
 			return;
@@ -77,10 +77,10 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 				if(curr.getIsVisible()) {
 					continue;
 				}
-				if(curr.numberOfTotalConfigs == 0) {
+				if(curr.numberOfTotalConfigs.getNumerator() == 0) {
 					throw new Exception("There should be at least one bomb configuration for non-visible cells");
 				}
-				if(curr.numberOfBombConfigs == 0) {
+				if(curr.numberOfBombConfigs.equals(0)) {
 					curr.isLogicalFree = true;
 				} else if(curr.numberOfBombConfigs.equals(curr.numberOfTotalConfigs)) {
 					curr.isLogicalBomb = true;
@@ -217,9 +217,9 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 					continue;
 				}
 				if (isBomb.get(i).get(j)) {
-					++board.get(i).get(j).numberOfBombConfigs;
+					board.get(i).get(j).numberOfBombConfigs.addWith(1);
 				}
-				++board.get(i).get(j).numberOfTotalConfigs;
+				board.get(i).get(j).numberOfTotalConfigs.addWith(1);
 			}
 		}
 	}
