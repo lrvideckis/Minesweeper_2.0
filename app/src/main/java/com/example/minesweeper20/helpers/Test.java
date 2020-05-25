@@ -1,5 +1,6 @@
 package com.example.minesweeper20.helpers;
 
+import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
@@ -9,18 +10,21 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Test {
-	private final static int numberOfTests = 20;
+	private final static int numberOfTests = 50;
 	private static int rows, cols;
 
 	public static void perform100SolverTestsForProbability() {
 		Random r = new Random();
 		for(int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			//3 - 8
-			rows = r.nextInt(6) + 3;
-			cols = 28 / rows;
-			//3 - 9
-			final int bombs = r.nextInt(7) + 3;
+			int bombs = 5;
+			rows = cols = 5;
+			try {
+				rows = MyMath.getRand(3, 8);
+				cols = MyMath.getRand(3, 40 / rows);
+				bombs = MyMath.getRand(2, 9);
+			} catch(Exception ignored) {}
+			bombs = Math.min(bombs, rows*cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
@@ -43,7 +47,12 @@ public class Test {
 
 			try {
 				backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfBombs());
-				slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfBombs());
+				try {
+					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfBombs());
+				} catch(HitIterationLimitException e) {
+					System.out.println("slow solver hit iteration limit, void test");
+					continue;
+				}
 				if(!checkBoardEquality(boardFast, boardSlow)) {
 					return;
 				}

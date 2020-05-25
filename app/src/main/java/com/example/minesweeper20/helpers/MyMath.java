@@ -45,4 +45,10 @@ public class MyMath {
 		}
 		return a;
 	}
+	static int getRand(int min, int max) throws Exception {
+		if(min > max) {
+			throw new Exception("invalid parameters: min > max");
+		}
+		return (int) (Math.random() * ((max - min) + 1)) + min;
+	}
 }
