@@ -113,8 +113,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			return;
 		}
 		toggleHintsOn = isChecked;
+		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if(isChecked) {
-			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 			try {
 				gameCanvas.updateSolvedBoard();
 			} catch (Exception e) {
@@ -125,6 +125,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			Switch bombProbability = findViewById(R.id.toggleBombProbability);
 			bombProbability.setChecked(false);
 			toggleBombProbabilityOn = false;
+			if(toggleGaussHintsOn) {
+				try {
+					gameCanvas.updateSolvedBoardWithGaussSolver();
+				} catch (Exception e) {
+					displayStackTracePopup(e);
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 

@@ -25,6 +25,7 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 //TODO: make rows/cols/bombs be the same as the last played game
 //TODO: make sure back button on bottom nav bar works
 //TODO: when you lose, you can't click the back button, you have to click the okay popup button - fix this
+//TODO: helper function to loop over all adjacent cells
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
 

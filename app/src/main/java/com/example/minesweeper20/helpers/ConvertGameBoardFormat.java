@@ -19,8 +19,8 @@ public class ConvertGameBoardFormat {
 	}
 
 	public static void convertToExistingBoard(MinesweeperGame minesweeperGame, VisibleTile[][] board) throws Exception {
-		int rows = minesweeperGame.getNumberOfRows();
-		int cols = minesweeperGame.getNumberOfCols();
+		final int rows = minesweeperGame.getNumberOfRows();
+		final int cols = minesweeperGame.getNumberOfCols();
 		if(board.length != rows) {
 			throw new Exception("minesweeper game rows doesn't match board rows");
 		}

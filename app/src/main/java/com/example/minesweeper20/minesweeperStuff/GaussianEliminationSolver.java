@@ -6,6 +6,7 @@ import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 
 import java.util.Arrays;
+import java.util.TreeSet;
 
 public class GaussianEliminationSolver implements MinesweeperSolver {
 
@@ -45,7 +46,30 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				numberOfHiddenNodes++;
 			}
 		}
-		double[][] matrix = new double[numberOfClues][numberOfHiddenNodes + 1];
+
+		TreeSet<Integer> knownBombs = new TreeSet<>(), knownFrees = new TreeSet<>();
+		//noinspection StatementWithEmptyBody
+		while(runGaussSolverOnce(knownBombs, knownFrees, board, numberOfClues, numberOfHiddenNodes));
+
+		for(int i : knownBombs) {
+			if(knownFrees.contains(i)) {
+				throw new Exception("cell can't be both a logical bomb, and logical free" + idToHiddenNode[i][0] + " " + idToHiddenNode[i][1]);
+			}
+			board[idToHiddenNode[i][0]][idToHiddenNode[i][1]].isLogicalBomb = true;
+		}
+		for(int i : knownFrees) {
+			board[idToHiddenNode[i][0]][idToHiddenNode[i][1]].isLogicalFree = true;
+		}
+	}
+
+	private boolean runGaussSolverOnce(
+			TreeSet<Integer> knownBombs,
+			TreeSet<Integer> knownFrees,
+			VisibleTile[][] board,
+			int numberOfClues,
+			int numberOfHiddenNodes
+	) throws Exception {
+		double[][] matrix = new double[numberOfClues + knownBombs.size() + knownFrees.size()][numberOfHiddenNodes + 1];
 		int currentClue = 0;
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
@@ -74,8 +98,19 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 			}
 		}
 
+		for(int i : knownBombs) {
+			matrix[currentClue][i] = 1;
+			matrix[currentClue][numberOfHiddenNodes] = 1;
+			++currentClue;
+		}
+
+		for(int i : knownFrees) {
+			matrix[currentClue++][i] = 1;
+		}
+
 		performGaussianElimination(matrix);
 
+		boolean foundNewStuff = false;
 		boolean[] isBomb = new boolean[numberOfHiddenNodes + 1];
 		boolean[] isFree = new boolean[numberOfHiddenNodes + 1];
 		for (double[] currRow : matrix) {
@@ -86,13 +121,106 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				if(isBomb[i] && isFree[i]) {
 					throw new Exception("can't be both a bomb and free");
 				}
-				if(isBomb[i]) {
-					board[idToHiddenNode[i][0]][idToHiddenNode[i][1]].isLogicalBomb = true;
-				} else if(isFree[i]) {
-					board[idToHiddenNode[i][0]][idToHiddenNode[i][1]].isLogicalFree = true;
+				if(isBomb[i] && !knownBombs.contains(i)) {
+					foundNewStuff = true;
+					knownBombs.add(i);
+				}
+				if(isFree[i] && !knownFrees.contains(i)) {
+					foundNewStuff = true;
+					knownFrees.add(i);
 				}
 			}
 		}
+
+		return (foundNewStuff || checkForTrivialStuff(knownBombs, knownFrees, board));
+	}
+
+	private boolean checkForTrivialStuff(TreeSet<Integer> knownBombs, TreeSet<Integer> knownFrees, VisibleTile[][] board) {
+		boolean foundNewStuff = false;
+		for(int i = 0; i < rows; ++i) {
+			for(int j = 0; j < cols; ++j) {
+				VisibleTile cell = board[i][j];
+				if(!cell.getIsVisible() || cell.getNumberSurroundingBombs() == 0) {
+					continue;
+				}
+				int cntAdjacentBombs = 0, cntAdjacentFrees = 0, cntTotalAdjacentCells = 0;
+				for(int di = -1; di <= 1; ++di) {
+					for(int dj = -1; dj <= 1; ++dj) {
+						if(di == 0 && dj == 0) {
+							continue;
+						}
+						final int adjI = i+di;
+						final int adjJ = j+dj;
+						if(ArrayBounds.outOfBounds(adjI,adjJ, rows, cols)) {
+							continue;
+						}
+						if(board[adjI][adjJ].getIsVisible()) {
+							continue;
+						}
+						++cntTotalAdjacentCells;
+						if(knownBombs.contains(hiddenNodeToId[adjI][adjJ])) {
+							++cntAdjacentBombs;
+						}
+						if(knownFrees.contains(hiddenNodeToId[adjI][adjJ])) {
+							++cntAdjacentFrees;
+						}
+					}
+				}
+				if(cntAdjacentBombs == cell.getNumberSurroundingBombs()) {
+					//anything that's not a bomb is free
+					for(int di = -1; di <= 1; ++di) {
+						for(int dj = -1; dj <= 1; ++dj) {
+							if (di == 0 && dj == 0) {
+								continue;
+							}
+							final int adjI = i + di;
+							final int adjJ = j + dj;
+							if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
+								continue;
+							}
+							if (board[adjI][adjJ].getIsVisible()) {
+								continue;
+							}
+							final int currID = hiddenNodeToId[adjI][adjJ];
+							if(knownBombs.contains(currID)) {
+								continue;
+							}
+							if(!knownFrees.contains(currID)) {
+								foundNewStuff = true;
+								knownFrees.add(currID);
+							}
+						}
+					}
+				}
+				if(cntTotalAdjacentCells - cntAdjacentFrees == cell.getNumberSurroundingBombs()) {
+					//anything that's not free is a bomb
+					for(int di = -1; di <= 1; ++di) {
+						for(int dj = -1; dj <= 1; ++dj) {
+							if (di == 0 && dj == 0) {
+								continue;
+							}
+							final int adjI = i + di;
+							final int adjJ = j + dj;
+							if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
+								continue;
+							}
+							if (board[adjI][adjJ].getIsVisible()) {
+								continue;
+							}
+							final int currID = hiddenNodeToId[adjI][adjJ];
+							if(knownFrees.contains(currID)) {
+								continue;
+							}
+							if(!knownBombs.contains(currID)) {
+								foundNewStuff = true;
+								knownBombs.add(currID);
+							}
+						}
+					}
+				}
+			}
+		}
+		return foundNewStuff;
 	}
 
 	private void checkRowForSolvableStuff(double[] currRow, boolean[] isBomb, boolean[] isFree) {

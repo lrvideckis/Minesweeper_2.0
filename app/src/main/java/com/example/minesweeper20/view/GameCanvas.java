@@ -22,6 +22,8 @@ import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 
+import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
+
 public class GameCanvas extends View {
 
 	private final ScaleListener scaleListener;
@@ -30,7 +32,7 @@ public class GameCanvas extends View {
 	private final Paint black = new Paint();
 	private PopupWindow endGamePopup;
 	private final Matrix canvasTransitionScale = new Matrix();
-	private final MinesweeperSolver.VisibleTile[][] board;
+	private final VisibleTile[][] board;
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
 	private final FractionThenDouble bombProbability = new FractionThenDouble(0);
@@ -100,8 +102,12 @@ public class GameCanvas extends View {
 			}
 
 			minesweeperGame.clickCell(row, col, gameActivity.getToggleFlagModeOn());
-			if (!minesweeperGame.getIsGameOver() && gameActivity.getToggleHintsOn() && !(gameActivity.getToggleFlagModeOn() && !minesweeperGame.getCell(row,col).getIsVisible())) {
-				updateSolvedBoard();
+			if (!minesweeperGame.getIsGameOver() && !(gameActivity.getToggleFlagModeOn() && !minesweeperGame.getCell(row,col).getIsVisible())) {
+				if(gameActivity.getToggleHintsOn()) {
+					updateSolvedBoard();
+				} else if(gameActivity.getToggleGaussHintsOn()) {
+					updateSolvedBoardWithGaussSolver();
+				}
 			}
 		} catch(Exception e) {
 			gameActivity.displayStackTracePopup(e);
@@ -134,7 +140,7 @@ public class GameCanvas extends View {
 		}
 	}
 
-	private void drawCell(Canvas canvas, MinesweeperSolver.VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j) throws Exception {
+	private void drawCell(Canvas canvas, VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j) throws Exception {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
 

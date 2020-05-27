@@ -5,8 +5,10 @@ import com.example.minesweeper20.helpers.ArrayBounds;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
+
 public class MinesweeperGame {
-	public static class Tile extends MinesweeperSolver.VisibleTile {
+	public static class Tile extends VisibleTile {
 		private boolean isFlagged, isBomb;
 		private Tile() {
 			isFlagged = isBomb = false;
