@@ -11,12 +11,13 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 
 	private static final double EPSILON = 0.00000001;
 	private final int rows, cols;
-	private final int[][] hiddenNodeToId;
+	private final int[][] hiddenNodeToId, idToHiddenNode;
 
 	public GaussianEliminationSolver(int rows, int cols) {
 		this.rows = rows;
 		this.cols = cols;
 		hiddenNodeToId = new int[rows][cols];
+		idToHiddenNode = new int[rows*cols][2];
 	}
 
 	@Override
@@ -38,7 +39,10 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				if(GetConnectedComponents.isAwayCell(board, i, j, rows, cols)) {
 					continue;
 				}
-				hiddenNodeToId[i][j] = numberOfHiddenNodes++;
+				hiddenNodeToId[i][j] = numberOfHiddenNodes;
+				idToHiddenNode[numberOfHiddenNodes][0] = i;
+				idToHiddenNode[numberOfHiddenNodes][1] = j;
+				numberOfHiddenNodes++;
 			}
 		}
 		double[][] matrix = new double[numberOfClues][numberOfHiddenNodes + 1];
@@ -69,6 +73,33 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				++currentClue;
 			}
 		}
+		/*
+		matrix = new double[5][6];
+		matrix[0][0] = 1;
+		matrix[0][1] = 1;
+		matrix[0][5] = 1;
+
+		matrix[1][0] = 1;
+		matrix[1][1] = 1;
+		matrix[1][2] = 1;
+
+		matrix[2][1] = 1;
+		matrix[2][2] = 1;
+		matrix[2][3] = 1;
+
+		matrix[3][2] = 1;
+		matrix[3][3] = 1;
+		matrix[3][4] = 1;
+
+		matrix[4][3] = 1;
+		matrix[4][4] = 1;
+		matrix[4][5] = 1;
+
+		matrix[1][5] = 2;
+		matrix[2][5] = 2;
+		matrix[3][5] = 2;
+		 */
+
 		System.out.println("before matrix is:");
 		for (double[] doubles : matrix) {
 			System.out.println(Arrays.toString(doubles));
@@ -80,14 +111,65 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 		for (double[] doubles : matrix) {
 			System.out.println(Arrays.toString(doubles));
 		}
+
+		boolean[] isBomb = new boolean[numberOfHiddenNodes + 1];
+		boolean[] isFree = new boolean[numberOfHiddenNodes + 1];
+		for (double[] currRow : matrix) {
+			Arrays.fill(isBomb, false);
+			Arrays.fill(isFree, false);
+			checkRowForSolvableStuff(currRow, isBomb, isFree);
+			for(int i = 0; i+1 < currRow.length; ++i) {
+				if(isBomb[i] && isFree[i]) {
+					throw new Exception("can't be both a bomb and free");
+				}
+				if(isBomb[i]) {
+					board[idToHiddenNode[i][0]][idToHiddenNode[i][1]].isLogicalBomb = true;
+				} else if(isFree[i]) {
+					board[idToHiddenNode[i][0]][idToHiddenNode[i][1]].isLogicalFree = true;
+				}
+			}
+		}
+	}
+
+	private void checkRowForSolvableStuff(double[] currRow, boolean[] isBomb, boolean[] isFree) {
+		double sumPos = 0, sumNeg = 0;
+		for(int i = 0; i+1 < currRow.length; ++i) {
+			if(currRow[i] > 0.0) {
+				sumPos += currRow[i];
+			}
+			if(currRow[i] < 0.0) {
+				sumNeg += currRow[i];
+			}
+		}
+		if(Math.abs(sumPos - currRow[currRow.length-1]) < EPSILON) {
+			for(int i = 0; i+1 < currRow.length; ++i) {
+				if(currRow[i] > 0.0) {
+					isBomb[i] = true;
+				}
+				if(currRow[i] < 0.0) {
+					isFree[i] = true;
+				}
+			}
+			return;
+		}
+		if(Math.abs(sumNeg - currRow[currRow.length-1]) < EPSILON) {
+			for(int i = 0; i+1 < currRow.length; ++i) {
+				if(currRow[i] > 0.0) {
+					isFree[i] = true;
+				}
+				if(currRow[i] < 0.0) {
+					isBomb[i] = true;
+				}
+			}
+		}
 	}
 
 	private void performGaussianElimination(double[][] matrix) {
-		int n = matrix.length;
-		int m = matrix[0].length-1;
-		for(int col = 0, row = 0; col < m && row < n; ++col) {
+		final int rows = matrix.length;
+		final int cols = matrix[0].length;
+		for(int col = 0, row = 0; col < cols && row < rows; ++col) {
 			int sel = row;
-			for(int i = row+1; i < n; ++i) {
+			for(int i = row+1; i < rows; ++i) {
 				if (Math.abs(matrix[i][col]) > Math.abs(matrix[sel][col])) {
 					sel = i;
 				}
@@ -95,19 +177,19 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 			if(Math.abs(matrix[sel][col]) < EPSILON) {
 				continue;
 			}
-			for(int j = 0; j < m; ++j) {
+			for(int j = 0; j < cols; ++j) {
 				double temp = matrix[sel][j];
 				matrix[sel][j] = matrix[row][j];
 				matrix[row][j] = temp;
 			}
 			double s = (1.0 / matrix[row][col]);
-			for(int j = 0; j < m; ++j) {
+			for(int j = 0; j < cols; ++j) {
 				matrix[row][j] = matrix[row][j] * s;
 			}
-			for(int i = 0; i < n; ++i) {
+			for(int i = 0; i < rows; ++i) {
 				if (i != row && Math.abs(matrix[i][col]) > EPSILON) {
 					double t = matrix[i][col];
-					for(int j = 0; j < m; ++j) {
+					for(int j = 0; j < cols; ++j) {
 						matrix[i][j] = matrix[i][j] - (matrix[row][j] * t);
 					}
 				}
