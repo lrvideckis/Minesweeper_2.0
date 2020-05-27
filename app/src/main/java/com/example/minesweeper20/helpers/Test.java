@@ -4,11 +4,11 @@ import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolverWithBigint;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.minesweeperStuff.SlowBacktrackingSolver;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+
+import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class Test {
 	private final static int numberOfTests = 20;
@@ -42,8 +42,8 @@ public class Test {
 				e.printStackTrace();
 				return;
 			}
-			ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> boardFraction = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
-			ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> boardBigInt = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+			VisibleTile[][] boardFraction = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+			VisibleTile[][] boardBigInt = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
 				backtrackingSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfBombs());
@@ -51,11 +51,11 @@ public class Test {
 				boolean testPassed = true;
 				for(int i = 0; i < rows; ++i) {
 					for(int j = 0; j < cols; ++j) {
-						if(boardBigInt.get(i).get(j).getIsVisible()) {
+						if(boardBigInt[i][j].getIsVisible()) {
 							continue;
 						}
-						FractionThenDouble curr = boardFraction.get(i).get(j).getNumberOfBombConfigs();
-						curr.divideWith(boardFraction.get(i).get(j).getNumberOfTotalConfigs());
+						FractionThenDouble curr = boardFraction[i][j].getNumberOfBombConfigs();
+						curr.divideWith(boardFraction[i][j].getNumberOfTotalConfigs());
 
 						BigInteger top = backtrackingSolverWithBigint.getNumberOfBombConfigs(i,j);
 						BigInteger bottom = backtrackingSolverWithBigint.getNumberOfTotalConfigs(i,j);
@@ -126,8 +126,8 @@ public class Test {
 				e.printStackTrace();
 				return;
 			}
-			ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
-			ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+			VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+			VisibleTile[][] boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
 				backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfBombs());
@@ -149,21 +149,21 @@ public class Test {
 	}
 
 	private static boolean areBoardsDifferent(
-			ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> boardFast,
-			ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> boardSlow
+			VisibleTile[][] boardFast,
+			VisibleTile[][] boardSlow
 	) throws Exception {
 		boolean passedTest = true;
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				if(boardFast.get(i).get(j).getIsVisible()) {
+				if(boardFast[i][j].getIsVisible()) {
 					continue;
 				}
 
-				MinesweeperSolver.VisibleTile fastTile = boardFast.get(i).get(j);
+				VisibleTile fastTile = boardFast[i][j];
 				FractionThenDouble fast = new FractionThenDouble(fastTile.getNumberOfBombConfigs());
 				fast.divideWith(fastTile.getNumberOfTotalConfigs());
 
-				MinesweeperSolver.VisibleTile slowTile = boardSlow.get(i).get(j);
+				VisibleTile slowTile = boardSlow[i][j];
 				FractionThenDouble slow = new FractionThenDouble(slowTile.getNumberOfBombConfigs());
 				slow.divideWith(slowTile.getNumberOfTotalConfigs());
 
@@ -183,15 +183,15 @@ public class Test {
 		return !passedTest;
 	}
 
-	private static void printBoardDebug(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board) {
+	private static void printBoardDebug(VisibleTile[][] board) {
 		System.out.println("\nboard is:");
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				if(board.get(i).get(j).getIsVisible()) {
-					if(board.get(i).get(j).getNumberSurroundingBombs() == 0) {
+				if(board[i][j].getIsVisible()) {
+					if(board[i][j].getNumberSurroundingBombs() == 0) {
 						System.out.print('.');
 					} else {
-						System.out.print(board.get(i).get(j).getNumberSurroundingBombs());
+						System.out.print(board[i][j].getNumberSurroundingBombs());
 					}
 				} else {
 					System.out.print('U');

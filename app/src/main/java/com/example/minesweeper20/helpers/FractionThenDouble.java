@@ -187,8 +187,7 @@ public class FractionThenDouble {
 			return false;
 		}
 		if(hasOverflowed) {
-			final double epsilon = 0.000000001;
-			return Math.abs(value - other.value) < epsilon;
+			return Math.abs(value - other.value) < 0.000000001;
 		}
 		try {
 			return numerator * (long) other.getDenominator() == denominator * (long) other.getNumerator();

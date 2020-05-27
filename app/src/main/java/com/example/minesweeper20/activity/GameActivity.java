@@ -21,8 +21,14 @@ import java.io.StringWriter;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-	private Boolean toggleFlagModeOn, toggleHintsOn, toggleBombsOn, toggleBombProbabilityOn, solverHitIterationLimit;
-	private Integer numberOfRows, numberOfCols, numberOfBombs;
+	private boolean
+			toggleFlagModeOn = false,
+			toggleHintsOn = false,
+			toggleGaussHintsOn = false,
+			toggleBombsOn = false,
+			toggleBombProbabilityOn = false,
+			solverHitIterationLimit = false;
+	private int numberOfRows, numberOfCols, numberOfBombs;
 	private String gameMode;
 	private PopupWindow solverHitLimitPopup, stackStacePopup;
 
@@ -33,8 +39,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
 		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 1);
 		gameMode = getIntent().getStringExtra("gameMode");
-		solverHitIterationLimit = false;
-		toggleBombsOn = toggleFlagModeOn = toggleHintsOn = toggleBombProbabilityOn = false;
 		setContentView(R.layout.game);
 		Button backToStartScreen = findViewById(R.id.backToStartScreen);
 		backToStartScreen.setOnClickListener(this);
@@ -50,6 +54,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		Switch toggleProbability = findViewById(R.id.toggleBombProbability);
 		toggleProbability.setOnCheckedChangeListener(this);
+
+		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
+		toggleGaussHints.setOnCheckedChangeListener(this);
 
 		updateNumberOfBombs(numberOfBombs);
 		setUpIterationLimitPopup();
@@ -77,6 +84,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			case R.id.toggleBombProbability:
 				handleProbabilityToggle(isChecked);
 				break;
+			case R.id.toggleGaussHints:
+				handleGaussHintToggle(isChecked);
+				break;
+		}
+	}
+
+	private void handleGaussHintToggle(boolean isChecked) {
+		toggleGaussHintsOn = isChecked;
+		if(isChecked) {
+			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
+			try {
+				gameCanvas.updateSolvedBoardWithGaussSolver();
+			} catch (Exception e) {
+				displayStackTracePopup(e);
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -157,35 +180,39 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfBombs.setText(bombsLeft);
 	}
 
-	public Integer getNumberOfRows() {
+	public int getNumberOfRows() {
 		return numberOfRows;
 	}
 
-	public Integer getNumberOfCols() {
+	public int getNumberOfCols() {
 		return numberOfCols;
 	}
 
-	public Integer getNumberOfBombs() {
+	public int getNumberOfBombs() {
 		return numberOfBombs;
 	}
 
-	public Boolean getToggleFlagModeOn() {
+	public boolean getToggleFlagModeOn() {
 		return toggleFlagModeOn;
 	}
 
-	public Boolean getToggleBombsOn() {
+	public boolean getToggleBombsOn() {
 		return toggleBombsOn;
 	}
 
-	public Boolean getToggleHintsOn() {
+	public boolean getToggleHintsOn() {
 		return toggleHintsOn;
 	}
 
-	public Boolean getToggleBombProbabilityOn() {
+	public boolean getToggleBombProbabilityOn() {
 		return toggleBombProbabilityOn;
 	}
 
 	public String getGameMode() {
 		return gameMode;
+	}
+
+	public boolean getToggleGaussHintsOn() {
+		return toggleGaussHintsOn;
 	}
 }

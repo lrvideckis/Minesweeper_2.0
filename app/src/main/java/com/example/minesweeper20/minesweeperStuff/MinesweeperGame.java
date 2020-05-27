@@ -7,7 +7,7 @@ import java.util.Collections;
 
 public class MinesweeperGame {
 	public static class Tile extends MinesweeperSolver.VisibleTile {
-		private Boolean isFlagged, isBomb;
+		private boolean isFlagged, isBomb;
 		private Tile() {
 			isFlagged = isBomb = false;
 			numberSurroundingBombs = 0;
@@ -33,8 +33,8 @@ public class MinesweeperGame {
 			isFlagged = !isFlagged;
 		}
 	}
-	private final Integer numberOfRows, numberOfCols, numberOfBombs;
-	private Integer numberOfFlags;
+	private final int numberOfRows, numberOfCols, numberOfBombs;
+	private int numberOfFlags;
 	private boolean firstClick, isGameOver;
 	private final Tile[][] grid;
 
@@ -233,7 +233,7 @@ public class MinesweeperGame {
 		}
 	}
 
-	public void changeBombLocations(ArrayList<ArrayList<Boolean>> newBombLocations) throws Exception {
+	public void changeBombLocations(boolean[][] newBombLocations) throws Exception {
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				Tile curr = getCell(i,j);
@@ -251,7 +251,7 @@ public class MinesweeperGame {
 						if(ArrayBounds.outOfBounds(adjI,adjJ,numberOfRows, numberOfCols)) {
 							continue;
 						}
-						if(newBombLocations.get(adjI).get(adjJ)) {
+						if(newBombLocations[adjI][adjJ]) {
 							++cntSurroundingBombs;
 						}
 					}
@@ -265,7 +265,7 @@ public class MinesweeperGame {
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				getCell(i,j).numberSurroundingBombs = 0;
-				if(newBombLocations.get(i).get(j)) {
+				if(newBombLocations[i][j]) {
 					++numberOfNewBombs;
 				}
 			}
@@ -275,10 +275,10 @@ public class MinesweeperGame {
 		}
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
-				if(newBombLocations.get(i).get(j) && getCell(i,j).getIsVisible()) {
+				if(newBombLocations[i][j] && getCell(i,j).getIsVisible()) {
 					throw new Exception("bad bomb configuration: bomb is in revealed cell");
 				}
-				getCell(i,j).isBomb = newBombLocations.get(i).get(j);
+				getCell(i,j).isBomb = newBombLocations[i][j];
 				if(getCell(i,j).isBomb) {
 					incrementSurroundingBombCounts(i, j);
 				}

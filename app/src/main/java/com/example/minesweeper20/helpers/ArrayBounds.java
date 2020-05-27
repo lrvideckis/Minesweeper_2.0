@@ -1,21 +1,21 @@
 package com.example.minesweeper20.helpers;
 
 import android.util.Pair;
-import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
-import java.util.ArrayList;
+
+import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class ArrayBounds {
-	public static Pair<Integer,Integer> getArrayBounds(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board) throws Exception {
-		int rows = board.size();
+	public static Pair<Integer,Integer> getArrayBounds(VisibleTile[][] board) throws Exception {
+		int rows = board.length;
 		if(rows == 0) {
 			throw new Exception("board has 0 rows");
 		}
-		int cols = board.get(0).size();
+		int cols = board[0].length;
 		if(cols == 0) {
 			throw new Exception("board has 0 columns");
 		}
-		for(int i = 0; i < rows; ++i) {
-			if(board.get(i).size() != cols) {
+		for (VisibleTile[] visibleTiles : board) {
+			if (visibleTiles.length != cols) {
 				throw new Exception("jagged board, not all rows are the same length");
 			}
 		}

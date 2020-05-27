@@ -8,50 +8,33 @@ import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.MutableInt;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class SlowBacktrackingSolver implements MinesweeperSolver {
 
-	private Integer rows, cols;
-	private final static Integer iterationLimit = 500000;
+	private int rows, cols;
+	private final static int iterationLimit = 500000;
 
-	private final ArrayList<ArrayList<Pair<Integer,Integer>>> lastUnvisitedSpot;
-	private final ArrayList<ArrayList<Boolean>> isBomb;
-	private final ArrayList<ArrayList<Integer>> cntSurroundingBombs;
-	private ArrayList<ArrayList<VisibleTile>> board;
-	private Integer numberOfBombs;
+	private final int[][][] lastUnvisitedSpot;
+	private final boolean[][] isBomb;
+	private final int[][] cntSurroundingBombs;
+	private VisibleTile[][] board;
+	private int numberOfBombs;
 
 	public SlowBacktrackingSolver(int rows, int cols) {
-		isBomb = new ArrayList<>(rows);
-		for(int i = 0; i < rows; ++i) {
-			ArrayList<Boolean> currRow = new ArrayList<>(Collections.nCopies(cols, false));
-			isBomb.add(currRow);
-		}
-
-		cntSurroundingBombs = new ArrayList<>(rows);
-		for(int i = 0; i < rows; ++i) {
-			ArrayList<Integer> currRow = new ArrayList<>(Collections.nCopies(cols, 0));
-			cntSurroundingBombs.add(currRow);
-		}
-		lastUnvisitedSpot = new ArrayList<>(rows);
-		for(int i = 0; i < rows; ++i) {
-			ArrayList<Pair<Integer,Integer>> currRow = new ArrayList<>(cols);
-			for(int j = 0; j < cols; ++j) {
-				currRow.add(null);
-			}
-			lastUnvisitedSpot.add(currRow);
-		}
+		isBomb = new boolean[rows][cols];
+		cntSurroundingBombs = new int[rows][cols];
+		lastUnvisitedSpot = new int[rows][cols][2];
 	}
 
 	@Override
-	public void solvePosition(ArrayList<ArrayList<VisibleTile>> _board, int _numberOfBombs) throws Exception {
+	public void solvePosition(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
 		initialize(_board, _numberOfBombs);
 
 		if(GetConnectedComponents.allCellsAreHidden(board)) {
 			for(int i = 0; i < rows; ++i) {
 				for(int j = 0; j < cols; ++j) {
-					board.get(i).get(j).numberOfBombConfigs.setValues(numberOfBombs, 1);
-					board.get(i).get(j).numberOfTotalConfigs.setValues(rows*cols, 1);
+					board[i][j].numberOfBombConfigs.setValues(numberOfBombs, 1);
+					board[i][j].numberOfTotalConfigs.setValues(rows*cols, 1);
 				}
 			}
 			return;
@@ -60,7 +43,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		ArrayList<Pair<Integer,Integer>> component = new ArrayList<>();
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				if(!board.get(i).get(j).getIsVisible()) {
+				if(!board[i][j].getIsVisible()) {
 					component.add(new Pair<>(i,j));
 				}
 			}
@@ -73,7 +56,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				VisibleTile curr = board.get(i).get(j);
+				VisibleTile curr = board[i][j];
 				if(curr.getIsVisible()) {
 					continue;
 				}
@@ -101,19 +84,20 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 					if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 						continue;
 					}
-					if (board.get(adjI).get(adjJ).isVisible) {
-						lastUnvisitedSpot.get(adjI).set(adjJ, spot);
+					if (board[adjI][adjJ].isVisible) {
+						lastUnvisitedSpot[adjI][adjJ][0] = spot.first;
+						lastUnvisitedSpot[adjI][adjJ][1] = spot.second;
 					}
 				}
 			}
 		}
 	}
 
-	public ArrayList<ArrayList<Boolean>> getBombConfiguration(ArrayList<ArrayList<VisibleTile>> _board, int _numberOfBombs, int _spotI, int _spotJ, boolean _wantBomb) throws Exception {
+	public boolean[][] getBombConfiguration(VisibleTile[][] _board, int _numberOfBombs, int _spotI, int _spotJ, boolean _wantBomb) throws Exception {
 		throw new Exception("to make warning go away");
 	}
 
-	private void initialize(ArrayList<ArrayList<VisibleTile>> _board, int _numberOfBombs) throws Exception {
+	private void initialize(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
 		board = _board;
 		numberOfBombs = _numberOfBombs;
 		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
@@ -121,8 +105,8 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		cols = dimensions.second;
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				isBomb.get(i).set(j,false);
-				cntSurroundingBombs.get(i).set(j,0);
+				isBomb[i][j] = false;
+				cntSurroundingBombs[i][j] = 0;
 			}
 		}
 	}
@@ -140,7 +124,8 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		final int j = component.get(pos).second;
 
 		//try bomb
-		isBomb.get(i).set(j, true);
+		//isBomb.get(i).set(j, true);
+		isBomb[i][j] = true;
 		if(checkSurroundingConditions(i,j, component.get(pos), 1)) {
 			currNumberOfBombs.addWith(1);
 			updateSurroundingBombCnt(i,j,1);
@@ -150,7 +135,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		}
 
 		//try free
-		isBomb.get(i).set(j, false);
+		isBomb[i][j] = false;
 		if(checkSurroundingConditions(i,j,component.get(pos), 0)) {
 			solveComponent(pos+1, component, currIterations, currNumberOfBombs);
 		}
@@ -167,9 +152,9 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 				if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 					continue;
 				}
-				if(board.get(adjI).get(adjJ).isVisible) {
-					final int cnt = cntSurroundingBombs.get(adjI).get(adjJ);
-					cntSurroundingBombs.get(adjI).set(adjJ, cnt + delta);
+				if(board[adjI][adjJ].isVisible) {
+					final int cnt = cntSurroundingBombs[adjI][adjJ];
+					cntSurroundingBombs[adjI][adjJ] = cnt + delta;
 				}
 			}
 		}
@@ -186,15 +171,18 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 				if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 					continue;
 				}
-				VisibleTile adjTile = board.get(adjI).get(adjJ);
+				VisibleTile adjTile = board[adjI][adjJ];
 				if(!adjTile.isVisible) {
 					continue;
 				}
-				final int currBacktrackingCount = cntSurroundingBombs.get(adjI).get(adjJ);
+				final int currBacktrackingCount = cntSurroundingBombs[adjI][adjJ];
 				if(currBacktrackingCount + arePlacingABomb > adjTile.numberSurroundingBombs) {
 					return false;
 				}
-				if(lastUnvisitedSpot.get(adjI).get(adjJ).equals(currSpot) && currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs) {
+				if(
+						lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
+						lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
+						currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs) {
 					return false;
 				}
 			}
@@ -210,16 +198,15 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		if(currNumberOfBombs != numberOfBombs) {
 			return;
 		}
-		//printBoardDebug();
 		for(int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if(board.get(i).get(j).getIsVisible()) {
+				if(board[i][j].getIsVisible()) {
 					continue;
 				}
-				if (isBomb.get(i).get(j)) {
-					board.get(i).get(j).numberOfBombConfigs.addWith(1);
+				if (isBomb[i][j]) {
+					board[i][j].numberOfBombConfigs.addWith(1);
 				}
-				board.get(i).get(j).numberOfTotalConfigs.addWith(1);
+				board[i][j].numberOfTotalConfigs.addWith(1);
 			}
 		}
 	}
@@ -238,11 +225,11 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 						if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 							continue;
 						}
-						VisibleTile adjTile = board.get(adjI).get(adjJ);
+						VisibleTile adjTile = board[adjI][adjJ];
 						if (!adjTile.isVisible) {
 							continue;
 						}
-						if (!cntSurroundingBombs.get(adjI).get(adjJ).equals(adjTile.numberSurroundingBombs)) {
+						if (cntSurroundingBombs[adjI][adjJ] != adjTile.numberSurroundingBombs) {
 							return false;
 						}
 					}
@@ -252,7 +239,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		int prevNumberOfBombs = 0;
 		for(int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (isBomb.get(i).get(j)) {
+				if (isBomb[i][j]) {
 					++prevNumberOfBombs;
 				}
 			}

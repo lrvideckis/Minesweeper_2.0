@@ -10,9 +10,10 @@ import com.example.minesweeper20.helpers.MyMath;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class BacktrackingSolverWithBigint {
 	private static class MyBIGPair {
@@ -28,87 +29,63 @@ public class BacktrackingSolverWithBigint {
 		}
 	}
 
-	private final ArrayList<ArrayList<BigInteger>> BIG_numberOfBombConfigs, BIG_numberOfTotalConfigs;
+	private final BigInteger[][] BIG_numberOfBombConfigs, BIG_numberOfTotalConfigs;
 
-	private Integer rows, cols;
-	private final static Integer iterationLimit = 20000;
+	private int rows, cols;
+	private final static int iterationLimit = 20000;
 
-	private final ArrayList<ArrayList<Boolean>> isBomb;
-	private final ArrayList<ArrayList<Integer>> cntSurroundingBombs;
-	private ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
-	private final ArrayList<ArrayList<Pair<Integer,Integer>>> lastUnvisitedSpot;
+	private final boolean[][] isBomb;
+	private final int[][] cntSurroundingBombs;
+	private VisibleTile[][] board;
+	private final int[][][] lastUnvisitedSpot;
 	private ArrayList<ArrayList<Pair<Integer,Integer>>> components;
-	private Integer numberOfBombs;
+	private int numberOfBombs;
 
-	//variables for saving specific bomb position
-	private final ArrayList<ArrayList<Boolean>> saveIsBomb;
 	//one hash-map for each component:
 	//for each component: we map the number of bombs to a configuration of bombs for that component
 	private final ArrayList<TreeMap<Integer, MutableInt>> bombConfig;
 	private final ArrayList<TreeMap<Integer, BigInteger>> numberOfConfigsForCurrent;
 
 	public BigInteger getNumberOfBombConfigs(int i, int j) {
-		return BIG_numberOfBombConfigs.get(i).get(j);
+		return BIG_numberOfBombConfigs[i][j];
 	}
 	public BigInteger getNumberOfTotalConfigs(int i, int j) {
-		return BIG_numberOfTotalConfigs.get(i).get(j);
+		return BIG_numberOfTotalConfigs[i][j];
 	}
 
 	public BacktrackingSolverWithBigint(int rows, int cols) {
-		isBomb = new ArrayList<>(rows);
-		for(int i = 0; i < rows; ++i) {
-			ArrayList<Boolean> currRow = new ArrayList<>(Collections.nCopies(cols, false));
-			isBomb.add(currRow);
-		}
+		isBomb = new boolean[rows][cols];
+		cntSurroundingBombs = new int[rows][cols];
+		lastUnvisitedSpot = new int[rows][cols][2];
 
-		saveIsBomb = new ArrayList<>(rows);
-		for(int i = 0; i < rows; ++i) {
-			ArrayList<Boolean> currRow = new ArrayList<>(Collections.nCopies(cols, false));
-			saveIsBomb.add(currRow);
-		}
 
-		cntSurroundingBombs = new ArrayList<>(rows);
+		BIG_numberOfBombConfigs = new BigInteger[rows][cols];
+		BIG_numberOfTotalConfigs = new BigInteger[rows][cols];
 		for(int i = 0; i < rows; ++i) {
-			ArrayList<Integer> currRow = new ArrayList<>(Collections.nCopies(cols, 0));
-			cntSurroundingBombs.add(currRow);
-		}
-
-		lastUnvisitedSpot = new ArrayList<>(rows);
-		for(int i = 0; i < rows; ++i) {
-			ArrayList<Pair<Integer,Integer>> currRow = new ArrayList<>(cols);
 			for(int j = 0; j < cols; ++j) {
-				currRow.add(null);
+				BIG_numberOfBombConfigs[i][j] = BigInteger.ZERO;
+				BIG_numberOfTotalConfigs[i][j] = BigInteger.ZERO;
 			}
-			lastUnvisitedSpot.add(currRow);
-		}
-
-		BIG_numberOfBombConfigs = new ArrayList<>();
-		BIG_numberOfTotalConfigs = new ArrayList<>();
-		for(int i = 0; i < rows; ++i) {
-			ArrayList<BigInteger> currRowBombs = new ArrayList<>(cols);
-			ArrayList<BigInteger> currRowTotal = new ArrayList<>(cols);
-			for(int j = 0; j < cols; ++j) {
-				currRowBombs.add(BigInteger.ZERO);
-				currRowTotal.add(BigInteger.ZERO);
-			}
-			BIG_numberOfBombConfigs.add(currRowBombs);
-			BIG_numberOfTotalConfigs.add(currRowTotal);
 		}
 
 		bombConfig = new ArrayList<>();
 		numberOfConfigsForCurrent = new ArrayList<>();
 	}
 
-	public void solvePosition(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> _board, int _numberOfBombs) throws Exception {
+	public void solvePosition(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
 		initialize(_board, _numberOfBombs);
 		components = GetConnectedComponents.getComponents(board);
 		initializeLastUnvisitedSpot(components);
 
+		if(_board.length != rows || _board[0].length != cols) {
+			throw new Exception("board dimensions don't match what was passed in the constructor");
+		}
+
 		if(GetConnectedComponents.allCellsAreHidden(board)) {
 			for(int i = 0; i < rows; ++i) {
 				for(int j = 0; j < cols; ++j) {
-					BIG_numberOfBombConfigs.get(i).set(j, BigInteger.valueOf(numberOfBombs));
-					BIG_numberOfTotalConfigs.get(i).set(i, BigInteger.valueOf(rows*cols));
+					BIG_numberOfBombConfigs[i][j] = BigInteger.valueOf(numberOfBombs);
+					BIG_numberOfTotalConfigs[i][j] = BigInteger.valueOf(rows*cols);
 				}
 			}
 			return;
@@ -139,19 +116,19 @@ public class BacktrackingSolverWithBigint {
 					if(awayBombProbability == null) {
 						throw new Exception("away probability is null, but this was checked above");
 					}
-					BIG_numberOfBombConfigs.get(i).set(j, new BigInteger(awayBombProbability.first.toString()));
-					BIG_numberOfTotalConfigs.get(i).set(j, new BigInteger(awayBombProbability.second.toString()));
+					BIG_numberOfBombConfigs[i][j] = new BigInteger(awayBombProbability.first.toString());
+					BIG_numberOfTotalConfigs[i][j] = new BigInteger(awayBombProbability.second.toString());
 				}
-				MinesweeperSolver.VisibleTile curr = board.get(i).get(j);
+				VisibleTile curr = board[i][j];
 				if(curr.getIsVisible()) {
 					continue;
 				}
-				if(BIG_numberOfTotalConfigs.get(i).get(j).equals(BigInteger.ZERO)) {
+				if(BIG_numberOfTotalConfigs[i][j].equals(BigInteger.ZERO)) {
 					throw new Exception("There should be at least one bomb configuration for non-visible cells");
 				}
-				if(BIG_numberOfBombConfigs.get(i).get(j).equals(BigInteger.ZERO)) {
+				if(BIG_numberOfBombConfigs[i][j].equals(BigInteger.ZERO)) {
 					curr.isLogicalFree = true;
-				} else if(BIG_numberOfBombConfigs.get(i).get(j).equals(BIG_numberOfTotalConfigs.get(i).get(j))) {
+				} else if(BIG_numberOfBombConfigs[i][j].equals(BIG_numberOfTotalConfigs[i][j])) {
 					curr.isLogicalBomb = true;
 				}
 			}
@@ -292,7 +269,7 @@ public class BacktrackingSolverWithBigint {
 		return prevWays;
 	}
 
-	private void initialize(ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> _board, int _numberOfBombs) throws Exception {
+	private void initialize(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
 		board = _board;
 		numberOfBombs = _numberOfBombs;
 		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
@@ -300,9 +277,8 @@ public class BacktrackingSolverWithBigint {
 		cols = dimensions.second;
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
-				isBomb.get(i).set(j,false);
-				saveIsBomb.get(i).set(j,false);
-				cntSurroundingBombs.get(i).set(j,0);
+				isBomb[i][j] = false;
+				cntSurroundingBombs[i][j] = 0;
 			}
 		}
 	}
@@ -324,8 +300,9 @@ public class BacktrackingSolverWithBigint {
 						if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 							continue;
 						}
-						if (board.get(adjI).get(adjJ).isVisible) {
-							lastUnvisitedSpot.get(adjI).set(adjJ, spot);
+						if (board[adjI][adjJ].isVisible) {
+							lastUnvisitedSpot[adjI][adjJ][0] = spot.first;
+							lastUnvisitedSpot[adjI][adjJ][1] = spot.second;
 						}
 					}
 				}
@@ -351,7 +328,7 @@ public class BacktrackingSolverWithBigint {
 		final int j = component.get(pos).second;
 
 		//try bomb
-		isBomb.get(i).set(j, true);
+		isBomb[i][j] = true;
 		if(checkSurroundingConditions(i,j,component.get(pos),1)) {
 			currNumberOfBombs.addWith(1);
 			updateSurroundingBombCnt(i,j,1);
@@ -361,7 +338,7 @@ public class BacktrackingSolverWithBigint {
 		}
 
 		//try free
-		isBomb.get(i).set(j, false);
+		isBomb[i][j] = false;
 		if(checkSurroundingConditions(i,j,component.get(pos),0)) {
 			solveComponent(pos + 1, componentPos, currIterations, currNumberOfBombs, isSecondPass);
 		}
@@ -379,10 +356,9 @@ public class BacktrackingSolverWithBigint {
 				if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 					continue;
 				}
-				if(board.get(adjI).get(adjJ).isVisible) {
+				if(board[adjI][adjJ].isVisible) {
 					foundAdjVis = true;
-					final int cnt = cntSurroundingBombs.get(adjI).get(adjJ);
-					cntSurroundingBombs.get(adjI).set(adjJ, cnt + delta);
+					cntSurroundingBombs[adjI][adjJ] += delta;
 				}
 			}
 		}
@@ -402,15 +378,19 @@ public class BacktrackingSolverWithBigint {
 				if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 					continue;
 				}
-				MinesweeperSolver.VisibleTile adjTile = board.get(adjI).get(adjJ);
+				VisibleTile adjTile = board[adjI][adjJ];
 				if(!adjTile.isVisible) {
 					continue;
 				}
-				final int currBacktrackingCount = cntSurroundingBombs.get(adjI).get(adjJ);
+				final int currBacktrackingCount = cntSurroundingBombs[adjI][adjJ];
 				if(currBacktrackingCount + arePlacingABomb > adjTile.numberSurroundingBombs) {
 					return false;
 				}
-				if(lastUnvisitedSpot.get(adjI).get(adjJ).equals(currSpot) && currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs) {
+				if(
+						lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
+						lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
+						currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs
+				) {
 					return false;
 				}
 			}
@@ -444,10 +424,10 @@ public class BacktrackingSolverWithBigint {
 			if(currConfigs == null) {
 				throw new Exception("number of configs value is null");
 			}
-			if (isBomb.get(i).get(j)) {
-				BIG_numberOfBombConfigs.get(i).set(j, BIG_numberOfBombConfigs.get(i).get(j).add(currConfigs));
+			if (isBomb[i][j]) {
+				BIG_numberOfBombConfigs[i][j] = BIG_numberOfBombConfigs[i][j].add(currConfigs);
 			}
-			BIG_numberOfTotalConfigs.get(i).set(j, BIG_numberOfTotalConfigs.get(i).get(j).add(currConfigs));
+			BIG_numberOfTotalConfigs[i][j] = BIG_numberOfTotalConfigs[i][j].add(currConfigs);
 		}
 	}
 
@@ -465,11 +445,11 @@ public class BacktrackingSolverWithBigint {
 					if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 						continue;
 					}
-					MinesweeperSolver.VisibleTile adjTile = board.get(adjI).get(adjJ);
+					VisibleTile adjTile = board[adjI][adjJ];
 					if(!adjTile.isVisible) {
 						continue;
 					}
-					if(!cntSurroundingBombs.get(adjI).get(adjJ).equals(adjTile.numberSurroundingBombs)) {
+					if(cntSurroundingBombs[adjI][adjJ] != adjTile.numberSurroundingBombs) {
 						throw new Exception("found bad solution - # bombs doesn't match, but this should be pruned out");
 					}
 				}
@@ -479,7 +459,7 @@ public class BacktrackingSolverWithBigint {
 		for(int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
-			if(isBomb.get(i).get(j)) {
+			if(isBomb[i][j]) {
 				++prevNumberOfBombs;
 			}
 		}

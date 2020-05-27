@@ -16,20 +16,17 @@ import com.example.minesweeper20.R;
 import com.example.minesweeper20.helpers.FractionThenDouble;
 import com.example.minesweeper20.helpers.MyMath;
 
-import java.util.ArrayList;
-
 class DrawCellHelpers {
 	private final Integer cellPixelLength = 150;
 	private final Paint
 			backgroundGreyForVisibleCells = new Paint(),
 			lowerTriangle = new Paint(),
-			upperTriangle = new Paint(),
 			middleSquare = new Paint(),
 			redFlag = new Paint(),
 			black = new Paint(),
 			redX = new Paint();
-	private ArrayList<ArrayList<ArrayList<Path>>> trianglePaths;
-	private ArrayList<ArrayList<Rect>> middleSquareRectangles, backgroundRectangles;
+	private Path[][] trianglePaths;
+	private Rect[][] middleSquareRectangles, backgroundRectangles;
 	private final Paint[] numberColors;
 	private final String
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
@@ -46,10 +43,6 @@ class DrawCellHelpers {
 		lowerTriangle.setColor(ContextCompat.getColor(context, R.color.lowerTriangleColor));
 		lowerTriangle.setStyle(Paint.Style.FILL_AND_STROKE);
 		lowerTriangle.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
-
-		upperTriangle.setColor(ContextCompat.getColor(context, R.color.upperTriangleColor));
-		upperTriangle.setStyle(Paint.Style.FILL_AND_STROKE);
-		upperTriangle.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
 
 		middleSquare.setColor(ContextCompat.getColor(context, R.color.middleSquareColor));
 		middleSquare.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -84,33 +77,21 @@ class DrawCellHelpers {
 	}
 
 	private void initializeTrianglesAndRectangles(int rows, int cols) {
-		trianglePaths = new ArrayList<>(rows);
-		middleSquareRectangles = new ArrayList<>(rows);
-		backgroundRectangles = new ArrayList<>(rows);
+		trianglePaths = new Path[rows][cols];
+		middleSquareRectangles = new Rect[rows][cols];
+		backgroundRectangles = new Rect[rows][cols];
 		for(int i = 0; i < rows; ++i) {
-			ArrayList<ArrayList<Path>> currTriangleRow = new ArrayList<>(cols);
-			ArrayList<Rect> currRectRow = new ArrayList<>(cols), currBackgroundRow = new ArrayList<>(cols);
 			for(int j = 0; j < cols; ++j) {
 				final int startX = j * cellPixelLength;
 				final int startY = i * cellPixelLength;
 
-				ArrayList<Path> currSpot = new ArrayList<>(2);
-
-				Path lowerTrianglePath = new Path();
-				lowerTrianglePath.setFillType(Path.FillType.WINDING);
-				lowerTrianglePath.moveTo(startX, startY + cellPixelLength);
-				lowerTrianglePath.lineTo(startX + cellPixelLength, startY + cellPixelLength);
-				lowerTrianglePath.lineTo(startX + cellPixelLength, startY);
-				lowerTrianglePath.lineTo(startX, startY + cellPixelLength);
-				lowerTrianglePath.close();
-
-				Path upperTrianglePath = new Path();
-				upperTrianglePath.setFillType(Path.FillType.WINDING);
-				upperTrianglePath.moveTo(startX, startY);
-				upperTrianglePath.lineTo(startX, startY + cellPixelLength);
-				upperTrianglePath.lineTo(startX + cellPixelLength, startY);
-				upperTrianglePath.lineTo(startX, startY);
-				upperTrianglePath.close();
+				Path currLowerTrianglePath = new Path();
+				currLowerTrianglePath.setFillType(Path.FillType.WINDING);
+				currLowerTrianglePath.moveTo(startX, startY + cellPixelLength);
+				currLowerTrianglePath.lineTo(startX + cellPixelLength, startY + cellPixelLength);
+				currLowerTrianglePath.lineTo(startX + cellPixelLength, startY);
+				currLowerTrianglePath.lineTo(startX, startY + cellPixelLength);
+				currLowerTrianglePath.close();
 
 				Rect middleSquare = new Rect();
 				middleSquare.set(startX + cellPixelLength*88/100,
@@ -120,29 +101,22 @@ class DrawCellHelpers {
 
 				Rect currBackground = new Rect(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
 
-				currSpot.add(lowerTrianglePath);
-				currSpot.add(upperTrianglePath);
-
-				currTriangleRow.add(currSpot);
-				currRectRow.add(middleSquare);
-				currBackgroundRow.add(currBackground);
+				trianglePaths[i][j] = currLowerTrianglePath;
+				middleSquareRectangles[i][j] = middleSquare;
+				backgroundRectangles[i][j] = currBackground;
 			}
-			trianglePaths.add(currTriangleRow);
-			middleSquareRectangles.add(currRectRow);
-			backgroundRectangles.add(currBackgroundRow);
 		}
 	}
 
 	void drawBlankCell(Canvas canvas, int i, int j) {
-		canvas.drawPath(trianglePaths.get(i).get(j).get(0), lowerTriangle);
-		canvas.drawPath(trianglePaths.get(i).get(j).get(1), upperTriangle);
-		canvas.drawRect(middleSquareRectangles.get(i).get(j), middleSquare);
+		canvas.drawPath(trianglePaths[i][j], lowerTriangle);
+		canvas.drawRect(middleSquareRectangles[i][j], middleSquare);
 	}
 
 	void drawNumberedCell(Canvas canvas, Integer numberSurroundingBombs, int i, int j) {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
-		canvas.drawRect(backgroundRectangles.get(i).get(j), backgroundGreyForVisibleCells);
+		canvas.drawRect(backgroundRectangles[i][j], backgroundGreyForVisibleCells);
 		if(numberSurroundingBombs > 0) {
 			final int xPos = startX + cellPixelLength / 2;
 			final int yPos = (int) (startY + cellPixelLength / 2 - ((numberColors[numberSurroundingBombs].descent() + numberColors[numberSurroundingBombs].ascent()) / 2)) ;

@@ -12,19 +12,19 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 	//variables to hand a swipe (translate) and pinch (scale)
 	private final ScaleGestureDetector SGD;
-	private Float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
+	private float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
 	private final GameCanvas gameCanvas;
-	private Integer prevPointerCount = 0;
+	private int prevPointerCount = 0;
 
 	//variables to handle a tap
-	private Boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
-	private Float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
+	private boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
+	private float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
 
 	private final Matrix matrix = new Matrix();
-	private final Integer halfScreenWidth, halfScreenHeight;
-	private Float topNavBarHeight;
+	private final int halfScreenWidth, halfScreenHeight;
+	private float topNavBarHeight;
 
-	public ScaleListener(Context context, GameCanvas _gameCanvas, Integer _screenWidth, Integer _screenHeight) {
+	public ScaleListener(Context context, GameCanvas _gameCanvas, int _screenWidth, int _screenHeight) {
 		halfScreenWidth = _screenWidth / 2;
 		halfScreenHeight = _screenHeight / 2;
 		SGD = new ScaleGestureDetector(context, this);
@@ -95,13 +95,13 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						absoluteX = startAbsoluteX;
 						absoluteY = startAbsoluteY;
 
-						Float newX = startOfTapX;
+						float newX = startOfTapX;
 						newX -= halfScreenWidth;
 						newX /= scale;
 						newX += halfScreenWidth;
 						newX -= absoluteX;
 
-						Float newY = startOfTapY;
+						float newY = startOfTapY;
 						newY += topNavBarHeight;
 						newY -= halfScreenHeight;
 						newY /= scale;

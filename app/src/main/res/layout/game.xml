@@ -44,14 +44,23 @@
 			android:id="@+id/toggleBombs"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/show_bombs"
-			/>
+			android:text="@string/show_bombs"/>
 		<Switch
 			android:id="@+id/toggleBombProbability"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/show_bomb_probability"
-			/>
+			android:text="@string/show_bomb_probability"/>
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+		<Switch
+			android:id="@+id/toggleGaussHints"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/gauss_hints"/>
 	</LinearLayout>
 
 	<com.example.minesweeper20.view.GameCanvas

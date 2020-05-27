@@ -18,21 +18,20 @@ import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
 import com.example.minesweeper20.helpers.FractionThenDouble;
 import com.example.minesweeper20.helpers.PopupHelper;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
+import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
-
-import java.util.ArrayList;
 
 public class GameCanvas extends View {
 
 	private final ScaleListener scaleListener;
 	private final MinesweeperGame minesweeperGame;
-	private final Integer cellPixelLength = 150;
+	private final int cellPixelLength = 150;
 	private final Paint black = new Paint();
 	private PopupWindow endGamePopup;
 	private final Matrix canvasTransitionScale = new Matrix();
-	private final ArrayList<ArrayList<MinesweeperSolver.VisibleTile>> board;
-	private final MinesweeperSolver backtrackingSolver;
+	private final MinesweeperSolver.VisibleTile[][] board;
+	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
 	private final FractionThenDouble bombProbability = new FractionThenDouble(0);
 
@@ -41,8 +40,8 @@ public class GameCanvas extends View {
 		black.setColor(Color.BLACK);
 		black.setStrokeWidth(3);
 		final GameActivity gameActivity = (GameActivity) getContext();
-		Integer screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-		Integer screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+		final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+		final int screenHeight = context.getResources().getDisplayMetrics().heightPixels;
 		scaleListener = new ScaleListener(context, this, screenWidth, screenHeight);
 		setOnTouchListener(scaleListener);
 		minesweeperGame = new MinesweeperGame(
@@ -52,6 +51,9 @@ public class GameCanvas extends View {
 		drawCellHelpers = new DrawCellHelpers(context, gameActivity.getNumberOfRows(), gameActivity.getNumberOfCols());
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 		backtrackingSolver = new BacktrackingSolver(
+				minesweeperGame.getNumberOfRows(),
+				minesweeperGame.getNumberOfCols());
+		gaussSolver = new GaussianEliminationSolver(
 				minesweeperGame.getNumberOfRows(),
 				minesweeperGame.getNumberOfCols());
 		setUpEndGamePopup();
@@ -70,7 +72,7 @@ public class GameCanvas extends View {
 		});
 	}
 
-	public void handleTap(Float tapX, Float tapY) {
+	public void handleTap(float tapX, float tapY) {
 		//TODO: have grid always fill screen
 		//eventually I won't need this check, as the grid always fills the screen
 		if(tapX < 0f ||
@@ -91,7 +93,7 @@ public class GameCanvas extends View {
 				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 				boolean wantBomb = gameActivity.getGameMode().equals(gameChoices[1]);
 				//TODO: bug: when toggle flags is on + hard mode: this will always put a bomb under the cell you just flagged
-				ArrayList<ArrayList<Boolean>> newBombLocations = backtrackingSolver.getBombConfiguration(board, 0, row, col, wantBomb);
+				boolean[][] newBombLocations = backtrackingSolver.getBombConfiguration(board, 0, row, col, wantBomb);
 				if (newBombLocations != null) {
 					minesweeperGame.changeBombLocations(newBombLocations);
 				}
@@ -118,6 +120,17 @@ public class GameCanvas extends View {
 		} catch (HitIterationLimitException e) {
 			GameActivity gameActivity = (GameActivity) getContext();
 			gameActivity.solverHasJustHitIterationLimit();
+		}
+	}
+
+	public void updateSolvedBoardWithGaussSolver() throws Exception {
+		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+		try {
+			gaussSolver.solvePosition(board, minesweeperGame.getNumberOfBombs());
+		} catch (Exception e) {
+			GameActivity gameActivity = (GameActivity) getContext();
+			gameActivity.displayStackTracePopup(e);
+			e.printStackTrace();
 		}
 	}
 
@@ -163,6 +176,18 @@ public class GameCanvas extends View {
 				bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
 				drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
 			}
+		} else if(gameActivity.getToggleGaussHintsOn()) {
+			if(solverCell.getIsLogicalBomb()) {
+				if(!gameCell.isBomb()) {
+					throw new Exception("gauss solver says: logical bomb, but it's not a bomb");
+				}
+				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
+			} else if(solverCell.getIsLogicalFree()) {
+				if(gameCell.isBomb()) {
+					throw new Exception("gauss solver says: logical free, but it's not free");
+				}
+				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
+			}
 		}
 	}
 
@@ -200,7 +225,7 @@ public class GameCanvas extends View {
 		for(int i = 0; i < numberOfRows; ++i) {
 			for(int j = 0; j < numberOfCols; ++j) {
 				try {
-					drawCell(canvas, board.get(i).get(j), minesweeperGame.getCell(i,j), i, j);
+					drawCell(canvas, board[i][j], minesweeperGame.getCell(i,j), i, j);
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);
