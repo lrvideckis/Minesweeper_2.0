@@ -3,6 +3,7 @@ package com.example.minesweeper20.helpers;
 import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolverWithBigint;
+import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.SlowBacktrackingSolver;
 
@@ -181,6 +182,67 @@ public class Test {
 			printBoardDebug(boardFast);
 		}
 		return !passedTest;
+	}
+
+	public static void performTestsForGaussSolver() {
+		for(int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.println("test number: " + testID);
+			int bombs = 5;
+			rows = cols = 5;
+			try {
+				rows = MyMath.getRand(3, 15);
+				cols = MyMath.getRand(3, 15);
+				bombs = MyMath.getRand(2, 50);
+			} catch(Exception ignored) {}
+			bombs = Math.min(bombs, rows*cols - 9);
+
+			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
+
+			MinesweeperGame minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+			try {
+				int numberOfClicks = MyMath.getRand(0, 4);
+				while(numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
+					int x = MyMath.getRand(0, rows-1);
+					int y = MyMath.getRand(0, cols-1);
+					minesweeperGame.clickCell(x, y, false);
+				}
+				if(minesweeperGame.getIsGameOver()) {
+					continue;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+			VisibleTile[][] boardBacktracking = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+			VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+
+			try {
+				backtrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfBombs());
+				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfBombs());
+				boolean passedTest = true;
+				for(int i = 0; i < rows; ++i) {
+					for(int j = 0; j < cols; ++j) {
+						if(!boardBacktracking[i][j].getIsLogicalBomb() && boardGauss[i][j].getIsLogicalBomb()) {
+							passedTest = false;
+							System.out.println("it isn't a logical bomb, but Gauss solver says it's a logical bomb " + i + " " + j);
+						}
+						if(!boardBacktracking[i][j].getIsLogicalFree() && boardGauss[i][j].getIsLogicalFree()) {
+							passedTest = false;
+							System.out.println("it isn't a logical free, but Gauss solver says it's a logical free " + i + " " + j);
+						}
+					}
+				}
+				if(!passedTest) {
+					printBoardDebug(boardBacktracking);
+					return;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
 	private static void printBoardDebug(VisibleTile[][] board) {

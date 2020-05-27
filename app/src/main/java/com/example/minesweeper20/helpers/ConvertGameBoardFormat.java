@@ -12,6 +12,7 @@ public class ConvertGameBoardFormat {
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
 				board[i][j] = new VisibleTile();
+				board[i][j].updateVisibilityAndSurroundingBombs(minesweeperGame.getCell(i,j));
 			}
 		}
 		return board;

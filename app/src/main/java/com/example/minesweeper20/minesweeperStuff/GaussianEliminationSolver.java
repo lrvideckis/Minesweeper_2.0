@@ -73,44 +73,8 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				++currentClue;
 			}
 		}
-		/*
-		matrix = new double[5][6];
-		matrix[0][0] = 1;
-		matrix[0][1] = 1;
-		matrix[0][5] = 1;
-
-		matrix[1][0] = 1;
-		matrix[1][1] = 1;
-		matrix[1][2] = 1;
-
-		matrix[2][1] = 1;
-		matrix[2][2] = 1;
-		matrix[2][3] = 1;
-
-		matrix[3][2] = 1;
-		matrix[3][3] = 1;
-		matrix[3][4] = 1;
-
-		matrix[4][3] = 1;
-		matrix[4][4] = 1;
-		matrix[4][5] = 1;
-
-		matrix[1][5] = 2;
-		matrix[2][5] = 2;
-		matrix[3][5] = 2;
-		 */
-
-		System.out.println("before matrix is:");
-		for (double[] doubles : matrix) {
-			System.out.println(Arrays.toString(doubles));
-		}
 
 		performGaussianElimination(matrix);
-
-		System.out.println("before matrix is:");
-		for (double[] doubles : matrix) {
-			System.out.println(Arrays.toString(doubles));
-		}
 
 		boolean[] isBomb = new boolean[numberOfHiddenNodes + 1];
 		boolean[] isFree = new boolean[numberOfHiddenNodes + 1];
@@ -165,6 +129,9 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 	}
 
 	private void performGaussianElimination(double[][] matrix) {
+		if(matrix.length == 0 || matrix[0].length == 0) {
+			return;
+		}
 		final int rows = matrix.length;
 		final int cols = matrix[0].length;
 		for(int col = 0, row = 0; col < cols && row < rows; ++col) {

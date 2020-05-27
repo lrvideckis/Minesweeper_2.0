@@ -43,6 +43,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		setUpGridTooSmallPopup();
 		Test.performTestsForBombProbability();
 		Test.performTestsForFractionOverflow();
+		Test.performTestsForGaussSolver();
 	}
 
 	@Override
