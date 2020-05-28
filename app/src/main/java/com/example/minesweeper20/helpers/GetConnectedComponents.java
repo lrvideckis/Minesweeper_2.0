@@ -53,22 +53,14 @@ public class GetConnectedComponents {
 				if(!board[i][j].getIsVisible()) {
 					continue;
 				}
-				for(int di = -1; di <= 1; ++di) {
-					for(int dj = -1; dj <= 1; ++dj) {
-						if(di == 0 && dj == 0) {
-							continue;
-						}
-						final int adjI = i + di;
-						final int adjJ = j + dj;
-						if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
-							continue;
-						}
-						VisibleTile adjTile = board[adjI][adjJ];
-						if(adjTile.getIsVisible()) {
-							continue;
-						}
-						disjointSet.merge(getNode(i,j),getNode(adjI,adjJ));
+				final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i,j,rows,cols);
+				for(int[] adj : adjCells) {
+					final int adjI = adj[0], adjJ = adj[1];
+					VisibleTile adjTile = board[adjI][adjJ];
+					if(adjTile.getIsVisible()) {
+						continue;
 					}
+					disjointSet.merge(getNode(i,j),getNode(adjI,adjJ));
 				}
 			}
 		}
@@ -114,16 +106,14 @@ public class GetConnectedComponents {
 
 	//returns true if cell has no visible neighbors
 	public static boolean isAwayCell(VisibleTile[][] board, int row, int col, int rows, int cols) {
-		for(int di = -1; di <= 1; ++di) {
-			for(int dj = -1; dj <= 1; ++dj) {
-				final int adjI = row+di;
-				final int adjJ = col+dj;
-				if(ArrayBounds.outOfBounds(adjI,adjJ,rows,cols)) {
-					continue;
-				}
-				if(board[adjI][adjJ].getIsVisible()) {
-					return false;
-				}
+		if(board[row][col].getIsVisible()) {
+			return false;
+		}
+		final int[][] adjCells = GetAdjacentCells.getAdjacentCells(row,col,rows,cols);
+		for(int[] adj : adjCells) {
+			final int adjI = adj[0], adjJ = adj[1];
+			if(board[adjI][adjJ].getIsVisible()) {
+				return false;
 			}
 		}
 		return true;

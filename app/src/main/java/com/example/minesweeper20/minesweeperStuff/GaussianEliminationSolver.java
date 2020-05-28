@@ -3,6 +3,7 @@ package com.example.minesweeper20.minesweeperStuff;
 import android.util.Pair;
 
 import com.example.minesweeper20.helpers.ArrayBounds;
+import com.example.minesweeper20.helpers.GetAdjacentCells;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 
 import java.util.Arrays;
@@ -77,21 +78,13 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				if(!cell.getIsVisible() || cell.getNumberSurroundingBombs() == 0) {
 					continue;
 				}
-				for(int di = -1; di <= 1; ++di) {
-					for(int dj = -1; dj <= 1; ++dj) {
-						if(di == 0 && dj == 0) {
-							continue;
-						}
-						final int adjI = i+di;
-						final int adjJ = j+dj;
-						if(ArrayBounds.outOfBounds(adjI,adjJ, rows, cols)) {
-							continue;
-						}
-						if(board[adjI][adjJ].getIsVisible()) {
-							continue;
-						}
-						matrix[currentClue][hiddenNodeToId[adjI][adjJ]] = 1;
+				final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i,j,rows,cols);
+				for(int[] adj : adjCells) {
+					final int adjI = adj[0], adjJ = adj[1];
+					if(board[adjI][adjJ].getIsVisible()) {
+						continue;
 					}
+					matrix[currentClue][hiddenNodeToId[adjI][adjJ]] = 1;
 				}
 				matrix[currentClue][numberOfHiddenNodes] = cell.getNumberSurroundingBombs();
 				++currentClue;
@@ -144,77 +137,51 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 					continue;
 				}
 				int cntAdjacentBombs = 0, cntAdjacentFrees = 0, cntTotalAdjacentCells = 0;
-				for(int di = -1; di <= 1; ++di) {
-					for(int dj = -1; dj <= 1; ++dj) {
-						if(di == 0 && dj == 0) {
-							continue;
-						}
-						final int adjI = i+di;
-						final int adjJ = j+dj;
-						if(ArrayBounds.outOfBounds(adjI,adjJ, rows, cols)) {
-							continue;
-						}
-						if(board[adjI][adjJ].getIsVisible()) {
-							continue;
-						}
-						++cntTotalAdjacentCells;
-						if(knownBombs.contains(hiddenNodeToId[adjI][adjJ])) {
-							++cntAdjacentBombs;
-						}
-						if(knownFrees.contains(hiddenNodeToId[adjI][adjJ])) {
-							++cntAdjacentFrees;
-						}
+				final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i,j,rows,cols);
+				for(int[] adj : adjCells) {
+					final int adjI = adj[0], adjJ = adj[1];
+					if(board[adjI][adjJ].getIsVisible()) {
+						continue;
+					}
+					++cntTotalAdjacentCells;
+					if(knownBombs.contains(hiddenNodeToId[adjI][adjJ])) {
+						++cntAdjacentBombs;
+					}
+					if(knownFrees.contains(hiddenNodeToId[adjI][adjJ])) {
+						++cntAdjacentFrees;
 					}
 				}
 				if(cntAdjacentBombs == cell.getNumberSurroundingBombs()) {
 					//anything that's not a bomb is free
-					for(int di = -1; di <= 1; ++di) {
-						for(int dj = -1; dj <= 1; ++dj) {
-							if (di == 0 && dj == 0) {
-								continue;
-							}
-							final int adjI = i + di;
-							final int adjJ = j + dj;
-							if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
-								continue;
-							}
-							if (board[adjI][adjJ].getIsVisible()) {
-								continue;
-							}
-							final int currID = hiddenNodeToId[adjI][adjJ];
-							if(knownBombs.contains(currID)) {
-								continue;
-							}
-							if(!knownFrees.contains(currID)) {
-								foundNewStuff = true;
-								knownFrees.add(currID);
-							}
+					for(int[] adj : adjCells) {
+						final int adjI = adj[0], adjJ = adj[1];
+						if (board[adjI][adjJ].getIsVisible()) {
+							continue;
+						}
+						final int currID = hiddenNodeToId[adjI][adjJ];
+						if(knownBombs.contains(currID)) {
+							continue;
+						}
+						if(!knownFrees.contains(currID)) {
+							foundNewStuff = true;
+							knownFrees.add(currID);
 						}
 					}
 				}
 				if(cntTotalAdjacentCells - cntAdjacentFrees == cell.getNumberSurroundingBombs()) {
 					//anything that's not free is a bomb
-					for(int di = -1; di <= 1; ++di) {
-						for(int dj = -1; dj <= 1; ++dj) {
-							if (di == 0 && dj == 0) {
-								continue;
-							}
-							final int adjI = i + di;
-							final int adjJ = j + dj;
-							if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
-								continue;
-							}
-							if (board[adjI][adjJ].getIsVisible()) {
-								continue;
-							}
-							final int currID = hiddenNodeToId[adjI][adjJ];
-							if(knownFrees.contains(currID)) {
-								continue;
-							}
-							if(!knownBombs.contains(currID)) {
-								foundNewStuff = true;
-								knownBombs.add(currID);
-							}
+					for(int[] adj : adjCells) {
+						final int adjI = adj[0], adjJ = adj[1];
+						if (board[adjI][adjJ].getIsVisible()) {
+							continue;
+						}
+						final int currID = hiddenNodeToId[adjI][adjJ];
+						if(knownFrees.contains(currID)) {
+							continue;
+						}
+						if(!knownBombs.contains(currID)) {
+							foundNewStuff = true;
+							knownBombs.add(currID);
 						}
 					}
 				}

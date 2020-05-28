@@ -1,6 +1,7 @@
 package com.example.minesweeper20.minesweeperStuff;
 
 import com.example.minesweeper20.helpers.ArrayBounds;
+import com.example.minesweeper20.helpers.GetAdjacentCells;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -243,19 +244,10 @@ public class MinesweeperGame {
 					continue;
 				}
 				int cntSurroundingBombs = 0;
-				for(int di = -1; di <= 1; ++di) {
-					for(int dj = -1; dj <= 1; ++dj) {
-						if(di == 0 && dj == 0) {
-							continue;
-						}
-						final int adjI = i+di;
-						final int adjJ = j+dj;
-						if(ArrayBounds.outOfBounds(adjI,adjJ,numberOfRows, numberOfCols)) {
-							continue;
-						}
-						if(newBombLocations[adjI][adjJ]) {
-							++cntSurroundingBombs;
-						}
+				final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i,j,numberOfRows,numberOfCols);
+				for(int[] adj : adjCells) {
+					if(newBombLocations[adj[0]][adj[1]]) {
+						++cntSurroundingBombs;
 					}
 				}
 				if(cntSurroundingBombs != getCell(i, j).numberSurroundingBombs) {

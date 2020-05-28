@@ -5,6 +5,7 @@ import android.util.Pair;
 import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.FractionThenDouble;
+import com.example.minesweeper20.helpers.GetAdjacentCells;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.MutableInt;
 import com.example.minesweeper20.helpers.MyMath;
@@ -293,20 +294,12 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			bombConfig.add(new TreeMap<Integer,MutableInt>());
 			numberOfConfigsForCurrent.add(new TreeMap<Integer,FractionThenDouble>());
 			for (Pair<Integer, Integer> spot : component) {
-				for (int di = -1; di <= 1; ++di) {
-					for (int dj = -1; dj <= 1; ++dj) {
-						if (di == 0 && dj == 0) {
-							continue;
-						}
-						final int adjI = spot.first + di;
-						final int adjJ = spot.second + dj;
-						if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
-							continue;
-						}
-						if (board[adjI][adjJ].isVisible) {
-							lastUnvisitedSpot[adjI][adjJ][0] = spot.first;
-							lastUnvisitedSpot[adjI][adjJ][1] = spot.second;
-						}
+				final int[][] adjCells = GetAdjacentCells.getAdjacentCells(spot.first,spot.second,rows,cols);
+				for(int[] adj : adjCells) {
+					final int adjI = adj[0], adjJ = adj[1];
+					if (board[adjI][adjJ].isVisible) {
+						lastUnvisitedSpot[adjI][adjJ][0] = spot.first;
+						lastUnvisitedSpot[adjI][adjJ][1] = spot.second;
 					}
 				}
 			}
@@ -350,20 +343,11 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 	private void updateSurroundingBombCnt(int i, int j, int delta) throws Exception {
 		boolean foundAdjVis = false;
-		for(int di = -1; di <= 1; ++di) {
-			for(int dj = -1; dj <= 1; ++dj) {
-				if (di == 0 && dj == 0) {
-					continue;
-				}
-				final int adjI = i + di;
-				final int adjJ = j + dj;
-				if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
-					continue;
-				}
-				if(board[adjI][adjJ].isVisible) {
-					foundAdjVis = true;
-					cntSurroundingBombs[adjI][adjJ] += delta;
-				}
+		final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i,j,rows,cols);
+		for(int[] adj : adjCells) {
+			if(board[adj[0]][adj[1]].isVisible) {
+				foundAdjVis = true;
+				cntSurroundingBombs[adj[0]][adj[1]] += delta;
 			}
 		}
 		if(!foundAdjVis) {
@@ -372,30 +356,22 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	private boolean checkSurroundingConditions(int i, int j, Pair<Integer,Integer> currSpot, int arePlacingABomb) {
-		for(int di = -1; di <= 1; ++di) {
-			for(int dj = -1; dj <= 1; ++dj) {
-				if (di == 0 && dj == 0) {
-					continue;
-				}
-				final int adjI = i + di;
-				final int adjJ = j + dj;
-				if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
-					continue;
-				}
-				VisibleTile adjTile = board[adjI][adjJ];
-				if(!adjTile.isVisible) {
-					continue;
-				}
-				final int currBacktrackingCount = cntSurroundingBombs[adjI][adjJ];
-				if(currBacktrackingCount + arePlacingABomb > adjTile.numberSurroundingBombs) {
-					return false;
-				}
-				if(
-						lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
-						lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
-						currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs) {
-					return false;
-				}
+		final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i,j,rows,cols);
+		for(int[] adj : adjCells) {
+			final int adjI = adj[0], adjJ = adj[1];
+			VisibleTile adjTile = board[adjI][adjJ];
+			if(!adjTile.isVisible) {
+				continue;
+			}
+			final int currBacktrackingCount = cntSurroundingBombs[adjI][adjJ];
+			if(currBacktrackingCount + arePlacingABomb > adjTile.numberSurroundingBombs) {
+				return false;
+			}
+			if(
+					lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
+					lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
+					currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs) {
+				return false;
 			}
 		}
 		return true;
@@ -451,23 +427,15 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for(int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
-			for(int di = -1; di <= 1; ++di) {
-				for(int dj = -1; dj <= 1; ++dj) {
-					if(di == 0 && dj == 0) {
-						continue;
-					}
-					final int adjI = i + di;
-					final int adjJ = j + dj;
-					if(ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
-						continue;
-					}
-					VisibleTile adjTile = board[adjI][adjJ];
-					if(!adjTile.isVisible) {
-						continue;
-					}
-					if(cntSurroundingBombs[adjI][adjJ] != adjTile.numberSurroundingBombs) {
-						throw new Exception("found bad solution - # bombs doesn't match, but this should be pruned out");
-					}
+			final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i,j,rows,cols);
+			for(int[] adj : adjCells) {
+				final int adjI = adj[0], adjJ = adj[1];
+				VisibleTile adjTile = board[adjI][adjJ];
+				if(!adjTile.isVisible) {
+					continue;
+				}
+				if(cntSurroundingBombs[adjI][adjJ] != adjTile.numberSurroundingBombs) {
+					throw new Exception("found bad solution - # bombs doesn't match, but this should be pruned out");
 				}
 			}
 		}
