@@ -4,69 +4,76 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:background="@color/white"
-	android:tag="@string/is_linear_layout"
-	android:orientation="vertical">
+	android:orientation="vertical"
+	android:tag="@string/is_linear_layout">
 
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
+
 		<Button
 			android:id="@+id/backToStartScreen"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/back"
-			android:layout_weight="1"/>
+			android:layout_weight="1"
+			android:text="@string/back" />
+
 		<Switch
 			android:id="@+id/toggleFlagMode"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/flag_mode"
-			android:layout_weight="3"/>
+			android:layout_weight="3"
+			android:text="@string/flag_mode" />
+
 		<Switch
 			android:id="@+id/toggleHints"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/show_hints"
-			android:layout_weight="3"/>
+			android:layout_weight="3"
+			android:text="@string/show_hints" />
+
 		<TextView
 			android:id="@+id/showNumberOfBombs"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_weight="3"/>
+			android:layout_weight="3" />
 	</LinearLayout>
 
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
+
 		<Switch
 			android:id="@+id/toggleBombs"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/show_bombs"/>
+			android:text="@string/show_bombs" />
+
 		<Switch
 			android:id="@+id/toggleBombProbability"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/show_bomb_probability"/>
+			android:text="@string/show_bomb_probability" />
 	</LinearLayout>
 
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
+
 		<Switch
 			android:id="@+id/toggleGaussHints"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/gauss_hints"/>
+			android:text="@string/gauss_hints" />
 	</LinearLayout>
 
 	<com.example.minesweeper20.view.GameCanvas
 		android:id="@+id/gridCanvas"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:tag="@string/is_game_canvas_layout"/>
+		android:tag="@string/is_game_canvas_layout" />
 
 </LinearLayout>

@@ -15,22 +15,6 @@ public class FractionThenDouble {
 		setValue(other);
 	}
 
-	public void setValue(FractionThenDouble other) throws Exception {
-		hasOverflowed = other.hasOverflowed;
-		if(other.hasOverflowed) {
-			value = other.value;
-		} else {
-			numerator = other.numerator;
-			denominator = other.denominator;
-			if(MyMath.gcd(numerator,denominator) != 1) {
-				throw new Exception("given fraction isn't in reduced form, but I reduced after each operation");
-			}
-			if(denominator == 0) {
-				throw new Exception("given fraction has a 0 denominator, but this shouldn't happen");
-			}
-		}
-	}
-
 	//this should only throw if _denominator is 0
 	public void setValues(int _numerator, int _denominator) throws Exception {
 		hasOverflowed = false;
@@ -38,13 +22,13 @@ public class FractionThenDouble {
 	}
 
 	public void addWith(int delta) {
-		if(hasOverflowed) {
+		if (hasOverflowed) {
 			value += delta;
 			return;
 		}
 		long currNumerator;
 		try {
-			currNumerator = Math.addExact(numerator, Math.multiplyExact(delta, (long)denominator));
+			currNumerator = Math.addExact(numerator, Math.multiplyExact(delta, (long) denominator));
 		} catch (ArithmeticException ignored) {
 			hasOverflowed = true;
 			value = numerator / (double) denominator;
@@ -53,13 +37,13 @@ public class FractionThenDouble {
 		}
 		try {
 			reduceAndSet(currNumerator, denominator);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void addWith(FractionThenDouble delta) {
-		if(!hasOverflowed && !delta.hasOverflowed) {
+		if (!hasOverflowed && !delta.hasOverflowed) {
 			long newNumerator, newDenominator;
 			try {
 				newNumerator = Math.addExact(
@@ -67,7 +51,7 @@ public class FractionThenDouble {
 						Math.multiplyExact((long) denominator, delta.numerator)
 				);
 				newDenominator = Math.multiplyExact((long) denominator, delta.denominator);
-			} catch(ArithmeticException ignored) {
+			} catch (ArithmeticException ignored) {
 				hasOverflowed = true;
 				value = numerator / (double) denominator;
 				value += delta.numerator / (double) delta.denominator;
@@ -81,11 +65,11 @@ public class FractionThenDouble {
 			return;
 		}
 		//we have overflowed
-		if(!hasOverflowed) {
+		if (!hasOverflowed) {
 			hasOverflowed = true;
 			value = numerator / (double) denominator;
 		}
-		if(delta.hasOverflowed) {
+		if (delta.hasOverflowed) {
 			value += delta.value;
 		} else {
 			value += delta.numerator / (double) delta.denominator;
@@ -94,7 +78,7 @@ public class FractionThenDouble {
 
 	//this will only throw if _denominator == 0
 	public void multiplyWith(int _numerator, int _denominator) throws Exception {
-		if(hasOverflowed) {
+		if (hasOverflowed) {
 			value *= _numerator;
 			value /= _denominator;
 			return;
@@ -103,7 +87,7 @@ public class FractionThenDouble {
 	}
 
 	public void multiplyWith(FractionThenDouble quotient) {
-		if(!quotient.hasOverflowed) {
+		if (!quotient.hasOverflowed) {
 			try {
 				multiplyWith(quotient.getNumerator(), quotient.getDenominator());
 			} catch (Exception e) {
@@ -111,7 +95,7 @@ public class FractionThenDouble {
 			}
 			return;
 		}
-		if(!hasOverflowed) {
+		if (!hasOverflowed) {
 			hasOverflowed = true;
 			value = numerator / (double) denominator;
 		}
@@ -120,7 +104,7 @@ public class FractionThenDouble {
 
 	//only will throw if quotient == 0 (divide by zero error)
 	public void divideWith(FractionThenDouble quotient) throws ArithmeticException {
-		if(!quotient.hasOverflowed) {
+		if (!quotient.hasOverflowed) {
 			try {
 				multiplyWith(quotient.getDenominator(), quotient.getNumerator());
 			} catch (Exception ignored) {
@@ -128,7 +112,7 @@ public class FractionThenDouble {
 			}
 			return;
 		}
-		if(!hasOverflowed) {
+		if (!hasOverflowed) {
 			hasOverflowed = true;
 			value = numerator / (double) denominator;
 		}
@@ -136,20 +120,20 @@ public class FractionThenDouble {
 	}
 
 	public int getNumerator() throws Exception {
-		if(hasOverflowed) {
+		if (hasOverflowed) {
 			throw new ArithmeticException("fraction has overflowed");
 		}
-		if(MyMath.gcd(numerator, denominator) != 1) {
+		if (MyMath.gcd(numerator, denominator) != 1) {
 			throw new Exception("fraction isn't in reduced form, but I reduced after every operation");
 		}
 		return numerator;
 	}
 
 	public int getDenominator() throws Exception {
-		if(hasOverflowed) {
+		if (hasOverflowed) {
 			throw new ArithmeticException("fraction has overflowed");
 		}
-		if(MyMath.gcd(numerator, denominator) != 1) {
+		if (MyMath.gcd(numerator, denominator) != 1) {
 			throw new Exception("fraction isn't in reduced form, but I reduced after every operation");
 		}
 		return denominator;
@@ -163,41 +147,58 @@ public class FractionThenDouble {
 		return value;
 	}
 
+	public void setValue(FractionThenDouble other) throws Exception {
+		hasOverflowed = other.hasOverflowed;
+		if (other.hasOverflowed) {
+			value = other.value;
+		} else {
+			numerator = other.numerator;
+			denominator = other.denominator;
+			if (MyMath.gcd(numerator, denominator) != 1) {
+				throw new Exception("given fraction isn't in reduced form, but I reduced after each operation");
+			}
+			if (denominator == 0) {
+				throw new Exception("given fraction has a 0 denominator, but this shouldn't happen");
+			}
+		}
+	}
+
 	private void reduceAndSet(long _numerator, long _denominator) throws Exception {
-		if(hasOverflowed) {
+		if (hasOverflowed) {
 			throw new Exception("this function should never be called when the fraction has overflowed");
 		}
 		final long gcd = MyMath.gcd(_numerator, _denominator);
 		_numerator /= gcd;
 		_denominator /= gcd;
-		if(_numerator != (int)_numerator || _denominator != (int)_denominator) {
+		if (_numerator != (int) _numerator || _denominator != (int) _denominator) {
 			hasOverflowed = true;
 			value = _numerator / (double) _denominator;
 			return;
 		}
-		numerator = (int)_numerator;
-		denominator = (int)_denominator;
-		if(denominator == 0) {
+		numerator = (int) _numerator;
+		denominator = (int) _denominator;
+		if (denominator == 0) {
 			throw new Exception("fraction with 0 as denominator");
 		}
 	}
 
 	public boolean equals(FractionThenDouble other) {
-		if(hasOverflowed != other.hasOverflowed) {
+		if (hasOverflowed != other.hasOverflowed) {
 			return false;
 		}
-		if(hasOverflowed) {
+		if (hasOverflowed) {
 			return Math.abs(value - other.value) < 0.000000001;
 		}
 		try {
 			return numerator * (long) other.getDenominator() == denominator * (long) other.getNumerator();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
+
 	public boolean equals(int other) {
-		if(hasOverflowed) {
+		if (hasOverflowed) {
 			return false;
 		}
 		return numerator == other * (long) denominator;

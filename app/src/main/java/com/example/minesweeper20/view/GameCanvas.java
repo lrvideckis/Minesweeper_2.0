@@ -30,12 +30,12 @@ public class GameCanvas extends View {
 	private final MinesweeperGame minesweeperGame;
 	private final int cellPixelLength = 150;
 	private final Paint black = new Paint();
-	private PopupWindow endGamePopup;
 	private final Matrix canvasTransitionScale = new Matrix();
 	private final VisibleTile[][] board;
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
 	private final FractionThenDouble bombProbability = new FractionThenDouble(0);
+	private PopupWindow endGamePopup;
 
 	public GameCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -77,7 +77,7 @@ public class GameCanvas extends View {
 	public void handleTap(float tapX, float tapY) {
 		//TODO: have grid always fill screen
 		//eventually I won't need this check, as the grid always fills the screen
-		if(tapX < 0f ||
+		if (tapX < 0f ||
 				tapY < 0f ||
 				tapX > minesweeperGame.getNumberOfCols() * cellPixelLength ||
 				tapY > minesweeperGame.getNumberOfRows() * cellPixelLength) {
@@ -102,14 +102,14 @@ public class GameCanvas extends View {
 			}
 
 			minesweeperGame.clickCell(row, col, gameActivity.getToggleFlagModeOn());
-			if (!minesweeperGame.getIsGameOver() && !(gameActivity.getToggleFlagModeOn() && !minesweeperGame.getCell(row,col).getIsVisible())) {
-				if(gameActivity.getToggleHintsOn()) {
+			if (!minesweeperGame.getIsGameOver() && !(gameActivity.getToggleFlagModeOn() && !minesweeperGame.getCell(row, col).getIsVisible())) {
+				if (gameActivity.getToggleHintsOn()) {
 					updateSolvedBoard();
-				} else if(gameActivity.getToggleGaussHintsOn()) {
+				} else if (gameActivity.getToggleGaussHintsOn()) {
 					updateSolvedBoardWithGaussSolver();
 				}
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			gameActivity.displayStackTracePopup(e);
 			e.printStackTrace();
 		}
@@ -145,11 +145,11 @@ public class GameCanvas extends View {
 		final int startY = i * cellPixelLength;
 
 		//it seems this is making it more laggy
-		if(cellIsOffScreen(startX, startY)) {
+		if (cellIsOffScreen(startX, startY)) {
 			return;
 		}
 
-		if(gameCell.getIsVisible()) {
+		if (gameCell.getIsVisible()) {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), i, j);
 			return;
 		}
@@ -157,39 +157,39 @@ public class GameCanvas extends View {
 
 		GameActivity gameActivity = (GameActivity) getContext();
 
-		if(gameCell.isFlagged()) {
+		if (gameCell.isFlagged()) {
 			drawCellHelpers.drawFlag(canvas, startX, startY);
-			if(minesweeperGame.getIsGameOver() && !gameCell.isBomb()) {
+			if (minesweeperGame.getIsGameOver() && !gameCell.isBomb()) {
 				drawCellHelpers.drawRedX(canvas, startX, startY);
 			}
-		} else if(gameCell.isBomb() && (minesweeperGame.getIsGameOver() || gameActivity.getToggleBombsOn())) {
+		} else if (gameCell.isBomb() && (minesweeperGame.getIsGameOver() || gameActivity.getToggleBombsOn())) {
 			drawCellHelpers.drawBomb(canvas, startX, startY);
 		}
 
-		if(gameActivity.getToggleHintsOn()) {
-			if(solverCell.getIsLogicalBomb()) {
-				if(!gameCell.isBomb()) {
+		if (gameActivity.getToggleHintsOn()) {
+			if (solverCell.getIsLogicalBomb()) {
+				if (!gameCell.isBomb()) {
 					throw new Exception("solver says: logical bomb, but it's not a bomb");
 				}
 				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
-			} else if(solverCell.getIsLogicalFree()) {
-				if(gameCell.isBomb()) {
+			} else if (solverCell.getIsLogicalFree()) {
+				if (gameCell.isBomb()) {
 					throw new Exception("solver says: logical free, but it's not free");
 				}
 				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
-			} else if(gameActivity.getToggleBombProbabilityOn() && !solverCell.getIsVisible()) {
+			} else if (gameActivity.getToggleBombProbabilityOn() && !solverCell.getIsVisible()) {
 				bombProbability.setValue(solverCell.getNumberOfBombConfigs());
 				bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
 				drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
 			}
-		} else if(gameActivity.getToggleGaussHintsOn()) {
-			if(solverCell.getIsLogicalBomb()) {
-				if(!gameCell.isBomb()) {
+		} else if (gameActivity.getToggleGaussHintsOn()) {
+			if (solverCell.getIsLogicalBomb()) {
+				if (!gameCell.isBomb()) {
 					throw new Exception("gauss solver says: logical bomb, but it's not a bomb");
 				}
 				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
-			} else if(solverCell.getIsLogicalFree()) {
-				if(gameCell.isBomb()) {
+			} else if (solverCell.getIsLogicalFree()) {
+				if (gameCell.isBomb()) {
 					throw new Exception("gauss solver says: logical free, but it's not free");
 				}
 				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
@@ -205,13 +205,13 @@ public class GameCanvas extends View {
 		final float halfOfScreenWidth = scaleListener.getHalfOfScreenWidth();
 		final float halfOfScreenHeight = scaleListener.getHalfOfScreenHeight();
 
-		if((startX + cellPixelLength + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth < 0) {
+		if ((startX + cellPixelLength + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth < 0) {
 			return true;
 		}
-		if((startY + cellPixelLength + topNavBarHeight + absoluteY - halfOfScreenHeight) * scale + halfOfScreenHeight - topNavBarHeight < 0) {
+		if ((startY + cellPixelLength + topNavBarHeight + absoluteY - halfOfScreenHeight) * scale + halfOfScreenHeight - topNavBarHeight < 0) {
 			return true;
 		}
-		if((startX + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth > getWidth()) {
+		if ((startX + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth > getWidth()) {
 			return true;
 		}
 		return ((startY + absoluteY + topNavBarHeight - halfOfScreenHeight) * scale + halfOfScreenHeight - topNavBarHeight > getHeight());
@@ -228,10 +228,10 @@ public class GameCanvas extends View {
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
 		final int numberOfCols = minesweeperGame.getNumberOfCols();
-		for(int i = 0; i < numberOfRows; ++i) {
-			for(int j = 0; j < numberOfCols; ++j) {
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
 				try {
-					drawCell(canvas, board[i][j], minesweeperGame.getCell(i,j), i, j);
+					drawCell(canvas, board[i][j], minesweeperGame.getCell(i, j), i, j);
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);
@@ -239,14 +239,14 @@ public class GameCanvas extends View {
 				}
 			}
 		}
-		for(int j = 0; j <= numberOfCols; ++j) {
-			canvas.drawLine(j*cellPixelLength, 0, j*cellPixelLength, numberOfRows*cellPixelLength, black);
+		for (int j = 0; j <= numberOfCols; ++j) {
+			canvas.drawLine(j * cellPixelLength, 0, j * cellPixelLength, numberOfRows * cellPixelLength, black);
 		}
-		for(int i = 0; i <= numberOfRows; ++i) {
-			canvas.drawLine(0, i*cellPixelLength, numberOfCols*cellPixelLength, i*cellPixelLength, black);
+		for (int i = 0; i <= numberOfRows; ++i) {
+			canvas.drawLine(0, i * cellPixelLength, numberOfCols * cellPixelLength, i * cellPixelLength, black);
 		}
 
-		if(minesweeperGame.getIsGameOver()) {
+		if (minesweeperGame.getIsGameOver()) {
 			PopupHelper.displayPopup(endGamePopup, findViewById(R.id.gridCanvas), getResources());
 		}
 	}
@@ -254,7 +254,7 @@ public class GameCanvas extends View {
 	private int getStatusBarHeight() {
 		int statusBarHeight = 0;
 		int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-		if(resourceId > 0) {
+		if (resourceId > 0) {
 			statusBarHeight = getResources().getDimensionPixelSize(resourceId);
 		}
 		return statusBarHeight;

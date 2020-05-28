@@ -9,12 +9,12 @@
 	<TextView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="@string/grid_too_small"/>
+		android:text="@string/grid_too_small" />
 
 	<Button
 		android:id="@+id/gridTooSmallOkButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="@string/ok"/>
+		android:text="@string/ok" />
 
 </LinearLayout>

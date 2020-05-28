@@ -92,7 +92,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void handleGaussHintToggle(boolean isChecked) {
 		toggleGaussHintsOn = isChecked;
-		if(isChecked) {
+		if (isChecked) {
 			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 			try {
 				gameCanvas.updateSolvedBoardWithGaussSolver();
@@ -104,7 +104,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void handleHintToggle(CompoundButton buttonView, boolean isChecked) {
-		if(solverHitIterationLimit) {
+		if (solverHitIterationLimit) {
 			buttonView.setChecked(false);
 			Switch bombProbability = findViewById(R.id.toggleBombProbability);
 			bombProbability.setChecked(false);
@@ -114,7 +114,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 		toggleHintsOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
-		if(isChecked) {
+		if (isChecked) {
 			try {
 				gameCanvas.updateSolvedBoard();
 			} catch (Exception e) {
@@ -125,7 +125,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			Switch bombProbability = findViewById(R.id.toggleBombProbability);
 			bombProbability.setChecked(false);
 			toggleBombProbabilityOn = false;
-			if(toggleGaussHintsOn) {
+			if (toggleGaussHintsOn) {
 				try {
 					gameCanvas.updateSolvedBoardWithGaussSolver();
 				} catch (Exception e) {
@@ -147,7 +147,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void handleProbabilityToggle(boolean isChecked) {
 		toggleBombProbabilityOn = isChecked;
-		if(isChecked) {
+		if (isChecked) {
 			Switch showHints = findViewById(R.id.toggleHints);
 			showHints.setChecked(true);
 			toggleHintsOn = true;
@@ -171,7 +171,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void solverHasJustHitIterationLimit() {
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
-		if(!gameMode.equals(gameChoices[0])) {
+		if (!gameMode.equals(gameChoices[0])) {
 			onClick(findViewById(R.id.gameLayout));
 			return;
 		}

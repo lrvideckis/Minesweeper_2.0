@@ -9,7 +9,7 @@
 	<color name="white">#ffffff</color>
 	<color name="black">#000000</color>
 
-    <!-- colors for the numbers -->
+	<!-- colors for the numbers -->
 	<color name="one">#0000FF</color>
 	<color name="two">#009933</color>
 	<color name="three">#FF0000</color>

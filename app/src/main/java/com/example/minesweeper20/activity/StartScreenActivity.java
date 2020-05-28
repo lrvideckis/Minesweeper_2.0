@@ -66,7 +66,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 				final int numberOfCols = getNumberInput(colInput.getText().toString());
 				final int numberOfBombs = getNumberInput(bombInput.getText().toString());
 
-				if(MinesweeperGame.tooManyBombsForZeroStart(numberOfRows, numberOfCols, numberOfBombs)) {
+				if (MinesweeperGame.tooManyBombsForZeroStart(numberOfRows, numberOfCols, numberOfBombs)) {
 					LinearLayout startScreen = findViewById(R.id.start_screen);
 					PopupHelper.displayPopup(gridTooSmallPopup, startScreen, getResources());
 					return;
@@ -132,7 +132,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 	}
 
 	private int getNumberInput(String input) {
-		if(input.equals("")) {
+		if (input.equals("")) {
 			return 1;
 		}
 		return Integer.parseInt(input);

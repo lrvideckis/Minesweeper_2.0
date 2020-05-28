@@ -12,16 +12,14 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 	//variables to hand a swipe (translate) and pinch (scale)
 	private final ScaleGestureDetector SGD;
-	private float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
 	private final GameCanvas gameCanvas;
+	private final Matrix matrix = new Matrix();
+	private final int halfScreenWidth, halfScreenHeight;
+	private float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
 	private int prevPointerCount = 0;
-
 	//variables to handle a tap
 	private boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
 	private float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
-
-	private final Matrix matrix = new Matrix();
-	private final int halfScreenWidth, halfScreenHeight;
 	private float topNavBarHeight;
 
 	public ScaleListener(Context context, GameCanvas _gameCanvas, int _screenWidth, int _screenHeight) {
@@ -58,7 +56,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 				!hasBeenTooFar &&
 				Math.abs(event.getX() - startOfTapX) <= 50f &&
 				Math.abs(event.getY() - startOfTapY) <= 50f);
-		if(!returnVal) {
+		if (!returnVal) {
 			hasBeenTooFar = true;
 		}
 		return returnVal;
@@ -91,7 +89,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 				case MotionEvent.ACTION_UP:
 					absoluteX += (event.getX() - prevFocusX) / scale;
 					absoluteY += (event.getY() - prevFocusY) / scale;
-					if(checkIfTap(event)) {
+					if (checkIfTap(event)) {
 						absoluteX = startAbsoluteX;
 						absoluteY = startAbsoluteY;
 
@@ -117,7 +115,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 			seenMoreThanOnePointer = true;
 			SGD.onTouchEvent(event);
 		}
-		if(!checkIfTap(event)) {
+		if (!checkIfTap(event)) {
 			matrix.setTranslate(absoluteX, absoluteY);
 			matrix.postScale(scale, scale, halfScreenWidth, halfScreenHeight);
 			gameCanvas.invalidate();

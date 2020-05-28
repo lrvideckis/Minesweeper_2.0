@@ -20,7 +20,7 @@ public class PopupHelper {
 	public static PopupWindow initializePopup(Context context, int layoutId) {
 		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
 		assert inflater != null;
-		@SuppressLint("InflateParams") final View view = inflater.inflate(layoutId,null);
+		@SuppressLint("InflateParams") final View view = inflater.inflate(layoutId, null);
 		final PopupWindow popup = new PopupWindow(
 				view,
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -32,12 +32,12 @@ public class PopupHelper {
 	}
 
 	public static void displayPopup(PopupWindow popup, View parentView, Resources resources) {
-		if(parentView.getTag().equals(resources.getString(R.string.is_linear_layout))) {
+		if (parentView.getTag().equals(resources.getString(R.string.is_linear_layout))) {
 			LinearLayout linearLayout = (LinearLayout) parentView;
-			popup.showAtLocation(linearLayout, Gravity.CENTER,0,0);
-		} else if(parentView.getTag().equals(resources.getString(R.string.is_game_canvas_layout))) {
+			popup.showAtLocation(linearLayout, Gravity.CENTER, 0, 0);
+		} else if (parentView.getTag().equals(resources.getString(R.string.is_game_canvas_layout))) {
 			GameCanvas gameCanvasLayout = (GameCanvas) parentView;
-			popup.showAtLocation(gameCanvasLayout, Gravity.CENTER,0,0);
+			popup.showAtLocation(gameCanvasLayout, Gravity.CENTER, 0, 0);
 		}
 	}
 }

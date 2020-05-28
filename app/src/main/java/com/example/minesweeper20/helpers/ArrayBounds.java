@@ -5,13 +5,13 @@ import android.util.Pair;
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class ArrayBounds {
-	public static Pair<Integer,Integer> getArrayBounds(VisibleTile[][] board) throws Exception {
+	public static Pair<Integer, Integer> getArrayBounds(VisibleTile[][] board) throws Exception {
 		int rows = board.length;
-		if(rows == 0) {
+		if (rows == 0) {
 			throw new Exception("board has 0 rows");
 		}
 		int cols = board[0].length;
-		if(cols == 0) {
+		if (cols == 0) {
 			throw new Exception("board has 0 columns");
 		}
 		for (VisibleTile[] visibleTiles : board) {

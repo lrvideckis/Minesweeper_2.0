@@ -25,12 +25,12 @@ class DrawCellHelpers {
 			redFlag = new Paint(),
 			black = new Paint(),
 			redX = new Paint();
-	private Path[][] trianglePaths;
-	private Rect[][] middleSquareRectangles, backgroundRectangles;
 	private final Paint[] numberColors;
 	private final String
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
 			bombEmoji = new String(Character.toChars(0x1F4A3));
+	private Path[][] trianglePaths;
+	private Rect[][] middleSquareRectangles, backgroundRectangles;
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
@@ -56,7 +56,7 @@ class DrawCellHelpers {
 		redX.setTextAlign(Paint.Align.CENTER);
 
 		numberColors = new Paint[9];
-		for(int i = 1; i <= 8; ++i) {
+		for (int i = 1; i <= 8; ++i) {
 			numberColors[i] = new Paint();
 			numberColors[i].setStyle(Paint.Style.FILL);
 			numberColors[i].setTextSize(cellPixelLength * 5 / 6f);
@@ -80,8 +80,8 @@ class DrawCellHelpers {
 		trianglePaths = new Path[rows][cols];
 		middleSquareRectangles = new Rect[rows][cols];
 		backgroundRectangles = new Rect[rows][cols];
-		for(int i = 0; i < rows; ++i) {
-			for(int j = 0; j < cols; ++j) {
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
 				final int startX = j * cellPixelLength;
 				final int startY = i * cellPixelLength;
 
@@ -94,10 +94,10 @@ class DrawCellHelpers {
 				currLowerTrianglePath.close();
 
 				Rect middleSquare = new Rect();
-				middleSquare.set(startX + cellPixelLength*88/100,
-						startY + cellPixelLength*88/100,
-						startX + cellPixelLength*12/100,
-						startY + cellPixelLength*12/100);
+				middleSquare.set(startX + cellPixelLength * 88 / 100,
+						startY + cellPixelLength * 88 / 100,
+						startX + cellPixelLength * 12 / 100,
+						startY + cellPixelLength * 12 / 100);
 
 				Rect currBackground = new Rect(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
 
@@ -117,59 +117,59 @@ class DrawCellHelpers {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
 		canvas.drawRect(backgroundRectangles[i][j], backgroundGreyForVisibleCells);
-		if(numberSurroundingBombs > 0) {
+		if (numberSurroundingBombs > 0) {
 			final int xPos = startX + cellPixelLength / 2;
-			final int yPos = (int) (startY + cellPixelLength / 2 - ((numberColors[numberSurroundingBombs].descent() + numberColors[numberSurroundingBombs].ascent()) / 2)) ;
+			final int yPos = (int) (startY + cellPixelLength / 2 - ((numberColors[numberSurroundingBombs].descent() + numberColors[numberSurroundingBombs].ascent()) / 2));
 			canvas.drawText(numberSurroundingBombs.toString(), xPos, yPos, numberColors[numberSurroundingBombs]);
 		}
 	}
 
 	void drawFlag(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
-		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
+		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2));
 		canvas.drawText(flagEmoji, xPos, yPos, redFlag);
 	}
 
 	void drawBomb(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
-		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2)) ;
+		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2));
 		canvas.drawText(bombEmoji, xPos, yPos, redFlag);
 	}
 
 	//TODO: make this look better
 	void drawLogicalBomb(Canvas canvas, int startX, int startY) {
-		canvas.drawText("B", startX, startY+cellPixelLength/3f, black);
+		canvas.drawText("B", startX, startY + cellPixelLength / 3f, black);
 	}
 
 	void drawLogicalFree(Canvas canvas, int startX, int startY) {
-		canvas.drawText("F", startX, startY+cellPixelLength/3f, black);
+		canvas.drawText("F", startX, startY + cellPixelLength / 3f, black);
 	}
 
 	void drawRedX(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
-		final int yPos = (int) (startY + cellPixelLength / 2 - ((redX.descent() + redX.ascent()) / 2)) ;
+		final int yPos = (int) (startY + cellPixelLength / 2 - ((redX.descent() + redX.ascent()) / 2));
 		canvas.drawText("X", xPos, yPos, redX);
 	}
 
 	void drawBombProbability(Canvas canvas, int startX, int startY, FractionThenDouble probability, Resources resources) throws Exception {
 		//fraction has too many digits, displaying double format
 		boolean displayFloat = probability.getHasOverflowed();
-		if(!displayFloat) {
+		if (!displayFloat) {
 			final int digitsNumerator = MyMath.MyLog10MinWith4(probability.getNumerator());
 			final int digitsDenominator = MyMath.MyLog10MinWith4(probability.getDenominator());
-			if(digitsNumerator + digitsDenominator >= 5) {
+			if (digitsNumerator + digitsDenominator >= 5) {
 				displayFloat = true;
 			}
 		}
-		if(displayFloat) {
+		if (displayFloat) {
 			canvas.drawText(
-					String.format(resources.getString(R.string.two_decimal_places),probability.getValue()),
+					String.format(resources.getString(R.string.two_decimal_places), probability.getValue()),
 					startX,
-					startY+cellPixelLength/3f,
+					startY + cellPixelLength / 3f,
 					black
 			);
 		} else {
-			canvas.drawText(probability.getNumerator() + "/" + probability.getDenominator(), startX, startY+cellPixelLength/3f, black);
+			canvas.drawText(probability.getNumerator() + "/" + probability.getDenominator(), startX, startY + cellPixelLength / 3f, black);
 		}
 	}
 }
