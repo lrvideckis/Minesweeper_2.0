@@ -75,7 +75,7 @@ public class GetConnectedComponents {
 				if (currTile.getIsVisible()) {
 					continue;
 				}
-				if(!isAwayCell(board, i, j, rows, cols)) {
+				if(!AwayCell.isAwayCell(board, i, j, rows, cols)) {
 					tempComponents.get(disjointSet.find(getNode(i, j))).add(new Pair<>(i, j));
 				}
 			}
@@ -89,47 +89,4 @@ public class GetConnectedComponents {
 		return components;
 	}
 
-	public static int getNumberOfAwayCells(VisibleTile[][] board) throws Exception {
-		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
-		rows = dimensions.first;
-		cols = dimensions.second;
-		int cntAwayCells = 0;
-		for(int i = 0; i < rows; ++i) {
-			for(int j = 0; j < cols; ++j) {
-				if(isAwayCell(board, i, j, rows, cols)) {
-					++cntAwayCells;
-				}
-			}
-		}
-		return cntAwayCells;
-	}
-
-	//returns true if cell has no visible neighbors
-	public static boolean isAwayCell(VisibleTile[][] board, int row, int col, int rows, int cols) {
-		if(board[row][col].getIsVisible()) {
-			return false;
-		}
-		final int[][] adjCells = GetAdjacentCells.getAdjacentCells(row,col,rows,cols);
-		for(int[] adj : adjCells) {
-			final int adjI = adj[0], adjJ = adj[1];
-			if(board[adjI][adjJ].getIsVisible()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public static boolean allCellsAreHidden(VisibleTile[][] board) throws Exception {
-		Pair<Integer,Integer> dimensions = ArrayBounds.getArrayBounds(board);
-		rows = dimensions.first;
-		cols = dimensions.second;
-		for(int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if(board[i][j].getIsVisible()) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
 }

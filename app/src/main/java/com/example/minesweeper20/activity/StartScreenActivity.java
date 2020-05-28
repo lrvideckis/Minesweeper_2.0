@@ -21,11 +21,9 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 //TODO: make translate + scale less laggy - maybe look into lowering frame rate or lowering rate of invalidate() calls
 //TODO: undo button - only when you lose
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
-//TODO: gauss elimination solver
 //TODO: make rows/cols/bombs be the same as the last played game
 //TODO: make sure back button on bottom nav bar works
 //TODO: when you lose, you can't click the back button, you have to click the okay popup button - fix this
-//TODO: helper function to loop over all adjacent cells
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
 

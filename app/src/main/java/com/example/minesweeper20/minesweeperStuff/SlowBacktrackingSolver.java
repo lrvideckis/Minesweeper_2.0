@@ -3,9 +3,9 @@ package com.example.minesweeper20.minesweeperStuff;
 import android.util.Pair;
 
 import com.example.minesweeper20.HitIterationLimitException;
+import com.example.minesweeper20.helpers.AllCellsAreHidden;
 import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.GetAdjacentCells;
-import com.example.minesweeper20.helpers.GetConnectedComponents;
 import com.example.minesweeper20.helpers.MutableInt;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 	public void solvePosition(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
 		initialize(_board, _numberOfBombs);
 
-		if(GetConnectedComponents.allCellsAreHidden(board)) {
+		if(AllCellsAreHidden.allCellsAreHidden(board)) {
 			for(int i = 0; i < rows; ++i) {
 				for(int j = 0; j < cols; ++j) {
 					board[i][j].numberOfBombConfigs.setValues(numberOfBombs, 1);

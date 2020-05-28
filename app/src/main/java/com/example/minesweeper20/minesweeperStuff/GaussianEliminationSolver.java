@@ -3,8 +3,8 @@ package com.example.minesweeper20.minesweeperStuff;
 import android.util.Pair;
 
 import com.example.minesweeper20.helpers.ArrayBounds;
+import com.example.minesweeper20.helpers.AwayCell;
 import com.example.minesweeper20.helpers.GetAdjacentCells;
-import com.example.minesweeper20.helpers.GetConnectedComponents;
 
 import java.util.Arrays;
 import java.util.TreeSet;
@@ -38,7 +38,7 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 					}
 					continue;
 				}
-				if(GetConnectedComponents.isAwayCell(board, i, j, rows, cols)) {
+				if(AwayCell.isAwayCell(board, i, j, rows, cols)) {
 					continue;
 				}
 				hiddenNodeToId[i][j] = numberOfHiddenNodes;

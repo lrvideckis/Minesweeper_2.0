@@ -175,7 +175,7 @@ public class Test {
 					System.out.println("i,j: " + i + " " + j);
 					System.out.println("fast solver " + fast.getNumerator() + '/' + fast.getDenominator());
 					System.out.println("slow solver " + slow.getNumerator() + '/' + slow.getDenominator());
-					System.out.println("number of away cells: " + GetConnectedComponents.getNumberOfAwayCells(boardFast));
+					System.out.println("number of away cells: " + AwayCell.getNumberOfAwayCells(boardFast));
 				}
 			}
 		}

@@ -3,7 +3,9 @@ package com.example.minesweeper20.minesweeperStuff;
 import android.util.Pair;
 
 import com.example.minesweeper20.HitIterationLimitException;
+import com.example.minesweeper20.helpers.AllCellsAreHidden;
 import com.example.minesweeper20.helpers.ArrayBounds;
+import com.example.minesweeper20.helpers.AwayCell;
 import com.example.minesweeper20.helpers.FractionThenDouble;
 import com.example.minesweeper20.helpers.GetAdjacentCells;
 import com.example.minesweeper20.helpers.GetConnectedComponents;
@@ -58,7 +60,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponents(board);
 		initializeLastUnvisitedSpot(components);
 
-		if(GetConnectedComponents.allCellsAreHidden(board)) {
+		if(AllCellsAreHidden.allCellsAreHidden(board)) {
 			for(int i = 0; i < rows; ++i) {
 				for(int j = 0; j < cols; ++j) {
 					board[i][j].numberOfBombConfigs.setValues(numberOfBombs,1);
@@ -76,10 +78,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		removeBombNumbersFromComponent();
 		FractionThenDouble awayBombProbability = null;
-		if(GetConnectedComponents.getNumberOfAwayCells(board) > 0) {
+		if(AwayCell.getNumberOfAwayCells(board) > 0) {
 			awayBombProbability = calculateAwayBombProbability();
 		}
-		updateNumberOfConfigsForCurrent(GetConnectedComponents.getNumberOfAwayCells(board));
+		updateNumberOfConfigsForCurrent(AwayCell.getNumberOfAwayCells(board));
 
 		for(int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
@@ -90,7 +92,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
 				VisibleTile curr = board[i][j];
-				if(GetConnectedComponents.isAwayCell(board, i, j, rows, cols)) {
+				if(AwayCell.isAwayCell(board, i, j, rows, cols)) {
 					if(awayBombProbability == null) {
 						throw new Exception("away probability is null, but this was checked above");
 					}
@@ -147,7 +149,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			}
 		}
 		TreeSet<Integer> validSpots = new TreeSet<>();
-		final int numberOfAwayCells = GetConnectedComponents.getNumberOfAwayCells(board);
+		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 		for(int bombCnt : dpTable.get(components.size())) {
 			if (bombCnt <= numberOfBombs && numberOfBombs <= bombCnt + numberOfAwayCells) {
 				validSpots.add(bombCnt);
@@ -194,7 +196,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	private FractionThenDouble calculateAwayBombProbability() throws Exception {
-		final int numberOfAwayCells = GetConnectedComponents.getNumberOfAwayCells(board);
+		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 
 		TreeMap<Integer, FractionThenDouble> configsPerBombCount = calculateNumberOfBombConfigs();
 		FractionThenDouble totalNumberOfConfigs = new FractionThenDouble(0);
