@@ -188,6 +188,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfBombs.setText(bombsLeft);
 	}
 
+	public void updateNumberOfSolverIterations(int numberOfIterations) {
+		TextView iterationTextView = findViewById(R.id.numberOfIterationsTextView);
+		final String iterationsText = "iterations: " + numberOfIterations;
+		iterationTextView.setText(iterationsText);
+	}
+
 	public int getNumberOfRows() {
 		return numberOfRows;
 	}

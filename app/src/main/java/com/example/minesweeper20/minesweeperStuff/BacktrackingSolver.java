@@ -28,6 +28,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final boolean[][] isBomb;
 	private final int[][] cntSurroundingBombs, updatedNumberSurroundingBombs;
 	private final int[][][] lastUnvisitedSpot;
+	private int totalIterations;
 
 	//variables for saving specific bomb position
 	private final boolean[][] saveIsBomb;
@@ -111,14 +112,13 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 		updateNumberOfConfigsForCurrent(AwayCell.getNumberOfAwayCells(board));
 
-		int totalIterations = 0;
+		totalIterations = 0;
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfBombs = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfBombs, true);
 			totalIterations += currIterations.get();
 		}
-		System.out.println("total iterations: " + totalIterations);
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -484,5 +484,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		if (prevNumberOfBombs != currNumberOfBombs) {
 			throw new Exception("number of bombs doesn't match");
 		}
+	}
+
+	public int getNumberOfIterations() {
+		return totalIterations;
 	}
 }

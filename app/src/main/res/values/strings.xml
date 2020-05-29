@@ -25,7 +25,7 @@
 	<string name="intermediate">intermediate</string>
 	<string name="expert">expert</string>
 	<string name="flag_mode">Flag Mode</string>
-	<string name="show_hints">Backtracking Hints</string>
+	<string name="backtracking">Back tracking</string>
 	<string name="show_bombs">Show Bombs</string>
 	<string name="hitIterationLimit">Backtracking solver hit iteration limit. Show Hints feature is no longer available.</string>
 	<string name="show_bomb_probability">Bomb Probability</string>
@@ -33,7 +33,8 @@
 	<string name="is_linear_layout">is_linear_layout</string>
 	<string name="is_game_canvas_layout">is_game_canvas_layout</string>
 	<string name="two_decimal_places">%.2f</string>
-	<string name="gauss_hints">Gauss Hints</string>
+	<string name="gauss_hints">Gauss</string>
+	<string name="initial_iterations">iterations: 0</string>
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>

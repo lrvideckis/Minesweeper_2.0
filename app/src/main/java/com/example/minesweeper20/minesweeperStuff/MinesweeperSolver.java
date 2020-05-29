@@ -13,6 +13,8 @@ public interface MinesweeperSolver {
 			boolean wantBomb
 	) throws Exception;
 
+	int getNumberOfIterations();
+
 	class VisibleTile {
 		final FractionThenDouble numberOfBombConfigs = new FractionThenDouble(0), numberOfTotalConfigs = new FractionThenDouble(0);
 		boolean isVisible, isLogicalBomb, isLogicalFree;

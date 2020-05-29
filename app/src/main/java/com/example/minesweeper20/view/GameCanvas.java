@@ -121,10 +121,11 @@ public class GameCanvas extends View {
 	public void updateSolvedBoard() throws Exception {
 		//TODO: only run solver if board has changed since last time
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+		GameActivity gameActivity = (GameActivity) getContext();
 		try {
 			backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfBombs());
+			gameActivity.updateNumberOfSolverIterations(backtrackingSolver.getNumberOfIterations());
 		} catch (HitIterationLimitException e) {
-			GameActivity gameActivity = (GameActivity) getContext();
 			gameActivity.solverHasJustHitIterationLimit();
 		}
 	}

@@ -17,7 +17,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 	private final int[][][] lastUnvisitedSpot;
 	private final boolean[][] isBomb;
 	private final int[][] cntSurroundingBombs;
-	private int rows, cols;
+	private int rows, cols, numberOfIterations;
 	private VisibleTile[][] board;
 	private int numberOfBombs;
 
@@ -54,6 +54,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		MutableInt currIterations = new MutableInt(0);
 		MutableInt currNumberOfBombs = new MutableInt(0);
 		solveComponent(0, component, currIterations, currNumberOfBombs);
+		numberOfIterations = currIterations.get();
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -87,6 +88,11 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 
 	public boolean[][] getBombConfiguration(VisibleTile[][] board, int numberOfBombs, int spotI, int spotJ, boolean wantBomb) throws Exception {
 		throw new Exception("to make warning go away");
+	}
+
+	@Override
+	public int getNumberOfIterations() {
+		return numberOfIterations;
 	}
 
 	private void initialize(VisibleTile[][] board, int numberOfBombs) throws Exception {
