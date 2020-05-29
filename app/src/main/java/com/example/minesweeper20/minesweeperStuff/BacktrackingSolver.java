@@ -26,8 +26,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final static int iterationLimit = 20000;
 	private final int rows, cols;
 	private final boolean[][] isBomb;
-	private final int[][] cntSurroundingBombs;
+	private final int[][] cntSurroundingBombs, updatedNumberSurroundingBombs;
 	private final int[][][] lastUnvisitedSpot;
+
 	//variables for saving specific bomb position
 	private final boolean[][] saveIsBomb;
 	//one hash-map for each component:
@@ -39,7 +40,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private int numberOfBombs;
 	private boolean needToCheckSpotCondition, wantBomb, foundBombConfiguration;
 	private int spotI, spotJ;
-	private GaussianEliminationSolver gaussianEliminationSolver;
+	private final GaussianEliminationSolver gaussianEliminationSolver;
 
 	public BacktrackingSolver(int rows, int cols) {
 		this.rows = rows;
@@ -47,6 +48,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		isBomb = new boolean[rows][cols];
 		saveIsBomb = new boolean[rows][cols];
 		cntSurroundingBombs = new int[rows][cols];
+		updatedNumberSurroundingBombs = new int[rows][cols];
 		lastUnvisitedSpot = new int[rows][cols][2];
 		bombConfig = new ArrayList<>();
 		numberOfConfigsForCurrent = new ArrayList<>();
@@ -56,15 +58,31 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	@Override
 	public void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception {
 
-		/*
 		gaussianEliminationSolver.solvePosition(board, numberOfBombs);
-		for(int i = 0; i < rows; ++i) {
-			for(int j = 0; j < cols; ++j) {
-
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (board[i][j].getIsVisible() && (board[i][j].getIsLogicalBomb() || board[i][j].getIsLogicalFree())) {
+					throw new Exception("visible cells can't be logical frees/bombs");
+				}
+				if (board[i][j].getIsLogicalBomb()) {
+					--numberOfBombs;
+					board[i][j].numberOfBombConfigs.setValues(1, 1);
+					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+				} else if (board[i][j].getIsLogicalFree()) {
+					board[i][j].numberOfBombConfigs.setValues(0, 1);
+					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+				}
+				if (board[i][j].getIsVisible()) {
+					updatedNumberSurroundingBombs[i][j] = board[i][j].getNumberSurroundingBombs();
+					for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+						VisibleTile adjCell = board[adj[0]][adj[1]];
+						if (adjCell.getIsLogicalBomb()) {
+							--updatedNumberSurroundingBombs[i][j];
+						}
+					}
+				}
 			}
 		}
-		 */
-
 
 		initialize(board, numberOfBombs);
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
@@ -109,7 +127,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					curr.numberOfBombConfigs.setValue(awayBombProbability);
 					curr.numberOfTotalConfigs.setValues(1, 1);
 				}
-				if (curr.getIsVisible()) {
+				if (curr.getIsVisible() || curr.getIsLogicalBomb() || curr.getIsLogicalFree()) {
 					continue;
 				}
 				if (curr.numberOfTotalConfigs.equals(0)) {
@@ -379,13 +397,12 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				continue;
 			}
 			final int currBacktrackingCount = cntSurroundingBombs[adjI][adjJ];
-			if (currBacktrackingCount + arePlacingABomb > adjTile.numberSurroundingBombs) {
+			if (currBacktrackingCount + arePlacingABomb > updatedNumberSurroundingBombs[adjI][adjJ]) {
 				return false;
 			}
-			if (
-					lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
-							lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
-							currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs) {
+			if (lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
+					lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
+					currBacktrackingCount + arePlacingABomb != updatedNumberSurroundingBombs[adjI][adjJ]) {
 				return false;
 			}
 		}
@@ -448,7 +465,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				if (!adjTile.isVisible) {
 					continue;
 				}
-				if (cntSurroundingBombs[adjI][adjJ] != adjTile.numberSurroundingBombs) {
+				if (cntSurroundingBombs[adjI][adjJ] != updatedNumberSurroundingBombs[adjI][adjJ]) {
 					throw new Exception("found bad solution - # bombs doesn't match, but this should be pruned out");
 				}
 			}

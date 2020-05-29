@@ -15,10 +15,10 @@ import java.math.BigInteger;
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class Test {
-	private final static int numberOfTests = 20;
 	private final static double EPSILON = 0.000000001;
 
-	private static String[][] previousFailedBoards = {
+	@SuppressWarnings("SpellCheckingInspection")
+	private final static String[][] previousFailedBoards = {
 			//bug with calling BinomialCoefficient with invalid parameters
 			{
 					"UUUU",
@@ -89,16 +89,15 @@ public class Test {
 				try {
 					try {
 						backtrackingSolver.solvePosition(boardFast, bombs);
-					} catch (NoSolutionFoundException e) {
-						System.out.println("FAST solver didn't find a solution, void test");
+					} catch (NoSolutionFoundException ignored) {
 						continue;
 					}
 					try {
 						slowBacktrackingSolver.solvePosition(boardSlow, bombs);
-					} catch (NoSolutionFoundException e) {
+					} catch (NoSolutionFoundException ignored) {
 						System.out.println("SLOW solver didn't find a solution, void test");
 						continue;
-					} catch (HitIterationLimitException e) {
+					} catch (HitIterationLimitException ignored) {
 						System.out.println("SLOW solver hit iteration limit, void test");
 						continue;
 					}
@@ -135,7 +134,7 @@ public class Test {
 		return board;
 	}
 
-	public static void performTestsForFractionOverflow() {
+	public static void performTestsForFractionOverflow(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 			int bombs = 5;
@@ -212,6 +211,8 @@ public class Test {
 					printBoardDebug(boardBigInt);
 					return;
 				}
+			} catch (HitIterationLimitException ignored) {
+				System.out.println("hit iteration limit, void test");
 			} catch (Exception e) {
 				e.printStackTrace();
 				printBoardDebug(boardBigInt);
@@ -221,7 +222,7 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	public static void performTestsForBombProbability() {
+	public static void performTestsForBombProbability(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 			int bombs = 5;
@@ -257,7 +258,7 @@ public class Test {
 				backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfBombs());
 				try {
 					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfBombs());
-				} catch (HitIterationLimitException e) {
+				} catch (HitIterationLimitException ignored) {
 					System.out.println("slow solver hit iteration limit, void test");
 					continue;
 				}
@@ -328,7 +329,7 @@ public class Test {
 		return !passedTest;
 	}
 
-	public static void performTestsForGaussSolver() {
+	public static void performTestsForGaussSolver(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 			int bombs = 5;

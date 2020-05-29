@@ -41,9 +41,9 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		setUpNewGamePopup();
 		setUpGridTooSmallPopup();
 		Test.testPreviouslyFailedBoards();
-		Test.performTestsForBombProbability();
-		Test.performTestsForFractionOverflow();
-		Test.performTestsForGaussSolver();
+		Test.performTestsForBombProbability(20);
+		Test.performTestsForFractionOverflow(20);
+		Test.performTestsForGaussSolver(20);
 	}
 
 	@Override

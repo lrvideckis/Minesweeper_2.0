@@ -17,7 +17,6 @@ public class GetConnectedComponents {
 		return i * cols + j;
 	}
 
-	//TODO: play around with the order of cells in a single CC to make the backtracking faster
 	public static ArrayList<ArrayList<Pair<Integer, Integer>>> getComponents(VisibleTile[][] board) throws Exception {
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
@@ -68,7 +67,7 @@ public class GetConnectedComponents {
 		rows = dimensions.first;
 		cols = dimensions.second;
 		Dsu disjointSet = new Dsu(rows * cols);
-		boolean[][] hasAdjacentNumber = new boolean[rows][cols];
+		boolean[][] unknownStatusSpot = new boolean[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				if (!board[i][j].getIsVisible()) {
@@ -77,11 +76,11 @@ public class GetConnectedComponents {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];
 					VisibleTile adjTile = board[adjI][adjJ];
-					if (adjTile.getIsVisible()) {
+					if (adjTile.getIsVisible() || adjTile.getIsLogicalBomb() || adjTile.getIsLogicalFree()) {
 						continue;
 					}
 					disjointSet.merge(getNode(i, j), getNode(adjI, adjJ));
-					hasAdjacentNumber[adjI][adjJ] = true;
+					unknownStatusSpot[adjI][adjJ] = true;
 				}
 			}
 		}
@@ -89,11 +88,11 @@ public class GetConnectedComponents {
 		ArrayList<ArrayList<Pair<Integer, Integer>>> components = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (visited[i][j] || !hasAdjacentNumber[i][j]) {
+				if (visited[i][j] || !unknownStatusSpot[i][j]) {
 					continue;
 				}
 				ArrayList<Pair<Integer, Integer>> component = new ArrayList<>();
-				dfs(i, j, component, visited, hasAdjacentNumber, disjointSet.find(getNode(i, j)), disjointSet);
+				dfs(i, j, component, visited, unknownStatusSpot, disjointSet.find(getNode(i, j)), disjointSet);
 				components.add(component);
 			}
 		}
@@ -105,7 +104,7 @@ public class GetConnectedComponents {
 			int j,
 			ArrayList<Pair<Integer, Integer>> component,
 			boolean[][] visited,
-			boolean[][] hasAdjacentNumber,
+			boolean[][] unknownStatusSpot,
 			int ccId,
 			Dsu disjointSet
 	) {
@@ -113,10 +112,10 @@ public class GetConnectedComponents {
 		visited[i][j] = true;
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
-			if (visited[adjI][adjJ] || !hasAdjacentNumber[adjI][adjJ] || ccId != disjointSet.find(getNode(adjI, adjJ))) {
+			if (visited[adjI][adjJ] || !unknownStatusSpot[adjI][adjJ] || ccId != disjointSet.find(getNode(adjI, adjJ))) {
 				continue;
 			}
-			dfs(adjI, adjJ, component, visited, hasAdjacentNumber, ccId, disjointSet);
+			dfs(adjI, adjJ, component, visited, unknownStatusSpot, ccId, disjointSet);
 		}
 		for (int di = -2; di <= 2; ++di) {
 			for (int dj = -2; dj <= 2; ++dj) {
@@ -128,10 +127,10 @@ public class GetConnectedComponents {
 				if (ArrayBounds.outOfBounds(adjI, adjJ, rows, cols)) {
 					continue;
 				}
-				if (visited[adjI][adjJ] || !hasAdjacentNumber[adjI][adjJ] || ccId != disjointSet.find(getNode(adjI, adjJ))) {
+				if (visited[adjI][adjJ] || !unknownStatusSpot[adjI][adjJ] || ccId != disjointSet.find(getNode(adjI, adjJ))) {
 					continue;
 				}
-				dfs(adjI, adjJ, component, visited, hasAdjacentNumber, ccId, disjointSet);
+				dfs(adjI, adjJ, component, visited, unknownStatusSpot, ccId, disjointSet);
 			}
 		}
 	}
