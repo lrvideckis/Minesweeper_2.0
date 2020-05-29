@@ -133,6 +133,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					e.printStackTrace();
 				}
 			}
+			updateNumberOfSolverIterations(0);
 		}
 	}
 
