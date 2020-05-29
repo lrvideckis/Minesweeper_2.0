@@ -111,11 +111,14 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 		updateNumberOfConfigsForCurrent(AwayCell.getNumberOfAwayCells(board));
 
+		int totalIterations = 0;
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfBombs = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfBombs, true);
+			totalIterations += currIterations.get();
 		}
+		System.out.println("total iterations: " + totalIterations);
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {

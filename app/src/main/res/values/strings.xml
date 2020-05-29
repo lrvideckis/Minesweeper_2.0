@@ -25,7 +25,7 @@
 	<string name="intermediate">intermediate</string>
 	<string name="expert">expert</string>
 	<string name="flag_mode">Flag Mode</string>
-	<string name="show_hints">Show Hints</string>
+	<string name="show_hints">Backtracking Hints</string>
 	<string name="show_bombs">Show Bombs</string>
 	<string name="hitIterationLimit">Backtracking solver hit iteration limit. Show Hints feature is no longer available.</string>
 	<string name="show_bomb_probability">Bomb Probability</string>
