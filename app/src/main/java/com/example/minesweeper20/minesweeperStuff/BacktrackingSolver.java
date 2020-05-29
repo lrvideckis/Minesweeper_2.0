@@ -3,6 +3,7 @@ package com.example.minesweeper20.minesweeperStuff;
 import android.util.Pair;
 
 import com.example.minesweeper20.HitIterationLimitException;
+import com.example.minesweeper20.NoSolutionFoundException;
 import com.example.minesweeper20.helpers.AllCellsAreHidden;
 import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.AwayCell;
@@ -66,8 +67,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 
 		initialize(_board, _numberOfBombs);
-		components = GetConnectedComponents.getComponents(board);
-		//components = GetConnectedComponents.getComponentsWithKnownCells(board);
+		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
@@ -113,7 +113,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					continue;
 				}
 				if (curr.numberOfTotalConfigs.equals(0)) {
-					throw new Exception("There should be at least one bomb configuration for non-visible cells");
+					throw new NoSolutionFoundException("There should be at least one bomb configuration for non-visible cells");
 				}
 				if (curr.numberOfBombConfigs.equals(0)) {
 					curr.isLogicalFree = true;
@@ -211,6 +211,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		TreeMap<Integer, FractionThenDouble> configsPerBombCount = calculateNumberOfBombConfigs();
 		FractionThenDouble totalNumberOfConfigs = new FractionThenDouble(0);
 		for (TreeMap.Entry<Integer, FractionThenDouble> val : configsPerBombCount.entrySet()) {
+			if (numberOfBombs - val.getKey() < 0 || numberOfBombs - val.getKey() > numberOfAwayCells) {
+				throw new Exception("number of remaining bombs is more than number of away cells (or negative)");
+			}
 			FractionThenDouble newConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - val.getKey());
 			newConfigs.multiplyWith(val.getValue());
 			totalNumberOfConfigs.addWith(newConfigs);
@@ -230,7 +233,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return awayBombProbability;
 	}
 
-	private TreeMap<Integer, FractionThenDouble> calculateNumberOfBombConfigs() {
+	private TreeMap<Integer, FractionThenDouble> calculateNumberOfBombConfigs() throws Exception {
+		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 		TreeMap<Integer, FractionThenDouble> prevWays = new TreeMap<>(), newWays = new TreeMap<>();
 		prevWays.put(0, new FractionThenDouble(1));
 		for (int i = 0; i < components.size(); ++i) {
@@ -239,7 +243,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					final int nextKey = bombVal.getKey() + waysVal.getKey();
 					FractionThenDouble nextValueDiff = new FractionThenDouble(bombVal.getValue().get());
 					nextValueDiff.multiplyWith(waysVal.getValue());
-
+					if (i + 1 == components.size() && (nextKey > numberOfBombs || nextKey + numberOfAwayCells < numberOfBombs)) {
+						continue;
+					}
 					FractionThenDouble nextVal = newWays.get(nextKey);
 					if (nextVal == null) {
 						newWays.put(nextKey, nextValueDiff);

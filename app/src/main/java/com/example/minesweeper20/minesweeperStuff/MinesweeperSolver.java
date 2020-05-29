@@ -64,5 +64,13 @@ public interface MinesweeperSolver {
 				numberSurroundingBombs = tile.numberSurroundingBombs;
 			}
 		}
+
+		public void updateVisibilityAndSurroundingBombs(boolean isVisible, int numberSurroundingBombs) {
+			reset();
+			this.isVisible = isVisible;
+			if (isVisible) {
+				this.numberSurroundingBombs = numberSurroundingBombs;
+			}
+		}
 	}
 }

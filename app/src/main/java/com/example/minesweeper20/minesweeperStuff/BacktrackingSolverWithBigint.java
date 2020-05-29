@@ -3,6 +3,7 @@ package com.example.minesweeper20.minesweeperStuff;
 import android.util.Pair;
 
 import com.example.minesweeper20.HitIterationLimitException;
+import com.example.minesweeper20.NoSolutionFoundException;
 import com.example.minesweeper20.helpers.AllCellsAreHidden;
 import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.AwayCell;
@@ -111,7 +112,7 @@ public class BacktrackingSolverWithBigint {
 					continue;
 				}
 				if (BIG_numberOfTotalConfigs[i][j].equals(BigInteger.ZERO)) {
-					throw new Exception("There should be at least one bomb configuration for non-visible cells");
+					throw new NoSolutionFoundException("There should be at least one bomb configuration for non-visible cells");
 				}
 				if (BIG_numberOfBombConfigs[i][j].equals(BigInteger.ZERO)) {
 					curr.isLogicalFree = true;

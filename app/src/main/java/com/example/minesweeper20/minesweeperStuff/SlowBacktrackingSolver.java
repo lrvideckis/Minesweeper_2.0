@@ -3,6 +3,7 @@ package com.example.minesweeper20.minesweeperStuff;
 import android.util.Pair;
 
 import com.example.minesweeper20.HitIterationLimitException;
+import com.example.minesweeper20.NoSolutionFoundException;
 import com.example.minesweeper20.helpers.AllCellsAreHidden;
 import com.example.minesweeper20.helpers.ArrayBounds;
 import com.example.minesweeper20.helpers.GetAdjacentCells;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 
 public class SlowBacktrackingSolver implements MinesweeperSolver {
 
-	private final static int iterationLimit = 500000;
+	private final static int iterationLimit = 100000;
 	private final int[][][] lastUnvisitedSpot;
 	private final boolean[][] isBomb;
 	private final int[][] cntSurroundingBombs;
@@ -61,7 +62,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 					continue;
 				}
 				if (curr.numberOfTotalConfigs.equals(0)) {
-					throw new Exception("There should be at least one bomb configuration for non-visible cells");
+					throw new NoSolutionFoundException("There should be at least one bomb configuration for non-visible cells");
 				}
 				if (curr.numberOfBombConfigs.equals(0)) {
 					curr.isLogicalFree = true;

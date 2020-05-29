@@ -1,6 +1,9 @@
 package com.example.minesweeper20.helpers;
 
+import android.util.Pair;
+
 import com.example.minesweeper20.HitIterationLimitException;
+import com.example.minesweeper20.NoSolutionFoundException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolverWithBigint;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
@@ -13,13 +16,130 @@ import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.Visib
 
 public class Test {
 	private final static int numberOfTests = 20;
-	private static int rows, cols;
+	private final static double EPSILON = 0.000000001;
+
+	private static String[][] previousFailedBoards = {
+			//bug with calling BinomialCoefficient with invalid parameters
+			{
+					"UUUU",
+					"U2UU",
+					"U3UU",
+					"UUUU",
+					"UUUU",
+					"U211",
+					"11..",
+					"...."
+			},
+			//bug with dfs connect components - upper component and lower component should be the same, but DFS splits them into separate components
+			{
+					"UUU",
+					"UU2",
+					"UUU",
+					"U21",
+					"22.",
+					"U21",
+					"UUU"
+			},
+			//bug with away cells - (incorrectly) returns true when cell is visible, and all adjacent cells are not visible
+			{
+					"...",
+					"232",
+					"UUU",
+					"4UU",
+					"UUU",
+					"U3U",
+					"UUU"
+			}
+	};
+
+	public static void testPreviouslyFailedBoards() {
+		for (String[] stringBoard : previousFailedBoards) {
+			final int rows = stringBoard.length;
+			final int cols = stringBoard[0].length();
+			for (int bombs = 0; bombs <= rows * cols; ++bombs) {
+				VisibleTile[][] boardFast;
+				VisibleTile[][] boardSlow;
+				try {
+					boardFast = convertFormat(stringBoard);
+					boardSlow = convertFormat(stringBoard);
+				} catch (Exception e) {
+					e.printStackTrace();
+					continue;
+				}
+				if (bombs == 0) {
+					printBoardDebug(boardFast);
+				}
+				Pair<Integer, Integer> dimensions;
+				try {
+					dimensions = ArrayBounds.getArrayBounds(boardFast);
+				} catch (Exception e) {
+					e.printStackTrace();
+					continue;
+				}
+				if (rows != dimensions.first || cols != dimensions.second) {
+					System.out.print("bounds don't match");
+					continue;
+				}
+
+				BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+				SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+
+
+				System.out.println("number of bombs: " + bombs);
+				try {
+					try {
+						backtrackingSolver.solvePosition(boardFast, bombs);
+					} catch (NoSolutionFoundException e) {
+						System.out.println("FAST solver didn't find a solution, void test");
+						continue;
+					}
+					try {
+						slowBacktrackingSolver.solvePosition(boardSlow, bombs);
+					} catch (NoSolutionFoundException e) {
+						System.out.println("SLOW solver didn't find a solution, void test");
+						continue;
+					} catch (HitIterationLimitException e) {
+						System.out.println("SLOW solver hit iteration limit, void test");
+						continue;
+					}
+					if (areBoardsDifferent(boardFast, boardSlow)) {
+						return;
+					}
+				} catch (Exception e) {
+					System.out.println("one of the solvers threw exception, failed test");
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
+	}
+
+	private static VisibleTile[][] convertFormat(String[] stringBoard) throws Exception {
+		VisibleTile[][] board = new VisibleTile[stringBoard.length][stringBoard[0].length()];
+		for (int i = 0; i < stringBoard.length; ++i) {
+			for (int j = 0; j < stringBoard[i].length(); ++j) {
+				if (stringBoard[i].length() != stringBoard[0].length()) {
+					throw new Exception("jagged array - not all rows are the same length");
+				}
+				board[i][j] = new VisibleTile();
+				if (stringBoard[i].charAt(j) == '.') {
+					board[i][j].updateVisibilityAndSurroundingBombs(true, 0);
+				} else if (stringBoard[i].charAt(j) == 'U') {
+					board[i][j].updateVisibilityAndSurroundingBombs(false, 0);
+				} else {
+					board[i][j].updateVisibilityAndSurroundingBombs(true, stringBoard[i].charAt(j) - '0');
+				}
+			}
+		}
+		return board;
+	}
 
 	public static void performTestsForFractionOverflow() {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 			int bombs = 5;
-			rows = cols = 5;
+			int rows = 5, cols = 5;
 			try {
 				rows = MyMath.getRand(10, 15);
 				cols = MyMath.getRand(10, 15);
@@ -66,7 +186,7 @@ public class Test {
 						bottom = bottom.divide(gcd);
 
 						if (curr.getHasOverflowed()) {
-							if (Math.abs(top.doubleValue() / bottom.doubleValue() - curr.getValue()) > 0.000000001) {
+							if (Math.abs(top.doubleValue() / bottom.doubleValue() - curr.getValue()) > EPSILON) {
 								testPassed = false;
 								System.out.println("here, solver outputs don't match");
 								System.out.println("i,j: " + i + " " + j);
@@ -105,7 +225,7 @@ public class Test {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 			int bombs = 5;
-			rows = cols = 5;
+			int rows = 5, cols = 5;
 			try {
 				rows = MyMath.getRand(3, 8);
 				cols = MyMath.getRand(3, 40 / rows);
@@ -146,6 +266,7 @@ public class Test {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				printBoardDebug(boardFast);
 				return;
 			}
 		}
@@ -156,6 +277,7 @@ public class Test {
 			VisibleTile[][] boardFast,
 			VisibleTile[][] boardSlow
 	) throws Exception {
+		int rows = boardFast.length, cols = boardFast[0].length;
 		boolean passedTest = true;
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -170,14 +292,33 @@ public class Test {
 				VisibleTile slowTile = boardSlow[i][j];
 				FractionThenDouble slow = new FractionThenDouble(slowTile.getNumberOfBombConfigs());
 				slow.divideWith(slowTile.getNumberOfTotalConfigs());
-
-				if (fast.getNumerator() != slow.getNumerator() || fast.getDenominator() != slow.getDenominator()) {
-					passedTest = false;
-					System.out.println("here, solver outputs don't match");
-					System.out.println("i,j: " + i + " " + j);
-					System.out.println("fast solver " + fast.getNumerator() + '/' + fast.getDenominator());
-					System.out.println("slow solver " + slow.getNumerator() + '/' + slow.getDenominator());
-					System.out.println("number of away cells: " + AwayCell.getNumberOfAwayCells(boardFast));
+				if (fast.getHasOverflowed()) {
+					double slowVal;
+					if (slow.getHasOverflowed()) {
+						slowVal = slow.getValue();
+					} else {
+						slowVal = slow.getNumerator() / (double) slow.getDenominator();
+					}
+					if (Math.abs(fast.getValue() - slowVal) > EPSILON) {
+						passedTest = false;
+						System.out.println("here, solver outputs don't match");
+						System.out.println("i,j: " + i + " " + j);
+						System.out.println("fast solver " + fast.getValue());
+						if (slow.getHasOverflowed()) {
+							System.out.println("slow solver " + slow.getValue());
+						} else {
+							System.out.println("slow solver " + slow.getNumerator() + '/' + slow.getDenominator());
+						}
+					}
+				} else {
+					if (fast.getNumerator() != slow.getNumerator() || fast.getDenominator() != slow.getDenominator()) {
+						passedTest = false;
+						System.out.println("here, solver outputs don't match");
+						System.out.println("i,j: " + i + " " + j);
+						System.out.println("fast solver " + fast.getNumerator() + '/' + fast.getDenominator());
+						System.out.println("slow solver " + slow.getNumerator() + '/' + slow.getDenominator());
+						System.out.println("number of away cells: " + AwayCell.getNumberOfAwayCells(boardFast));
+					}
 				}
 			}
 		}
@@ -191,7 +332,7 @@ public class Test {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 			int bombs = 5;
-			rows = cols = 5;
+			int rows = 5, cols = 5;
 			try {
 				rows = MyMath.getRand(3, 15);
 				cols = MyMath.getRand(3, 15);
@@ -251,13 +392,13 @@ public class Test {
 
 	private static void printBoardDebug(VisibleTile[][] board) {
 		System.out.println("\nboard is:");
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (board[i][j].getIsVisible()) {
-					if (board[i][j].getNumberSurroundingBombs() == 0) {
+		for (VisibleTile[] visibleTiles : board) {
+			for (VisibleTile visibleTile : visibleTiles) {
+				if (visibleTile.getIsVisible()) {
+					if (visibleTile.getNumberSurroundingBombs() == 0) {
 						System.out.print('.');
 					} else {
-						System.out.print(board[i][j].getNumberSurroundingBombs());
+						System.out.print(visibleTile.getNumberSurroundingBombs());
 					}
 				} else {
 					System.out.print('U');
