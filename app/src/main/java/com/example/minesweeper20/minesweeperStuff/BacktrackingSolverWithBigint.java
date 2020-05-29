@@ -60,12 +60,12 @@ public class BacktrackingSolverWithBigint {
 		return BIG_numberOfTotalConfigs[i][j];
 	}
 
-	public void solvePosition(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
-		initialize(_board, _numberOfBombs);
+	public void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception {
+		initialize(board, numberOfBombs);
 		components = GetConnectedComponents.getComponents(board);
 		initializeLastUnvisitedSpot(components);
 
-		if (_board.length != rows || _board[0].length != cols) {
+		if (board.length != rows || board[0].length != cols) {
 			throw new Exception("board dimensions don't match what was passed in the constructor");
 		}
 
@@ -257,9 +257,9 @@ public class BacktrackingSolverWithBigint {
 		return prevWays;
 	}
 
-	private void initialize(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
-		board = _board;
-		numberOfBombs = _numberOfBombs;
+	private void initialize(VisibleTile[][] board, int numberOfBombs) throws Exception {
+		this.board = board;
+		this.numberOfBombs = numberOfBombs;
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
 		cols = dimensions.second;
@@ -448,8 +448,8 @@ public class BacktrackingSolverWithBigint {
 	private static class MyBIGPair {
 		BigInteger first, second;
 
-		MyBIGPair(BigInteger _first) {
-			first = _first;
+		MyBIGPair(BigInteger first) {
+			this.first = first;
 			second = BigInteger.ONE;
 		}
 

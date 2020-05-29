@@ -54,10 +54,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	@Override
-	public void solvePosition(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
+	public void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception {
 
 		/*
-		gaussianEliminationSolver.solvePosition(_board, _numberOfBombs);
+		gaussianEliminationSolver.solvePosition(board, numberOfBombs);
 		for(int i = 0; i < rows; ++i) {
 			for(int j = 0; j < cols; ++j) {
 
@@ -66,7 +66,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		 */
 
 
-		initialize(_board, _numberOfBombs);
+		initialize(board, numberOfBombs);
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
@@ -262,14 +262,14 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	//TODO: update this to do backtracking twice with dp in the middle
-	public boolean[][] getBombConfiguration(VisibleTile[][] _board, int _numberOfBombs, int _spotI, int _spotJ, boolean _wantBomb) throws Exception {
-		initialize(_board, _numberOfBombs);
+	public boolean[][] getBombConfiguration(VisibleTile[][] board, int numberOfBombs, int spotI, int spotJ, boolean wantBomb) throws Exception {
+		initialize(board, numberOfBombs);
 		components = GetConnectedComponents.getComponents(board);
 		initializeLastUnvisitedSpot(components);
 
-		spotI = _spotI;
-		spotJ = _spotJ;
-		wantBomb = _wantBomb;
+		this.spotI = spotI;
+		this.spotJ = spotJ;
+		this.wantBomb = wantBomb;
 		foundBombConfiguration = false;
 
 		for (int i = 0; i < components.size(); ++i) {
@@ -288,9 +288,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return (foundBombConfiguration ? saveIsBomb : null);
 	}
 
-	private void initialize(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
-		board = _board;
-		numberOfBombs = _numberOfBombs;
+	private void initialize(VisibleTile[][] board, int numberOfBombs) throws Exception {
+		this.board = board;
+		this.numberOfBombs = numberOfBombs;
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		if (rows != dimensions.first || cols != dimensions.second) {
 			throw new Exception("dimensions of board doesn't match what was passed in the constructor");

@@ -28,8 +28,8 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 	}
 
 	@Override
-	public void solvePosition(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
-		initialize(_board, _numberOfBombs);
+	public void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception {
+		initialize(board, numberOfBombs);
 
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
 			for (int i = 0; i < rows; ++i) {
@@ -85,13 +85,13 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	public boolean[][] getBombConfiguration(VisibleTile[][] _board, int _numberOfBombs, int _spotI, int _spotJ, boolean _wantBomb) throws Exception {
+	public boolean[][] getBombConfiguration(VisibleTile[][] board, int numberOfBombs, int spotI, int spotJ, boolean wantBomb) throws Exception {
 		throw new Exception("to make warning go away");
 	}
 
-	private void initialize(VisibleTile[][] _board, int _numberOfBombs) throws Exception {
-		board = _board;
-		numberOfBombs = _numberOfBombs;
+	private void initialize(VisibleTile[][] board, int numberOfBombs) throws Exception {
+		this.board = board;
+		this.numberOfBombs = numberOfBombs;
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
 		cols = dimensions.second;

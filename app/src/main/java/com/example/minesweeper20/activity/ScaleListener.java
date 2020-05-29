@@ -22,15 +22,15 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
 	private float topNavBarHeight;
 
-	public ScaleListener(Context context, GameCanvas _gameCanvas, int _screenWidth, int _screenHeight) {
-		halfScreenWidth = _screenWidth / 2;
-		halfScreenHeight = _screenHeight / 2;
+	public ScaleListener(Context context, GameCanvas gameCanvas, int screenWidth, int screenHeight) {
+		halfScreenWidth = screenWidth / 2;
+		halfScreenHeight = screenHeight / 2;
 		SGD = new ScaleGestureDetector(context, this);
-		gameCanvas = _gameCanvas;
+		this.gameCanvas = gameCanvas;
 	}
 
-	public void setTopNavBarHeight(float _topNavBarHeight) {
-		topNavBarHeight = _topNavBarHeight;
+	public void setTopNavBarHeight(float topNavBarHeight) {
+		this.topNavBarHeight = topNavBarHeight;
 	}
 
 	@Override

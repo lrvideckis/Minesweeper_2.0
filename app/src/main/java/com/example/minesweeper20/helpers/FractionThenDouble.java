@@ -15,10 +15,10 @@ public class FractionThenDouble {
 		setValue(other);
 	}
 
-	//this should only throw if _denominator is 0
-	public void setValues(int _numerator, int _denominator) throws Exception {
+	//this should only throw if denominator is 0
+	public void setValues(int numerator, int denominator) throws Exception {
 		hasOverflowed = false;
-		reduceAndSet(_numerator, _denominator);
+		reduceAndSet(numerator, denominator);
 	}
 
 	public void addWith(int delta) {
@@ -76,14 +76,14 @@ public class FractionThenDouble {
 		}
 	}
 
-	//this will only throw if _denominator == 0
-	public void multiplyWith(int _numerator, int _denominator) throws Exception {
+	//this will only throw if denominator == 0
+	public void multiplyWith(int numerator, int denominator) throws Exception {
 		if (hasOverflowed) {
-			value *= _numerator;
-			value /= _denominator;
+			value *= numerator;
+			value /= denominator;
 			return;
 		}
-		reduceAndSet(numerator * (long) _numerator, denominator * (long) _denominator);
+		reduceAndSet(this.numerator * (long) numerator, this.denominator * (long) denominator);
 	}
 
 	public void multiplyWith(FractionThenDouble quotient) {
@@ -163,21 +163,21 @@ public class FractionThenDouble {
 		}
 	}
 
-	private void reduceAndSet(long _numerator, long _denominator) throws Exception {
+	private void reduceAndSet(long numerator, long denominator) throws Exception {
 		if (hasOverflowed) {
 			throw new Exception("this function should never be called when the fraction has overflowed");
 		}
-		final long gcd = MyMath.gcd(_numerator, _denominator);
-		_numerator /= gcd;
-		_denominator /= gcd;
-		if (_numerator != (int) _numerator || _denominator != (int) _denominator) {
+		final long gcd = MyMath.gcd(numerator, denominator);
+		numerator /= gcd;
+		denominator /= gcd;
+		if (numerator != (int) numerator || denominator != (int) denominator) {
 			hasOverflowed = true;
-			value = _numerator / (double) _denominator;
+			value = numerator / (double) denominator;
 			return;
 		}
-		numerator = (int) _numerator;
-		denominator = (int) _denominator;
-		if (denominator == 0) {
+		this.numerator = (int) numerator;
+		this.denominator = (int) denominator;
+		if (this.denominator == 0) {
 			throw new Exception("fraction with 0 as denominator");
 		}
 	}

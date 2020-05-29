@@ -14,10 +14,10 @@ public class MinesweeperGame {
 	private int numberOfFlags;
 	private boolean firstClick, isGameOver;
 	//TODO: constructor with bomb placements as param for testing - you can test the same board over multiple runs
-	public MinesweeperGame(int _numberOfRows, int _numberOfCols, int _numberOfBombs) {
-		numberOfRows = _numberOfRows;
-		numberOfCols = _numberOfCols;
-		numberOfBombs = _numberOfBombs;
+	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfBombs) {
+		this.numberOfRows = numberOfRows;
+		this.numberOfCols = numberOfCols;
+		this.numberOfBombs = numberOfBombs;
 		numberOfFlags = 0;
 		firstClick = true;
 		isGameOver = false;

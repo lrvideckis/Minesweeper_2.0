@@ -6,11 +6,11 @@ public interface MinesweeperSolver {
 	void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception;
 
 	boolean[][] getBombConfiguration(
-			VisibleTile[][] _board,
-			int _numberOfBombs,
-			int _spotI,
-			int _spotJ,
-			boolean _wantBomb
+			VisibleTile[][] board,
+			int numberOfBombs,
+			int spotI,
+			int spotJ,
+			boolean wantBomb
 	) throws Exception;
 
 	class VisibleTile {

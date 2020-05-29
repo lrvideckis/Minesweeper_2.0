@@ -261,7 +261,7 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 	}
 
 	@Override
-	public boolean[][] getBombConfiguration(VisibleTile[][] _board, int _numberOfBombs, int _spotI, int _spotJ, boolean _wantBomb) throws Exception {
+	public boolean[][] getBombConfiguration(VisibleTile[][] board, int numberOfBombs, int spotI, int spotJ, boolean wantBomb) throws Exception {
 		throw new Exception("not implemented yet");
 	}
 }
