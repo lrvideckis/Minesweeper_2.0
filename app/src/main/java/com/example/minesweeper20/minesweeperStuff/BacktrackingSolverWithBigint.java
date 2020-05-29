@@ -17,9 +17,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
-
-public class BacktrackingSolverWithBigint {
+public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 	private final static int iterationLimit = 20000;
 	private final BigInteger[][] BIG_numberOfBombConfigs, BIG_numberOfTotalConfigs;
 	private final boolean[][] isBomb;
@@ -32,7 +30,8 @@ public class BacktrackingSolverWithBigint {
 	private int rows, cols;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
-	private int numberOfBombs;
+	private int numberOfBombs, numberOfIterations;
+
 	public BacktrackingSolverWithBigint(int rows, int cols) {
 		isBomb = new boolean[rows][cols];
 		cntSurroundingBombs = new int[rows][cols];
@@ -92,10 +91,12 @@ public class BacktrackingSolverWithBigint {
 		}
 		updateNumberOfConfigsForCurrent(AwayCell.getNumberOfAwayCells(board));
 
+		numberOfIterations = 0;
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfBombs = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfBombs, true);
+			numberOfIterations += currIterations.get();
 		}
 
 		for (int i = 0; i < rows; ++i) {
@@ -121,6 +122,16 @@ public class BacktrackingSolverWithBigint {
 				}
 			}
 		}
+	}
+
+	@Override
+	public boolean[][] getBombConfiguration(VisibleTile[][] board, int numberOfBombs, int spotI, int spotJ, boolean wantBomb) throws Exception {
+		throw new Exception("not implemented yet");
+	}
+
+	@Override
+	public int getNumberOfIterations() {
+		return numberOfIterations;
 	}
 
 	private void updateNumberOfConfigsForCurrent(int numberOfAwayCells) throws Exception {
