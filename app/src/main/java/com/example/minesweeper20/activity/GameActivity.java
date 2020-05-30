@@ -23,7 +23,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	private boolean
 			toggleFlagModeOn = false,
-			toggleHintsOn = false,
+			toggleBacktrackingHintsOn = false,
 			toggleGaussHintsOn = false,
 			toggleBombsOn = false,
 			toggleBombProbabilityOn = false,
@@ -46,7 +46,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleFlagMode = findViewById(R.id.toggleFlagMode);
 		toggleFlagMode.setOnCheckedChangeListener(this);
 
-		Switch toggleHints = findViewById(R.id.toggleHints);
+		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setOnCheckedChangeListener(this);
 
 		Switch toggleBombs = findViewById(R.id.toggleBombs);
@@ -75,14 +75,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			case R.id.toggleFlagMode:
 				toggleFlagModeOn = isChecked;
 				break;
-			case R.id.toggleHints:
+			case R.id.toggleBacktrackingHints:
 				handleHintToggle(buttonView, isChecked);
 				break;
 			case R.id.toggleBombs:
 				toggleBombsOn = isChecked;
 				break;
 			case R.id.toggleBombProbability:
-				handleProbabilityToggle(isChecked);
+				handleToggleBombProbability(isChecked);
 				break;
 			case R.id.toggleGaussHints:
 				handleGaussHintToggle(isChecked);
@@ -90,9 +90,40 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 	}
 
+	private void handleToggleBombProbability(boolean isChecked) {
+		toggleBombProbabilityOn = isChecked;
+		if (isChecked) {
+			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
+			try {
+				gameCanvas.updateSolvedBoardWithBacktrackingSolver();
+			} catch (Exception e) {
+				displayStackTracePopup(e);
+				e.printStackTrace();
+			}
+			if (toggleGaussHintsOn) {
+				toggleGaussHintsOn = false;
+				Switch gaussHints = findViewById(R.id.toggleGaussHints);
+				gaussHints.setChecked(false);
+			}
+		}
+	}
+
 	private void handleGaussHintToggle(boolean isChecked) {
 		toggleGaussHintsOn = isChecked;
 		if (isChecked) {
+
+			if (toggleBacktrackingHintsOn) {
+				toggleBacktrackingHintsOn = false;
+				Switch backtrackingHints = findViewById(R.id.toggleBacktrackingHints);
+				backtrackingHints.setChecked(false);
+			}
+
+			if (toggleBombProbabilityOn) {
+				toggleBombProbabilityOn = false;
+				Switch bombProbability = findViewById(R.id.toggleBombProbability);
+				bombProbability.setChecked(false);
+			}
+
 			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 			try {
 				gameCanvas.updateSolvedBoardWithGaussSolver();
@@ -112,19 +143,21 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 			return;
 		}
-		toggleHintsOn = isChecked;
+		toggleBacktrackingHintsOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
 			try {
-				gameCanvas.updateSolvedBoard();
+				gameCanvas.updateSolvedBoardWithBacktrackingSolver();
 			} catch (Exception e) {
 				displayStackTracePopup(e);
 				e.printStackTrace();
 			}
+			if (toggleGaussHintsOn) {
+				toggleGaussHintsOn = false;
+				Switch gaussHints = findViewById(R.id.toggleGaussHints);
+				gaussHints.setChecked(false);
+			}
 		} else {
-			Switch bombProbability = findViewById(R.id.toggleBombProbability);
-			bombProbability.setChecked(false);
-			toggleBombProbabilityOn = false;
 			if (toggleGaussHintsOn) {
 				try {
 					gameCanvas.updateSolvedBoardWithGaussSolver();
@@ -144,15 +177,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		textView.setText(sw.toString());
 		textView.setMovementMethod(new ScrollingMovementMethod());
 		PopupHelper.displayPopup(stackStacePopup, findViewById(R.id.gameLayout), getResources());
-	}
-
-	private void handleProbabilityToggle(boolean isChecked) {
-		toggleBombProbabilityOn = isChecked;
-		if (isChecked) {
-			Switch showHints = findViewById(R.id.toggleHints);
-			showHints.setChecked(true);
-			toggleHintsOn = true;
-		}
 	}
 
 	private void setUpIterationLimitPopup() {
@@ -177,9 +201,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			return;
 		}
 		solverHitIterationLimit = true;
-		Switch toggleHints = findViewById(R.id.toggleHints);
+		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setChecked(false);
-		toggleHintsOn = false;
+		toggleBacktrackingHintsOn = false;
 		PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 	}
 
@@ -215,8 +239,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		return toggleBombsOn;
 	}
 
-	public boolean getToggleHintsOn() {
-		return toggleHintsOn;
+	public boolean getToggleBacktrackingHintsOn() {
+		return toggleBacktrackingHintsOn;
 	}
 
 	public boolean getToggleBombProbabilityOn() {

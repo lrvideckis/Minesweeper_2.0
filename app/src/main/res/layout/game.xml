@@ -4,7 +4,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:background="@color/white"
-	android:tag="@string/is_linear_layout">
+	android:tag="@string/is_relative_layout">
 
 	<LinearLayout
 		android:id="@+id/topPanel"
@@ -56,6 +56,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
+		android:layout_marginBottom="5dp"
 		android:orientation="horizontal">
 
 		<Switch
@@ -66,7 +67,7 @@
 			android:text="@string/gauss_hints" />
 
 		<Switch
-			android:id="@+id/toggleHints"
+			android:id="@+id/toggleBacktrackingHints"
 			android:layout_height="wrap_content"
 			android:layout_width="0dp"
 			android:layout_weight="3"

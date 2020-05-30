@@ -38,6 +38,9 @@ public class PopupHelper {
 		} else if (parentView.getTag().equals(resources.getString(R.string.is_game_canvas_layout))) {
 			GameCanvas gameCanvasLayout = (GameCanvas) parentView;
 			popup.showAtLocation(gameCanvasLayout, Gravity.CENTER, 0, 0);
+		} else if (parentView.getTag().equals(resources.getString(R.string.is_relative_layout))) {
+			RelativeLayout relativeLayout = (RelativeLayout) parentView;
+			popup.showAtLocation(relativeLayout, Gravity.CENTER, 0, 0);
 		}
 	}
 }
