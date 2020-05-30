@@ -170,11 +170,9 @@ public class GameCanvas extends View {
 		if (gameActivity.getToggleBacktrackingHintsOn() && gameActivity.getToggleGaussHintsOn()) {
 			throw new Exception("can't have both solvers on at once");
 		}
-		/*
 		if(gameActivity.getToggleGaussHintsOn() && gameActivity.getToggleBombProbabilityOn()) {
-			throw new Exception("can't have gauss");
+			throw new Exception("can't have gauss hints and probability on");
 		}
-		 */
 
 		boolean displayedLogicalStuff = false;
 		if (gameActivity.getToggleBacktrackingHintsOn()) {
