@@ -149,10 +149,10 @@ public class GameCanvas extends View {
 		}
 
 		if (gameCell.getIsVisible()) {
-			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), i, j);
+			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), i, j, startX, startY);
 			return;
 		}
-		drawCellHelpers.drawBlankCell(canvas, i, j);
+		drawCellHelpers.drawBlankCell(canvas, i, j, startX, startY);
 
 		GameActivity gameActivity = (GameActivity) getContext();
 

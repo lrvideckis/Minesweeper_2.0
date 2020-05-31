@@ -98,17 +98,12 @@ class DrawCellHelpers {
 		}
 	}
 
-	void drawBlankCell(Canvas canvas, int i, int j) {
-		final int startX = j * cellPixelLength;
-		final int startY = i * cellPixelLength;
-
+	void drawBlankCell(Canvas canvas, int i, int j, int startX, int startY) {
 		canvas.drawText(triangleEmoji, startX - 20, startY + cellPixelLength, lowerTriangle);
 		canvas.drawRect(middleSquareRectangles[i][j], middleSquare);
 	}
 
-	void drawNumberedCell(Canvas canvas, Integer numberSurroundingBombs, int i, int j) {
-		final int startX = j * cellPixelLength;
-		final int startY = i * cellPixelLength;
+	void drawNumberedCell(Canvas canvas, Integer numberSurroundingBombs, int i, int j, int startX, int startY) {
 		canvas.drawRect(backgroundRectangles[i][j], backgroundGreyForVisibleCells);
 		if (numberSurroundingBombs > 0) {
 			final int xPos = startX + cellPixelLength / 2;
