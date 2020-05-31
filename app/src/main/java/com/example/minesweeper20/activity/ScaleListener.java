@@ -20,17 +20,12 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	//variables to handle a tap
 	private boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
 	private float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
-	private float topNavBarHeight;
 
 	public ScaleListener(Context context, GameCanvas gameCanvas, int screenWidth, int screenHeight) {
 		halfScreenWidth = screenWidth / 2;
 		halfScreenHeight = screenHeight / 2;
 		SGD = new ScaleGestureDetector(context, this);
 		this.gameCanvas = gameCanvas;
-	}
-
-	public void setTopNavBarHeight(float topNavBarHeight) {
-		this.topNavBarHeight = topNavBarHeight;
 	}
 
 	@Override
@@ -100,12 +95,10 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						newX -= absoluteX;
 
 						float newY = startOfTapY;
-						newY += topNavBarHeight;
 						newY -= halfScreenHeight;
 						newY /= scale;
 						newY += halfScreenHeight;
 						newY -= absoluteY;
-						newY -= topNavBarHeight;
 
 						gameCanvas.handleTap(newX, newY);
 					}

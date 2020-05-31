@@ -3,7 +3,6 @@ package com.example.minesweeper20.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
@@ -30,7 +29,6 @@ public class GameCanvas extends View {
 	private final MinesweeperGame minesweeperGame;
 	private final int cellPixelLength = 150;
 	private final Paint black = new Paint();
-	private final Matrix canvasTransitionScale = new Matrix();
 	private final VisibleTile[][] board;
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
@@ -213,7 +211,6 @@ public class GameCanvas extends View {
 	}
 
 	private boolean cellIsOffScreen(int startX, int startY) {
-		final float topNavBarHeight = getTop() + getStatusBarHeight();
 		final float absoluteX = scaleListener.getAbsoluteX();
 		final float absoluteY = scaleListener.getAbsoluteY();
 		final float scale = scaleListener.getScale();
@@ -223,23 +220,20 @@ public class GameCanvas extends View {
 		if ((startX + cellPixelLength + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth < 0) {
 			return true;
 		}
-		if ((startY + cellPixelLength + topNavBarHeight + absoluteY - halfOfScreenHeight) * scale + halfOfScreenHeight - topNavBarHeight < 0) {
+		if ((startY + cellPixelLength + absoluteY - halfOfScreenHeight) * scale + halfOfScreenHeight < 0) {
 			return true;
 		}
 		if ((startX + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth > getWidth()) {
 			return true;
 		}
-		return ((startY + absoluteY + topNavBarHeight - halfOfScreenHeight) * scale + halfOfScreenHeight - topNavBarHeight > getHeight());
+		return ((startY + absoluteY - halfOfScreenHeight) * scale + halfOfScreenHeight > getHeight());
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		final float topNavBarHeight = getTop() + getStatusBarHeight();
-		scaleListener.setTopNavBarHeight(topNavBarHeight);
-		canvasTransitionScale.set(scaleListener.getMatrix());
-		canvasTransitionScale.preTranslate(0, topNavBarHeight);
-		canvas.setMatrix(canvasTransitionScale);
+
+		canvas.setMatrix(scaleListener.getMatrix());
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
 		final int numberOfCols = minesweeperGame.getNumberOfCols();
@@ -264,14 +258,5 @@ public class GameCanvas extends View {
 		if (minesweeperGame.getIsGameOver()) {
 			PopupHelper.displayPopup(endGamePopup, findViewById(R.id.gridCanvas), getResources());
 		}
-	}
-
-	private int getStatusBarHeight() {
-		int statusBarHeight = 0;
-		int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-		if (resourceId > 0) {
-			statusBarHeight = getResources().getDimensionPixelSize(resourceId);
-		}
-		return statusBarHeight;
 	}
 }
