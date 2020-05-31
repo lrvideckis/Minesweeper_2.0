@@ -79,7 +79,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				handleHintToggle(buttonView, isChecked);
 				break;
 			case R.id.toggleBombs:
-				toggleBombsOn = isChecked;
+				handleToggleShowBombs(isChecked);
 				break;
 			case R.id.toggleBombProbability:
 				handleToggleBombProbability(isChecked);
@@ -90,10 +90,16 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 	}
 
+	private void handleToggleShowBombs(boolean isChecked) {
+		toggleBombsOn = isChecked;
+		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
+		gameCanvas.invalidate();
+	}
+
 	private void handleToggleBombProbability(boolean isChecked) {
 		toggleBombProbabilityOn = isChecked;
+		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
-			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 			try {
 				gameCanvas.updateSolvedBoardWithBacktrackingSolver();
 			} catch (Exception e) {
@@ -106,10 +112,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				gaussHints.setChecked(false);
 			}
 		}
+		gameCanvas.invalidate();
 	}
 
 	private void handleGaussHintToggle(boolean isChecked) {
 		toggleGaussHintsOn = isChecked;
+		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
 
 			if (toggleBacktrackingHintsOn) {
@@ -124,7 +132,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				bombProbability.setChecked(false);
 			}
 
-			GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 			try {
 				gameCanvas.updateSolvedBoardWithGaussSolver();
 			} catch (Exception e) {
@@ -132,6 +139,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				e.printStackTrace();
 			}
 		}
+		gameCanvas.invalidate();
 	}
 
 	private void handleHintToggle(CompoundButton buttonView, boolean isChecked) {
@@ -168,6 +176,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			}
 			updateNumberOfSolverIterations(0);
 		}
+		gameCanvas.invalidate();
 	}
 
 	public void displayStackTracePopup(Exception e) {
