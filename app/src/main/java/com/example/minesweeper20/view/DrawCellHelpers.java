@@ -6,7 +6,6 @@ import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 
@@ -28,8 +27,8 @@ class DrawCellHelpers {
 	private final Paint[] numberColors;
 	private final String
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
-			bombEmoji = new String(Character.toChars(0x1F4A3));
-	private Path[][] trianglePaths;
+			bombEmoji = new String(Character.toChars(0x1F4A3)),
+			triangleEmoji = new String(Character.toChars(0x25E2));
 	private Rect[][] middleSquareRectangles, backgroundRectangles;
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
@@ -41,6 +40,7 @@ class DrawCellHelpers {
 		backgroundGreyForVisibleCells.setStyle(Paint.Style.FILL);
 
 		lowerTriangle.setColor(ContextCompat.getColor(context, R.color.lowerTriangleColor));
+		lowerTriangle.setTextSize(cellPixelLength * 1.7f);
 		lowerTriangle.setStyle(Paint.Style.FILL_AND_STROKE);
 		lowerTriangle.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
 
@@ -77,21 +77,12 @@ class DrawCellHelpers {
 	}
 
 	private void initializeTrianglesAndRectangles(int rows, int cols) {
-		trianglePaths = new Path[rows][cols];
 		middleSquareRectangles = new Rect[rows][cols];
 		backgroundRectangles = new Rect[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				final int startX = j * cellPixelLength;
 				final int startY = i * cellPixelLength;
-
-				Path currLowerTrianglePath = new Path();
-				currLowerTrianglePath.setFillType(Path.FillType.WINDING);
-				currLowerTrianglePath.moveTo(startX, startY + cellPixelLength);
-				currLowerTrianglePath.lineTo(startX + cellPixelLength, startY + cellPixelLength);
-				currLowerTrianglePath.lineTo(startX + cellPixelLength, startY);
-				currLowerTrianglePath.lineTo(startX, startY + cellPixelLength);
-				currLowerTrianglePath.close();
 
 				Rect middleSquare = new Rect();
 				middleSquare.set(startX + cellPixelLength * 88 / 100,
@@ -101,7 +92,6 @@ class DrawCellHelpers {
 
 				Rect currBackground = new Rect(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
 
-				trianglePaths[i][j] = currLowerTrianglePath;
 				middleSquareRectangles[i][j] = middleSquare;
 				backgroundRectangles[i][j] = currBackground;
 			}
@@ -109,7 +99,10 @@ class DrawCellHelpers {
 	}
 
 	void drawBlankCell(Canvas canvas, int i, int j) {
-		canvas.drawPath(trianglePaths[i][j], lowerTriangle);
+		final int startX = j * cellPixelLength;
+		final int startY = i * cellPixelLength;
+
+		canvas.drawText(triangleEmoji, startX - 20, startY + cellPixelLength, lowerTriangle);
 		canvas.drawRect(middleSquareRectangles[i][j], middleSquare);
 	}
 
