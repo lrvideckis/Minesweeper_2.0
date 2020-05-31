@@ -99,6 +99,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			return;
 		}
 
+		//TODO: look into running this loop in parallel
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfBombs = new MutableInt(0);

@@ -24,6 +24,13 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 //TODO: make rows/cols/bombs be the same as the last played game
 //TODO: make sure back button on bottom nav bar works
 //TODO: when you lose, you can't click the back button, you have to click the okay popup button - fix this
+//TODO: Backtracking popup shows twice when clicking bomb probability
+//TODO: Win screen
+//TODO: Hard mode: always lose if there exists a possible bomb combination s.t. the move loses
+//TODO: Easy mode: always keep playing if there is a combination of bombs St the move doesn't lose
+//TODO: Make minesweeper endless: always force >= 1 visible tile on the screen
+//TODO: Recommend the guess which will reveal the greatest amount of further stuff
+//TODO: Crashed when hitting iteration limit on expert
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
 
