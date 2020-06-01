@@ -2,8 +2,8 @@ package com.example.minesweeper20.minesweeperStuff;
 
 import android.util.Pair;
 
-import com.example.minesweeper20.HitIterationLimitException;
-import com.example.minesweeper20.NoSolutionFoundException;
+import com.example.minesweeper20.customExceptions.HitIterationLimitException;
+import com.example.minesweeper20.customExceptions.NoSolutionFoundException;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AllCellsAreHidden;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;

@@ -2,8 +2,8 @@ package com.example.minesweeper20.miscHelpers;
 
 import android.util.Pair;
 
-import com.example.minesweeper20.HitIterationLimitException;
-import com.example.minesweeper20.NoSolutionFoundException;
+import com.example.minesweeper20.customExceptions.HitIterationLimitException;
+import com.example.minesweeper20.customExceptions.NoSolutionFoundException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolverWithBigint;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;

@@ -9,10 +9,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.PopupWindow;
 
-import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
+import com.example.minesweeper20.customExceptions.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
