@@ -131,7 +131,6 @@ class DrawCellHelpers {
 		canvas.drawText(bombEmoji, xPos, yPos, redFlag);
 	}
 
-	//TODO: make this look better
 	void drawLogicalBomb(Canvas canvas, int i, int j, Resources resources) {
 		final Drawable upperTriangleDrawable = resources.getDrawable(R.drawable.upper_triangle_red, null);
 		upperTriangleDrawable.setBounds(lowerTriangleRectangles[i][j]);
