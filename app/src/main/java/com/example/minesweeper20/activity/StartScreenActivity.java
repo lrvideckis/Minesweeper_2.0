@@ -3,6 +3,7 @@ package com.example.minesweeper20.activity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
+import com.example.minesweeper20.miscHelpers.NumberInputFilterMinMax;
 import com.example.minesweeper20.miscHelpers.PopupHelper;
 import com.example.minesweeper20.miscHelpers.Test;
 
@@ -67,7 +69,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 				EditText rowInput = newGamePopup.getContentView().findViewById(R.id.rowsInput);
 				EditText colInput = newGamePopup.getContentView().findViewById(R.id.colsInput);
 				EditText bombInput = newGamePopup.getContentView().findViewById(R.id.bombsInput);
-				//TODO: limit size of grid to a reasonable size
+
 				final int numberOfRows = getNumberInput(rowInput.getText().toString());
 				final int numberOfCols = getNumberInput(colInput.getText().toString());
 				final int numberOfBombs = getNumberInput(bombInput.getText().toString());
@@ -94,6 +96,11 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		final EditText rowsInput = newGamePopup.getContentView().findViewById(R.id.rowsInput);
 		final EditText colsInput = newGamePopup.getContentView().findViewById(R.id.colsInput);
 		final EditText bombsInput = newGamePopup.getContentView().findViewById(R.id.bombsInput);
+
+		NumberInputFilterMinMax rowsAndColsFilter = new NumberInputFilterMinMax(1, 50);
+		rowsInput.setFilters(new InputFilter[]{rowsAndColsFilter});
+		colsInput.setFilters(new InputFilter[]{rowsAndColsFilter});
+		bombsInput.setFilters(new InputFilter[]{new NumberInputFilterMinMax(1, 1000)});
 
 		Button beginner = newGamePopup.getContentView().findViewById(R.id.beginner);
 		beginner.setOnClickListener(new View.OnClickListener() {
