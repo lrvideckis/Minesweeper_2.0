@@ -13,9 +13,9 @@ import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
-import com.example.minesweeper20.helpers.PopupHelper;
-import com.example.minesweeper20.helpers.Test;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
+import com.example.minesweeper20.miscHelpers.PopupHelper;
+import com.example.minesweeper20.miscHelpers.Test;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: undo button - only when you lose

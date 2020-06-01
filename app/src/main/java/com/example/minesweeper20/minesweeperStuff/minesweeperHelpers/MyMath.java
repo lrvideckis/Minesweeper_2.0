@@ -1,4 +1,4 @@
-package com.example.minesweeper20.helpers;
+package com.example.minesweeper20.minesweeperStuff.minesweeperHelpers;
 
 public class MyMath {
 	public static FractionThenDouble BinomialCoefficient(int n, int k) throws Exception {
@@ -58,7 +58,7 @@ public class MyMath {
 		return a;
 	}
 
-	static int getRand(int min, int max) throws Exception {
+	public static int getRand(int min, int max) throws Exception {
 		if (min > max) {
 			throw new Exception("invalid parameters: min > max");
 		}

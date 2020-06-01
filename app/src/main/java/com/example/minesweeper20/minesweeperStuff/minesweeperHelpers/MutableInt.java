@@ -1,4 +1,4 @@
-package com.example.minesweeper20.helpers;
+package com.example.minesweeper20.minesweeperStuff.minesweeperHelpers;
 
 public class MutableInt {
 	private int value;

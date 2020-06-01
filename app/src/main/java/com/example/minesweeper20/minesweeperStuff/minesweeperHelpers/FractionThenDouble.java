@@ -1,4 +1,4 @@
-package com.example.minesweeper20.helpers;
+package com.example.minesweeper20.minesweeperStuff.minesweeperHelpers;
 
 public class FractionThenDouble {
 
@@ -11,7 +11,7 @@ public class FractionThenDouble {
 		denominator = 1;
 	}
 
-	FractionThenDouble(FractionThenDouble other) throws Exception {
+	public FractionThenDouble(FractionThenDouble other) throws Exception {
 		setValue(other);
 	}
 

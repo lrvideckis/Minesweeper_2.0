@@ -12,8 +12,8 @@ import android.graphics.drawable.Drawable;
 import androidx.core.content.ContextCompat;
 
 import com.example.minesweeper20.R;
-import com.example.minesweeper20.helpers.FractionThenDouble;
-import com.example.minesweeper20.helpers.MyMath;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 class DrawCellHelpers {
 	private final Integer cellPixelLength = 150;

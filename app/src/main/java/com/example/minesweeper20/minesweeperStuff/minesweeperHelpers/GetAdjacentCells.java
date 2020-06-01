@@ -1,4 +1,4 @@
-package com.example.minesweeper20.helpers;
+package com.example.minesweeper20.minesweeperStuff.minesweeperHelpers;
 
 public class GetAdjacentCells {
 	public static int[][] getAdjacentCells(int i, int j, int rows, int cols) {

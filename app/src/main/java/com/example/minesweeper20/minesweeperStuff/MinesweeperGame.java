@@ -1,7 +1,7 @@
 package com.example.minesweeper20.minesweeperStuff;
 
-import com.example.minesweeper20.helpers.ArrayBounds;
-import com.example.minesweeper20.helpers.GetAdjacentCells;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 
 import java.util.ArrayList;
 import java.util.Collections;

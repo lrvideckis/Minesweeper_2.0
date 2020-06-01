@@ -1,6 +1,6 @@
 package com.example.minesweeper20.minesweeperStuff;
 
-import com.example.minesweeper20.helpers.FractionThenDouble;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
 
 public interface MinesweeperSolver {
 	void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception;

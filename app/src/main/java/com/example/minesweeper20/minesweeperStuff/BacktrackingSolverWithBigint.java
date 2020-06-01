@@ -4,13 +4,13 @@ import android.util.Pair;
 
 import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.NoSolutionFoundException;
-import com.example.minesweeper20.helpers.AllCellsAreHidden;
-import com.example.minesweeper20.helpers.ArrayBounds;
-import com.example.minesweeper20.helpers.AwayCell;
-import com.example.minesweeper20.helpers.GetAdjacentCells;
-import com.example.minesweeper20.helpers.GetConnectedComponents;
-import com.example.minesweeper20.helpers.MutableInt;
-import com.example.minesweeper20.helpers.MyMath;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AllCellsAreHidden;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MutableInt;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

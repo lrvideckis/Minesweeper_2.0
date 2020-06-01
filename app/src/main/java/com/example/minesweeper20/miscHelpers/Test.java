@@ -1,4 +1,4 @@
-package com.example.minesweeper20.helpers;
+package com.example.minesweeper20.miscHelpers;
 
 import android.util.Pair;
 
@@ -9,6 +9,11 @@ import com.example.minesweeper20.minesweeperStuff.BacktrackingSolverWithBigint;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.SlowBacktrackingSolver;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.math.BigInteger;
 

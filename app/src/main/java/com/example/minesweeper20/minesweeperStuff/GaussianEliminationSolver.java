@@ -2,9 +2,9 @@ package com.example.minesweeper20.minesweeperStuff;
 
 import android.util.Pair;
 
-import com.example.minesweeper20.helpers.ArrayBounds;
-import com.example.minesweeper20.helpers.AwayCell;
-import com.example.minesweeper20.helpers.GetAdjacentCells;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 
 import java.util.Arrays;
 import java.util.TreeSet;

@@ -13,7 +13,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
-import com.example.minesweeper20.helpers.PopupHelper;
+import com.example.minesweeper20.miscHelpers.PopupHelper;
 import com.example.minesweeper20.view.GameCanvas;
 
 import java.io.PrintWriter;

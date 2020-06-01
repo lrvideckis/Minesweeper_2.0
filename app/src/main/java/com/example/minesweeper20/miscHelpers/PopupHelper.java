@@ -1,4 +1,4 @@
-package com.example.minesweeper20.helpers;
+package com.example.minesweeper20.miscHelpers;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

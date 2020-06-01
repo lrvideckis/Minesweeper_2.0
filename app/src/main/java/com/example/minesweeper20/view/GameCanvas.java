@@ -13,13 +13,13 @@ import com.example.minesweeper20.HitIterationLimitException;
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.GameActivity;
 import com.example.minesweeper20.activity.ScaleListener;
-import com.example.minesweeper20.helpers.ConvertGameBoardFormat;
-import com.example.minesweeper20.helpers.FractionThenDouble;
-import com.example.minesweeper20.helpers.PopupHelper;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
+import com.example.minesweeper20.miscHelpers.PopupHelper;
 
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
