@@ -28,20 +28,16 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final boolean[][] isBomb;
 	private final int[][] cntSurroundingBombs, updatedNumberSurroundingBombs;
 	private final int[][][] lastUnvisitedSpot;
-	private int totalIterations;
-
-	//variables for saving specific bomb position
 	private final boolean[][] saveIsBomb;
-	//one hash-map for each component:
-	//for each component: we map the number of bombs to a configuration of bombs for that component
 	private final ArrayList<TreeMap<Integer, MutableInt>> bombConfig;
 	private final ArrayList<TreeMap<Integer, FractionThenDouble>> numberOfConfigsForCurrent;
+	private final GaussianEliminationSolver gaussianEliminationSolver;
+	private int totalIterations;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
 	private int numberOfBombs;
 	private boolean needToCheckSpotCondition, wantBomb, foundBombConfiguration;
 	private int spotI, spotJ;
-	private final GaussianEliminationSolver gaussianEliminationSolver;
 
 	public BacktrackingSolver(int rows, int cols) {
 		this.rows = rows;

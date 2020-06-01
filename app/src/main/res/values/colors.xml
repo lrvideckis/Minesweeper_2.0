@@ -8,6 +8,7 @@
 	<color name="reallyLightGrey">#e6e6e6</color>
 	<color name="white">#ffffff</color>
 	<color name="black">#000000</color>
+	<color name="backGroundGreyBlankVisibleCell">#cccccc</color>
 
 	<!-- colors for the numbers -->
 	<color name="one">#0000FF</color>
@@ -19,8 +20,14 @@
 	<color name="seven">#000000</color>
 	<color name="eight">#808080</color>
 
-	<color name="lowerTriangleColor">#666666</color>
 	<color name="middleSquareColor">#b3b3b3</color>
+	<color name="lowerTriangleColor">#666666</color>
 
-	<color name="backGroundGreyBlankVisibleCell">#cccccc</color>
+	<color name="upperRedTriangle">#ffcccc</color>
+	<color name="middleRedSquare">#ff6666</color>
+	<color name="lowerRedTriangle">#cc0000</color>
+
+	<color name="upperGreenTriangle">#ccffcc</color>
+	<color name="middleGreenSquare">#4dff4d</color>
+	<color name="lowerGreenTriangle">#00cc00</color>
 </resources>

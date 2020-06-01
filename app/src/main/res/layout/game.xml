@@ -61,22 +61,22 @@
 
 		<Switch
 			android:id="@+id/toggleGaussHints"
-			android:layout_height="wrap_content"
 			android:layout_width="0dp"
+			android:layout_height="wrap_content"
 			android:layout_weight="3"
 			android:text="@string/gauss_hints" />
 
 		<Switch
 			android:id="@+id/toggleBacktrackingHints"
-			android:layout_height="wrap_content"
 			android:layout_width="0dp"
+			android:layout_height="wrap_content"
 			android:layout_weight="3"
 			android:text="@string/backtracking" />
 
 		<Switch
 			android:id="@+id/toggleBombProbability"
-			android:layout_height="wrap_content"
 			android:layout_width="0dp"
+			android:layout_height="wrap_content"
 			android:layout_weight="4"
 			android:text="@string/show_bomb_probability" />
 

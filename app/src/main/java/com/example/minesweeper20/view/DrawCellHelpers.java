@@ -20,6 +20,8 @@ class DrawCellHelpers {
 	private final Paint
 			backgroundGreyForVisibleCells = new Paint(),
 			middleSquare = new Paint(),
+			middleRedSquare = new Paint(),
+			middleGreenSquare = new Paint(),
 			redFlag = new Paint(),
 			black = new Paint(),
 			redX = new Paint();
@@ -39,6 +41,12 @@ class DrawCellHelpers {
 
 		middleSquare.setColor(ContextCompat.getColor(context, R.color.middleSquareColor));
 		middleSquare.setStyle(Paint.Style.FILL_AND_STROKE);
+
+		middleRedSquare.setColor(ContextCompat.getColor(context, R.color.middleRedSquare));
+		middleRedSquare.setStyle(Paint.Style.FILL_AND_STROKE);
+
+		middleGreenSquare.setColor(ContextCompat.getColor(context, R.color.middleGreenSquare));
+		middleGreenSquare.setStyle(Paint.Style.FILL_AND_STROKE);
 
 		redFlag.setTextSize(cellPixelLength / 2f);
 		redFlag.setTextAlign(Paint.Align.CENTER);
@@ -96,9 +104,9 @@ class DrawCellHelpers {
 	}
 
 	void drawBlankCell(Canvas canvas, int i, int j, Resources resources) {
-		final Drawable d = resources.getDrawable(R.drawable.lower_triangle, null);
-		d.setBounds(lowerTriangleRectangles[i][j]);
-		d.draw(canvas);
+		final Drawable lowerTriangleDrawable = resources.getDrawable(R.drawable.lower_triangle_grey, null);
+		lowerTriangleDrawable.setBounds(lowerTriangleRectangles[i][j]);
+		lowerTriangleDrawable.draw(canvas);
 		canvas.drawRect(middleSquareRectangles[i][j], middleSquare);
 	}
 
@@ -124,12 +132,24 @@ class DrawCellHelpers {
 	}
 
 	//TODO: make this look better
-	void drawLogicalBomb(Canvas canvas, int startX, int startY) {
-		canvas.drawText("B", startX, startY + cellPixelLength / 3f, black);
+	void drawLogicalBomb(Canvas canvas, int i, int j, Resources resources) {
+		final Drawable upperTriangleDrawable = resources.getDrawable(R.drawable.upper_triangle_red, null);
+		upperTriangleDrawable.setBounds(lowerTriangleRectangles[i][j]);
+		upperTriangleDrawable.draw(canvas);
+		final Drawable lowerTriangleDrawable = resources.getDrawable(R.drawable.lower_triangle_red, null);
+		lowerTriangleDrawable.setBounds(lowerTriangleRectangles[i][j]);
+		lowerTriangleDrawable.draw(canvas);
+		canvas.drawRect(middleSquareRectangles[i][j], middleRedSquare);
 	}
 
-	void drawLogicalFree(Canvas canvas, int startX, int startY) {
-		canvas.drawText("F", startX, startY + cellPixelLength / 3f, black);
+	void drawLogicalFree(Canvas canvas, int i, int j, Resources resources) {
+		final Drawable upperTriangleDrawable = resources.getDrawable(R.drawable.upper_triangle_green, null);
+		upperTriangleDrawable.setBounds(lowerTriangleRectangles[i][j]);
+		upperTriangleDrawable.draw(canvas);
+		final Drawable lowerTriangleDrawable = resources.getDrawable(R.drawable.lower_triangle_green, null);
+		lowerTriangleDrawable.setBounds(lowerTriangleRectangles[i][j]);
+		lowerTriangleDrawable.draw(canvas);
+		canvas.drawRect(middleSquareRectangles[i][j], middleGreenSquare);
 	}
 
 	void drawRedX(Canvas canvas, int startX, int startY) {

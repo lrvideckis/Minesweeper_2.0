@@ -143,7 +143,6 @@ public class GameCanvas extends View {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
 
-		//it seems this is making it more laggy
 		if (cellIsOffScreen(startX, startY)) {
 			return;
 		}
@@ -152,9 +151,38 @@ public class GameCanvas extends View {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), i, j, startX, startY);
 			return;
 		}
-		drawCellHelpers.drawBlankCell(canvas, i, j, getResources());
 
 		GameActivity gameActivity = (GameActivity) getContext();
+		if (gameActivity.getToggleBacktrackingHintsOn() && gameActivity.getToggleGaussHintsOn()) {
+			throw new Exception("can't have both solvers on at once");
+		}
+		if (gameActivity.getToggleGaussHintsOn() && gameActivity.getToggleBombProbabilityOn()) {
+			throw new Exception("can't have gauss hints and probability on");
+		}
+
+		final boolean showHints = (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleGaussHintsOn());
+		boolean displayedLogicalStuff = false;
+		if (solverCell.getIsLogicalBomb() && showHints) {
+			if (!gameCell.isBomb()) {
+				throw new Exception("solver says: logical bomb, but it's not a bomb");
+			}
+			displayedLogicalStuff = true;
+			drawCellHelpers.drawLogicalBomb(canvas, i, j, getResources());
+		} else if (solverCell.getIsLogicalFree() && showHints) {
+			if (gameCell.isBomb()) {
+				throw new Exception("gauss solver says: logical free, but it's not free");
+			}
+			displayedLogicalStuff = true;
+			drawCellHelpers.drawLogicalFree(canvas, i, j, getResources());
+		} else {
+			drawCellHelpers.drawBlankCell(canvas, i, j, getResources());
+		}
+
+		if (gameActivity.getToggleBombProbabilityOn() && !solverCell.getIsVisible() && !displayedLogicalStuff) {
+			bombProbability.setValue(solverCell.getNumberOfBombConfigs());
+			bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
+			drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
+		}
 
 		if (gameCell.isFlagged()) {
 			drawCellHelpers.drawFlag(canvas, startX, startY);
@@ -163,50 +191,6 @@ public class GameCanvas extends View {
 			}
 		} else if (gameCell.isBomb() && (minesweeperGame.getIsGameOver() || gameActivity.getToggleBombsOn())) {
 			drawCellHelpers.drawBomb(canvas, startX, startY);
-		}
-
-		if (gameActivity.getToggleBacktrackingHintsOn() && gameActivity.getToggleGaussHintsOn()) {
-			throw new Exception("can't have both solvers on at once");
-		}
-		if(gameActivity.getToggleGaussHintsOn() && gameActivity.getToggleBombProbabilityOn()) {
-			throw new Exception("can't have gauss hints and probability on");
-		}
-
-		boolean displayedLogicalStuff = false;
-		if (gameActivity.getToggleBacktrackingHintsOn()) {
-			if (solverCell.getIsLogicalBomb()) {
-				if (!gameCell.isBomb()) {
-					throw new Exception("solver says: logical bomb, but it's not a bomb");
-				}
-				displayedLogicalStuff = true;
-				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
-			} else if (solverCell.getIsLogicalFree()) {
-				if (gameCell.isBomb()) {
-					throw new Exception("solver says: logical free, but it's not free");
-				}
-				displayedLogicalStuff = true;
-				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
-			}
-		} else if (gameActivity.getToggleGaussHintsOn()) {
-			if (solverCell.getIsLogicalBomb()) {
-				if (!gameCell.isBomb()) {
-					throw new Exception("gauss solver says: logical bomb, but it's not a bomb");
-				}
-				displayedLogicalStuff = true;
-				drawCellHelpers.drawLogicalBomb(canvas, startX, startY);
-			} else if (solverCell.getIsLogicalFree()) {
-				if (gameCell.isBomb()) {
-					throw new Exception("gauss solver says: logical free, but it's not free");
-				}
-				displayedLogicalStuff = true;
-				drawCellHelpers.drawLogicalFree(canvas, startX, startY);
-			}
-		}
-
-		if (gameActivity.getToggleBombProbabilityOn() && !solverCell.getIsVisible() && !displayedLogicalStuff) {
-			bombProbability.setValue(solverCell.getNumberOfBombConfigs());
-			bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
-			drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
 		}
 	}
 
