@@ -152,7 +152,7 @@ public class GameCanvas extends View {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), i, j, startX, startY);
 			return;
 		}
-		drawCellHelpers.drawBlankCell(canvas, i, j, startX, startY);
+		drawCellHelpers.drawBlankCell(canvas, i, j, getResources());
 
 		GameActivity gameActivity = (GameActivity) getContext();
 

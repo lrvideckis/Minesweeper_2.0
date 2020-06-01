@@ -2,12 +2,12 @@ package com.example.minesweeper20.view;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 
 import androidx.core.content.ContextCompat;
 
@@ -19,7 +19,6 @@ class DrawCellHelpers {
 	private final Integer cellPixelLength = 150;
 	private final Paint
 			backgroundGreyForVisibleCells = new Paint(),
-			lowerTriangle = new Paint(),
 			middleSquare = new Paint(),
 			redFlag = new Paint(),
 			black = new Paint(),
@@ -27,9 +26,8 @@ class DrawCellHelpers {
 	private final Paint[] numberColors;
 	private final String
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
-			bombEmoji = new String(Character.toChars(0x1F4A3)),
-			triangleEmoji = new String(Character.toChars(0x25E2));
-	private Rect[][] middleSquareRectangles, backgroundRectangles;
+			bombEmoji = new String(Character.toChars(0x1F4A3));
+	private Rect[][] middleSquareRectangles, backgroundRectangles, lowerTriangleRectangles;
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
@@ -39,14 +37,8 @@ class DrawCellHelpers {
 		backgroundGreyForVisibleCells.setColor(ContextCompat.getColor(context, R.color.backGroundGreyBlankVisibleCell));
 		backgroundGreyForVisibleCells.setStyle(Paint.Style.FILL);
 
-		lowerTriangle.setColor(ContextCompat.getColor(context, R.color.lowerTriangleColor));
-		lowerTriangle.setTextSize(cellPixelLength * 1.7f);
-		lowerTriangle.setStyle(Paint.Style.FILL_AND_STROKE);
-		lowerTriangle.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
-
 		middleSquare.setColor(ContextCompat.getColor(context, R.color.middleSquareColor));
 		middleSquare.setStyle(Paint.Style.FILL_AND_STROKE);
-		middleSquare.setMaskFilter(new BlurMaskFilter(3, BlurMaskFilter.Blur.NORMAL));
 
 		redFlag.setTextSize(cellPixelLength / 2f);
 		redFlag.setTextAlign(Paint.Align.CENTER);
@@ -79,27 +71,34 @@ class DrawCellHelpers {
 	private void initializeTrianglesAndRectangles(int rows, int cols) {
 		middleSquareRectangles = new Rect[rows][cols];
 		backgroundRectangles = new Rect[rows][cols];
+		lowerTriangleRectangles = new Rect[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				final int startX = j * cellPixelLength;
 				final int startY = i * cellPixelLength;
 
 				Rect middleSquare = new Rect();
-				middleSquare.set(startX + cellPixelLength * 88 / 100,
-						startY + cellPixelLength * 88 / 100,
-						startX + cellPixelLength * 12 / 100,
-						startY + cellPixelLength * 12 / 100);
+				middleSquare.set(startX + cellPixelLength * 89 / 100,
+						startY + cellPixelLength * 89 / 100,
+						startX + cellPixelLength * 11 / 100,
+						startY + cellPixelLength * 11 / 100);
 
 				Rect currBackground = new Rect(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
 
+				Rect lowerTriangleBounds = new Rect();
+				lowerTriangleBounds.set(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
+
 				middleSquareRectangles[i][j] = middleSquare;
 				backgroundRectangles[i][j] = currBackground;
+				lowerTriangleRectangles[i][j] = lowerTriangleBounds;
 			}
 		}
 	}
 
-	void drawBlankCell(Canvas canvas, int i, int j, int startX, int startY) {
-		canvas.drawText(triangleEmoji, startX - 20, startY + cellPixelLength, lowerTriangle);
+	void drawBlankCell(Canvas canvas, int i, int j, Resources resources) {
+		final Drawable d = resources.getDrawable(R.drawable.lower_triangle, null);
+		d.setBounds(lowerTriangleRectangles[i][j]);
+		d.draw(canvas);
 		canvas.drawRect(middleSquareRectangles[i][j], middleSquare);
 	}
 
