@@ -30,7 +30,7 @@ import com.example.minesweeper20.miscHelpers.Test;
 //TODO: Make minesweeper endless: always force >= 1 visible tile on the screen
 //TODO: Recommend the guess which will reveal the greatest amount of further stuff
 
-public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener {
+public class StartScreenActivity extends AppCompatActivity {
 
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
@@ -134,10 +134,6 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		Test.performTestsForBombProbability(20);
 		Test.performTestsForFractionOverflow(20);
 		Test.performTestsForGaussSolver(20);
-	}
-
-	@Override
-	public void onClick(View v) {
 	}
 
 	private int getNumberInput(String input) {
