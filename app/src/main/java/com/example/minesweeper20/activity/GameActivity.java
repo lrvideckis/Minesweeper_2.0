@@ -82,7 +82,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				handleToggleShowBombs(isChecked);
 				break;
 			case R.id.toggleBombProbability:
-				handleToggleBombProbability(isChecked);
+				handleToggleBombProbability(buttonView, isChecked);
 				break;
 			case R.id.toggleGaussHints:
 				handleGaussHintToggle(isChecked);
@@ -96,7 +96,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		gameCanvas.invalidate();
 	}
 
-	private void handleToggleBombProbability(boolean isChecked) {
+	private void handleToggleBombProbability(CompoundButton buttonView, boolean isChecked) {
+		if (solverHitIterationLimit) {
+			buttonView.setChecked(false);
+			Switch showBacktrackingHints = findViewById(R.id.toggleBacktrackingHints);
+			showBacktrackingHints.setChecked(false);
+			toggleBacktrackingHintsOn = false;
+			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
+			return;
+		}
 		toggleBombProbabilityOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
