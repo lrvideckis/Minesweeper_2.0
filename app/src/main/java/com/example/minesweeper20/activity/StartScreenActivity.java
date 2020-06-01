@@ -112,9 +112,9 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 		final EditText colsInput = newGamePopup.getContentView().findViewById(R.id.colsInput);
 		final EditText bombsInput = newGamePopup.getContentView().findViewById(R.id.bombsInput);
 
-		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 5);
-		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 5);
-		final int previousBombs = sharedPreferences.getInt(NUMBER_OF_BOMBS, 5);
+		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 9);
+		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 9);
+		final int previousBombs = sharedPreferences.getInt(NUMBER_OF_BOMBS, 10);
 
 		rowsInput.setText(String.valueOf(previousRows));
 		colsInput.setText(String.valueOf(previousCols));
