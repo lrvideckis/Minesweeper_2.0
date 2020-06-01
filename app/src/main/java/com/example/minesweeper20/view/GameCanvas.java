@@ -35,7 +35,7 @@ public class GameCanvas extends View {
 	private final FractionThenDouble bombProbability = new FractionThenDouble(0);
 	private PopupWindow endGamePopup;
 
-	public GameCanvas(Context context, AttributeSet attrs) {
+	public GameCanvas(Context context, AttributeSet attrs) throws Exception {
 		super(context, attrs);
 		black.setColor(Color.BLACK);
 		black.setStrokeWidth(3);

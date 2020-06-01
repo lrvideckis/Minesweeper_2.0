@@ -14,7 +14,12 @@ public class MinesweeperGame {
 	private int numberOfFlags;
 	private boolean firstClick, isGameOver;
 
-	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfBombs) {
+	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfBombs) throws Exception {
+
+		if (tooManyBombsForZeroStart(numberOfRows, numberOfCols, numberOfBombs)) {
+			throw new Exception("too many bombs for zero start, UI doesn't allow for this to happen");
+		}
+
 		this.numberOfRows = numberOfRows;
 		this.numberOfCols = numberOfCols;
 		this.numberOfBombs = numberOfBombs;

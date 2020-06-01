@@ -155,8 +155,9 @@ public class Test {
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			BacktrackingSolverWithBigint backtrackingSolverWithBigint = new BacktrackingSolverWithBigint(rows, cols);
 
-			MinesweeperGame minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+			MinesweeperGame minesweeperGame;
 			try {
+				minesweeperGame = new MinesweeperGame(rows, cols, bombs);
 				int numberOfClicks = MyMath.getRand(3, 7);
 				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
@@ -243,8 +244,9 @@ public class Test {
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
-			MinesweeperGame minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+			MinesweeperGame minesweeperGame;
 			try {
+				minesweeperGame = new MinesweeperGame(rows, cols, bombs);
 				int numberOfClicks = MyMath.getRand(0, 4);
 				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
@@ -350,8 +352,9 @@ public class Test {
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
-			MinesweeperGame minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+			MinesweeperGame minesweeperGame;
 			try {
+				minesweeperGame = new MinesweeperGame(rows, cols, bombs);
 				int numberOfClicks = MyMath.getRand(0, 4);
 				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					int x = MyMath.getRand(0, rows - 1);
