@@ -1,65 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:background="@color/reallyLightGrey"
 	android:orientation="vertical">
 
 	<TableRow
-		android:layout_width="wrap_content"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content">
 
 		<TextView
-			android:layout_width="wrap_content"
+			android:id="@+id/rowsText"
+			android:layout_width="70dp"
 			android:layout_height="wrap_content"
-			android:text="@string/rows" />
+			android:text="Height:  4"
+			tools:ignore="HardcodedText" />
 
-		<EditText
+		<SeekBar
 			android:id="@+id/rowsInput"
-			android:layout_width="100dp"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:autofillHints="@string/number_of_rows"
-			android:hint="@string/number_of_rows"
-			android:inputType="number"
-			android:text="@string/_5" />
+			android:max="30"
+			android:min="4"
+			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
+
 	</TableRow>
 
 	<TableRow
-		android:layout_width="wrap_content"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content">
 
 		<TextView
-			android:layout_width="wrap_content"
+			android:id="@+id/colsText"
+			android:layout_width="70dp"
 			android:layout_height="wrap_content"
-			android:text="@string/cols" />
+			android:text="Width:  4"
+			tools:ignore="HardcodedText" />
 
-		<EditText
+		<SeekBar
 			android:id="@+id/colsInput"
-			android:layout_width="100dp"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:autofillHints="@string/number_of_columns"
-			android:hint="@string/number_of_columns"
-			android:inputType="number"
-			android:text="@string/_5" />
+			android:max="30"
+			android:min="4"
+			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
+
 	</TableRow>
 
 	<TableRow
-		android:layout_width="wrap_content"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content">
 
 		<TextView
-			android:layout_width="wrap_content"
+			android:id="@+id/bombsText"
+			android:layout_width="70dp"
 			android:layout_height="wrap_content"
-			android:text="@string/bombs" />
+			android:text="Mines:  4"
+			tools:ignore="HardcodedText" />
 
-		<EditText
+		<SeekBar
 			android:id="@+id/bombsInput"
-			android:layout_width="100dp"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:autofillHints="@string/number_of_bombs"
-			android:hint="@string/number_of_bombs"
-			android:inputType="number"
-			android:text="@string/_5" />
+			android:max="7"
+			android:min="0"
+			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
+
 	</TableRow>
 
 	<TableRow

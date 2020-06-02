@@ -5,17 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.InputFilter;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.example.minesweeper20.miscHelpers.NumberInputFilterMinMax;
 import com.example.minesweeper20.miscHelpers.Test;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
@@ -30,7 +29,7 @@ import com.example.minesweeper20.miscHelpers.Test;
 //TODO: Make minesweeper endless: always force >= 1 visible tile on the screen
 //TODO: Recommend the guess which will reveal the greatest amount of further stuff
 
-public class StartScreenActivity extends AppCompatActivity {
+public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
 
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
@@ -52,13 +51,13 @@ public class StartScreenActivity extends AppCompatActivity {
 			@SuppressLint("InflateParams")
 			@Override
 			public void onClick(View view) {
-				final EditText rowInput = findViewById(R.id.rowsInput);
-				final EditText colInput = findViewById(R.id.colsInput);
-				final EditText bombInput = findViewById(R.id.bombsInput);
+				final SeekBar rowInput = findViewById(R.id.rowsInput);
+				final SeekBar colInput = findViewById(R.id.colsInput);
+				final SeekBar bombInput = findViewById(R.id.bombsInput);
 
-				final int numberOfRows = getNumberInput(rowInput.getText().toString());
-				final int numberOfCols = getNumberInput(colInput.getText().toString());
-				final int numberOfBombs = getNumberInput(bombInput.getText().toString());
+				final int numberOfRows = rowInput.getProgress();
+				final int numberOfCols = colInput.getProgress();
+				final int numberOfBombs = bombInput.getProgress();
 
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putInt(NUMBER_OF_ROWS, numberOfRows);
@@ -82,31 +81,30 @@ public class StartScreenActivity extends AppCompatActivity {
 				startActivity(intent);
 			}
 		});
-		final EditText rowsInput = findViewById(R.id.rowsInput);
-		final EditText colsInput = findViewById(R.id.colsInput);
-		final EditText bombsInput = findViewById(R.id.bombsInput);
+		final SeekBar rowsInput = findViewById(R.id.rowsInput);
+		final SeekBar colsInput = findViewById(R.id.colsInput);
+		final SeekBar bombsInput = findViewById(R.id.bombsInput);
+
+		rowsInput.setOnSeekBarChangeListener(this);
+		colsInput.setOnSeekBarChangeListener(this);
+		bombsInput.setOnSeekBarChangeListener(this);
 
 		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 9);
 		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 9);
 		final int previousBombs = sharedPreferences.getInt(NUMBER_OF_BOMBS, 10);
 
-		rowsInput.setText(String.valueOf(previousRows));
-		colsInput.setText(String.valueOf(previousCols));
-		bombsInput.setText(String.valueOf(previousBombs));
+		rowsInput.setProgress(previousRows);
+		colsInput.setProgress(previousCols);
+		bombsInput.setProgress(previousBombs);
 
-
-		NumberInputFilterMinMax rowsAndColsFilter = new NumberInputFilterMinMax(1, 50);
-		rowsInput.setFilters(new InputFilter[]{rowsAndColsFilter});
-		colsInput.setFilters(new InputFilter[]{rowsAndColsFilter});
-		bombsInput.setFilters(new InputFilter[]{new NumberInputFilterMinMax(1, 1000)});
 
 		Button beginner = findViewById(R.id.beginner);
 		beginner.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				rowsInput.setText(R.string._9);
-				colsInput.setText(R.string._9);
-				bombsInput.setText(R.string._10);
+				rowsInput.setProgress(9);
+				colsInput.setProgress(9);
+				bombsInput.setProgress(10);
 			}
 		});
 
@@ -114,9 +112,9 @@ public class StartScreenActivity extends AppCompatActivity {
 		intermediate.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				rowsInput.setText(R.string._14);
-				colsInput.setText(R.string._16);
-				bombsInput.setText(R.string._40);
+				rowsInput.setProgress(14);
+				colsInput.setProgress(16);
+				bombsInput.setProgress(40);
 			}
 		});
 
@@ -124,9 +122,9 @@ public class StartScreenActivity extends AppCompatActivity {
 		expert.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				rowsInput.setText(R.string._16);
-				colsInput.setText(R.string._30);
-				bombsInput.setText(R.string._99);
+				rowsInput.setProgress(16);
+				colsInput.setProgress(30);
+				bombsInput.setProgress(99);
 			}
 		});
 
@@ -136,10 +134,42 @@ public class StartScreenActivity extends AppCompatActivity {
 		Test.performTestsForGaussSolver(20);
 	}
 
-	private int getNumberInput(String input) {
-		if (input.equals("")) {
-			return 1;
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+		String text;
+		switch (seekBar.getId()) {
+			case R.id.rowsInput:
+				TextView rowsText = findViewById(R.id.rowsText);
+				text = "Height: " + seekBar.getProgress();
+				rowsText.setText(text);
+				setMaxBombSeekBar();
+				break;
+			case R.id.colsInput:
+				TextView colsText = findViewById(R.id.colsText);
+				text = "Width: " + seekBar.getProgress();
+				colsText.setText(text);
+				setMaxBombSeekBar();
+				break;
+			case R.id.bombsInput:
+				TextView bombsText = findViewById(R.id.bombsText);
+				text = "Mines: " + seekBar.getProgress();
+				bombsText.setText(text);
+				break;
 		}
-		return Integer.parseInt(input);
+	}
+
+	private void setMaxBombSeekBar() {
+		final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress();
+		final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress();
+		SeekBar bombsInput = findViewById(R.id.bombsInput);
+		bombsInput.setMax(rows * cols - 9);
+	}
+
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
 	}
 }
