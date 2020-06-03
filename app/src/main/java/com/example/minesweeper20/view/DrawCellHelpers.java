@@ -24,7 +24,7 @@ class DrawCellHelpers {
 			middleGreenSquare = new Paint(),
 			redFlag = new Paint(),
 			black = new Paint(),
-			redX = new Paint();
+			blackX = new Paint();
 	private final Paint[] numberColors;
 	private final String
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
@@ -51,9 +51,9 @@ class DrawCellHelpers {
 		redFlag.setTextSize(cellPixelLength / 2f);
 		redFlag.setTextAlign(Paint.Align.CENTER);
 
-		redX.setColor(Color.BLACK);
-		redX.setTextSize(cellPixelLength * 2 / 3f);
-		redX.setTextAlign(Paint.Align.CENTER);
+		blackX.setColor(Color.BLACK);
+		blackX.setTextSize(cellPixelLength * 2 / 3f);
+		blackX.setTextAlign(Paint.Align.CENTER);
 
 		numberColors = new Paint[9];
 		for (int i = 1; i <= 8; ++i) {
@@ -151,10 +151,10 @@ class DrawCellHelpers {
 		canvas.drawRect(middleSquareRectangles[i][j], middleGreenSquare);
 	}
 
-	void drawRedX(Canvas canvas, int startX, int startY) {
+	void drawBlackX(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
-		final int yPos = (int) (startY + cellPixelLength / 2 - ((redX.descent() + redX.ascent()) / 2));
-		canvas.drawText("X", xPos, yPos, redX);
+		final int yPos = (int) (startY + cellPixelLength / 2 - ((blackX.descent() + blackX.ascent()) / 2));
+		canvas.drawText("X", xPos, yPos, blackX);
 	}
 
 	void drawBombProbability(Canvas canvas, int startX, int startY, FractionThenDouble probability, Resources resources) throws Exception {

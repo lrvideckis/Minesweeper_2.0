@@ -159,38 +159,40 @@ public class GameCanvas extends View {
 		if (gameActivity.getToggleGaussHintsOn() && gameActivity.getToggleBombProbabilityOn()) {
 			throw new Exception("can't have gauss hints and probability on");
 		}
+		if (solverCell.getIsLogicalBomb() && !gameCell.isBomb()) {
+			throw new Exception("solver says: logical bomb, but it's not a bomb");
+		}
+		if (solverCell.getIsLogicalFree() && gameCell.isBomb()) {
+			throw new Exception("gauss solver says: logical free, but it's not free");
+		}
 
 		final boolean showHints = (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleGaussHintsOn());
 		boolean displayedLogicalStuff = false;
-		if (solverCell.getIsLogicalBomb() && showHints) {
-			if (!gameCell.isBomb()) {
-				throw new Exception("solver says: logical bomb, but it's not a bomb");
-			}
+		if (solverCell.getIsLogicalBomb() && showHints && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
 			drawCellHelpers.drawLogicalBomb(canvas, i, j, getResources());
-		} else if (solverCell.getIsLogicalFree() && showHints) {
-			if (gameCell.isBomb()) {
-				throw new Exception("gauss solver says: logical free, but it's not free");
-			}
+		} else if (solverCell.getIsLogicalFree() && showHints && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
 			drawCellHelpers.drawLogicalFree(canvas, i, j, getResources());
 		} else {
 			drawCellHelpers.drawBlankCell(canvas, i, j, getResources());
 		}
 
-		if (gameActivity.getToggleBombProbabilityOn() && !solverCell.getIsVisible() && !displayedLogicalStuff) {
-			bombProbability.setValue(solverCell.getNumberOfBombConfigs());
-			bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
-			drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
-		}
-
 		if (gameCell.isFlagged()) {
 			drawCellHelpers.drawFlag(canvas, startX, startY);
 			if (minesweeperGame.getIsGameOver() && !gameCell.isBomb()) {
-				drawCellHelpers.drawRedX(canvas, startX, startY);
+				drawCellHelpers.drawBlackX(canvas, startX, startY);
+			} else if (solverCell.getIsLogicalFree() && (showHints || gameActivity.getToggleBombProbabilityOn())) {
+				drawCellHelpers.drawBlackX(canvas, startX, startY);
 			}
 		} else if (gameCell.isBomb() && (minesweeperGame.getIsGameOver() || gameActivity.getToggleBombsOn())) {
 			drawCellHelpers.drawBomb(canvas, startX, startY);
+		}
+
+		if (gameActivity.getToggleBombProbabilityOn() && !solverCell.getIsVisible() && !displayedLogicalStuff && !gameCell.isFlagged()) {
+			bombProbability.setValue(solverCell.getNumberOfBombConfigs());
+			bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
+			drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
 		}
 	}
 
