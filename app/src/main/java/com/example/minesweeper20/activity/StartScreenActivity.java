@@ -149,7 +149,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		String text;
 		switch (seekBar.getId()) {
 			case R.id.rowsInput:
 				setRowsText(seekBar.getProgress());
