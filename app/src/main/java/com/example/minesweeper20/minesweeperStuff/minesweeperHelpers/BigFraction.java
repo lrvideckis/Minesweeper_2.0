@@ -49,7 +49,7 @@ public class BigFraction {
 	public void multiplyWith(BigFraction quotient) {
 		try {
 			BigInteger newNumerator, newDenominator;
-			newNumerator = numerator.multiply(quotient.getDenominator()).add(denominator.multiply(quotient.getNumerator()));
+			newNumerator = numerator.multiply(quotient.getNumerator());
 			newDenominator = denominator.multiply(quotient.getDenominator());
 			reduceAndSet(newNumerator, newDenominator);
 		} catch (Exception e) {
