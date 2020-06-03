@@ -14,6 +14,7 @@
 			android:id="@+id/rowsText"
 			android:layout_width="70dp"
 			android:layout_height="wrap_content"
+			android:layout_centerVertical="true"
 			android:text="Height:  4"
 			tools:ignore="HardcodedText" />
 
@@ -21,6 +22,7 @@
 			android:id="@+id/rowsInput"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:layout_centerVertical="true"
 			android:layout_toStartOf="@id/rowsDecrement"
 			android:layout_toEndOf="@id/rowsText"
 			android:max="30"
@@ -29,15 +31,16 @@
 
 		<Button
 			android:id="@+id/rowsDecrement"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
 			android:layout_toStartOf="@id/rowsIncrement"
+			android:height="@android:dimen/app_icon_size"
 			android:text="@string/decrement" />
 
 		<Button
 			android:id="@+id/rowsIncrement"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
 			android:layout_alignParentEnd="true"
 			android:text="@string/increment" />
 
@@ -50,6 +53,7 @@
 		<TextView
 			android:id="@+id/colsText"
 			android:layout_width="70dp"
+			android:layout_centerVertical="true"
 			android:layout_height="wrap_content"
 			android:layout_alignParentStart="true"
 			android:text="Width:  4"
@@ -59,6 +63,7 @@
 			android:id="@+id/colsInput"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_centerVertical="true"
 			android:layout_toStartOf="@id/colsDecrement"
 			android:layout_toEndOf="@id/colsText"
 			android:max="30"
@@ -67,15 +72,15 @@
 
 		<Button
 			android:id="@+id/colsDecrement"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
 			android:layout_toStartOf="@id/colsIncrement"
 			android:text="@string/decrement" />
 
 		<Button
 			android:id="@+id/colsIncrement"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
 			android:layout_alignParentEnd="true"
 			android:text="@string/increment" />
 
@@ -90,6 +95,7 @@
 			android:id="@+id/bombsText"
 			android:layout_width="70dp"
 			android:layout_height="wrap_content"
+			android:layout_centerVertical="true"
 			android:text="Mines:  4"
 			tools:ignore="HardcodedText" />
 
@@ -97,6 +103,7 @@
 			android:id="@+id/bombsInput"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:layout_centerVertical="true"
 			android:layout_toStartOf="@id/bombsDecrement"
 			android:layout_toEndOf="@id/bombsText"
 			android:max="7"
@@ -105,15 +112,15 @@
 
 		<Button
 			android:id="@+id/bombsDecrement"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
 			android:layout_toStartOf="@id/bombsIncrement"
 			android:text="@string/decrement" />
 
 		<Button
 			android:id="@+id/bombsIncrement"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
 			android:layout_alignParentEnd="true"
 			android:text="@string/increment" />
 
@@ -121,54 +128,47 @@
 
 	<TableRow
 		style="?android:attr/buttonBarStyle"
-		android:layout_width="wrap_content"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content">
 
 		<Button
 			android:id="@+id/beginner"
 			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="0dp"
+			android:layout_height="70dp"
+			android:layout_weight="1"
 			android:text="@string/beginner"
 			android:textColor="@color/black" />
 
 		<Button
 			android:id="@+id/intermediate"
 			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="0dp"
+			android:layout_height="70dp"
+			android:layout_weight="1"
 			android:text="@string/intermediate"
 			android:textColor="@color/black" />
 
 		<Button
 			android:id="@+id/expert"
 			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="0dp"
+			android:layout_height="70dp"
+			android:layout_weight="1"
 			android:text="@string/expert"
 			android:textColor="@color/black" />
 	</TableRow>
 
-	<TableRow
+	<Spinner
+		android:id="@+id/game_type"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content">
+		android:layout_height="wrap_content"
+		android:entries="@array/game_type" />
 
-		<Spinner
-			android:id="@+id/game_type"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:entries="@array/game_type" />
-	</TableRow>
-
-	<TableRow
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content">
-
-		<Button
-			android:id="@+id/startNewGameButton"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/start_new_game" />
-	</TableRow>
+	<Button
+		android:id="@+id/startNewGameButton"
+		android:layout_width="match_parent"
+		android:layout_height="70dp"
+		android:text="@string/start_new_game" />
 
 </LinearLayout>
