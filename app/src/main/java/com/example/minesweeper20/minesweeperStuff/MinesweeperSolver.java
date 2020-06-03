@@ -1,6 +1,6 @@
 package com.example.minesweeper20.minesweeperStuff;
 
-import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 
 public interface MinesweeperSolver {
 	void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception;
@@ -16,7 +16,7 @@ public interface MinesweeperSolver {
 	int getNumberOfIterations();
 
 	class VisibleTile {
-		final FractionThenDouble numberOfBombConfigs = new FractionThenDouble(0), numberOfTotalConfigs = new FractionThenDouble(0);
+		final BigFraction numberOfBombConfigs = new BigFraction(0), numberOfTotalConfigs = new BigFraction(0);
 		boolean isVisible, isLogicalBomb, isLogicalFree;
 		int numberSurroundingBombs;
 
@@ -47,11 +47,11 @@ public interface MinesweeperSolver {
 			return isLogicalFree;
 		}
 
-		public FractionThenDouble getNumberOfBombConfigs() {
+		public BigFraction getNumberOfBombConfigs() {
 			return numberOfBombConfigs;
 		}
 
-		public FractionThenDouble getNumberOfTotalConfigs() {
+		public BigFraction getNumberOfTotalConfigs() {
 			return numberOfTotalConfigs;
 		}
 

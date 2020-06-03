@@ -12,8 +12,7 @@ import android.graphics.drawable.Drawable;
 import androidx.core.content.ContextCompat;
 
 import com.example.minesweeper20.R;
-import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
-import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 
 class DrawCellHelpers {
 	private final Integer cellPixelLength = 150;
@@ -157,19 +156,13 @@ class DrawCellHelpers {
 		canvas.drawText("X", xPos, yPos, blackX);
 	}
 
-	void drawBombProbability(Canvas canvas, int startX, int startY, FractionThenDouble probability, Resources resources) throws Exception {
+	void drawBombProbability(Canvas canvas, int startX, int startY, BigFraction probability, Resources resources) throws Exception {
 		//fraction has too many digits, displaying double format
-		boolean displayFloat = probability.getHasOverflowed();
-		if (!displayFloat) {
-			final int digitsNumerator = MyMath.MyLog10MinWith4(probability.getNumerator());
-			final int digitsDenominator = MyMath.MyLog10MinWith4(probability.getDenominator());
-			if (digitsNumerator + digitsDenominator >= 5) {
-				displayFloat = true;
-			}
-		}
-		if (displayFloat) {
+		final int digitsNumerator = probability.getNumerator().toString().length();
+		final int digitsDenominator = probability.getDenominator().toString().length();
+		if (digitsNumerator + digitsDenominator >= 5) {
 			canvas.drawText(
-					String.format(resources.getString(R.string.two_decimal_places), probability.getValue()),
+					String.format(resources.getString(R.string.two_decimal_places), probability.getDoubleValue()),
 					startX,
 					startY + cellPixelLength / 3f,
 					black

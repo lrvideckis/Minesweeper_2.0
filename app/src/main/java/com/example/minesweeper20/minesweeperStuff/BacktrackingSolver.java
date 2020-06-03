@@ -7,7 +7,7 @@ import com.example.minesweeper20.customExceptions.NoSolutionFoundException;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AllCellsAreHidden;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
-import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MutableInt;
@@ -30,7 +30,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final int[][][] lastUnvisitedSpot;
 	private final boolean[][] saveIsBomb;
 	private final ArrayList<TreeMap<Integer, MutableInt>> bombConfig;
-	private final ArrayList<TreeMap<Integer, FractionThenDouble>> numberOfConfigsForCurrent;
+	private final ArrayList<TreeMap<Integer, BigFraction>> numberOfConfigsForCurrent;
 	private final GaussianEliminationSolver gaussianEliminationSolver;
 	private int totalIterations;
 	private VisibleTile[][] board;
@@ -103,7 +103,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 
 		removeBombNumbersFromComponent();
-		FractionThenDouble awayBombProbability = null;
+		BigFraction awayBombProbability = null;
 		if (AwayCell.getNumberOfAwayCells(board) > 0) {
 			awayBombProbability = calculateAwayBombProbability();
 		}
@@ -146,12 +146,12 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for (int i = 0; i < components.size(); ++i) {
 			TreeMap<Integer, MutableInt> saveBombConfigs = new TreeMap<>(bombConfig.get(i));
 			for (TreeMap.Entry<Integer, MutableInt> entry : saveBombConfigs.entrySet()) {
-				FractionThenDouble totalConfigs = new FractionThenDouble(0);
+				BigFraction totalConfigs = new BigFraction(0);
 				bombConfig.get(i).clear();
 				bombConfig.get(i).put(entry.getKey(), new MutableInt(1));
-				TreeMap<Integer, FractionThenDouble> configsPerBombCount = calculateNumberOfBombConfigs();
-				for (TreeMap.Entry<Integer, FractionThenDouble> total : configsPerBombCount.entrySet()) {
-					FractionThenDouble currConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - total.getKey());
+				TreeMap<Integer, BigFraction> configsPerBombCount = calculateNumberOfBombConfigs();
+				for (TreeMap.Entry<Integer, BigFraction> total : configsPerBombCount.entrySet()) {
+					BigFraction currConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - total.getKey());
 					currConfigs.multiplyWith(total.getValue());
 					totalConfigs.addWith(currConfigs);
 				}
@@ -223,26 +223,26 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	private FractionThenDouble calculateAwayBombProbability() throws Exception {
+	private BigFraction calculateAwayBombProbability() throws Exception {
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 
-		TreeMap<Integer, FractionThenDouble> configsPerBombCount = calculateNumberOfBombConfigs();
-		FractionThenDouble totalNumberOfConfigs = new FractionThenDouble(0);
-		for (TreeMap.Entry<Integer, FractionThenDouble> val : configsPerBombCount.entrySet()) {
+		TreeMap<Integer, BigFraction> configsPerBombCount = calculateNumberOfBombConfigs();
+		BigFraction totalNumberOfConfigs = new BigFraction(0);
+		for (TreeMap.Entry<Integer, BigFraction> val : configsPerBombCount.entrySet()) {
 			if (numberOfBombs - val.getKey() < 0 || numberOfBombs - val.getKey() > numberOfAwayCells) {
 				throw new Exception("number of remaining bombs is more than number of away cells (or negative)");
 			}
-			FractionThenDouble newConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - val.getKey());
+			BigFraction newConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - val.getKey());
 			newConfigs.multiplyWith(val.getValue());
 			totalNumberOfConfigs.addWith(newConfigs);
 		}
-		FractionThenDouble awayBombProbability = new FractionThenDouble(0);
-		for (TreeMap.Entry<Integer, FractionThenDouble> entry : configsPerBombCount.entrySet()) {
+		BigFraction awayBombProbability = new BigFraction(0);
+		for (TreeMap.Entry<Integer, BigFraction> entry : configsPerBombCount.entrySet()) {
 			final int currNumberOfBombs = entry.getKey();
 			if (numberOfBombs - currNumberOfBombs < 0 || numberOfBombs - currNumberOfBombs > numberOfAwayCells) {
 				throw new Exception("number of remaining bombs is more than number of away cells (or negative)");
 			}
-			FractionThenDouble numberOfConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - entry.getKey());
+			BigFraction numberOfConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - entry.getKey());
 			numberOfConfigs.multiplyWith(entry.getValue());
 			numberOfConfigs.divideWith(totalNumberOfConfigs);
 			numberOfConfigs.multiplyWith(numberOfBombs - currNumberOfBombs, numberOfAwayCells);
@@ -251,20 +251,20 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return awayBombProbability;
 	}
 
-	private TreeMap<Integer, FractionThenDouble> calculateNumberOfBombConfigs() throws Exception {
+	private TreeMap<Integer, BigFraction> calculateNumberOfBombConfigs() throws Exception {
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
-		TreeMap<Integer, FractionThenDouble> prevWays = new TreeMap<>(), newWays = new TreeMap<>();
-		prevWays.put(0, new FractionThenDouble(1));
+		TreeMap<Integer, BigFraction> prevWays = new TreeMap<>(), newWays = new TreeMap<>();
+		prevWays.put(0, new BigFraction(1));
 		for (int i = 0; i < components.size(); ++i) {
 			for (TreeMap.Entry<Integer, MutableInt> bombVal : bombConfig.get(i).entrySet()) {
-				for (TreeMap.Entry<Integer, FractionThenDouble> waysVal : prevWays.entrySet()) {
+				for (TreeMap.Entry<Integer, BigFraction> waysVal : prevWays.entrySet()) {
 					final int nextKey = bombVal.getKey() + waysVal.getKey();
-					FractionThenDouble nextValueDiff = new FractionThenDouble(bombVal.getValue().get());
+					BigFraction nextValueDiff = new BigFraction(bombVal.getValue().get());
 					nextValueDiff.multiplyWith(waysVal.getValue());
 					if (i + 1 == components.size() && (nextKey > numberOfBombs || nextKey + numberOfAwayCells < numberOfBombs)) {
 						continue;
 					}
-					FractionThenDouble nextVal = newWays.get(nextKey);
+					BigFraction nextVal = newWays.get(nextKey);
 					if (nextVal == null) {
 						newWays.put(nextKey, nextValueDiff);
 					} else {
@@ -328,7 +328,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		numberOfConfigsForCurrent.clear();
 		for (ArrayList<Pair<Integer, Integer>> component : components) {
 			bombConfig.add(new TreeMap<Integer, MutableInt>());
-			numberOfConfigsForCurrent.add(new TreeMap<Integer, FractionThenDouble>());
+			numberOfConfigsForCurrent.add(new TreeMap<Integer, BigFraction>());
 			for (Pair<Integer, Integer> spot : component) {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(spot.first, spot.second, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];
@@ -443,7 +443,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for (int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
-			FractionThenDouble currConfigs = numberOfConfigsForCurrent.get(componentPos).get(currNumberOfBombs);
+			BigFraction currConfigs = numberOfConfigsForCurrent.get(componentPos).get(currNumberOfBombs);
 			if (currConfigs == null) {
 				throw new Exception("number of configs value is null");
 			}

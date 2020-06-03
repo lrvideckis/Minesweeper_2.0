@@ -11,8 +11,8 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.SlowBacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
-import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.math.BigInteger;
@@ -20,8 +20,6 @@ import java.math.BigInteger;
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class Test {
-	private final static double EPSILON = 0.000000001;
-
 	@SuppressWarnings("SpellCheckingInspection")
 	private final static String[][] previousFailedBoards = {
 			//bug with calling BinomialCoefficient with invalid parameters
@@ -181,7 +179,7 @@ public class Test {
 						if (boardBigInt[i][j].getIsVisible()) {
 							continue;
 						}
-						FractionThenDouble curr = boardFraction[i][j].getNumberOfBombConfigs();
+						BigFraction curr = boardFraction[i][j].getNumberOfBombConfigs();
 						curr.divideWith(boardFraction[i][j].getNumberOfTotalConfigs());
 
 						BigInteger top = backtrackingSolverWithBigint.getNumberOfBombConfigs(i, j);
@@ -190,26 +188,16 @@ public class Test {
 						top = top.divide(gcd);
 						bottom = bottom.divide(gcd);
 
-						if (curr.getHasOverflowed()) {
-							if (Math.abs(top.doubleValue() / bottom.doubleValue() - curr.getValue()) > EPSILON) {
-								testPassed = false;
-								System.out.println("here, solver outputs don't match");
-								System.out.println("i,j: " + i + " " + j);
-								System.out.println("fraction solver " + curr.getValue());
-								System.out.println("big int solver " + top.toString() + '/' + bottom.toString());
-							}
-						} else {
-							//noinspection SuspiciousNameCombination
-							if (
-									!BigInteger.valueOf(curr.getNumerator()).equals(top) ||
-											!BigInteger.valueOf(curr.getDenominator()).equals(bottom)
-							) {
-								testPassed = false;
-								System.out.println("here, solver outputs don't match");
-								System.out.println("i,j: " + i + " " + j);
-								System.out.println("fraction solver " + curr.getNumerator() + '/' + curr.getDenominator());
-								System.out.println("big int solver " + top + '/' + bottom);
-							}
+						//noinspection SuspiciousNameCombination
+						if (
+								!curr.getNumerator().equals(top) ||
+										!curr.getDenominator().equals(bottom)
+						) {
+							testPassed = false;
+							System.out.println("here, solver outputs don't match");
+							System.out.println("i,j: " + i + " " + j);
+							System.out.println("fraction solver " + curr.getNumerator() + '/' + curr.getDenominator());
+							System.out.println("big int solver " + top + '/' + bottom);
 						}
 					}
 				}
@@ -294,39 +282,19 @@ public class Test {
 				}
 
 				VisibleTile fastTile = boardFast[i][j];
-				FractionThenDouble fast = new FractionThenDouble(fastTile.getNumberOfBombConfigs());
+				BigFraction fast = new BigFraction(fastTile.getNumberOfBombConfigs());
 				fast.divideWith(fastTile.getNumberOfTotalConfigs());
 
 				VisibleTile slowTile = boardSlow[i][j];
-				FractionThenDouble slow = new FractionThenDouble(slowTile.getNumberOfBombConfigs());
+				BigFraction slow = new BigFraction(slowTile.getNumberOfBombConfigs());
 				slow.divideWith(slowTile.getNumberOfTotalConfigs());
-				if (fast.getHasOverflowed()) {
-					double slowVal;
-					if (slow.getHasOverflowed()) {
-						slowVal = slow.getValue();
-					} else {
-						slowVal = slow.getNumerator() / (double) slow.getDenominator();
-					}
-					if (Math.abs(fast.getValue() - slowVal) > EPSILON) {
-						passedTest = false;
-						System.out.println("here, solver outputs don't match");
-						System.out.println("i,j: " + i + " " + j);
-						System.out.println("fast solver " + fast.getValue());
-						if (slow.getHasOverflowed()) {
-							System.out.println("slow solver " + slow.getValue());
-						} else {
-							System.out.println("slow solver " + slow.getNumerator() + '/' + slow.getDenominator());
-						}
-					}
-				} else {
-					if (fast.getNumerator() != slow.getNumerator() || fast.getDenominator() != slow.getDenominator()) {
-						passedTest = false;
-						System.out.println("here, solver outputs don't match");
-						System.out.println("i,j: " + i + " " + j);
-						System.out.println("fast solver " + fast.getNumerator() + '/' + fast.getDenominator());
-						System.out.println("slow solver " + slow.getNumerator() + '/' + slow.getDenominator());
-						System.out.println("number of away cells: " + AwayCell.getNumberOfAwayCells(boardFast));
-					}
+				if (!fast.getNumerator().equals(slow.getNumerator()) || !fast.getDenominator().equals(slow.getDenominator())) {
+					passedTest = false;
+					System.out.println("here, solver outputs don't match");
+					System.out.println("i,j: " + i + " " + j);
+					System.out.println("fast solver " + fast.getNumerator() + '/' + fast.getDenominator());
+					System.out.println("slow solver " + slow.getNumerator() + '/' + slow.getDenominator());
+					System.out.println("number of away cells: " + AwayCell.getNumberOfAwayCells(boardFast));
 				}
 			}
 		}

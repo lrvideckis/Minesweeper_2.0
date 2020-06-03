@@ -17,8 +17,8 @@ import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
-import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
 import com.example.minesweeper20.miscHelpers.PopupHelper;
 
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
@@ -32,7 +32,7 @@ public class GameCanvas extends View {
 	private final VisibleTile[][] board;
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
-	private final FractionThenDouble bombProbability = new FractionThenDouble(0);
+	private final BigFraction bombProbability = new BigFraction(0);
 	private PopupWindow endGamePopup;
 
 	public GameCanvas(Context context, AttributeSet attrs) throws Exception {

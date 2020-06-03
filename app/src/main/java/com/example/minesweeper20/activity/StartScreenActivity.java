@@ -142,9 +142,9 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		});
 
 		Test.testPreviouslyFailedBoards();
-		Test.performTestsForBombProbability(20);
-		Test.performTestsForFractionOverflow(20);
-		Test.performTestsForGaussSolver(20);
+		//Test.performTestsForBombProbability(5);
+		//Test.performTestsForFractionOverflow(20);
+		//Test.performTestsForGaussSolver(20);
 	}
 
 	@Override
