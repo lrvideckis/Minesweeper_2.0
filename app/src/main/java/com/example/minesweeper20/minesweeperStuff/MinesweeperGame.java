@@ -86,6 +86,9 @@ public class MinesweeperGame {
 			isGameOver = true;
 			return;
 		}
+		if (curr.isFlagged()) {
+			return;
+		}
 		revealCell(row, col);
 	}
 
