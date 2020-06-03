@@ -19,6 +19,8 @@
 	<string name="gauss_hints">Gauss</string>
 	<string name="initial_iterations">iterations: 0</string>
 	<string name="is_relative_layout">is_relative_layout</string>
+	<string name="decrement">-</string>
+	<string name="increment">+</string>
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>

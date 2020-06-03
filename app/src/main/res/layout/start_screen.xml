@@ -6,7 +6,7 @@
 	android:background="@color/reallyLightGrey"
 	android:orientation="vertical">
 
-	<TableRow
+	<RelativeLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content">
 
@@ -21,13 +21,29 @@
 			android:id="@+id/rowsInput"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:layout_toStartOf="@id/rowsDecrement"
+			android:layout_toEndOf="@id/rowsText"
 			android:max="30"
 			android:min="4"
 			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
-	</TableRow>
+		<Button
+			android:id="@+id/rowsDecrement"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_toStartOf="@id/rowsIncrement"
+			android:text="@string/decrement" />
 
-	<TableRow
+		<Button
+			android:id="@+id/rowsIncrement"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentEnd="true"
+			android:text="@string/increment" />
+
+	</RelativeLayout>
+
+	<RelativeLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content">
 
@@ -35,20 +51,38 @@
 			android:id="@+id/colsText"
 			android:layout_width="70dp"
 			android:layout_height="wrap_content"
+			android:layout_alignParentStart="true"
 			android:text="Width:  4"
 			tools:ignore="HardcodedText" />
 
 		<SeekBar
 			android:id="@+id/colsInput"
-			android:layout_width="match_parent"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_toStartOf="@id/colsDecrement"
+			android:layout_toEndOf="@id/colsText"
 			android:max="30"
 			android:min="4"
 			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
-	</TableRow>
+		<Button
+			android:id="@+id/colsDecrement"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_toStartOf="@id/colsIncrement"
+			android:text="@string/decrement" />
 
-	<TableRow
+		<Button
+			android:id="@+id/colsIncrement"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentEnd="true"
+			android:text="@string/increment" />
+
+
+	</RelativeLayout>
+
+	<RelativeLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content">
 
@@ -63,11 +97,27 @@
 			android:id="@+id/bombsInput"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:layout_toStartOf="@id/bombsDecrement"
+			android:layout_toEndOf="@id/bombsText"
 			android:max="7"
 			android:min="0"
 			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
-	</TableRow>
+		<Button
+			android:id="@+id/bombsDecrement"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_toStartOf="@id/bombsIncrement"
+			android:text="@string/decrement" />
+
+		<Button
+			android:id="@+id/bombsIncrement"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentEnd="true"
+			android:text="@string/increment" />
+
+	</RelativeLayout>
 
 	<TableRow
 		style="?android:attr/buttonBarStyle"

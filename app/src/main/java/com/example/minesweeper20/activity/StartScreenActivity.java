@@ -29,7 +29,7 @@ import com.example.minesweeper20.miscHelpers.Test;
 //TODO: Make minesweeper endless: always force >= 1 visible tile on the screen
 //TODO: Recommend the guess which will reveal the greatest amount of further stuff
 
-public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
+public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
@@ -44,6 +44,19 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		setContentView(R.layout.start_screen);
 
 		sharedPreferences = getSharedPreferences(MY_PREFERENCES, Context.MODE_PRIVATE);
+
+		Button rowsDecrement = findViewById(R.id.rowsDecrement);
+		Button rowsIncrement = findViewById(R.id.rowsIncrement);
+		Button colsDecrement = findViewById(R.id.colsDecrement);
+		Button colsIncrement = findViewById(R.id.colsIncrement);
+		Button bombsDecrement = findViewById(R.id.bombsDecrement);
+		Button bombsIncrement = findViewById(R.id.bombsIncrement);
+		rowsDecrement.setOnClickListener(this);
+		rowsIncrement.setOnClickListener(this);
+		colsDecrement.setOnClickListener(this);
+		colsIncrement.setOnClickListener(this);
+		bombsDecrement.setOnClickListener(this);
+		bombsIncrement.setOnClickListener(this);
 
 
 		Button okButton = findViewById(R.id.startNewGameButton);
@@ -139,23 +152,35 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		String text;
 		switch (seekBar.getId()) {
 			case R.id.rowsInput:
-				TextView rowsText = findViewById(R.id.rowsText);
-				text = "Height: " + seekBar.getProgress();
-				rowsText.setText(text);
-				setMaxBombSeekBar();
+				setRowsText(seekBar.getProgress());
 				break;
 			case R.id.colsInput:
-				TextView colsText = findViewById(R.id.colsText);
-				text = "Width: " + seekBar.getProgress();
-				colsText.setText(text);
-				setMaxBombSeekBar();
+				setColsText(seekBar.getProgress());
 				break;
 			case R.id.bombsInput:
-				TextView bombsText = findViewById(R.id.bombsText);
-				text = "Mines: " + seekBar.getProgress();
-				bombsText.setText(text);
+				setBombsText(seekBar.getProgress());
 				break;
 		}
+	}
+
+	private void setRowsText(int val) {
+		TextView rowsText = findViewById(R.id.rowsText);
+		String text = "Height: " + val;
+		rowsText.setText(text);
+		setMaxBombSeekBar();
+	}
+
+	private void setColsText(int val) {
+		TextView colsText = findViewById(R.id.colsText);
+		String text = "Width: " + val;
+		colsText.setText(text);
+		setMaxBombSeekBar();
+	}
+
+	private void setBombsText(int val) {
+		TextView bombsText = findViewById(R.id.bombsText);
+		String text = "Mines: " + val;
+		bombsText.setText(text);
 	}
 
 	private void setMaxBombSeekBar() {
@@ -171,5 +196,50 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
+	}
+
+	@Override
+	public void onClick(View v) {
+		final SeekBar rowsInput = findViewById(R.id.rowsInput);
+		final SeekBar colsInput = findViewById(R.id.colsInput);
+		final SeekBar bombsInput = findViewById(R.id.bombsInput);
+
+		int rows = rowsInput.getProgress();
+		int cols = colsInput.getProgress();
+		int bombs = bombsInput.getProgress();
+
+
+		switch (v.getId()) {
+			case R.id.rowsDecrement:
+				rows = Math.max(4, rows - 1);
+				rowsInput.setProgress(rows);
+				setRowsText(rows);
+				break;
+			case R.id.rowsIncrement:
+				rows = Math.min(30, rows + 1);
+				rowsInput.setProgress(rows);
+				setRowsText(rows);
+				break;
+			case R.id.colsDecrement:
+				cols = Math.max(4, cols - 1);
+				colsInput.setProgress(cols);
+				setColsText(cols);
+				break;
+			case R.id.colsIncrement:
+				cols = Math.min(30, cols + 1);
+				colsInput.setProgress(cols);
+				setColsText(cols);
+				break;
+			case R.id.bombsDecrement:
+				bombs = Math.max(0, bombs - 1);
+				bombsInput.setProgress(bombs);
+				setBombsText(bombs);
+				break;
+			case R.id.bombsIncrement:
+				bombs = Math.min(rows * cols - 9, bombs + 1);
+				bombsInput.setProgress(bombs);
+				setBombsText(bombs);
+				break;
+		}
 	}
 }
