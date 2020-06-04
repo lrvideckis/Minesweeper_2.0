@@ -21,7 +21,38 @@ import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.Visib
 
 public class Test {
 	@SuppressWarnings("SpellCheckingInspection")
+
 	private final static String[][] previousFailedBoards = {
+
+			//failed test after basically redoing BacktrackingSolver to be more efficient with BigIntegr
+			{
+					"U1......",
+					"U1111...",
+					"UUUU1...",
+					"U1111...",
+					"U1......",
+					"3"
+			},
+
+			{
+					"UUU",
+					"UUU",
+					"UUU",
+					"12U",
+					".11",
+					"...",
+					"122",
+					"UUU",
+					"9"
+			},
+
+			{
+					".1U",
+					"23U",
+					"UUU",
+					"3",
+			},
+
 			//bug with calling BinomialCoefficient with invalid parameters
 			{
 					"UUUU",
@@ -56,70 +87,70 @@ public class Test {
 	};
 
 	public static void testPreviouslyFailedBoards() {
+		int cnt = 0;
 		for (String[] stringBoard : previousFailedBoards) {
-			final int rows = stringBoard.length;
+			++cnt;
+			if (cnt == 3) break;
+			final int rows = stringBoard.length - 1;
 			final int cols = stringBoard[0].length();
-			for (int bombs = 0; bombs <= rows * cols; ++bombs) {
-				VisibleTile[][] boardFast;
-				VisibleTile[][] boardSlow;
-				try {
-					boardFast = convertFormat(stringBoard);
-					boardSlow = convertFormat(stringBoard);
-				} catch (Exception e) {
-					e.printStackTrace();
-					continue;
-				}
-				if (bombs == 0) {
-					printBoardDebug(boardFast);
-				}
-				Pair<Integer, Integer> dimensions;
-				try {
-					dimensions = ArrayBounds.getArrayBounds(boardFast);
-				} catch (Exception e) {
-					e.printStackTrace();
-					continue;
-				}
-				if (rows != dimensions.first || cols != dimensions.second) {
-					System.out.print("bounds don't match");
-					continue;
-				}
+			final int bombs = Integer.parseInt(stringBoard[stringBoard.length - 1]);
+			VisibleTile[][] boardFast;
+			VisibleTile[][] boardSlow;
+			try {
+				boardFast = convertFormat(stringBoard);
+				boardSlow = convertFormat(stringBoard);
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			printBoardDebug(boardFast, bombs);
+			Pair<Integer, Integer> dimensions;
+			try {
+				dimensions = ArrayBounds.getArrayBounds(boardFast);
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			if (rows != dimensions.first || cols != dimensions.second) {
+				System.out.print("bounds don't match");
+				continue;
+			}
 
-				BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
-				SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 
-				System.out.println("number of bombs: " + bombs);
+			//System.out.println("number of bombs: " + bombs);
+			try {
 				try {
-					try {
-						backtrackingSolver.solvePosition(boardFast, bombs);
-					} catch (NoSolutionFoundException ignored) {
-						continue;
-					}
-					try {
-						slowBacktrackingSolver.solvePosition(boardSlow, bombs);
-					} catch (NoSolutionFoundException ignored) {
-						System.out.println("SLOW solver didn't find a solution, void test");
-						continue;
-					} catch (HitIterationLimitException ignored) {
-						System.out.println("SLOW solver hit iteration limit, void test");
-						continue;
-					}
-					if (areBoardsDifferent(boardFast, boardSlow)) {
-						return;
-					}
-				} catch (Exception e) {
-					System.out.println("one of the solvers threw exception, failed test");
-					e.printStackTrace();
+					backtrackingSolver.solvePosition(boardFast, bombs);
+				} catch (NoSolutionFoundException ignored) {
+					continue;
+				}
+				try {
+					slowBacktrackingSolver.solvePosition(boardSlow, bombs);
+				} catch (NoSolutionFoundException ignored) {
+					System.out.println("SLOW solver didn't find a solution, void test");
+					continue;
+				} catch (HitIterationLimitException ignored) {
+					System.out.println("SLOW solver hit iteration limit, void test");
+					continue;
+				}
+				if (areBoardsDifferent(boardFast, boardSlow, bombs)) {
 					return;
 				}
+			} catch (Exception e) {
+				System.out.println("one of the solvers threw exception, failed test");
+				e.printStackTrace();
+				return;
 			}
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
 	private static VisibleTile[][] convertFormat(String[] stringBoard) throws Exception {
-		VisibleTile[][] board = new VisibleTile[stringBoard.length][stringBoard[0].length()];
-		for (int i = 0; i < stringBoard.length; ++i) {
+		VisibleTile[][] board = new VisibleTile[stringBoard.length - 1][stringBoard[0].length()];
+		for (int i = 0; i + 1 < stringBoard.length; ++i) {
 			for (int j = 0; j < stringBoard[i].length(); ++j) {
 				if (stringBoard[i].length() != stringBoard[0].length()) {
 					throw new Exception("jagged array - not all rows are the same length");
@@ -202,14 +233,14 @@ public class Test {
 					}
 				}
 				if (!testPassed) {
-					printBoardDebug(boardBigInt);
+					printBoardDebug(boardBigInt, bombs);
 					return;
 				}
 			} catch (HitIterationLimitException ignored) {
 				System.out.println("hit iteration limit, void test");
 			} catch (Exception e) {
 				e.printStackTrace();
-				printBoardDebug(boardBigInt);
+				printBoardDebug(boardBigInt, bombs);
 				return;
 			}
 		}
@@ -257,12 +288,12 @@ public class Test {
 					System.out.println("slow solver hit iteration limit, void test");
 					continue;
 				}
-				if (areBoardsDifferent(boardFast, boardSlow)) {
+				if (areBoardsDifferent(boardFast, boardSlow, bombs)) {
 					return;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				printBoardDebug(boardFast);
+				printBoardDebug(boardFast, bombs);
 				return;
 			}
 		}
@@ -271,7 +302,8 @@ public class Test {
 
 	private static boolean areBoardsDifferent(
 			VisibleTile[][] boardFast,
-			VisibleTile[][] boardSlow
+			VisibleTile[][] boardSlow,
+			int bombs
 	) throws Exception {
 		int rows = boardFast.length, cols = boardFast[0].length;
 		boolean passedTest = true;
@@ -299,7 +331,7 @@ public class Test {
 			}
 		}
 		if (!passedTest) {
-			printBoardDebug(boardFast);
+			printBoardDebug(boardFast, bombs);
 		}
 		return !passedTest;
 	}
@@ -356,7 +388,7 @@ public class Test {
 					}
 				}
 				if (!passedTest) {
-					printBoardDebug(boardBacktracking);
+					printBoardDebug(boardBacktracking, bombs);
 					return;
 				}
 			} catch (Exception e) {
@@ -367,8 +399,26 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	private static void printBoardDebug(VisibleTile[][] board) {
-		System.out.println("\nboard is:");
+	/*
+
+    U1......
+    U1111...
+    UUUU1...
+    U1111...
+    U1......
+
+
+    U1......
+    U1111...
+    FFFB1...
+    U1111...
+    U1......
+
+	 */
+
+	private static void printBoardDebug(VisibleTile[][] board, int bombs) {
+		System.out.println("\nbombs: " + bombs);
+		System.out.println("board is:");
 		for (VisibleTile[] visibleTiles : board) {
 			for (VisibleTile visibleTile : visibleTiles) {
 				if (visibleTile.getIsVisible()) {

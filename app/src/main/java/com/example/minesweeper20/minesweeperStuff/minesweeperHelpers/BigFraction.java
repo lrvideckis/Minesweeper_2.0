@@ -11,13 +11,26 @@ public class BigFraction {
 		denominator = BigInteger.ONE;
 	}
 
-	public BigFraction(BigFraction other) throws Exception {
-		setValue(other);
+	public BigFraction(int numerator, int denominator) throws Exception {
+		reduceAndSet(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
+	}
+
+	public BigFraction(BigFraction other) {
+		try {
+			setValue(other);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	//this should only throw if denominator is 0
 	public void setValues(int numerator, int denominator) throws Exception {
 		reduceAndSet(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
+	}
+
+	public void setValues(BigFraction other) throws Exception {
+		numerator = other.getNumerator();
+		denominator = other.getDenominator();
 	}
 
 	public void addWith(int delta) {

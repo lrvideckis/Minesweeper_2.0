@@ -23,6 +23,8 @@ public class MyMath {
 			result.multiplyWith(i / gcd, 1);
 			i++;
 		}
+		String s = result.getNumerator().toString();
+		//System.out.println(n + " choose " + k + " is " + s);
 		return result;
 	}
 

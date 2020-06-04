@@ -134,7 +134,7 @@
 		<Button
 			android:id="@+id/beginner"
 			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="70dp"
 			android:layout_weight="1"
 			android:text="@string/beginner"
@@ -143,7 +143,7 @@
 		<Button
 			android:id="@+id/intermediate"
 			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="70dp"
 			android:layout_weight="1"
 			android:text="@string/intermediate"
@@ -152,7 +152,7 @@
 		<Button
 			android:id="@+id/expert"
 			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="70dp"
 			android:layout_weight="1"
 			android:text="@string/expert"

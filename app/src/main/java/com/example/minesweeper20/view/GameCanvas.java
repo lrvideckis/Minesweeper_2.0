@@ -33,6 +33,7 @@ public class GameCanvas extends View {
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
 	private final BigFraction bombProbability = new BigFraction(0);
+	BigFraction mx = new BigFraction(1);
 	private PopupWindow endGamePopup;
 
 	public GameCanvas(Context context, AttributeSet attrs) throws Exception {
@@ -153,6 +154,8 @@ public class GameCanvas extends View {
 		}
 
 		GameActivity gameActivity = (GameActivity) getContext();
+
+
 		if (gameActivity.getToggleBacktrackingHintsOn() && gameActivity.getToggleGaussHintsOn()) {
 			throw new Exception("can't have both solvers on at once");
 		}
@@ -167,6 +170,15 @@ public class GameCanvas extends View {
 		}
 
 		final boolean showHints = (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleGaussHintsOn());
+
+		if (showHints || gameActivity.getToggleBombProbabilityOn()) {
+			bombProbability.setValue(solverCell.getNumberOfBombConfigs());
+			bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
+			if (mx.getDenominator().toString().length() < bombProbability.getDenominator().toString().length()) {
+				mx = bombProbability;
+			}
+		}
+
 		boolean displayedLogicalStuff = false;
 		if (solverCell.getIsLogicalBomb() && showHints && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
@@ -223,10 +235,13 @@ public class GameCanvas extends View {
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
 		final int numberOfCols = minesweeperGame.getNumberOfCols();
+		mx = new BigFraction(1);
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				try {
+
 					drawCell(canvas, board[i][j], minesweeperGame.getCell(i, j), i, j);
+
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);
@@ -234,6 +249,13 @@ public class GameCanvas extends View {
 				}
 			}
 		}
+		/*
+		try {
+			System.out.println("frac: " + mx.getNumerator().toString() + '/' + mx.getDenominator().toString());
+		}catch ( Exception ignored) {
+
+		}
+		 */
 		for (int j = 0; j <= numberOfCols; ++j) {
 			canvas.drawLine(j * cellPixelLength, 0, j * cellPixelLength, numberOfRows * cellPixelLength, black);
 		}
