@@ -13,6 +13,7 @@ import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MutableInt;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -27,7 +28,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final boolean[][] isBomb;
 	private final int[][] cntSurroundingBombs, updatedNumberSurroundingBombs;
 	private final int[][][] lastUnvisitedSpot;
-	private final boolean[][] saveIsBomb;
 	private final ArrayList<TreeMap<Integer, MutableInt>> bombConfig;
 	//TODO: remove bombProbPerCompPerNumBombs denominator, and use bombConfig instead
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> bombProbPerCompPerNumBombs;
@@ -42,7 +42,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		this.rows = rows;
 		this.cols = cols;
 		isBomb = new boolean[rows][cols];
-		saveIsBomb = new boolean[rows][cols];
 		cntSurroundingBombs = new int[rows][cols];
 		updatedNumberSurroundingBombs = new int[rows][cols];
 		lastUnvisitedSpot = new int[rows][cols][2];
@@ -66,32 +65,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 
 		gaussianEliminationSolver.solvePosition(board, numberOfBombs);
-
-
-		/*
-		System.out.println("\nboard is:");
-		for (VisibleTile[] visibleTiles : board) {
-			for (VisibleTile visibleTile : visibleTiles) {
-				if (visibleTile.getIsVisible()) {
-					if (visibleTile.getNumberSurroundingBombs() == 0) {
-						System.out.print('.');
-					} else {
-						System.out.print(visibleTile.getNumberSurroundingBombs());
-					}
-				} else {
-					if (visibleTile.getIsLogicalBomb()) {
-						System.out.print('B');
-					} else if (visibleTile.getIsLogicalFree()) {
-						System.out.print('F');
-					} else {
-						System.out.print('U');
-					}
-				}
-			}
-			System.out.println();
-		}
-		System.out.println();
-		 */
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -121,17 +94,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		initialize(board, numberOfBombs);
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 
-		/*
-		System.out.println("components:");
-		for(ArrayList<Pair<Integer, Integer>> comp : components) {
-			for(Pair<Integer, Integer> spot : comp) {
-				System.out.print(spot + "            ");
-			}
-			System.out.println();
-		}
-		 */
-
-
 		initializeLastUnvisitedSpot(components);
 
 		//TODO: look into running this loop in parallel
@@ -143,29 +105,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			totalIterations += currIterations.get();
 		}
 
-		/*
-		System.out.println("bomb config before removing:");
-		for(TreeMap<Integer, MutableInt> comp : bombConfig) {
-			for(TreeMap.Entry<Integer, MutableInt> curr : comp.entrySet()) {
-				System.out.print(curr.getKey() + " " + curr.getValue().get() + "            ");
-			}
-			System.out.println();
-		}
-		 */
-
-		//bombProbPerCompPerNumBombs.get(i).remove(val);
 		removeBombNumbersFromComponent();
-
-		/*
-		System.out.println("bomb config after removing:");
-		for(TreeMap<Integer, MutableInt> comp : bombConfig) {
-			for(TreeMap.Entry<Integer, MutableInt> curr : comp.entrySet()) {
-				System.out.print(curr.getKey() + " " + curr.getValue().get() + "            ");
-			}
-			System.out.println();
-		}
-		 */
-
 		BigFraction awayBombProbability = null;
 		if (AwayCell.getNumberOfAwayCells(board) > 0) {
 			awayBombProbability = calculateAwayBombProbability();
@@ -182,8 +122,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			totalConfigs.addWith(currConfigs);
 		}
 
-		//System.out.println("total number of configs " + totalConfigs.getNumerator().toString());
-
 		for (int i = 0; i < components.size(); ++i) {
 			for (TreeMap.Entry<Integer, ArrayList<Pair<MutableInt, MutableInt>>> entry : bombProbPerCompPerNumBombs.get(i).entrySet()) {
 				final int bombs = entry.getKey();
@@ -191,33 +129,14 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 				BigFraction currWeight = numberOfConfigsForCurrent.get(i).get(bombs);
 
-				//Objects.requireNonNull(currWeight).divideWith(totalConfigs);
-
-
 				for (int j = 0; j < components.get(i).size(); ++j) {
 					final int numerator = bombProbPerSpot.get(j).first.get();
-					final int denominator = bombProbPerSpot.get(j).second.get();
 					final int row = components.get(i).get(j).first;
 					final int col = components.get(i).get(j).second;
-					/*
-					System.out.println();
-					System.out.println();
-					System.out.println();
-					System.out.println("row,col: " + row + " " + col);
-					System.out.println("num, dem: " + numerator + '/' + denominator);
-					 */
 
-
-					VisibleTile curr = board[row][col];
 					BigFraction delta = new BigFraction(numerator);
-
-					//System.out.println("currWeight: " + currWeight.getNumerator().toString() + '/' + currWeight.getDenominator().toString());
-
 					delta.multiplyWith(currWeight);
-
-					//System.out.println("delta: " + delta.getNumerator().toString() + '/' + delta.getDenominator().toString());
-
-					curr.numberOfBombConfigs.addWith(delta);
+					board[row][col].numberOfBombConfigs.addWith(delta);
 				}
 			}
 		}
@@ -237,7 +156,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				if (curr.getIsVisible() || curr.getIsLogicalBomb() || curr.getIsLogicalFree()) {
 					continue;
 				}
-				//curr.numberOfTotalConfigs.setValues(totalConfigs);
 				curr.numberOfBombConfigs.divideWith(totalConfigs);
 				curr.numberOfTotalConfigs.setValues(1, 1);
 				if (curr.numberOfBombConfigs.equals(0)) {
@@ -436,7 +354,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				isBomb[i][j] = false;
-				saveIsBomb[i][j] = false;
 				cntSurroundingBombs[i][j] = 0;
 			}
 		}
@@ -445,6 +362,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private void initializeLastUnvisitedSpot(ArrayList<ArrayList<Pair<Integer, Integer>>> components) {
 		bombConfig.clear();
 		numberOfConfigsForCurrent.clear();
+		bombProbPerCompPerNumBombs.clear();
 		for (ArrayList<Pair<Integer, Integer>> component : components) {
 			bombConfig.add(new TreeMap<Integer, MutableInt>());
 			numberOfConfigsForCurrent.add(new TreeMap<Integer, BigFraction>());
@@ -544,11 +462,12 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			}
 			bombProbPerCompPerNumBombs.get(componentPos).put(currNumberOfBombs, currSpotsArray);
 		}
+		ArrayList<Pair<MutableInt, MutableInt>> currArrayList = Objects.requireNonNull(bombProbPerCompPerNumBombs.get(componentPos).get(currNumberOfBombs));
 		for (int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
 			//VisibleTile curr = board[i][j];
-			Pair<MutableInt, MutableInt> curr = bombProbPerCompPerNumBombs.get(componentPos).get(currNumberOfBombs).get(pos);
+			Pair<MutableInt, MutableInt> curr = currArrayList.get(pos);
 
 			if (isBomb[i][j]) {
 				curr.first.addWith(1);

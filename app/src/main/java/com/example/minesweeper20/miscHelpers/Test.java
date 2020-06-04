@@ -399,23 +399,6 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	/*
-
-    U1......
-    U1111...
-    UUUU1...
-    U1111...
-    U1......
-
-
-    U1......
-    U1111...
-    FFFB1...
-    U1111...
-    U1......
-
-	 */
-
 	private static void printBoardDebug(VisibleTile[][] board, int bombs) {
 		System.out.println("\nbombs: " + bombs);
 		System.out.println("board is:");
@@ -434,5 +417,64 @@ public class Test {
 			System.out.println();
 		}
 		System.out.println();
+	}
+
+	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) {
+		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.println("test number: " + testID);
+			int bombs = 5;
+			int rows = 5, cols = 5;
+			try {
+				rows = MyMath.getRand(3, 8);
+				cols = MyMath.getRand(3, 40 / rows);
+				bombs = MyMath.getRand(2, 9);
+			} catch (Exception ignored) {
+			}
+			bombs = Math.min(bombs, rows * cols - 9);
+
+			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+
+			MinesweeperGame minesweeperGame;
+			try {
+				minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+				int numberOfClicks = MyMath.getRand(0, 4);
+				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
+					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
+				}
+				if (minesweeperGame.getIsGameOver()) {
+					continue;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+			VisibleTile[][] boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+
+			try {
+				slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfBombs());
+			} catch (HitIterationLimitException ignored) {
+				System.out.println("slow solver hit iteration limit, void test");
+				continue;
+			} catch (Exception e) {
+				System.out.println("slow solver crashed, void test");
+				e.printStackTrace();
+				continue;
+			}
+			for (int i = 0; i < 5; ++i) {
+				VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+				try {
+					backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfBombs());
+					if (areBoardsDifferent(boardFast, boardSlow, bombs)) {
+						return;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					printBoardDebug(boardFast, bombs);
+					return;
+				}
+			}
+		}
+		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 }

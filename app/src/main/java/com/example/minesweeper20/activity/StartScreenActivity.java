@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
+import com.example.minesweeper20.miscHelpers.Test;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: undo button - only when you lose
@@ -140,10 +141,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			}
 		});
 
-		//Test.testPreviouslyFailedBoards();
-		//Test.performTestsForBombProbability(20);
-		//Test.performTestsForFractionOverflow(20);
-		//Test.performTestsForGaussSolver(20);
+		Test.testPreviouslyFailedBoards();
+		Test.performTestsForBombProbability(20);
+		Test.performTestsForFractionOverflow(20);
+		Test.performTestsForGaussSolver(20);
+		Test.performTestsMultipleRunsOfSameBoard(10);
 	}
 
 	@Override

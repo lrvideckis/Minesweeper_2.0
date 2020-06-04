@@ -249,13 +249,11 @@ public class GameCanvas extends View {
 				}
 			}
 		}
-		/*
 		try {
-			System.out.println("frac: " + mx.getNumerator().toString() + '/' + mx.getDenominator().toString());
-		}catch ( Exception ignored) {
+			System.out.println("fraction: " + mx.getNumerator().toString() + '/' + mx.getDenominator().toString());
+		} catch (Exception ignored) {
 
 		}
-		 */
 		for (int j = 0; j <= numberOfCols; ++j) {
 			canvas.drawLine(j * cellPixelLength, 0, j * cellPixelLength, numberOfRows * cellPixelLength, black);
 		}
