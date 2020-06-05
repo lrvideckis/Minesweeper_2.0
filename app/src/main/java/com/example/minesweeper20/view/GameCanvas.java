@@ -17,8 +17,8 @@ import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
-import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.FractionThenDouble;
 import com.example.minesweeper20.miscHelpers.PopupHelper;
 
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
@@ -32,7 +32,7 @@ public class GameCanvas extends View {
 	private final VisibleTile[][] board;
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
-	private final FractionThenDouble bombProbability = new FractionThenDouble(0);
+	private final BigFraction bombProbability = new BigFraction(0);
 	private PopupWindow endGamePopup;
 
 	public GameCanvas(Context context, AttributeSet attrs) throws Exception {
@@ -153,6 +153,8 @@ public class GameCanvas extends View {
 		}
 
 		GameActivity gameActivity = (GameActivity) getContext();
+
+
 		if (gameActivity.getToggleBacktrackingHintsOn() && gameActivity.getToggleGaussHintsOn()) {
 			throw new Exception("can't have both solvers on at once");
 		}
@@ -167,6 +169,7 @@ public class GameCanvas extends View {
 		}
 
 		final boolean showHints = (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleGaussHintsOn());
+
 		boolean displayedLogicalStuff = false;
 		if (solverCell.getIsLogicalBomb() && showHints && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
@@ -226,7 +229,9 @@ public class GameCanvas extends View {
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				try {
+
 					drawCell(canvas, board[i][j], minesweeperGame.getCell(i, j), i, j);
+
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);
