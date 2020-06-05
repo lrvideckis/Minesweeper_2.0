@@ -31,7 +31,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final ArrayList<TreeMap<Integer, MutableInt>> bombConfig;
 	//TODO: remove bombProbPerCompPerNumBombs denominator, and use bombConfig instead
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> bombProbPerCompPerNumBombs;
-	private final ArrayList<TreeMap<Integer, BigFraction>> numberOfConfigsForCurrent;
+	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent;
 	private final GaussianEliminationSolver gaussianEliminationSolver;
 	private int totalIterations;
 	private VisibleTile[][] board;
@@ -110,23 +110,32 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			awayBombProbability = calculateAwayBombProbability();
 		}
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
-		updateNumberOfConfigsForCurrent(numberOfAwayCells);
+		updateNumberOfConfigsForCurrent();
 
 
-		BigFraction totalConfigs = new BigFraction(0);
 		TreeMap<Integer, BigFraction> configsPerBombCount = calculateNumberOfBombConfigs();
-		for (TreeMap.Entry<Integer, BigFraction> total : configsPerBombCount.entrySet()) {
-			BigFraction currConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - total.getKey());
-			currConfigs.multiplyWith(total.getValue());
-			totalConfigs.addWith(currConfigs);
-		}
 
 		for (int i = 0; i < components.size(); ++i) {
 			for (TreeMap.Entry<Integer, ArrayList<Pair<MutableInt, MutableInt>>> entry : bombProbPerCompPerNumBombs.get(i).entrySet()) {
 				final int bombs = entry.getKey();
 				final ArrayList<Pair<MutableInt, MutableInt>> bombProbPerSpot = entry.getValue();
 
-				BigFraction currWeight = numberOfConfigsForCurrent.get(i).get(bombs);
+				TreeMap<Integer, BigFraction> configsPerBomb = numberOfConfigsForCurrent.get(i).get(bombs);
+				BigFraction currWeight = new BigFraction(0);
+				for (TreeMap.Entry<Integer, BigFraction> currEntry : Objects.requireNonNull(configsPerBomb).entrySet()) {
+					BigFraction currTerm = new BigFraction(0);
+					for (TreeMap.Entry<Integer, BigFraction> total : configsPerBombCount.entrySet()) {
+						BigFraction delta = MyMath.BinomialCoefficientFraction(numberOfAwayCells, numberOfBombs - total.getKey(), numberOfBombs - currEntry.getKey());
+						delta.multiplyWith(total.getValue());
+
+						currTerm.addWith(delta);
+					}
+
+					currTerm.invert();
+					currTerm.multiplyWith(currEntry.getValue());
+
+					currWeight.addWith(currTerm);
+				}
 
 				for (int j = 0; j < components.get(i).size(); ++j) {
 					final int numerator = bombProbPerSpot.get(j).first.get();
@@ -155,7 +164,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				if (curr.getIsVisible() || curr.getIsLogicalBomb() || curr.getIsLogicalFree()) {
 					continue;
 				}
-				curr.numberOfBombConfigs.divideWith(totalConfigs);
+				//TODO: remove total configs, and just have a single BigFraction
 				curr.numberOfTotalConfigs.setValues(1, 1);
 				if (curr.numberOfBombConfigs.equals(0)) {
 					curr.isLogicalFree = true;
@@ -166,21 +175,18 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
+	//TODO: this can be optimized a dimension by storing prefixes and suffixes of the dp table
 	//for each component, and for each # bombs: this calculates the number of bomb configurations, and saves it in numberOfConfigsForCurrent
-	private void updateNumberOfConfigsForCurrent(int numberOfAwayCells) throws Exception {
+	private void updateNumberOfConfigsForCurrent() throws Exception {
 		for (int i = 0; i < components.size(); ++i) {
 			TreeMap<Integer, MutableInt> saveBombConfigs = new TreeMap<>(bombConfig.get(i));
+			if (!numberOfConfigsForCurrent.get(i).isEmpty()) {
+				throw new Exception("numberOfConfigsForCurrent should be cleared from previous run, but isn't");
+			}
 			for (TreeMap.Entry<Integer, MutableInt> entry : saveBombConfigs.entrySet()) {
-				BigFraction totalConfigs = new BigFraction(0);
 				bombConfig.get(i).clear();
 				bombConfig.get(i).put(entry.getKey(), new MutableInt(1));
-				TreeMap<Integer, BigFraction> configsPerBombCount = calculateNumberOfBombConfigs();
-				for (TreeMap.Entry<Integer, BigFraction> total : configsPerBombCount.entrySet()) {
-					BigFraction currConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - total.getKey());
-					currConfigs.multiplyWith(total.getValue());
-					totalConfigs.addWith(currConfigs);
-				}
-				numberOfConfigsForCurrent.get(i).put(entry.getKey(), totalConfigs);
+				numberOfConfigsForCurrent.get(i).put(entry.getKey(), calculateNumberOfBombConfigs());
 			}
 			bombConfig.get(i).clear();
 			bombConfig.set(i, saveBombConfigs);
@@ -355,7 +361,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		bombProbPerCompPerNumBombs.clear();
 		for (ArrayList<Pair<Integer, Integer>> component : components) {
 			bombConfig.add(new TreeMap<Integer, MutableInt>());
-			numberOfConfigsForCurrent.add(new TreeMap<Integer, BigFraction>());
+			numberOfConfigsForCurrent.add(new TreeMap<Integer, TreeMap<Integer, BigFraction>>());
 			bombProbPerCompPerNumBombs.add(new TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>());
 			for (Pair<Integer, Integer> spot : component) {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(spot.first, spot.second, rows, cols)) {
