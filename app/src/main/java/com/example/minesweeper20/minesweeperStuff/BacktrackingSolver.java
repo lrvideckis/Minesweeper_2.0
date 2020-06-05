@@ -316,7 +316,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 	//TODO: update this to do backtracking twice with dp in the middle
 	public boolean[][] getBombConfiguration(VisibleTile[][] board, int numberOfBombs, int spotI, int spotJ, boolean wantBomb) throws Exception {
-		return null;
+		throw new Exception("not implemented");
 		/*
 		initialize(board, numberOfBombs);
 		components = GetConnectedComponents.getComponents(board);

@@ -31,6 +31,7 @@ public class Test {
 					"UUUU1...",
 					"U1111...",
 					"U1......",
+
 					"3"
 			},
 
@@ -43,6 +44,7 @@ public class Test {
 					"...",
 					"122",
 					"UUU",
+
 					"9"
 			},
 
@@ -50,6 +52,7 @@ public class Test {
 					".1U",
 					"23U",
 					"UUU",
+
 					"3",
 			},
 
@@ -62,8 +65,23 @@ public class Test {
 					"UUUU",
 					"U211",
 					"11..",
-					"...."
+					"....",
+
+					"6"
 			},
+			{
+					"UUUU",
+					"U2UU",
+					"U3UU",
+					"UUUU",
+					"UUUU",
+					"U211",
+					"11..",
+					"....",
+
+					"11"
+			},
+
 			//bug with dfs connect components - upper component and lower component should be the same, but DFS splits them into separate components
 			{
 					"UUU",
@@ -72,8 +90,11 @@ public class Test {
 					"U21",
 					"22.",
 					"U21",
-					"UUU"
+					"UUU",
+
+					"6"
 			},
+
 			//bug with away cells - (incorrectly) returns true when cell is visible, and all adjacent cells are not visible
 			{
 					"...",
@@ -82,15 +103,14 @@ public class Test {
 					"4UU",
 					"UUU",
 					"U3U",
-					"UUU"
+					"UUU",
+
+					"6"
 			}
 	};
 
 	public static void testPreviouslyFailedBoards() {
-		int cnt = 0;
 		for (String[] stringBoard : previousFailedBoards) {
-			++cnt;
-			if (cnt == 3) break;
 			final int rows = stringBoard.length - 1;
 			final int cols = stringBoard[0].length();
 			final int bombs = Integer.parseInt(stringBoard[stringBoard.length - 1]);
