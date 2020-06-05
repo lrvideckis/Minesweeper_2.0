@@ -3,32 +3,32 @@ package com.example.minesweeper20.minesweeperStuff;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 
 public interface MinesweeperSolver {
-	void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception;
+	void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception;
 
-	boolean[][] getBombConfiguration(
+	boolean[][] getMineConfiguration(
 			VisibleTile[][] board,
-			int numberOfBombs,
+			int numberOfMines,
 			int spotI,
 			int spotJ,
-			boolean wantBomb
+			boolean wantMine
 	) throws Exception;
 
 	int getNumberOfIterations();
 
 	class VisibleTile {
-		final BigFraction numberOfBombConfigs = new BigFraction(0), numberOfTotalConfigs = new BigFraction(0);
-		boolean isVisible, isLogicalBomb, isLogicalFree;
-		int numberSurroundingBombs;
+		final BigFraction numberOfMineConfigs = new BigFraction(0), numberOfTotalConfigs = new BigFraction(0);
+		boolean isVisible, isLogicalMine, isLogicalFree;
+		int numberSurroundingMines;
 
 		public VisibleTile() {
 			reset();
 		}
 
 		private void reset() {
-			isLogicalFree = isLogicalBomb = isVisible = false;
-			numberSurroundingBombs = 0;
+			isLogicalFree = isLogicalMine = isVisible = false;
+			numberSurroundingMines = 0;
 			try {
-				numberOfBombConfigs.setValues(0, 1);
+				numberOfMineConfigs.setValues(0, 1);
 				numberOfTotalConfigs.setValues(0, 1);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -39,39 +39,39 @@ public interface MinesweeperSolver {
 			return isVisible;
 		}
 
-		public boolean getIsLogicalBomb() {
-			return isLogicalBomb;
+		public boolean getIsLogicalMine() {
+			return isLogicalMine;
 		}
 
 		public boolean getIsLogicalFree() {
 			return isLogicalFree;
 		}
 
-		public BigFraction getNumberOfBombConfigs() {
-			return numberOfBombConfigs;
+		public BigFraction getNumberOfMineConfigs() {
+			return numberOfMineConfigs;
 		}
 
 		public BigFraction getNumberOfTotalConfigs() {
 			return numberOfTotalConfigs;
 		}
 
-		public int getNumberSurroundingBombs() {
-			return numberSurroundingBombs;
+		public int getNumberSurroundingMines() {
+			return numberSurroundingMines;
 		}
 
-		public void updateVisibilityAndSurroundingBombs(MinesweeperGame.Tile tile) {
+		public void updateVisibilityAndSurroundingMines(MinesweeperGame.Tile tile) {
 			reset();
 			isVisible = tile.isVisible;
 			if (isVisible) {
-				numberSurroundingBombs = tile.numberSurroundingBombs;
+				numberSurroundingMines = tile.numberSurroundingMines;
 			}
 		}
 
-		public void updateVisibilityAndSurroundingBombs(boolean isVisible, int numberSurroundingBombs) {
+		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) {
 			reset();
 			this.isVisible = isVisible;
 			if (isVisible) {
-				this.numberSurroundingBombs = numberSurroundingBombs;
+				this.numberSurroundingMines = numberSurroundingMines;
 			}
 		}
 	}

@@ -76,7 +76,7 @@ public class GetConnectedComponents {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];
 					VisibleTile adjTile = board[adjI][adjJ];
-					if (adjTile.getIsVisible() || adjTile.getIsLogicalBomb() || adjTile.getIsLogicalFree()) {
+					if (adjTile.getIsVisible() || adjTile.getIsLogicalMine() || adjTile.getIsLogicalFree()) {
 						continue;
 					}
 					disjointSet.merge(getNode(i, j), getNode(adjI, adjJ));

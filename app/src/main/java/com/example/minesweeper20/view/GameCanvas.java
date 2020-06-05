@@ -32,7 +32,7 @@ public class GameCanvas extends View {
 	private final VisibleTile[][] board;
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
-	private final BigFraction bombProbability = new BigFraction(0);
+	private final BigFraction mineProbability = new BigFraction(0);
 	private PopupWindow endGamePopup;
 
 	public GameCanvas(Context context, AttributeSet attrs) throws Exception {
@@ -47,7 +47,7 @@ public class GameCanvas extends View {
 		minesweeperGame = new MinesweeperGame(
 				gameActivity.getNumberOfRows(),
 				gameActivity.getNumberOfCols(),
-				gameActivity.getNumberOfBombs());
+				gameActivity.getNumberOfMines());
 		drawCellHelpers = new DrawCellHelpers(context, gameActivity.getNumberOfRows(), gameActivity.getNumberOfCols());
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 		backtrackingSolver = new BacktrackingSolver(
@@ -91,17 +91,17 @@ public class GameCanvas extends View {
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
 			if (!gameActivity.getGameMode().equals(gameChoices[0])) {
 				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-				boolean wantBomb = gameActivity.getGameMode().equals(gameChoices[1]);
-				//TODO: bug: when toggle flags is on + hard mode: this will always put a bomb under the cell you just flagged
-				boolean[][] newBombLocations = backtrackingSolver.getBombConfiguration(board, 0, row, col, wantBomb);
-				if (newBombLocations != null) {
-					minesweeperGame.changeBombLocations(newBombLocations);
+				boolean wantMine = gameActivity.getGameMode().equals(gameChoices[1]);
+				//TODO: bug: when toggle flags is on + hard mode: this will always put a mine under the cell you just flagged
+				boolean[][] newMineLocations = backtrackingSolver.getMineConfiguration(board, 0, row, col, wantMine);
+				if (newMineLocations != null) {
+					minesweeperGame.changeMineLocations(newMineLocations);
 				}
 			}
 
 			minesweeperGame.clickCell(row, col, gameActivity.getToggleFlagModeOn());
 			if (!minesweeperGame.getIsGameOver() && !(gameActivity.getToggleFlagModeOn() && !minesweeperGame.getCell(row, col).getIsVisible())) {
-				if (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleBombProbabilityOn()) {
+				if (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn()) {
 					updateSolvedBoardWithBacktrackingSolver();
 				} else if (gameActivity.getToggleGaussHintsOn()) {
 					updateSolvedBoardWithGaussSolver();
@@ -112,7 +112,7 @@ public class GameCanvas extends View {
 			e.printStackTrace();
 		}
 
-		gameActivity.updateNumberOfBombs(minesweeperGame.getNumberOfBombs() - minesweeperGame.getNumberOfFlags());
+		gameActivity.updateNumberOfMines(minesweeperGame.getNumberOfMines() - minesweeperGame.getNumberOfFlags());
 		invalidate();
 	}
 
@@ -121,7 +121,7 @@ public class GameCanvas extends View {
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		GameActivity gameActivity = (GameActivity) getContext();
 		try {
-			backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfBombs());
+			backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
 			gameActivity.updateNumberOfSolverIterations(backtrackingSolver.getNumberOfIterations());
 		} catch (HitIterationLimitException e) {
 			gameActivity.solverHasJustHitIterationLimit();
@@ -131,7 +131,7 @@ public class GameCanvas extends View {
 	public void updateSolvedBoardWithGaussSolver() throws Exception {
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		try {
-			gaussSolver.solvePosition(board, minesweeperGame.getNumberOfBombs());
+			gaussSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
 		} catch (Exception e) {
 			GameActivity gameActivity = (GameActivity) getContext();
 			gameActivity.displayStackTracePopup(e);
@@ -148,7 +148,7 @@ public class GameCanvas extends View {
 		}
 
 		if (gameCell.getIsVisible()) {
-			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingBombs(), i, j, startX, startY);
+			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingMines(), i, j, startX, startY);
 			return;
 		}
 
@@ -158,22 +158,22 @@ public class GameCanvas extends View {
 		if (gameActivity.getToggleBacktrackingHintsOn() && gameActivity.getToggleGaussHintsOn()) {
 			throw new Exception("can't have both solvers on at once");
 		}
-		if (gameActivity.getToggleGaussHintsOn() && gameActivity.getToggleBombProbabilityOn()) {
+		if (gameActivity.getToggleGaussHintsOn() && gameActivity.getToggleMineProbabilityOn()) {
 			throw new Exception("can't have gauss hints and probability on");
 		}
-		if (solverCell.getIsLogicalBomb() && !gameCell.isBomb()) {
-			throw new Exception("solver says: logical bomb, but it's not a bomb");
+		if (solverCell.getIsLogicalMine() && !gameCell.isMine()) {
+			throw new Exception("solver says: logical mine, but it's not a mine");
 		}
-		if (solverCell.getIsLogicalFree() && gameCell.isBomb()) {
+		if (solverCell.getIsLogicalFree() && gameCell.isMine()) {
 			throw new Exception("gauss solver says: logical free, but it's not free");
 		}
 
 		final boolean showHints = (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleGaussHintsOn());
 
 		boolean displayedLogicalStuff = false;
-		if (solverCell.getIsLogicalBomb() && showHints && !gameCell.isFlagged()) {
+		if (solverCell.getIsLogicalMine() && showHints && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
-			drawCellHelpers.drawLogicalBomb(canvas, i, j, getResources());
+			drawCellHelpers.drawLogicalMine(canvas, i, j, getResources());
 		} else if (solverCell.getIsLogicalFree() && showHints && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
 			drawCellHelpers.drawLogicalFree(canvas, i, j, getResources());
@@ -183,19 +183,19 @@ public class GameCanvas extends View {
 
 		if (gameCell.isFlagged()) {
 			drawCellHelpers.drawFlag(canvas, startX, startY);
-			if (minesweeperGame.getIsGameOver() && !gameCell.isBomb()) {
+			if (minesweeperGame.getIsGameOver() && !gameCell.isMine()) {
 				drawCellHelpers.drawBlackX(canvas, startX, startY);
-			} else if (solverCell.getIsLogicalFree() && (showHints || gameActivity.getToggleBombProbabilityOn())) {
+			} else if (solverCell.getIsLogicalFree() && (showHints || gameActivity.getToggleMineProbabilityOn())) {
 				drawCellHelpers.drawBlackX(canvas, startX, startY);
 			}
-		} else if (gameCell.isBomb() && (minesweeperGame.getIsGameOver() || gameActivity.getToggleBombsOn())) {
-			drawCellHelpers.drawBomb(canvas, startX, startY);
+		} else if (gameCell.isMine() && (minesweeperGame.getIsGameOver() || gameActivity.getToggleMinesOn())) {
+			drawCellHelpers.drawMine(canvas, startX, startY);
 		}
 
-		if (gameActivity.getToggleBombProbabilityOn() && !solverCell.getIsVisible() && !displayedLogicalStuff && !gameCell.isFlagged()) {
-			bombProbability.setValue(solverCell.getNumberOfBombConfigs());
-			bombProbability.divideWith(solverCell.getNumberOfTotalConfigs());
-			drawCellHelpers.drawBombProbability(canvas, startX, startY, bombProbability, getResources());
+		if (gameActivity.getToggleMineProbabilityOn() && !solverCell.getIsVisible() && !displayedLogicalStuff && !gameCell.isFlagged()) {
+			mineProbability.setValue(solverCell.getNumberOfMineConfigs());
+			mineProbability.divideWith(solverCell.getNumberOfTotalConfigs());
+			drawCellHelpers.drawMineProbability(canvas, startX, startY, mineProbability, getResources());
 		}
 	}
 

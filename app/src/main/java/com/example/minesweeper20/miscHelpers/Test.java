@@ -113,7 +113,7 @@ public class Test {
 		for (String[] stringBoard : previousFailedBoards) {
 			final int rows = stringBoard.length - 1;
 			final int cols = stringBoard[0].length();
-			final int bombs = Integer.parseInt(stringBoard[stringBoard.length - 1]);
+			final int mines = Integer.parseInt(stringBoard[stringBoard.length - 1]);
 			VisibleTile[][] boardFast;
 			VisibleTile[][] boardSlow;
 			try {
@@ -123,7 +123,7 @@ public class Test {
 				e.printStackTrace();
 				continue;
 			}
-			printBoardDebug(boardFast, bombs);
+			printBoardDebug(boardFast, mines);
 			Pair<Integer, Integer> dimensions;
 			try {
 				dimensions = ArrayBounds.getArrayBounds(boardFast);
@@ -140,15 +140,15 @@ public class Test {
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 
-			//System.out.println("number of bombs: " + bombs);
+			//System.out.println("number of mines: " + mines);
 			try {
 				try {
-					backtrackingSolver.solvePosition(boardFast, bombs);
+					backtrackingSolver.solvePosition(boardFast, mines);
 				} catch (NoSolutionFoundException ignored) {
 					continue;
 				}
 				try {
-					slowBacktrackingSolver.solvePosition(boardSlow, bombs);
+					slowBacktrackingSolver.solvePosition(boardSlow, mines);
 				} catch (NoSolutionFoundException ignored) {
 					System.out.println("SLOW solver didn't find a solution, void test");
 					continue;
@@ -156,7 +156,7 @@ public class Test {
 					System.out.println("SLOW solver hit iteration limit, void test");
 					continue;
 				}
-				if (areBoardsDifferent(boardFast, boardSlow, bombs)) {
+				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 					return;
 				}
 			} catch (Exception e) {
@@ -177,11 +177,11 @@ public class Test {
 				}
 				board[i][j] = new VisibleTile();
 				if (stringBoard[i].charAt(j) == '.') {
-					board[i][j].updateVisibilityAndSurroundingBombs(true, 0);
+					board[i][j].updateVisibilityAndSurroundingMines(true, 0);
 				} else if (stringBoard[i].charAt(j) == 'U') {
-					board[i][j].updateVisibilityAndSurroundingBombs(false, 0);
+					board[i][j].updateVisibilityAndSurroundingMines(false, 0);
 				} else {
-					board[i][j].updateVisibilityAndSurroundingBombs(true, stringBoard[i].charAt(j) - '0');
+					board[i][j].updateVisibilityAndSurroundingMines(true, stringBoard[i].charAt(j) - '0');
 				}
 			}
 		}
@@ -191,22 +191,22 @@ public class Test {
 	public static void performTestsForFractionOverflow(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int bombs = 5;
+			int mines = 5;
 			int rows = 5, cols = 5;
 			try {
 				rows = MyMath.getRand(10, 15);
 				cols = MyMath.getRand(10, 15);
-				bombs = MyMath.getRand(2, 50);
+				mines = MyMath.getRand(2, 50);
 			} catch (Exception ignored) {
 			}
-			bombs = Math.min(bombs, rows * cols - 9);
+			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			BacktrackingSolverWithBigint backtrackingSolverWithBigint = new BacktrackingSolverWithBigint(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			try {
-				minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 				int numberOfClicks = MyMath.getRand(3, 7);
 				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
@@ -222,18 +222,18 @@ public class Test {
 			VisibleTile[][] boardBigInt = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				backtrackingSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfBombs());
-				backtrackingSolverWithBigint.solvePosition(boardBigInt, minesweeperGame.getNumberOfBombs());
+				backtrackingSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfMines());
+				backtrackingSolverWithBigint.solvePosition(boardBigInt, minesweeperGame.getNumberOfMines());
 				boolean testPassed = true;
 				for (int i = 0; i < rows; ++i) {
 					for (int j = 0; j < cols; ++j) {
 						if (boardBigInt[i][j].getIsVisible()) {
 							continue;
 						}
-						BigFraction curr = boardFraction[i][j].getNumberOfBombConfigs();
+						BigFraction curr = boardFraction[i][j].getNumberOfMineConfigs();
 						curr.divideWith(boardFraction[i][j].getNumberOfTotalConfigs());
 
-						BigInteger top = backtrackingSolverWithBigint.getNumberOfBombConfigs(i, j);
+						BigInteger top = backtrackingSolverWithBigint.getNumberOfMineConfigs(i, j);
 						BigInteger bottom = backtrackingSolverWithBigint.getNumberOfTotalConfigs(i, j);
 						BigInteger gcd = top.gcd(bottom);
 						top = top.divide(gcd);
@@ -253,39 +253,39 @@ public class Test {
 					}
 				}
 				if (!testPassed) {
-					printBoardDebug(boardBigInt, bombs);
+					printBoardDebug(boardBigInt, mines);
 					return;
 				}
 			} catch (HitIterationLimitException ignored) {
 				System.out.println("hit iteration limit, void test");
 			} catch (Exception e) {
 				e.printStackTrace();
-				printBoardDebug(boardBigInt, bombs);
+				printBoardDebug(boardBigInt, mines);
 				return;
 			}
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	public static void performTestsForBombProbability(int numberOfTests) {
+	public static void performTestsForMineProbability(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int bombs = 5;
+			int mines = 5;
 			int rows = 5, cols = 5;
 			try {
 				rows = MyMath.getRand(3, 8);
 				cols = MyMath.getRand(3, 40 / rows);
-				bombs = MyMath.getRand(2, 9);
+				mines = MyMath.getRand(2, 9);
 			} catch (Exception ignored) {
 			}
-			bombs = Math.min(bombs, rows * cols - 9);
+			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			try {
-				minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 				int numberOfClicks = MyMath.getRand(0, 4);
 				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
@@ -301,19 +301,19 @@ public class Test {
 			VisibleTile[][] boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfBombs());
+				backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
 				try {
-					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfBombs());
+					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
 				} catch (HitIterationLimitException ignored) {
 					System.out.println("slow solver hit iteration limit, void test");
 					continue;
 				}
-				if (areBoardsDifferent(boardFast, boardSlow, bombs)) {
+				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 					return;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				printBoardDebug(boardFast, bombs);
+				printBoardDebug(boardFast, mines);
 				return;
 			}
 		}
@@ -323,7 +323,7 @@ public class Test {
 	private static boolean areBoardsDifferent(
 			VisibleTile[][] boardFast,
 			VisibleTile[][] boardSlow,
-			int bombs
+			int mines
 	) throws Exception {
 		int rows = boardFast.length, cols = boardFast[0].length;
 		boolean passedTest = true;
@@ -334,11 +334,11 @@ public class Test {
 				}
 
 				VisibleTile fastTile = boardFast[i][j];
-				BigFraction fast = new BigFraction(fastTile.getNumberOfBombConfigs());
+				BigFraction fast = new BigFraction(fastTile.getNumberOfMineConfigs());
 				fast.divideWith(fastTile.getNumberOfTotalConfigs());
 
 				VisibleTile slowTile = boardSlow[i][j];
-				BigFraction slow = new BigFraction(slowTile.getNumberOfBombConfigs());
+				BigFraction slow = new BigFraction(slowTile.getNumberOfMineConfigs());
 				slow.divideWith(slowTile.getNumberOfTotalConfigs());
 				if (!fast.getNumerator().equals(slow.getNumerator()) || !fast.getDenominator().equals(slow.getDenominator())) {
 					passedTest = false;
@@ -351,7 +351,7 @@ public class Test {
 			}
 		}
 		if (!passedTest) {
-			printBoardDebug(boardFast, bombs);
+			printBoardDebug(boardFast, mines);
 		}
 		return !passedTest;
 	}
@@ -359,22 +359,22 @@ public class Test {
 	public static void performTestsForGaussSolver(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int bombs = 5;
+			int mines = 5;
 			int rows = 5, cols = 5;
 			try {
 				rows = MyMath.getRand(3, 15);
 				cols = MyMath.getRand(3, 15);
-				bombs = MyMath.getRand(2, 50);
+				mines = MyMath.getRand(2, 50);
 			} catch (Exception ignored) {
 			}
-			bombs = Math.min(bombs, rows * cols - 9);
+			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			try {
-				minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 				int numberOfClicks = MyMath.getRand(0, 4);
 				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					int x = MyMath.getRand(0, rows - 1);
@@ -392,14 +392,14 @@ public class Test {
 			VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				backtrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfBombs());
-				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfBombs());
+				backtrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
+				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
 				boolean passedTest = true;
 				for (int i = 0; i < rows; ++i) {
 					for (int j = 0; j < cols; ++j) {
-						if (!boardBacktracking[i][j].getIsLogicalBomb() && boardGauss[i][j].getIsLogicalBomb()) {
+						if (!boardBacktracking[i][j].getIsLogicalMine() && boardGauss[i][j].getIsLogicalMine()) {
 							passedTest = false;
-							System.out.println("it isn't a logical bomb, but Gauss solver says it's a logical bomb " + i + " " + j);
+							System.out.println("it isn't a logical mine, but Gauss solver says it's a logical mine " + i + " " + j);
 						}
 						if (!boardBacktracking[i][j].getIsLogicalFree() && boardGauss[i][j].getIsLogicalFree()) {
 							passedTest = false;
@@ -408,7 +408,7 @@ public class Test {
 					}
 				}
 				if (!passedTest) {
-					printBoardDebug(boardBacktracking, bombs);
+					printBoardDebug(boardBacktracking, mines);
 					return;
 				}
 			} catch (Exception e) {
@@ -419,16 +419,16 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	private static void printBoardDebug(VisibleTile[][] board, int bombs) {
-		System.out.println("\nbombs: " + bombs);
+	private static void printBoardDebug(VisibleTile[][] board, int mines) {
+		System.out.println("\nmines: " + mines);
 		System.out.println("board is:");
 		for (VisibleTile[] visibleTiles : board) {
 			for (VisibleTile visibleTile : visibleTiles) {
 				if (visibleTile.getIsVisible()) {
-					if (visibleTile.getNumberSurroundingBombs() == 0) {
+					if (visibleTile.getNumberSurroundingMines() == 0) {
 						System.out.print('.');
 					} else {
-						System.out.print(visibleTile.getNumberSurroundingBombs());
+						System.out.print(visibleTile.getNumberSurroundingMines());
 					}
 				} else {
 					System.out.print('U');
@@ -442,22 +442,22 @@ public class Test {
 	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int bombs = 5;
+			int mines = 5;
 			int rows = 5, cols = 5;
 			try {
 				rows = MyMath.getRand(3, 8);
 				cols = MyMath.getRand(3, 40 / rows);
-				bombs = MyMath.getRand(2, 9);
+				mines = MyMath.getRand(2, 9);
 			} catch (Exception ignored) {
 			}
-			bombs = Math.min(bombs, rows * cols - 9);
+			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			try {
-				minesweeperGame = new MinesweeperGame(rows, cols, bombs);
+				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 				int numberOfClicks = MyMath.getRand(0, 4);
 				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
@@ -472,7 +472,7 @@ public class Test {
 			VisibleTile[][] boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfBombs());
+				slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
 			} catch (HitIterationLimitException ignored) {
 				System.out.println("slow solver hit iteration limit, void test");
 				continue;
@@ -484,13 +484,13 @@ public class Test {
 			for (int i = 0; i < 5; ++i) {
 				VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 				try {
-					backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfBombs());
-					if (areBoardsDifferent(boardFast, boardSlow, bombs)) {
+					backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
+					if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 						return;
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					printBoardDebug(boardFast, bombs);
+					printBoardDebug(boardFast, mines);
 					return;
 				}
 			}

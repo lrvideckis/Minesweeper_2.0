@@ -27,7 +27,7 @@ class DrawCellHelpers {
 	private final Paint[] numberColors;
 	private final String
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
-			bombEmoji = new String(Character.toChars(0x1F4A3));
+			mineEmoji = new String(Character.toChars(0x1F4A3));
 	private Rect[][] middleSquareRectangles, backgroundRectangles, lowerTriangleRectangles;
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
@@ -109,12 +109,12 @@ class DrawCellHelpers {
 		canvas.drawRect(middleSquareRectangles[i][j], middleSquare);
 	}
 
-	void drawNumberedCell(Canvas canvas, Integer numberSurroundingBombs, int i, int j, int startX, int startY) {
+	void drawNumberedCell(Canvas canvas, Integer numberSurroundingMines, int i, int j, int startX, int startY) {
 		canvas.drawRect(backgroundRectangles[i][j], backgroundGreyForVisibleCells);
-		if (numberSurroundingBombs > 0) {
+		if (numberSurroundingMines > 0) {
 			final int xPos = startX + cellPixelLength / 2;
-			final int yPos = (int) (startY + cellPixelLength / 2 - ((numberColors[numberSurroundingBombs].descent() + numberColors[numberSurroundingBombs].ascent()) / 2));
-			canvas.drawText(numberSurroundingBombs.toString(), xPos, yPos, numberColors[numberSurroundingBombs]);
+			final int yPos = (int) (startY + cellPixelLength / 2 - ((numberColors[numberSurroundingMines].descent() + numberColors[numberSurroundingMines].ascent()) / 2));
+			canvas.drawText(numberSurroundingMines.toString(), xPos, yPos, numberColors[numberSurroundingMines]);
 		}
 	}
 
@@ -124,13 +124,13 @@ class DrawCellHelpers {
 		canvas.drawText(flagEmoji, xPos, yPos, redFlag);
 	}
 
-	void drawBomb(Canvas canvas, int startX, int startY) {
+	void drawMine(Canvas canvas, int startX, int startY) {
 		final int xPos = startX + cellPixelLength / 2;
 		final int yPos = (int) (startY + cellPixelLength / 2 - ((redFlag.descent() + redFlag.ascent()) / 2));
-		canvas.drawText(bombEmoji, xPos, yPos, redFlag);
+		canvas.drawText(mineEmoji, xPos, yPos, redFlag);
 	}
 
-	void drawLogicalBomb(Canvas canvas, int i, int j, Resources resources) {
+	void drawLogicalMine(Canvas canvas, int i, int j, Resources resources) {
 		final Drawable upperTriangleDrawable = resources.getDrawable(R.drawable.upper_triangle_red, null);
 		upperTriangleDrawable.setBounds(lowerTriangleRectangles[i][j]);
 		upperTriangleDrawable.draw(canvas);
@@ -156,7 +156,7 @@ class DrawCellHelpers {
 		canvas.drawText("X", xPos, yPos, blackX);
 	}
 
-	void drawBombProbability(Canvas canvas, int startX, int startY, BigFraction probability, Resources resources) throws Exception {
+	void drawMineProbability(Canvas canvas, int startX, int startY, BigFraction probability, Resources resources) throws Exception {
 		//fraction has too many digits, displaying double format
 		final int digitsNumerator = probability.getNumerator().toString().length();
 		final int digitsDenominator = probability.getDenominator().toString().length();

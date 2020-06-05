@@ -9,20 +9,20 @@ import java.util.Collections;
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class MinesweeperGame {
-	private final int numberOfRows, numberOfCols, numberOfBombs;
+	private final int numberOfRows, numberOfCols, numberOfMines;
 	private final Tile[][] grid;
 	private int numberOfFlags;
 	private boolean firstClick, isGameOver;
 
-	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfBombs) throws Exception {
+	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfMines) throws Exception {
 
-		if (tooManyBombsForZeroStart(numberOfRows, numberOfCols, numberOfBombs)) {
-			throw new Exception("too many bombs for zero start, UI doesn't allow for this to happen");
+		if (tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
+			throw new Exception("too many mines for zero start, UI doesn't allow for this to happen");
 		}
 
 		this.numberOfRows = numberOfRows;
 		this.numberOfCols = numberOfCols;
-		this.numberOfBombs = numberOfBombs;
+		this.numberOfMines = numberOfMines;
 		numberOfFlags = 0;
 		firstClick = true;
 		isGameOver = false;
@@ -34,8 +34,8 @@ public class MinesweeperGame {
 		}
 	}
 
-	public static boolean tooManyBombsForZeroStart(int numberOfRows, int numberOfCols, int numberOfBombs) {
-		return (numberOfBombs > numberOfRows * numberOfCols - 9);
+	public static boolean tooManyMinesForZeroStart(int numberOfRows, int numberOfCols, int numberOfMines) {
+		return (numberOfMines > numberOfRows * numberOfCols - 9);
 	}
 
 	public int getNumberOfRows() {
@@ -46,8 +46,8 @@ public class MinesweeperGame {
 		return numberOfCols;
 	}
 
-	public int getNumberOfBombs() {
-		return numberOfBombs;
+	public int getNumberOfMines() {
+		return numberOfMines;
 	}
 
 	public int getNumberOfFlags() {
@@ -61,17 +61,17 @@ public class MinesweeperGame {
 		return grid[row][col];
 	}
 
-	public void clickCell(int row, int col, boolean toggleBombs) throws Exception {
-		if (firstClick && !toggleBombs) {
+	public void clickCell(int row, int col, boolean toggleMines) throws Exception {
+		if (firstClick && !toggleMines) {
 			firstClick = false;
 			firstClickedCell(row, col);
 			return;
 		}
 		final Tile curr = getCell(row, col);
 		if (curr.getIsVisible()) {
-			checkToRevealAdjacentBombs(row, col);
+			checkToRevealAdjacentMines(row, col);
 		}
-		if (toggleBombs) {
+		if (toggleMines) {
 			if (!curr.getIsVisible()) {
 				if (curr.isFlagged()) {
 					--numberOfFlags;
@@ -82,7 +82,7 @@ public class MinesweeperGame {
 			}
 			return;
 		}
-		if (curr.isBomb && !curr.isFlagged()) {
+		if (curr.isMine && !curr.isFlagged()) {
 			isGameOver = true;
 			return;
 		}
@@ -92,7 +92,7 @@ public class MinesweeperGame {
 		revealCell(row, col);
 	}
 
-	private void checkToRevealAdjacentBombs(int row, int col) throws Exception {
+	private void checkToRevealAdjacentMines(int row, int col) throws Exception {
 		boolean revealSurroundingCells = true;
 		for (int dRow = -1; dRow <= 1; ++dRow) {
 			for (int dCol = -1; dCol <= 1; ++dCol) {
@@ -104,11 +104,11 @@ public class MinesweeperGame {
 					if (adj.getIsVisible()) {
 						continue;
 					}
-					if (adj.isFlagged() && !adj.isBomb) {
+					if (adj.isFlagged() && !adj.isMine) {
 						isGameOver = true;
 						return;
 					}
-					if (adj.isFlagged() != adj.isBomb) {
+					if (adj.isFlagged() != adj.isMine) {
 						revealSurroundingCells = false;
 					}
 				} catch (ArrayIndexOutOfBoundsException ignored) {
@@ -125,7 +125,7 @@ public class MinesweeperGame {
 				}
 				try {
 					Tile adj = getCell(row + dRow, col + dCol);
-					if (adj.isBomb) {
+					if (adj.isMine) {
 						continue;
 					}
 					revealCell(row + dRow, col + dCol);
@@ -154,32 +154,32 @@ public class MinesweeperGame {
 			throw new Exception("array list not working as expected");
 		}
 
-		if (spotsI.size() < numberOfBombs) {
-			throw new Exception("too many bombs to have a zero start");
+		if (spotsI.size() < numberOfMines) {
+			throw new Exception("too many mines to have a zero start");
 		}
 
 		Collections.shuffle(permutation);
 
-		for (int i = 0; i < numberOfBombs; ++i) {
-			int bombRow = spotsI.get(permutation.get(i));
-			int bombCol = spotsJ.get(permutation.get(i));
-			getCell(bombRow, bombCol).isBomb = true;
-			incrementSurroundingBombCounts(bombRow, bombCol);
+		for (int i = 0; i < numberOfMines; ++i) {
+			int mineRow = spotsI.get(permutation.get(i));
+			int mineCol = spotsJ.get(permutation.get(i));
+			getCell(mineRow, mineCol).isMine = true;
+			incrementSurroundingMineCounts(mineRow, mineCol);
 		}
-		if (getCell(row, col).isBomb) {
-			throw new Exception("starting click shouldn't be a bomb");
+		if (getCell(row, col).isMine) {
+			throw new Exception("starting click shouldn't be a mine");
 		}
 		revealCell(row, col);
 	}
 
-	private void incrementSurroundingBombCounts(int bombRow, int bombCol) {
+	private void incrementSurroundingMineCounts(int mineRow, int mineCol) {
 		for (int dRow = -1; dRow <= 1; ++dRow) {
 			for (int dCol = -1; dCol <= 1; ++dCol) {
 				if (dRow == 0 && dCol == 0) {
 					continue;
 				}
 				try {
-					getCell(bombRow + dRow, bombCol + dCol).numberSurroundingBombs++;
+					getCell(mineRow + dRow, mineCol + dCol).numberSurroundingMines++;
 				} catch (ArrayIndexOutOfBoundsException ignored) {
 				}
 			}
@@ -188,14 +188,14 @@ public class MinesweeperGame {
 
 	private void revealCell(int row, int col) throws Exception {
 		Tile curr = getCell(row, col);
-		if (curr.isBomb) {
-			throw new Exception("can't reveal a bomb");
+		if (curr.isMine) {
+			throw new Exception("can't reveal a mine");
 		}
 		if (curr.isFlagged()) {
 			--numberOfFlags;
 		}
 		curr.revealTile();
-		if (curr.numberSurroundingBombs > 0) {
+		if (curr.numberSurroundingMines > 0) {
 			return;
 		}
 		for (int dRow = -1; dRow <= 1; ++dRow) {
@@ -216,44 +216,44 @@ public class MinesweeperGame {
 		}
 	}
 
-	public void changeBombLocations(boolean[][] newBombLocations) throws Exception {
+	public void changeMineLocations(boolean[][] newMineLocations) throws Exception {
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				Tile curr = getCell(i, j);
 				if (!curr.getIsVisible()) {
 					continue;
 				}
-				int cntSurroundingBombs = 0;
+				int cntSurroundingMines = 0;
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, numberOfRows, numberOfCols)) {
-					if (newBombLocations[adj[0]][adj[1]]) {
-						++cntSurroundingBombs;
+					if (newMineLocations[adj[0]][adj[1]]) {
+						++cntSurroundingMines;
 					}
 				}
-				if (cntSurroundingBombs != getCell(i, j).numberSurroundingBombs) {
-					throw new Exception("bad bomb configuration: surrounding bomb count doesn't match");
+				if (cntSurroundingMines != getCell(i, j).numberSurroundingMines) {
+					throw new Exception("bad mine configuration: surrounding mine count doesn't match");
 				}
 			}
 		}
-		int numberOfNewBombs = 0;
+		int numberOfNewMines = 0;
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
-				getCell(i, j).numberSurroundingBombs = 0;
-				if (newBombLocations[i][j]) {
-					++numberOfNewBombs;
+				getCell(i, j).numberSurroundingMines = 0;
+				if (newMineLocations[i][j]) {
+					++numberOfNewMines;
 				}
 			}
 		}
-		if (numberOfNewBombs != numberOfBombs) {
-			throw new Exception("bad bomb configuration: wrong # of bombs");
+		if (numberOfNewMines != numberOfMines) {
+			throw new Exception("bad mine configuration: wrong # of mines");
 		}
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
-				if (newBombLocations[i][j] && getCell(i, j).getIsVisible()) {
-					throw new Exception("bad bomb configuration: bomb is in revealed cell");
+				if (newMineLocations[i][j] && getCell(i, j).getIsVisible()) {
+					throw new Exception("bad mine configuration: mine is in revealed cell");
 				}
-				getCell(i, j).isBomb = newBombLocations[i][j];
-				if (getCell(i, j).isBomb) {
-					incrementSurroundingBombCounts(i, j);
+				getCell(i, j).isMine = newMineLocations[i][j];
+				if (getCell(i, j).isMine) {
+					incrementSurroundingMineCounts(i, j);
 				}
 			}
 		}
@@ -264,15 +264,15 @@ public class MinesweeperGame {
 	}
 
 	public static class Tile extends VisibleTile {
-		private boolean isFlagged, isBomb;
+		private boolean isFlagged, isMine;
 
 		private Tile() {
-			isFlagged = isBomb = false;
-			numberSurroundingBombs = 0;
+			isFlagged = isMine = false;
+			numberSurroundingMines = 0;
 		}
 
-		public boolean isBomb() {
-			return isBomb;
+		public boolean isMine() {
+			return isMine;
 		}
 
 		public boolean isFlagged() {

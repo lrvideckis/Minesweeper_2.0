@@ -28,14 +28,14 @@
 			android:text="@string/flag_mode" />
 
 		<Switch
-			android:id="@+id/toggleBombs"
+			android:id="@+id/toggleMiness"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="3"
-			android:text="@string/show_bombs" />
+			android:text="@string/show_mines" />
 
 		<TextView
-			android:id="@+id/showNumberOfBombs"
+			android:id="@+id/showNumberOfMines"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="3" />
@@ -74,11 +74,11 @@
 			android:text="@string/backtracking" />
 
 		<Switch
-			android:id="@+id/toggleBombProbability"
+			android:id="@+id/toggleMineProbability"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="4"
-			android:text="@string/show_bomb_probability" />
+			android:text="@string/show_mine_probability" />
 
 		<TextView
 			android:id="@+id/numberOfIterationsTextView"

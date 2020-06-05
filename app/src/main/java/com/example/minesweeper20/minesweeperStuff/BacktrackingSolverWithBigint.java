@@ -19,48 +19,48 @@ import java.util.TreeSet;
 
 public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 	private final static int iterationLimit = 20000;
-	private final BigInteger[][] BIG_numberOfBombConfigs, BIG_numberOfTotalConfigs;
-	private final boolean[][] isBomb;
-	private final int[][] cntSurroundingBombs;
+	private final BigInteger[][] BIG_numberOfMineConfigs, BIG_numberOfTotalConfigs;
+	private final boolean[][] isMine;
+	private final int[][] cntSurroundingMines;
 	private final int[][][] lastUnvisitedSpot;
 	//one hash-map for each component:
-	//for each component: we map the number of bombs to a configuration of bombs for that component
-	private final ArrayList<TreeMap<Integer, MutableInt>> bombConfig;
+	//for each component: we map the number of mines to a configuration of mines for that component
+	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig;
 	private final ArrayList<TreeMap<Integer, BigInteger>> numberOfConfigsForCurrent;
 	private int rows, cols;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
-	private int numberOfBombs, numberOfIterations;
+	private int numberOfMines, numberOfIterations;
 
 	public BacktrackingSolverWithBigint(int rows, int cols) {
-		isBomb = new boolean[rows][cols];
-		cntSurroundingBombs = new int[rows][cols];
+		isMine = new boolean[rows][cols];
+		cntSurroundingMines = new int[rows][cols];
 		lastUnvisitedSpot = new int[rows][cols][2];
 
 
-		BIG_numberOfBombConfigs = new BigInteger[rows][cols];
+		BIG_numberOfMineConfigs = new BigInteger[rows][cols];
 		BIG_numberOfTotalConfigs = new BigInteger[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				BIG_numberOfBombConfigs[i][j] = BigInteger.ZERO;
+				BIG_numberOfMineConfigs[i][j] = BigInteger.ZERO;
 				BIG_numberOfTotalConfigs[i][j] = BigInteger.ZERO;
 			}
 		}
 
-		bombConfig = new ArrayList<>();
+		mineConfig = new ArrayList<>();
 		numberOfConfigsForCurrent = new ArrayList<>();
 	}
 
-	public BigInteger getNumberOfBombConfigs(int i, int j) {
-		return BIG_numberOfBombConfigs[i][j];
+	public BigInteger getNumberOfMineConfigs(int i, int j) {
+		return BIG_numberOfMineConfigs[i][j];
 	}
 
 	public BigInteger getNumberOfTotalConfigs(int i, int j) {
 		return BIG_numberOfTotalConfigs[i][j];
 	}
 
-	public void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception {
-		initialize(board, numberOfBombs);
+	public void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception {
+		initialize(board, numberOfMines);
 		components = GetConnectedComponents.getComponents(board);
 		initializeLastUnvisitedSpot(components);
 
@@ -71,7 +71,7 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {
-					BIG_numberOfBombConfigs[i][j] = BigInteger.valueOf(numberOfBombs);
+					BIG_numberOfMineConfigs[i][j] = BigInteger.valueOf(numberOfMines);
 					BIG_numberOfTotalConfigs[i][j] = BigInteger.valueOf(rows * cols);
 				}
 			}
@@ -80,52 +80,52 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
-			MutableInt currNumberOfBombs = new MutableInt(0);
-			solveComponent(0, i, currIterations, currNumberOfBombs, false);
+			MutableInt currNumberOfMines = new MutableInt(0);
+			solveComponent(0, i, currIterations, currNumberOfMines, false);
 		}
 
-		removeBombNumbersFromComponent();
-		MyBIGPair awayBombProbability = null;
+		removeMineNumbersFromComponent();
+		MyBIGPair awayMineProbability = null;
 		if (AwayCell.getNumberOfAwayCells(board) > 0) {
-			awayBombProbability = calculateAwayBombProbability();
+			awayMineProbability = calculateAwayMineProbability();
 		}
 		updateNumberOfConfigsForCurrent(AwayCell.getNumberOfAwayCells(board));
 
 		numberOfIterations = 0;
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
-			MutableInt currNumberOfBombs = new MutableInt(0);
-			solveComponent(0, i, currIterations, currNumberOfBombs, true);
+			MutableInt currNumberOfMines = new MutableInt(0);
+			solveComponent(0, i, currIterations, currNumberOfMines, true);
 			numberOfIterations += currIterations.get();
 		}
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				if (AwayCell.isAwayCell(board, i, j, rows, cols)) {
-					if (awayBombProbability == null) {
+					if (awayMineProbability == null) {
 						throw new Exception("away probability is null, but this was checked above");
 					}
-					BIG_numberOfBombConfigs[i][j] = new BigInteger(awayBombProbability.first.toString());
-					BIG_numberOfTotalConfigs[i][j] = new BigInteger(awayBombProbability.second.toString());
+					BIG_numberOfMineConfigs[i][j] = new BigInteger(awayMineProbability.first.toString());
+					BIG_numberOfTotalConfigs[i][j] = new BigInteger(awayMineProbability.second.toString());
 				}
 				VisibleTile curr = board[i][j];
 				if (curr.getIsVisible()) {
 					continue;
 				}
 				if (BIG_numberOfTotalConfigs[i][j].equals(BigInteger.ZERO)) {
-					throw new NoSolutionFoundException("There should be at least one bomb configuration for non-visible cells");
+					throw new NoSolutionFoundException("There should be at least one mine configuration for non-visible cells");
 				}
-				if (BIG_numberOfBombConfigs[i][j].equals(BigInteger.ZERO)) {
+				if (BIG_numberOfMineConfigs[i][j].equals(BigInteger.ZERO)) {
 					curr.isLogicalFree = true;
-				} else if (BIG_numberOfBombConfigs[i][j].equals(BIG_numberOfTotalConfigs[i][j])) {
-					curr.isLogicalBomb = true;
+				} else if (BIG_numberOfMineConfigs[i][j].equals(BIG_numberOfTotalConfigs[i][j])) {
+					curr.isLogicalMine = true;
 				}
 			}
 		}
 	}
 
 	@Override
-	public boolean[][] getBombConfiguration(VisibleTile[][] board, int numberOfBombs, int spotI, int spotJ, boolean wantBomb) throws Exception {
+	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
 		throw new Exception("not implemented yet");
 	}
 
@@ -136,25 +136,25 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 
 	private void updateNumberOfConfigsForCurrent(int numberOfAwayCells) throws Exception {
 		for (int i = 0; i < components.size(); ++i) {
-			TreeMap<Integer, MutableInt> saveBombConfigs = new TreeMap<>(bombConfig.get(i));
-			for (TreeMap.Entry<Integer, MutableInt> entry : saveBombConfigs.entrySet()) {
+			TreeMap<Integer, MutableInt> saveMineConfigs = new TreeMap<>(mineConfig.get(i));
+			for (TreeMap.Entry<Integer, MutableInt> entry : saveMineConfigs.entrySet()) {
 				BigInteger totalConfigs = new BigInteger("0");
-				bombConfig.get(i).clear();
-				bombConfig.get(i).put(entry.getKey(), new MutableInt(1));
-				TreeMap<Integer, BigInteger> configsPerBombCount = calculateNumberOfBombConfigs();
-				for (TreeMap.Entry<Integer, BigInteger> total : configsPerBombCount.entrySet()) {
-					BigInteger currConfigs = BinomialCoefficientBIG(numberOfAwayCells, numberOfBombs - total.getKey());
+				mineConfig.get(i).clear();
+				mineConfig.get(i).put(entry.getKey(), new MutableInt(1));
+				TreeMap<Integer, BigInteger> configsPerMineCount = calculateNumberOfMineConfigs();
+				for (TreeMap.Entry<Integer, BigInteger> total : configsPerMineCount.entrySet()) {
+					BigInteger currConfigs = BinomialCoefficientBIG(numberOfAwayCells, numberOfMines - total.getKey());
 					currConfigs = currConfigs.multiply(total.getValue());
 					totalConfigs = totalConfigs.add(currConfigs);
 				}
 				numberOfConfigsForCurrent.get(i).put(entry.getKey(), totalConfigs);
 			}
-			bombConfig.get(i).clear();
-			bombConfig.set(i, saveBombConfigs);
+			mineConfig.get(i).clear();
+			mineConfig.set(i, saveMineConfigs);
 		}
 	}
 
-	private void removeBombNumbersFromComponent() throws Exception {
+	private void removeMineNumbersFromComponent() throws Exception {
 		ArrayList<TreeSet<Integer>> dpTable = new ArrayList<>(components.size() + 1);
 		for (int i = 0; i <= components.size(); ++i) {
 			dpTable.add(new TreeSet<Integer>());
@@ -162,7 +162,7 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 
 		dpTable.get(0).add(0);
 		for (int i = 0; i < components.size(); ++i) {
-			for (int entry : bombConfig.get(i).keySet()) {
+			for (int entry : mineConfig.get(i).keySet()) {
 				for (int val : dpTable.get(i)) {
 					dpTable.get(i + 1).add(val + entry);
 				}
@@ -170,9 +170,9 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		}
 		TreeSet<Integer> validSpots = new TreeSet<>();
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
-		for (int bombCnt : dpTable.get(components.size())) {
-			if (bombCnt <= numberOfBombs && numberOfBombs <= bombCnt + numberOfAwayCells) {
-				validSpots.add(bombCnt);
+		for (int mineCnt : dpTable.get(components.size())) {
+			if (mineCnt <= numberOfMines && numberOfMines <= mineCnt + numberOfAwayCells) {
+				validSpots.add(mineCnt);
 			}
 		}
 		dpTable.get(components.size()).clear();
@@ -180,7 +180,7 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 
 		for (int i = components.size() - 1; i >= 0; --i) {
 			TreeSet<Integer> spotsToRemove = new TreeSet<>();
-			for (int entry : bombConfig.get(i).keySet()) {
+			for (int entry : mineConfig.get(i).keySet()) {
 				boolean found = false;
 				for (int val : dpTable.get(i)) {
 					if (dpTable.get(i + 1).contains(val + entry)) {
@@ -193,13 +193,13 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 				}
 			}
 			for (int val : spotsToRemove) {
-				bombConfig.get(i).remove(val);
+				mineConfig.get(i).remove(val);
 			}
 
 			spotsToRemove.clear();
 			for (int val : dpTable.get(i)) {
 				boolean found = false;
-				for (int entry : bombConfig.get(i).keySet()) {
+				for (int entry : mineConfig.get(i).keySet()) {
 					if (dpTable.get(i + 1).contains(val + entry)) {
 						found = true;
 						break;
@@ -215,42 +215,42 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		}
 	}
 
-	private MyBIGPair calculateAwayBombProbability() throws Exception {
+	private MyBIGPair calculateAwayMineProbability() throws Exception {
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 
-		TreeMap<Integer, BigInteger> configsPerBombCount = calculateNumberOfBombConfigs();
+		TreeMap<Integer, BigInteger> configsPerMineCount = calculateNumberOfMineConfigs();
 		BigInteger totalNumberOfConfigs = BigInteger.ZERO;
-		for (TreeMap.Entry<Integer, BigInteger> val : configsPerBombCount.entrySet()) {
-			BigInteger newConfigs = BinomialCoefficientBIG(numberOfAwayCells, numberOfBombs - val.getKey());
+		for (TreeMap.Entry<Integer, BigInteger> val : configsPerMineCount.entrySet()) {
+			BigInteger newConfigs = BinomialCoefficientBIG(numberOfAwayCells, numberOfMines - val.getKey());
 			newConfigs = newConfigs.multiply(val.getValue());
 			totalNumberOfConfigs = totalNumberOfConfigs.add(newConfigs);
 		}
-		MyBIGPair awayBombProbability = new MyBIGPair(BigInteger.ZERO);
-		for (TreeMap.Entry<Integer, BigInteger> entry : configsPerBombCount.entrySet()) {
-			final int currNumberOfBombs = entry.getKey();
-			if (numberOfBombs - currNumberOfBombs < 0 || numberOfBombs - currNumberOfBombs > numberOfAwayCells) {
-				throw new Exception("number of remaining bombs is more than number of away cells (or negative)");
+		MyBIGPair awayMineProbability = new MyBIGPair(BigInteger.ZERO);
+		for (TreeMap.Entry<Integer, BigInteger> entry : configsPerMineCount.entrySet()) {
+			final int currNumberOfMines = entry.getKey();
+			if (numberOfMines - currNumberOfMines < 0 || numberOfMines - currNumberOfMines > numberOfAwayCells) {
+				throw new Exception("number of remaining mines is more than number of away cells (or negative)");
 			}
-			MyBIGPair numberOfConfigs = new MyBIGPair(BinomialCoefficientBIG(numberOfAwayCells, numberOfBombs - entry.getKey()));
+			MyBIGPair numberOfConfigs = new MyBIGPair(BinomialCoefficientBIG(numberOfAwayCells, numberOfMines - entry.getKey()));
 			numberOfConfigs.first = numberOfConfigs.first.multiply(entry.getValue());
 			numberOfConfigs.second = numberOfConfigs.second.multiply(totalNumberOfConfigs);
 
-			numberOfConfigs.first = numberOfConfigs.first.multiply(BigInteger.valueOf(numberOfBombs - currNumberOfBombs));
+			numberOfConfigs.first = numberOfConfigs.first.multiply(BigInteger.valueOf(numberOfMines - currNumberOfMines));
 			numberOfConfigs.second = numberOfConfigs.second.multiply(BigInteger.valueOf(numberOfAwayCells));
 
-			awayBombProbability.addWith(numberOfConfigs);
+			awayMineProbability.addWith(numberOfConfigs);
 		}
-		return awayBombProbability;
+		return awayMineProbability;
 	}
 
-	private TreeMap<Integer, BigInteger> calculateNumberOfBombConfigs() {
+	private TreeMap<Integer, BigInteger> calculateNumberOfMineConfigs() {
 		TreeMap<Integer, BigInteger> prevWays = new TreeMap<>(), newWays = new TreeMap<>();
 		prevWays.put(0, BigInteger.ONE);
 		for (int i = 0; i < components.size(); ++i) {
-			for (TreeMap.Entry<Integer, MutableInt> bombVal : bombConfig.get(i).entrySet()) {
+			for (TreeMap.Entry<Integer, MutableInt> mineVal : mineConfig.get(i).entrySet()) {
 				for (TreeMap.Entry<Integer, BigInteger> waysVal : prevWays.entrySet()) {
-					final int nextKey = bombVal.getKey() + waysVal.getKey();
-					BigInteger nextValueDiff = BigInteger.valueOf(bombVal.getValue().get());
+					final int nextKey = mineVal.getKey() + waysVal.getKey();
+					BigInteger nextValueDiff = BigInteger.valueOf(mineVal.getValue().get());
 					nextValueDiff = nextValueDiff.multiply(waysVal.getValue());
 
 					BigInteger nextVal = newWays.get(nextKey);
@@ -268,25 +268,25 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		return prevWays;
 	}
 
-	private void initialize(VisibleTile[][] board, int numberOfBombs) throws Exception {
+	private void initialize(VisibleTile[][] board, int numberOfMines) throws Exception {
 		this.board = board;
-		this.numberOfBombs = numberOfBombs;
+		this.numberOfMines = numberOfMines;
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
 		cols = dimensions.second;
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				isBomb[i][j] = false;
-				cntSurroundingBombs[i][j] = 0;
+				isMine[i][j] = false;
+				cntSurroundingMines[i][j] = 0;
 			}
 		}
 	}
 
 	private void initializeLastUnvisitedSpot(ArrayList<ArrayList<Pair<Integer, Integer>>> components) {
-		bombConfig.clear();
+		mineConfig.clear();
 		numberOfConfigsForCurrent.clear();
 		for (ArrayList<Pair<Integer, Integer>> component : components) {
-			bombConfig.add(new TreeMap<Integer, MutableInt>());
+			mineConfig.add(new TreeMap<Integer, MutableInt>());
 			numberOfConfigsForCurrent.add(new TreeMap<Integer, BigInteger>());
 			for (Pair<Integer, Integer> spot : component) {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(spot.first, spot.second, rows, cols)) {
@@ -300,13 +300,13 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		}
 	}
 
-	private void solveComponent(int pos, int componentPos, MutableInt currIterations, MutableInt currNumberOfBombs, boolean isSecondPass) throws Exception {
+	private void solveComponent(int pos, int componentPos, MutableInt currIterations, MutableInt currNumberOfMines, boolean isSecondPass) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
 		if (pos == component.size()) {
 			if (isSecondPass) {
-				checkSolutionSecondPass(componentPos, currNumberOfBombs.get());
+				checkSolutionSecondPass(componentPos, currNumberOfMines.get());
 			} else {
-				checkSolutionFirstPass(componentPos, currNumberOfBombs.get());
+				checkSolutionFirstPass(componentPos, currNumberOfMines.get());
 			}
 			return;
 		}
@@ -317,30 +317,30 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		final int i = component.get(pos).first;
 		final int j = component.get(pos).second;
 
-		//try bomb
-		isBomb[i][j] = true;
+		//try mine
+		isMine[i][j] = true;
 		if (checkSurroundingConditions(i, j, component.get(pos), 1)) {
-			currNumberOfBombs.addWith(1);
-			updateSurroundingBombCnt(i, j, 1);
-			solveComponent(pos + 1, componentPos, currIterations, currNumberOfBombs, isSecondPass);
-			updateSurroundingBombCnt(i, j, -1);
-			currNumberOfBombs.addWith(-1);
+			currNumberOfMines.addWith(1);
+			updateSurroundingMineCnt(i, j, 1);
+			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines, isSecondPass);
+			updateSurroundingMineCnt(i, j, -1);
+			currNumberOfMines.addWith(-1);
 		}
 
 		//try free
-		isBomb[i][j] = false;
+		isMine[i][j] = false;
 		if (checkSurroundingConditions(i, j, component.get(pos), 0)) {
-			solveComponent(pos + 1, componentPos, currIterations, currNumberOfBombs, isSecondPass);
+			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines, isSecondPass);
 		}
 	}
 
-	private void updateSurroundingBombCnt(int i, int j, int delta) throws Exception {
+	private void updateSurroundingMineCnt(int i, int j, int delta) throws Exception {
 		boolean foundAdjVis = false;
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
 			if (board[adjI][adjJ].isVisible) {
 				foundAdjVis = true;
-				cntSurroundingBombs[adjI][adjJ] += delta;
+				cntSurroundingMines[adjI][adjJ] += delta;
 			}
 		}
 		if (!foundAdjVis) {
@@ -348,21 +348,21 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		}
 	}
 
-	private boolean checkSurroundingConditions(int i, int j, Pair<Integer, Integer> currSpot, int arePlacingABomb) {
+	private boolean checkSurroundingConditions(int i, int j, Pair<Integer, Integer> currSpot, int arePlacingAMine) {
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
 			VisibleTile adjTile = board[adjI][adjJ];
 			if (!adjTile.isVisible) {
 				continue;
 			}
-			final int currBacktrackingCount = cntSurroundingBombs[adjI][adjJ];
-			if (currBacktrackingCount + arePlacingABomb > adjTile.numberSurroundingBombs) {
+			final int currBacktrackingCount = cntSurroundingMines[adjI][adjJ];
+			if (currBacktrackingCount + arePlacingAMine > adjTile.numberSurroundingMines) {
 				return false;
 			}
 			if (
 					lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
 							lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
-							currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs
+							currBacktrackingCount + arePlacingAMine != adjTile.numberSurroundingMines
 			) {
 				return false;
 			}
@@ -370,40 +370,40 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		return true;
 	}
 
-	private void checkSolutionFirstPass(int componentPos, int currNumberOfBombs) throws Exception {
+	private void checkSolutionFirstPass(int componentPos, int currNumberOfMines) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
-		checkPositionValidity(component, currNumberOfBombs);
+		checkPositionValidity(component, currNumberOfMines);
 
-		MutableInt count = bombConfig.get(componentPos).get(currNumberOfBombs);
+		MutableInt count = mineConfig.get(componentPos).get(currNumberOfMines);
 		if (count == null) {
-			bombConfig.get(componentPos).put(currNumberOfBombs, new MutableInt(1));
+			mineConfig.get(componentPos).put(currNumberOfMines, new MutableInt(1));
 		} else {
 			count.addWith(1);
 		}
 	}
 
-	private void checkSolutionSecondPass(int componentPos, int currNumberOfBombs) throws Exception {
+	private void checkSolutionSecondPass(int componentPos, int currNumberOfMines) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
-		checkPositionValidity(component, currNumberOfBombs);
+		checkPositionValidity(component, currNumberOfMines);
 
-		if (!bombConfig.get(componentPos).containsKey(currNumberOfBombs)) {
+		if (!mineConfig.get(componentPos).containsKey(currNumberOfMines)) {
 			return;
 		}
 		for (int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
-			BigInteger currConfigs = numberOfConfigsForCurrent.get(componentPos).get(currNumberOfBombs);
+			BigInteger currConfigs = numberOfConfigsForCurrent.get(componentPos).get(currNumberOfMines);
 			if (currConfigs == null) {
 				throw new Exception("number of configs value is null");
 			}
-			if (isBomb[i][j]) {
-				BIG_numberOfBombConfigs[i][j] = BIG_numberOfBombConfigs[i][j].add(currConfigs);
+			if (isMine[i][j]) {
+				BIG_numberOfMineConfigs[i][j] = BIG_numberOfMineConfigs[i][j].add(currConfigs);
 			}
 			BIG_numberOfTotalConfigs[i][j] = BIG_numberOfTotalConfigs[i][j].add(currConfigs);
 		}
 	}
 
-	private void checkPositionValidity(ArrayList<Pair<Integer, Integer>> component, int currNumberOfBombs) throws Exception {
+	private void checkPositionValidity(ArrayList<Pair<Integer, Integer>> component, int currNumberOfMines) throws Exception {
 		for (int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
@@ -413,21 +413,21 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 				if (!adjTile.isVisible) {
 					continue;
 				}
-				if (cntSurroundingBombs[adjI][adjJ] != adjTile.numberSurroundingBombs) {
-					throw new Exception("found bad solution - # bombs doesn't match, but this should be pruned out");
+				if (cntSurroundingMines[adjI][adjJ] != adjTile.numberSurroundingMines) {
+					throw new Exception("found bad solution - # mines doesn't match, but this should be pruned out");
 				}
 			}
 		}
-		int prevNumberOfBombs = 0;
+		int prevNumberOfMines = 0;
 		for (int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
-			if (isBomb[i][j]) {
-				++prevNumberOfBombs;
+			if (isMine[i][j]) {
+				++prevNumberOfMines;
 			}
 		}
-		if (prevNumberOfBombs != currNumberOfBombs) {
-			throw new Exception("number of bombs doesn't match");
+		if (prevNumberOfMines != currNumberOfMines) {
+			throw new Exception("number of mines doesn't match");
 		}
 	}
 

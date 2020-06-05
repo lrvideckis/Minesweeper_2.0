@@ -15,26 +15,26 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 
 	private final static int iterationLimit = 100000;
 	private final int[][][] lastUnvisitedSpot;
-	private final boolean[][] isBomb;
-	private final int[][] cntSurroundingBombs;
+	private final boolean[][] isMine;
+	private final int[][] cntSurroundingMines;
 	private int rows, cols, numberOfIterations;
 	private VisibleTile[][] board;
-	private int numberOfBombs;
+	private int numberOfMines;
 
 	public SlowBacktrackingSolver(int rows, int cols) {
-		isBomb = new boolean[rows][cols];
-		cntSurroundingBombs = new int[rows][cols];
+		isMine = new boolean[rows][cols];
+		cntSurroundingMines = new int[rows][cols];
 		lastUnvisitedSpot = new int[rows][cols][2];
 	}
 
 	@Override
-	public void solvePosition(VisibleTile[][] board, int numberOfBombs) throws Exception {
-		initialize(board, numberOfBombs);
+	public void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception {
+		initialize(board, numberOfMines);
 
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {
-					board[i][j].numberOfBombConfigs.setValues(numberOfBombs, 1);
+					board[i][j].numberOfMineConfigs.setValues(numberOfMines, 1);
 					board[i][j].numberOfTotalConfigs.setValues(rows * cols, 1);
 				}
 			}
@@ -52,8 +52,8 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		initializeLastUnvisitedSpot(component);
 
 		MutableInt currIterations = new MutableInt(0);
-		MutableInt currNumberOfBombs = new MutableInt(0);
-		solveComponent(0, component, currIterations, currNumberOfBombs);
+		MutableInt currNumberOfMines = new MutableInt(0);
+		solveComponent(0, component, currIterations, currNumberOfMines);
 		numberOfIterations = currIterations.get();
 
 		for (int i = 0; i < rows; ++i) {
@@ -63,12 +63,12 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 					continue;
 				}
 				if (curr.numberOfTotalConfigs.equals(0)) {
-					throw new NoSolutionFoundException("There should be at least one bomb configuration for non-visible cells");
+					throw new NoSolutionFoundException("There should be at least one mine configuration for non-visible cells");
 				}
-				if (curr.numberOfBombConfigs.equals(0)) {
+				if (curr.numberOfMineConfigs.equals(0)) {
 					curr.isLogicalFree = true;
-				} else if (curr.numberOfBombConfigs.equals(curr.numberOfTotalConfigs)) {
-					curr.isLogicalBomb = true;
+				} else if (curr.numberOfMineConfigs.equals(curr.numberOfTotalConfigs)) {
+					curr.isLogicalMine = true;
 				}
 			}
 		}
@@ -86,7 +86,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	public boolean[][] getBombConfiguration(VisibleTile[][] board, int numberOfBombs, int spotI, int spotJ, boolean wantBomb) throws Exception {
+	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
 		throw new Exception("to make warning go away");
 	}
 
@@ -95,23 +95,23 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		return numberOfIterations;
 	}
 
-	private void initialize(VisibleTile[][] board, int numberOfBombs) throws Exception {
+	private void initialize(VisibleTile[][] board, int numberOfMines) throws Exception {
 		this.board = board;
-		this.numberOfBombs = numberOfBombs;
+		this.numberOfMines = numberOfMines;
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
 		cols = dimensions.second;
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				isBomb[i][j] = false;
-				cntSurroundingBombs[i][j] = 0;
+				isMine[i][j] = false;
+				cntSurroundingMines[i][j] = 0;
 			}
 		}
 	}
 
-	private void solveComponent(int pos, ArrayList<Pair<Integer, Integer>> component, MutableInt currIterations, MutableInt currNumberOfBombs) throws Exception {
+	private void solveComponent(int pos, ArrayList<Pair<Integer, Integer>> component, MutableInt currIterations, MutableInt currNumberOfMines) throws Exception {
 		if (pos == component.size()) {
-			checkSolution(currNumberOfBombs.get());
+			checkSolution(currNumberOfMines.get());
 			return;
 		}
 		currIterations.addWith(1);
@@ -121,61 +121,61 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 		final int i = component.get(pos).first;
 		final int j = component.get(pos).second;
 
-		//try bomb
-		//isBomb.get(i).set(j, true);
-		isBomb[i][j] = true;
+		//try mine
+		//isMine.get(i).set(j, true);
+		isMine[i][j] = true;
 		if (checkSurroundingConditions(i, j, component.get(pos), 1)) {
-			currNumberOfBombs.addWith(1);
-			updateSurroundingBombCnt(i, j, 1);
-			solveComponent(pos + 1, component, currIterations, currNumberOfBombs);
-			updateSurroundingBombCnt(i, j, -1);
-			currNumberOfBombs.addWith(-1);
+			currNumberOfMines.addWith(1);
+			updateSurroundingMineCnt(i, j, 1);
+			solveComponent(pos + 1, component, currIterations, currNumberOfMines);
+			updateSurroundingMineCnt(i, j, -1);
+			currNumberOfMines.addWith(-1);
 		}
 
 		//try free
-		isBomb[i][j] = false;
+		isMine[i][j] = false;
 		if (checkSurroundingConditions(i, j, component.get(pos), 0)) {
-			solveComponent(pos + 1, component, currIterations, currNumberOfBombs);
+			solveComponent(pos + 1, component, currIterations, currNumberOfMines);
 		}
 	}
 
-	private void updateSurroundingBombCnt(int i, int j, int delta) {
+	private void updateSurroundingMineCnt(int i, int j, int delta) {
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
 			if (board[adjI][adjJ].isVisible) {
-				final int cnt = cntSurroundingBombs[adjI][adjJ];
-				cntSurroundingBombs[adjI][adjJ] = cnt + delta;
+				final int cnt = cntSurroundingMines[adjI][adjJ];
+				cntSurroundingMines[adjI][adjJ] = cnt + delta;
 			}
 		}
 	}
 
-	private boolean checkSurroundingConditions(int i, int j, Pair<Integer, Integer> currSpot, int arePlacingABomb) {
+	private boolean checkSurroundingConditions(int i, int j, Pair<Integer, Integer> currSpot, int arePlacingAMine) {
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
 			VisibleTile adjTile = board[adjI][adjJ];
 			if (!adjTile.isVisible) {
 				continue;
 			}
-			final int currBacktrackingCount = cntSurroundingBombs[adjI][adjJ];
-			if (currBacktrackingCount + arePlacingABomb > adjTile.numberSurroundingBombs) {
+			final int currBacktrackingCount = cntSurroundingMines[adjI][adjJ];
+			if (currBacktrackingCount + arePlacingAMine > adjTile.numberSurroundingMines) {
 				return false;
 			}
 			if (
 					lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
 							lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
-							currBacktrackingCount + arePlacingABomb != adjTile.numberSurroundingBombs) {
+							currBacktrackingCount + arePlacingAMine != adjTile.numberSurroundingMines) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private void checkSolution(int currNumberOfBombs) throws Exception {
-		if (!checkPositionValidity(currNumberOfBombs)) {
+	private void checkSolution(int currNumberOfMines) throws Exception {
+		if (!checkPositionValidity(currNumberOfMines)) {
 			return;
 		}
 
-		if (currNumberOfBombs != numberOfBombs) {
+		if (currNumberOfMines != numberOfMines) {
 			return;
 		}
 		for (int i = 0; i < rows; ++i) {
@@ -183,8 +183,8 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 				if (board[i][j].getIsVisible()) {
 					continue;
 				}
-				if (isBomb[i][j]) {
-					board[i][j].numberOfBombConfigs.addWith(1);
+				if (isMine[i][j]) {
+					board[i][j].numberOfMineConfigs.addWith(1);
 				}
 				board[i][j].numberOfTotalConfigs.addWith(1);
 			}
@@ -192,7 +192,7 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 	}
 
 	//returns true if valid
-	private boolean checkPositionValidity(int currNumberOfBombs) throws Exception {
+	private boolean checkPositionValidity(int currNumberOfMines) throws Exception {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
@@ -201,22 +201,22 @@ public class SlowBacktrackingSolver implements MinesweeperSolver {
 					if (!adjTile.isVisible) {
 						continue;
 					}
-					if (cntSurroundingBombs[adjI][adjJ] != adjTile.numberSurroundingBombs) {
+					if (cntSurroundingMines[adjI][adjJ] != adjTile.numberSurroundingMines) {
 						return false;
 					}
 				}
 			}
 		}
-		int prevNumberOfBombs = 0;
+		int prevNumberOfMines = 0;
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (isBomb[i][j]) {
-					++prevNumberOfBombs;
+				if (isMine[i][j]) {
+					++prevNumberOfMines;
 				}
 			}
 		}
-		if (prevNumberOfBombs != currNumberOfBombs) {
-			throw new Exception("number of bombs doesn't match");
+		if (prevNumberOfMines != currNumberOfMines) {
+			throw new Exception("number of mines doesn't match");
 		}
 
 		return true;

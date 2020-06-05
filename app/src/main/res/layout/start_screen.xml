@@ -92,7 +92,7 @@
 		android:layout_height="wrap_content">
 
 		<TextView
-			android:id="@+id/bombsText"
+			android:id="@+id/mineText"
 			android:layout_width="70dp"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
@@ -100,25 +100,25 @@
 			tools:ignore="HardcodedText" />
 
 		<SeekBar
-			android:id="@+id/bombsInput"
+			android:id="@+id/mineInput"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
-			android:layout_toStartOf="@id/bombsDecrement"
-			android:layout_toEndOf="@id/bombsText"
+			android:layout_toStartOf="@id/minesDecrement"
+			android:layout_toEndOf="@id/mineText"
 			android:max="7"
 			android:min="0"
 			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 		<Button
-			android:id="@+id/bombsDecrement"
+			android:id="@+id/minesDecrement"
 			android:layout_width="48dp"
 			android:layout_height="48dp"
-			android:layout_toStartOf="@id/bombsIncrement"
+			android:layout_toStartOf="@id/minesIncrement"
 			android:text="@string/decrement" />
 
 		<Button
-			android:id="@+id/bombsIncrement"
+			android:id="@+id/minesIncrement"
 			android:layout_width="48dp"
 			android:layout_height="48dp"
 			android:layout_alignParentEnd="true"

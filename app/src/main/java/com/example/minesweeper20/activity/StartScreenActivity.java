@@ -22,13 +22,12 @@ import com.example.minesweeper20.miscHelpers.Test;
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
 //TODO: make sure back button on bottom nav bar works
 //TODO: when you lose, you can't click the back button, you have to click the okay popup button - fix this
-//TODO: Backtracking popup shows twice when clicking bomb probability
+//TODO: Backtracking popup shows twice when clicking mine probability
 //TODO: Win screen
-//TODO: Hard mode: always lose if there exists a possible bomb combination s.t. the move loses
-//TODO: Easy mode: always keep playing if there is a combination of bombs St the move doesn't lose
+//TODO: Hard mode: always lose if there exists a possible mine combination s.t. the move loses
+//TODO: Easy mode: always keep playing if there is a combination of mines St the move doesn't lose
 //TODO: Make minesweeper endless: always force >= 1 visible tile on the screen
 //TODO: Recommend the guess which will reveal the greatest amount of further stuff
-//TODO: change all bomb variables to be named mine instead
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
@@ -36,13 +35,13 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			MY_PREFERENCES = "MyPrefs",
 			NUMBER_OF_ROWS = "numRows",
 			NUMBER_OF_COLS = "numCols",
-			NUMBER_OF_BOMBS = "numBombs";
+			NUMBER_OF_MINES = "numMines";
 	private SharedPreferences sharedPreferences;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		Test.testPreviouslyFailedBoards();
-		Test.performTestsForBombProbability(20);
+		Test.performTestsForMineProbability(20);
 		Test.performTestsForFractionOverflow(20);
 		Test.performTestsForGaussSolver(20);
 		Test.performTestsMultipleRunsOfSameBoard(10);
@@ -56,14 +55,14 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		Button rowsIncrement = findViewById(R.id.rowsIncrement);
 		Button colsDecrement = findViewById(R.id.colsDecrement);
 		Button colsIncrement = findViewById(R.id.colsIncrement);
-		Button bombsDecrement = findViewById(R.id.bombsDecrement);
-		Button bombsIncrement = findViewById(R.id.bombsIncrement);
+		Button minesDecrement = findViewById(R.id.minesDecrement);
+		Button minesIncrement = findViewById(R.id.minesIncrement);
 		rowsDecrement.setOnClickListener(this);
 		rowsIncrement.setOnClickListener(this);
 		colsDecrement.setOnClickListener(this);
 		colsIncrement.setOnClickListener(this);
-		bombsDecrement.setOnClickListener(this);
-		bombsIncrement.setOnClickListener(this);
+		minesDecrement.setOnClickListener(this);
+		minesIncrement.setOnClickListener(this);
 
 
 		Button okButton = findViewById(R.id.startNewGameButton);
@@ -73,20 +72,20 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			public void onClick(View view) {
 				final SeekBar rowInput = findViewById(R.id.rowsInput);
 				final SeekBar colInput = findViewById(R.id.colsInput);
-				final SeekBar bombInput = findViewById(R.id.bombsInput);
+				final SeekBar mineInput = findViewById(R.id.mineInput);
 
 				final int numberOfRows = rowInput.getProgress();
 				final int numberOfCols = colInput.getProgress();
-				final int numberOfBombs = bombInput.getProgress();
+				final int numberOfMines = mineInput.getProgress();
 
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putInt(NUMBER_OF_ROWS, numberOfRows);
 				editor.putInt(NUMBER_OF_COLS, numberOfCols);
-				editor.putInt(NUMBER_OF_BOMBS, numberOfBombs);
+				editor.putInt(NUMBER_OF_MINES, numberOfMines);
 				editor.apply();
 
-				if (MinesweeperGame.tooManyBombsForZeroStart(numberOfRows, numberOfCols, numberOfBombs)) {
-					System.out.println("too many bombs for zero start, UI doesn't allow for this to happen");
+				if (MinesweeperGame.tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
+					System.out.println("too many mines for zero start, UI doesn't allow for this to happen");
 					return;
 				}
 
@@ -96,26 +95,26 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
 				intent.putExtra("numberOfRows", numberOfRows);
 				intent.putExtra("numberOfCols", numberOfCols);
-				intent.putExtra("numberOfBombs", numberOfBombs);
+				intent.putExtra("numberOfMines", numberOfMines);
 				intent.putExtra("gameMode", selectedGameType);
 				startActivity(intent);
 			}
 		});
 		final SeekBar rowsInput = findViewById(R.id.rowsInput);
 		final SeekBar colsInput = findViewById(R.id.colsInput);
-		final SeekBar bombsInput = findViewById(R.id.bombsInput);
+		final SeekBar minesInput = findViewById(R.id.mineInput);
 
 		rowsInput.setOnSeekBarChangeListener(this);
 		colsInput.setOnSeekBarChangeListener(this);
-		bombsInput.setOnSeekBarChangeListener(this);
+		minesInput.setOnSeekBarChangeListener(this);
 
 		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 9);
 		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 9);
-		final int previousBombs = sharedPreferences.getInt(NUMBER_OF_BOMBS, 10);
+		final int previousMines = sharedPreferences.getInt(NUMBER_OF_MINES, 10);
 
 		rowsInput.setProgress(previousRows);
 		colsInput.setProgress(previousCols);
-		bombsInput.setProgress(previousBombs);
+		minesInput.setProgress(previousMines);
 
 
 		Button beginner = findViewById(R.id.beginner);
@@ -124,7 +123,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			public void onClick(View view) {
 				rowsInput.setProgress(9);
 				colsInput.setProgress(9);
-				bombsInput.setProgress(10);
+				minesInput.setProgress(10);
 			}
 		});
 
@@ -134,7 +133,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			public void onClick(View view) {
 				rowsInput.setProgress(14);
 				colsInput.setProgress(16);
-				bombsInput.setProgress(40);
+				minesInput.setProgress(40);
 			}
 		});
 
@@ -144,7 +143,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			public void onClick(View view) {
 				rowsInput.setProgress(16);
 				colsInput.setProgress(30);
-				bombsInput.setProgress(99);
+				minesInput.setProgress(99);
 			}
 		});
 	}
@@ -158,8 +157,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			case R.id.colsInput:
 				setColsText(seekBar.getProgress());
 				break;
-			case R.id.bombsInput:
-				setBombsText(seekBar.getProgress());
+			case R.id.mineInput:
+				setMinesText(seekBar.getProgress());
 				break;
 		}
 	}
@@ -168,27 +167,27 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		TextView rowsText = findViewById(R.id.rowsText);
 		String text = "Height: " + val;
 		rowsText.setText(text);
-		setMaxBombSeekBar();
+		setMaxMineSeekBar();
 	}
 
 	private void setColsText(int val) {
 		TextView colsText = findViewById(R.id.colsText);
 		String text = "Width: " + val;
 		colsText.setText(text);
-		setMaxBombSeekBar();
+		setMaxMineSeekBar();
 	}
 
-	private void setBombsText(int val) {
-		TextView bombsText = findViewById(R.id.bombsText);
+	private void setMinesText(int val) {
+		TextView minesText = findViewById(R.id.mineText);
 		String text = "Mines: " + val;
-		bombsText.setText(text);
+		minesText.setText(text);
 	}
 
-	private void setMaxBombSeekBar() {
+	private void setMaxMineSeekBar() {
 		final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress();
 		final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress();
-		SeekBar bombsInput = findViewById(R.id.bombsInput);
-		bombsInput.setMax(rows * cols - 9);
+		SeekBar minesInput = findViewById(R.id.mineInput);
+		minesInput.setMax(rows * cols - 9);
 	}
 
 	@Override
@@ -203,11 +202,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	public void onClick(View v) {
 		final SeekBar rowsInput = findViewById(R.id.rowsInput);
 		final SeekBar colsInput = findViewById(R.id.colsInput);
-		final SeekBar bombsInput = findViewById(R.id.bombsInput);
+		final SeekBar minesInput = findViewById(R.id.mineInput);
 
 		int rows = rowsInput.getProgress();
 		int cols = colsInput.getProgress();
-		int bombs = bombsInput.getProgress();
+		int mines = minesInput.getProgress();
 
 
 		switch (v.getId()) {
@@ -231,15 +230,15 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				colsInput.setProgress(cols);
 				setColsText(cols);
 				break;
-			case R.id.bombsDecrement:
-				bombs = Math.max(0, bombs - 1);
-				bombsInput.setProgress(bombs);
-				setBombsText(bombs);
+			case R.id.minesDecrement:
+				mines = Math.max(0, mines - 1);
+				minesInput.setProgress(mines);
+				setMinesText(mines);
 				break;
-			case R.id.bombsIncrement:
-				bombs = Math.min(rows * cols - 9, bombs + 1);
-				bombsInput.setProgress(bombs);
-				setBombsText(bombs);
+			case R.id.minesIncrement:
+				mines = Math.min(rows * cols - 9, mines + 1);
+				minesInput.setProgress(mines);
+				setMinesText(mines);
 				break;
 		}
 	}

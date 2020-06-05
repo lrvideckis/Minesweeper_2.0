@@ -25,10 +25,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleFlagModeOn = false,
 			toggleBacktrackingHintsOn = false,
 			toggleGaussHintsOn = false,
-			toggleBombsOn = false,
-			toggleBombProbabilityOn = false,
+			toggleMinesOn = false,
+			toggleMineProbabilityOn = false,
 			solverHitIterationLimit = false;
-	private int numberOfRows, numberOfCols, numberOfBombs;
+	private int numberOfRows, numberOfCols, numberOfMines;
 	private String gameMode;
 	private PopupWindow solverHitLimitPopup, stackStacePopup;
 
@@ -37,7 +37,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		super.onCreate(savedInstanceState);
 		numberOfRows = getIntent().getIntExtra("numberOfRows", 1);
 		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
-		numberOfBombs = getIntent().getIntExtra("numberOfBombs", 1);
+		numberOfMines = getIntent().getIntExtra("numberOfMines", 1);
 		gameMode = getIntent().getStringExtra("gameMode");
 		setContentView(R.layout.game);
 		Button backToStartScreen = findViewById(R.id.backToStartScreen);
@@ -49,16 +49,16 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setOnCheckedChangeListener(this);
 
-		Switch toggleBombs = findViewById(R.id.toggleBombs);
-		toggleBombs.setOnCheckedChangeListener(this);
+		Switch toggleMines = findViewById(R.id.toggleMiness);
+		toggleMines.setOnCheckedChangeListener(this);
 
-		Switch toggleProbability = findViewById(R.id.toggleBombProbability);
+		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setOnCheckedChangeListener(this);
 
 		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
 		toggleGaussHints.setOnCheckedChangeListener(this);
 
-		updateNumberOfBombs(numberOfBombs);
+		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
 		setUpStackTracePopup();
 	}
@@ -78,11 +78,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			case R.id.toggleBacktrackingHints:
 				handleHintToggle(buttonView, isChecked);
 				break;
-			case R.id.toggleBombs:
-				handleToggleShowBombs(isChecked);
+			case R.id.toggleMiness:
+				handleToggleShowMines(isChecked);
 				break;
-			case R.id.toggleBombProbability:
-				handleToggleBombProbability(buttonView, isChecked);
+			case R.id.toggleMineProbability:
+				handleToggleMineProbability(buttonView, isChecked);
 				break;
 			case R.id.toggleGaussHints:
 				handleGaussHintToggle(isChecked);
@@ -90,13 +90,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 	}
 
-	private void handleToggleShowBombs(boolean isChecked) {
-		toggleBombsOn = isChecked;
+	private void handleToggleShowMines(boolean isChecked) {
+		toggleMinesOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		gameCanvas.invalidate();
 	}
 
-	private void handleToggleBombProbability(CompoundButton buttonView, boolean isChecked) {
+	private void handleToggleMineProbability(CompoundButton buttonView, boolean isChecked) {
 		if (solverHitIterationLimit) {
 			buttonView.setChecked(false);
 			Switch showBacktrackingHints = findViewById(R.id.toggleBacktrackingHints);
@@ -105,7 +105,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 			return;
 		}
-		toggleBombProbabilityOn = isChecked;
+		toggleMineProbabilityOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
 			try {
@@ -134,10 +134,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				backtrackingHints.setChecked(false);
 			}
 
-			if (toggleBombProbabilityOn) {
-				toggleBombProbabilityOn = false;
-				Switch bombProbability = findViewById(R.id.toggleBombProbability);
-				bombProbability.setChecked(false);
+			if (toggleMineProbabilityOn) {
+				toggleMineProbabilityOn = false;
+				Switch mineProbability = findViewById(R.id.toggleMineProbability);
+				mineProbability.setChecked(false);
 			}
 
 			try {
@@ -153,9 +153,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private void handleHintToggle(CompoundButton buttonView, boolean isChecked) {
 		if (solverHitIterationLimit) {
 			buttonView.setChecked(false);
-			Switch bombProbability = findViewById(R.id.toggleBombProbability);
-			bombProbability.setChecked(false);
-			toggleBombProbabilityOn = false;
+			Switch mineProbability = findViewById(R.id.toggleMineProbability);
+			mineProbability.setChecked(false);
+			toggleMineProbabilityOn = false;
 			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 			return;
 		}
@@ -224,10 +224,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 	}
 
-	public void updateNumberOfBombs(int numberOfBombsLeft) {
-		TextView numberOfBombs = findViewById(R.id.showNumberOfBombs);
-		final String bombsLeft = "bombs: " + numberOfBombsLeft;
-		numberOfBombs.setText(bombsLeft);
+	public void updateNumberOfMines(int numberOfMinesLeft) {
+		TextView numberOfMines = findViewById(R.id.showNumberOfMines);
+		final String minesLeft = "mines: " + numberOfMinesLeft;
+		numberOfMines.setText(minesLeft);
 	}
 
 	public void updateNumberOfSolverIterations(int numberOfIterations) {
@@ -244,24 +244,24 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		return numberOfCols;
 	}
 
-	public int getNumberOfBombs() {
-		return numberOfBombs;
+	public int getNumberOfMines() {
+		return numberOfMines;
 	}
 
 	public boolean getToggleFlagModeOn() {
 		return toggleFlagModeOn;
 	}
 
-	public boolean getToggleBombsOn() {
-		return toggleBombsOn;
+	public boolean getToggleMinesOn() {
+		return toggleMinesOn;
 	}
 
 	public boolean getToggleBacktrackingHintsOn() {
 		return toggleBacktrackingHintsOn;
 	}
 
-	public boolean getToggleBombProbabilityOn() {
-		return toggleBombProbabilityOn;
+	public boolean getToggleMineProbabilityOn() {
+		return toggleMineProbabilityOn;
 	}
 
 	public String getGameMode() {
