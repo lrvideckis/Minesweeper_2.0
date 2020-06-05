@@ -93,7 +93,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		initialize(board, numberOfBombs);
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
-
 		initializeLastUnvisitedSpot(components);
 
 		//TODO: look into running this loop in parallel
@@ -110,9 +109,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		if (AwayCell.getNumberOfAwayCells(board) > 0) {
 			awayBombProbability = calculateAwayBombProbability();
 		}
-		updateNumberOfConfigsForCurrent(AwayCell.getNumberOfAwayCells(board));
-
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
+		updateNumberOfConfigsForCurrent(numberOfAwayCells);
+
 
 		BigFraction totalConfigs = new BigFraction(0);
 		TreeMap<Integer, BigFraction> configsPerBombCount = calculateNumberOfBombConfigs();
@@ -167,6 +166,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
+	//for each component, and for each # bombs: this calculates the number of bomb configurations, and saves it in numberOfConfigsForCurrent
 	private void updateNumberOfConfigsForCurrent(int numberOfAwayCells) throws Exception {
 		for (int i = 0; i < components.size(); ++i) {
 			TreeMap<Integer, MutableInt> saveBombConfigs = new TreeMap<>(bombConfig.get(i));
@@ -251,35 +251,25 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 	private BigFraction calculateAwayBombProbability() throws Exception {
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
-
 		TreeMap<Integer, BigFraction> configsPerBombCount = calculateNumberOfBombConfigs();
-		BigFraction totalNumberOfConfigs = new BigFraction(0);
-		for (TreeMap.Entry<Integer, BigFraction> val : configsPerBombCount.entrySet()) {
-			if (numberOfBombs - val.getKey() < 0 || numberOfBombs - val.getKey() > numberOfAwayCells) {
-				throw new Exception("number of remaining bombs is more than number of away cells (or negative)");
-			}
-			//choose where the extra bombs go
-			BigFraction newConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - val.getKey());
-			//multiply with number of bomb configs with current # of bombs
-			newConfigs.multiplyWith(val.getValue());
-			totalNumberOfConfigs.addWith(newConfigs);
-		}
 		BigFraction awayBombProbability = new BigFraction(0);
 		for (TreeMap.Entry<Integer, BigFraction> entry : configsPerBombCount.entrySet()) {
-			final int currNumberOfBombs = entry.getKey();
-			if (numberOfBombs - currNumberOfBombs < 0 || numberOfBombs - currNumberOfBombs > numberOfAwayCells) {
+			if (numberOfBombs - entry.getKey() < 0 || numberOfBombs - entry.getKey() > numberOfAwayCells) {
 				throw new Exception("number of remaining bombs is more than number of away cells (or negative)");
 			}
-			//again, choose which away cells to place remaining bombs
-			BigFraction numberOfConfigs = MyMath.BinomialCoefficient(numberOfAwayCells, numberOfBombs - entry.getKey());
-			//again multiply with number of bomb configs with current # of bombs
+
+			//calculate # configs / # total configs - the probability that the configuration of bombs has the current specific # of bombs
+			BigFraction numberOfConfigs = new BigFraction(0);
+			for (TreeMap.Entry<Integer, BigFraction> val : configsPerBombCount.entrySet()) {
+				BigFraction currDelta = MyMath.BinomialCoefficientFraction(numberOfAwayCells, numberOfBombs - val.getKey(), numberOfBombs - entry.getKey());
+				currDelta.multiplyWith(val.getValue());
+				numberOfConfigs.addWith(currDelta);
+			}
+			numberOfConfigs.invert();
 			numberOfConfigs.multiplyWith(entry.getValue());
 
-			//divide with total number of configurations
-			numberOfConfigs.divideWith(totalNumberOfConfigs);
-
 			//actual probability that a single away cell is a bomb, the above is just a weight - "how often is this probability the case - # configs / # total configs"
-			numberOfConfigs.multiplyWith(numberOfBombs - currNumberOfBombs, numberOfAwayCells);
+			numberOfConfigs.multiplyWith(numberOfBombs - entry.getKey(), numberOfAwayCells);
 
 			awayBombProbability.addWith(numberOfConfigs);
 		}

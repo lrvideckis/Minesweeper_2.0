@@ -40,6 +40,12 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
+		Test.testPreviouslyFailedBoards();
+		Test.performTestsForBombProbability(20);
+		Test.performTestsForFractionOverflow(20);
+		Test.performTestsForGaussSolver(20);
+		Test.performTestsMultipleRunsOfSameBoard(10);
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);
 
@@ -140,12 +146,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				bombsInput.setProgress(99);
 			}
 		});
-
-		Test.testPreviouslyFailedBoards();
-		Test.performTestsForBombProbability(20);
-		Test.performTestsForFractionOverflow(20);
-		Test.performTestsForGaussSolver(20);
-		Test.performTestsMultipleRunsOfSameBoard(10);
 	}
 
 	@Override

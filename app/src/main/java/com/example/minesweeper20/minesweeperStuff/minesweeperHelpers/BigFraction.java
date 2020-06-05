@@ -11,6 +11,11 @@ public class BigFraction {
 		denominator = BigInteger.ONE;
 	}
 
+	//this should only throw if denominator is 0
+	public BigFraction(BigInteger numerator, BigInteger denominator) throws Exception {
+		reduceAndSet(numerator, denominator);
+	}
+
 	public BigFraction(BigFraction other) {
 		try {
 			setValue(other);
@@ -66,6 +71,11 @@ public class BigFraction {
 		this.numerator = this.numerator.multiply(quotient.getDenominator());
 		this.denominator = this.denominator.multiply(quotient.getNumerator());
 		reduceAndSet(this.numerator, this.denominator);
+	}
+
+	//should only throw if fraction initially equals 0
+	public void invert() throws Exception {
+		reduceAndSet(denominator, numerator);
 	}
 
 	public BigInteger getNumerator() throws Exception {
