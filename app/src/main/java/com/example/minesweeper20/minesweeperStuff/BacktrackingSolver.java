@@ -27,7 +27,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final int rows, cols;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
-	private final int[][][] lastUnvisitedSpot;
+	private final ArrayList<Pair<Integer,Integer>>[][] lastUnvisitedSpot;
 	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig;
 	//TODO: remove mineProbPerCompPerNumMines denominator, and use mineConfig instead
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines;
@@ -44,7 +44,12 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		isMine = new boolean[rows][cols];
 		cntSurroundingMines = new int[rows][cols];
 		updatedNumberSurroundingMines = new int[rows][cols];
-		lastUnvisitedSpot = new int[rows][cols][2];
+		lastUnvisitedSpot = new ArrayList[rows][cols];
+		for(int i = 0; i < rows; ++i) {
+			for(int j = 0; j < cols; ++j) {
+				lastUnvisitedSpot[i][j] = new ArrayList<>();
+			}
+		}
 		mineConfig = new ArrayList<>();
 		numberOfConfigsForCurrent = new ArrayList<>();
 		gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
@@ -367,8 +372,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(spot.first, spot.second, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];
 					if (board[adjI][adjJ].isVisible) {
-						lastUnvisitedSpot[adjI][adjJ][0] = spot.first;
-						lastUnvisitedSpot[adjI][adjJ][1] = spot.second;
+						lastUnvisitedSpot[adjI][adjJ].add(spot);
 					}
 				}
 			}
@@ -419,7 +423,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	private boolean checkSurroundingConditions(int i, int j, Pair<Integer, Integer> currSpot, int arePlacingAMine) {
+	private boolean checkSurroundingConditions(int i, int j, Pair<Integer, Integer> currSpot, int arePlacingAMine) throws Exception {
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
 			VisibleTile adjTile = board[adjI][adjJ];
@@ -430,9 +434,18 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			if (currBacktrackingCount + arePlacingAMine > updatedNumberSurroundingMines[adjI][adjJ]) {
 				return false;
 			}
-			if (lastUnvisitedSpot[adjI][adjJ][0] == currSpot.first &&
-					lastUnvisitedSpot[adjI][adjJ][1] == currSpot.second &&
-					currBacktrackingCount + arePlacingAMine != updatedNumberSurroundingMines[adjI][adjJ]) {
+			ArrayList<Pair<Integer,Integer>> currAdj = lastUnvisitedSpot[adjI][adjJ];
+			int spotsLeft = -1;
+			for(int pos = 0; pos < currAdj.size(); ++pos) {
+				if(currAdj.get(pos).equals(currSpot)) {
+					spotsLeft = currAdj.size() - pos - 1;
+					break;
+				}
+			}
+			if(spotsLeft == -1) {
+				throw new Exception("didn't find spot in lastUnvisitedSpot, but it should be there");
+			}
+			if(currBacktrackingCount + arePlacingAMine + spotsLeft < updatedNumberSurroundingMines[adjI][adjJ]) {
 				return false;
 			}
 		}

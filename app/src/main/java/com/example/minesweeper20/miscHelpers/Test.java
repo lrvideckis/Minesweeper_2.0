@@ -194,8 +194,8 @@ public class Test {
 			int mines = 5;
 			int rows = 5, cols = 5;
 			try {
-				rows = MyMath.getRand(10, 15);
-				cols = MyMath.getRand(10, 15);
+				rows = MyMath.getRand(10, 30);
+				cols = MyMath.getRand(10, 30);
 				mines = MyMath.getRand(2, 50);
 			} catch (Exception ignored) {
 			}
@@ -240,9 +240,8 @@ public class Test {
 						bottom = bottom.divide(gcd);
 
 						//noinspection SuspiciousNameCombination
-						if (
-								!curr.getNumerator().equals(top) ||
-										!curr.getDenominator().equals(bottom)
+						if (!curr.getNumerator().equals(top) ||
+								!curr.getDenominator().equals(bottom)
 						) {
 							testPassed = false;
 							System.out.println("here, solver outputs don't match");
