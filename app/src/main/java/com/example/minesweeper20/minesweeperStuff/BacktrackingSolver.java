@@ -27,7 +27,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final int rows, cols;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
-	private final ArrayList<Pair<Integer,Integer>>[][] lastUnvisitedSpot;
+	private final ArrayList<ArrayList<ArrayList<Pair<Integer, Integer>>>> lastUnvisitedSpot;
 	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig;
 	//TODO: remove mineProbPerCompPerNumMines denominator, and use mineConfig instead
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines;
@@ -44,11 +44,14 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		isMine = new boolean[rows][cols];
 		cntSurroundingMines = new int[rows][cols];
 		updatedNumberSurroundingMines = new int[rows][cols];
-		lastUnvisitedSpot = new ArrayList[rows][cols];
-		for(int i = 0; i < rows; ++i) {
-			for(int j = 0; j < cols; ++j) {
-				lastUnvisitedSpot[i][j] = new ArrayList<>();
+		lastUnvisitedSpot = new ArrayList<>(rows);
+		for (int i = 0; i < rows; ++i) {
+			ArrayList<ArrayList<Pair<Integer, Integer>>> currRow = new ArrayList<>(cols);
+			for (int j = 0; j < cols; ++j) {
+				ArrayList<Pair<Integer, Integer>> currSpot = new ArrayList<>();
+				currRow.add(currSpot);
 			}
+			lastUnvisitedSpot.add(currRow);
 		}
 		mineConfig = new ArrayList<>();
 		numberOfConfigsForCurrent = new ArrayList<>();
@@ -361,6 +364,11 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	private void initializeLastUnvisitedSpot(ArrayList<ArrayList<Pair<Integer, Integer>>> components) {
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				lastUnvisitedSpot.get(i).get(j).clear();
+			}
+		}
 		mineConfig.clear();
 		numberOfConfigsForCurrent.clear();
 		mineProbPerCompPerNumMines.clear();
@@ -372,7 +380,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(spot.first, spot.second, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];
 					if (board[adjI][adjJ].isVisible) {
-						lastUnvisitedSpot[adjI][adjJ].add(spot);
+						lastUnvisitedSpot.get(adjI).get(adjJ).add(spot);
 					}
 				}
 			}
@@ -434,18 +442,18 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			if (currBacktrackingCount + arePlacingAMine > updatedNumberSurroundingMines[adjI][adjJ]) {
 				return false;
 			}
-			ArrayList<Pair<Integer,Integer>> currAdj = lastUnvisitedSpot[adjI][adjJ];
+			ArrayList<Pair<Integer, Integer>> currAdj = lastUnvisitedSpot.get(adjI).get(adjJ);
 			int spotsLeft = -1;
-			for(int pos = 0; pos < currAdj.size(); ++pos) {
-				if(currAdj.get(pos).equals(currSpot)) {
+			for (int pos = 0; pos < currAdj.size(); ++pos) {
+				if (currAdj.get(pos).equals(currSpot)) {
 					spotsLeft = currAdj.size() - pos - 1;
 					break;
 				}
 			}
-			if(spotsLeft == -1) {
+			if (spotsLeft == -1) {
 				throw new Exception("didn't find spot in lastUnvisitedSpot, but it should be there");
 			}
-			if(currBacktrackingCount + arePlacingAMine + spotsLeft < updatedNumberSurroundingMines[adjI][adjJ]) {
+			if (currBacktrackingCount + arePlacingAMine + spotsLeft < updatedNumberSurroundingMines[adjI][adjJ]) {
 				return false;
 			}
 		}

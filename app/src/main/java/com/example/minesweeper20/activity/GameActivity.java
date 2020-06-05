@@ -49,7 +49,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setOnCheckedChangeListener(this);
 
-		Switch toggleMines = findViewById(R.id.toggleMiness);
+		Switch toggleMines = findViewById(R.id.toggleMines);
 		toggleMines.setOnCheckedChangeListener(this);
 
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
@@ -78,7 +78,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			case R.id.toggleBacktrackingHints:
 				handleHintToggle(buttonView, isChecked);
 				break;
-			case R.id.toggleMiness:
+			case R.id.toggleMines:
 				handleToggleShowMines(isChecked);
 				break;
 			case R.id.toggleMineProbability:
