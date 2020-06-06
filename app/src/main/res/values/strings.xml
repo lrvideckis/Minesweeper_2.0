@@ -3,7 +3,6 @@
 	<string name="app_name">Minesweeper 2.0</string>
 	<string name="back">Back</string>
 	<string name="ok">OK</string>
-	<string name="you_lose">You lose!</string>
 	<string name="start_new_game">Start New Game</string>
 	<string name="beginner">beginner</string>
 	<string name="intermediate">intermediate</string>
