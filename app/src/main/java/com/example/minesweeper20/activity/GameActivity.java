@@ -99,16 +99,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void handleToggleMineProbability(CompoundButton buttonView, boolean isChecked) {
-		/*
-		if (solverHitIterationLimit) {
-			buttonView.setChecked(false);
-			Switch showBacktrackingHints = findViewById(R.id.toggleBacktrackingHints);
-			showBacktrackingHints.setChecked(false);
-			toggleBacktrackingHintsOn = false;
-			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
-			return;
-		}
-		 */
 		toggleMineProbabilityOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
@@ -155,16 +145,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void handleHintToggle(CompoundButton buttonView, boolean isChecked) {
-		/*
-		if (solverHitIterationLimit) {
-			buttonView.setChecked(false);
-			Switch mineProbability = findViewById(R.id.toggleMineProbability);
-			mineProbability.setChecked(false);
-			toggleMineProbabilityOn = false;
-			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
-			return;
-		}
-		 */
 		toggleBacktrackingHintsOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {

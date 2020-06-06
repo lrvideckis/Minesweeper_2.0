@@ -30,6 +30,8 @@ import com.example.minesweeper20.miscHelpers.Test;
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
+	public static final int rowsColsMax = 50;
+
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
 			NUMBER_OF_ROWS = "numRows",
@@ -67,12 +69,12 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		final SeekBar colsInput = findViewById(R.id.colsInput);
 		final SeekBar minesInput = findViewById(R.id.mineInput);
 
-		Button okButton = findViewById(R.id.startNewGameButton);
-		okButton.setOnClickListener(new okButtonListener(rowsInput, colsInput, minesInput));
-
 		rowsInput.setOnSeekBarChangeListener(this);
 		colsInput.setOnSeekBarChangeListener(this);
 		minesInput.setOnSeekBarChangeListener(this);
+
+		rowsInput.setMax(rowsColsMax);
+		colsInput.setMax(rowsColsMax);
 
 		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 9);
 		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 9);
@@ -82,6 +84,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		colsInput.setProgress(previousCols);
 		minesInput.setProgress(previousMines);
 
+		Button okButton = findViewById(R.id.startNewGameButton);
+		okButton.setOnClickListener(new okButtonListener(rowsInput, colsInput, minesInput));
 
 		Button beginner = findViewById(R.id.beginner);
 		beginner.setOnClickListener(view -> {
@@ -179,7 +183,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				setMinesText(rows, cols, mines);
 				break;
 			case R.id.rowsIncrement:
-				rows = Math.min(30, rows + 1);
+				rows = Math.min(rowsColsMax, rows + 1);
 				rowsInput.setProgress(rows);
 				setRowsText(rows);
 				setMinesText(rows, cols, mines);
@@ -191,7 +195,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				setMinesText(rows, cols, mines);
 				break;
 			case R.id.colsIncrement:
-				cols = Math.min(30, cols + 1);
+				cols = Math.min(rowsColsMax, cols + 1);
 				colsInput.setProgress(cols);
 				setColsText(cols);
 				setMinesText(rows, cols, mines);
