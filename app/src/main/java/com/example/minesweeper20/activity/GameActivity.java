@@ -199,12 +199,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private void setUpIterationLimitPopup() {
 		solverHitLimitPopup = PopupHelper.initializePopup(this, R.layout.solver_hit_limit_popup);
 		Button okButton = solverHitLimitPopup.getContentView().findViewById(R.id.solverHitLimitOkButton);
-		okButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				solverHitLimitPopup.dismiss();
-			}
-		});
+		okButton.setOnClickListener(view -> solverHitLimitPopup.dismiss());
 	}
 
 	private void setUpStackTracePopup() {

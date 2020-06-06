@@ -62,13 +62,10 @@ public class GameCanvas extends View {
 	private void setUpEndGamePopup() {
 		endGamePopup = PopupHelper.initializePopup(getContext().getApplicationContext(), R.layout.end_game_popup);
 		Button okButton = endGamePopup.getContentView().findViewById(R.id.closeEndGamePopup);
-		okButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				endGamePopup.dismiss();
-				GameActivity gameActivity = (GameActivity) getContext();
-				gameActivity.onClick(null);
-			}
+		okButton.setOnClickListener(view -> {
+			endGamePopup.dismiss();
+			GameActivity gameActivity = (GameActivity) getContext();
+			gameActivity.onClick(null);
 		});
 	}
 

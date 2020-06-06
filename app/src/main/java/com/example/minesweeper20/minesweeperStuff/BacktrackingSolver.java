@@ -13,6 +13,7 @@ import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MutableInt;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -102,14 +103,21 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
-		//TODO: look into running this loop in parallel
-		totalIterations = 0;
+		List<Integer> componentIndexes = new ArrayList<>();
 		for (int i = 0; i < components.size(); ++i) {
+			componentIndexes.add(i);
+		}
+		totalIterations = 0;
+		componentIndexes.parallelStream().forEach(i -> {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
-			solveComponent(0, i, currIterations, currNumberOfMines);
+			try {
+				solveComponent(0, i, currIterations, currNumberOfMines);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			totalIterations += currIterations.get();
-		}
+		});
 
 		removeMineNumbersFromComponent();
 		BigFraction awayMineProbability = null;
@@ -203,7 +211,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private void removeMineNumbersFromComponent() throws Exception {
 		ArrayList<TreeSet<Integer>> dpTable = new ArrayList<>(components.size() + 1);
 		for (int i = 0; i <= components.size(); ++i) {
-			dpTable.add(new TreeSet<Integer>());
+			dpTable.add(new TreeSet<>());
 		}
 
 		dpTable.get(0).add(0);
@@ -372,9 +380,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		numberOfConfigsForCurrent.clear();
 		mineProbPerCompPerNumMines.clear();
 		for (ArrayList<Pair<Integer, Integer>> component : components) {
-			mineConfig.add(new TreeMap<Integer, MutableInt>());
-			numberOfConfigsForCurrent.add(new TreeMap<Integer, TreeMap<Integer, BigFraction>>());
-			mineProbPerCompPerNumMines.add(new TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>());
+			mineConfig.add(new TreeMap<>());
+			numberOfConfigsForCurrent.add(new TreeMap<>());
+			mineProbPerCompPerNumMines.add(new TreeMap<>());
 			for (Pair<Integer, Integer> spot : component) {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(spot.first, spot.second, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];

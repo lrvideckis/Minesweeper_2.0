@@ -157,7 +157,7 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 	private void removeMineNumbersFromComponent() throws Exception {
 		ArrayList<TreeSet<Integer>> dpTable = new ArrayList<>(components.size() + 1);
 		for (int i = 0; i <= components.size(); ++i) {
-			dpTable.add(new TreeSet<Integer>());
+			dpTable.add(new TreeSet<>());
 		}
 
 		dpTable.get(0).add(0);
@@ -286,8 +286,8 @@ public class BacktrackingSolverWithBigint implements MinesweeperSolver {
 		mineConfig.clear();
 		numberOfConfigsForCurrent.clear();
 		for (ArrayList<Pair<Integer, Integer>> component : components) {
-			mineConfig.add(new TreeMap<Integer, MutableInt>());
-			numberOfConfigsForCurrent.add(new TreeMap<Integer, BigInteger>());
+			mineConfig.add(new TreeMap<>());
+			numberOfConfigsForCurrent.add(new TreeMap<>());
 			for (Pair<Integer, Integer> spot : component) {
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(spot.first, spot.second, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];

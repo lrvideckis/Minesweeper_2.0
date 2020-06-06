@@ -1,6 +1,5 @@
 package com.example.minesweeper20.activity;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -64,45 +63,12 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		minesDecrement.setOnClickListener(this);
 		minesIncrement.setOnClickListener(this);
 
-
-		Button okButton = findViewById(R.id.startNewGameButton);
-		okButton.setOnClickListener(new View.OnClickListener() {
-			@SuppressLint("InflateParams")
-			@Override
-			public void onClick(View view) {
-				final SeekBar rowInput = findViewById(R.id.rowsInput);
-				final SeekBar colInput = findViewById(R.id.colsInput);
-				final SeekBar mineInput = findViewById(R.id.mineInput);
-
-				final int numberOfRows = rowInput.getProgress();
-				final int numberOfCols = colInput.getProgress();
-				final int numberOfMines = mineInput.getProgress();
-
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putInt(NUMBER_OF_ROWS, numberOfRows);
-				editor.putInt(NUMBER_OF_COLS, numberOfCols);
-				editor.putInt(NUMBER_OF_MINES, numberOfMines);
-				editor.apply();
-
-				if (MinesweeperGame.tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
-					System.out.println("too many mines for zero start, UI doesn't allow for this to happen");
-					return;
-				}
-
-				Spinner gameType = findViewById(R.id.game_type);
-				String selectedGameType = gameType.getSelectedItem().toString();
-
-				Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
-				intent.putExtra("numberOfRows", numberOfRows);
-				intent.putExtra("numberOfCols", numberOfCols);
-				intent.putExtra("numberOfMines", numberOfMines);
-				intent.putExtra("gameMode", selectedGameType);
-				startActivity(intent);
-			}
-		});
 		final SeekBar rowsInput = findViewById(R.id.rowsInput);
 		final SeekBar colsInput = findViewById(R.id.colsInput);
 		final SeekBar minesInput = findViewById(R.id.mineInput);
+
+		Button okButton = findViewById(R.id.startNewGameButton);
+		okButton.setOnClickListener(new okButtonListener(rowsInput, colsInput, minesInput));
 
 		rowsInput.setOnSeekBarChangeListener(this);
 		colsInput.setOnSeekBarChangeListener(this);
@@ -118,33 +84,24 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 
 		Button beginner = findViewById(R.id.beginner);
-		beginner.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				rowsInput.setProgress(9);
-				colsInput.setProgress(9);
-				minesInput.setProgress(10);
-			}
+		beginner.setOnClickListener(view -> {
+			rowsInput.setProgress(9);
+			colsInput.setProgress(9);
+			minesInput.setProgress(10);
 		});
 
 		Button intermediate = findViewById(R.id.intermediate);
-		intermediate.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				rowsInput.setProgress(14);
-				colsInput.setProgress(16);
-				minesInput.setProgress(40);
-			}
+		intermediate.setOnClickListener(view -> {
+			rowsInput.setProgress(14);
+			colsInput.setProgress(16);
+			minesInput.setProgress(40);
 		});
 
 		Button expert = findViewById(R.id.expert);
-		expert.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				rowsInput.setProgress(16);
-				colsInput.setProgress(30);
-				minesInput.setProgress(99);
-			}
+		expert.setOnClickListener(view -> {
+			rowsInput.setProgress(16);
+			colsInput.setProgress(30);
+			minesInput.setProgress(99);
 		});
 	}
 
@@ -241,5 +198,47 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				setMinesText(mines);
 				break;
 		}
+	}
+
+	private class okButtonListener implements View.OnClickListener {
+
+		private final SeekBar rowInput;
+		private final SeekBar colInput;
+		private final SeekBar mineInput;
+
+		public okButtonListener(SeekBar rowInput, SeekBar colInput, SeekBar mineInput) {
+			this.rowInput = rowInput;
+			this.colInput = colInput;
+			this.mineInput = mineInput;
+		}
+
+		@Override
+		public void onClick(View v) {
+			final int numberOfRows = this.rowInput.getProgress();
+			final int numberOfCols = this.colInput.getProgress();
+			final int numberOfMines = this.mineInput.getProgress();
+
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putInt(NUMBER_OF_ROWS, numberOfRows);
+			editor.putInt(NUMBER_OF_COLS, numberOfCols);
+			editor.putInt(NUMBER_OF_MINES, numberOfMines);
+			editor.apply();
+
+			if (MinesweeperGame.tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
+				System.out.println("too many mines for zero start, UI doesn't allow for this to happen");
+				return;
+			}
+
+			Spinner gameType = findViewById(R.id.game_type);
+			String selectedGameType = gameType.getSelectedItem().toString();
+
+			Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
+			intent.putExtra("numberOfRows", numberOfRows);
+			intent.putExtra("numberOfCols", numberOfCols);
+			intent.putExtra("numberOfMines", numberOfMines);
+			intent.putExtra("gameMode", selectedGameType);
+			startActivity(intent);
+		}
+
 	}
 }

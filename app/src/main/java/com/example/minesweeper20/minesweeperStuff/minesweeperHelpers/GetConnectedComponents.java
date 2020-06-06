@@ -39,7 +39,7 @@ public class GetConnectedComponents {
 		}
 		ArrayList<ArrayList<Pair<Integer, Integer>>> tempComponents = new ArrayList<>(rows * cols);
 		for (int i = 0; i < rows * cols; ++i) {
-			tempComponents.add(new ArrayList<Pair<Integer, Integer>>());
+			tempComponents.add(new ArrayList<>());
 		}
 
 		for (int i = 0; i < rows; ++i) {
