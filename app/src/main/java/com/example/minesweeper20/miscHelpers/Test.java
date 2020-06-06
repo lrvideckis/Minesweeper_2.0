@@ -24,6 +24,17 @@ public class Test {
 
 	private final static String[][] previousFailedBoards = {
 
+			//cell (0,3) is a logical - free, but fast solver doesn't set it
+			//basically, testing if away cells are set as logical free/bomb
+			{
+					"U3UU",
+					"UUUU",
+					"U421",
+					"U2..",
+
+					"5"
+			},
+
 			//failed test after basically redoing BacktrackingSolver to be more efficient with BigIntegr
 			{
 					"U1......",
@@ -110,7 +121,9 @@ public class Test {
 	};
 
 	public static void testPreviouslyFailedBoards() {
+		int testID = 1;
 		for (String[] stringBoard : previousFailedBoards) {
+			System.out.println("test number: " + (testID++));
 			final int rows = stringBoard.length - 1;
 			final int cols = stringBoard[0].length();
 			final int mines = Integer.parseInt(stringBoard[stringBoard.length - 1]);
@@ -123,7 +136,6 @@ public class Test {
 				e.printStackTrace();
 				continue;
 			}
-			printBoardDebug(boardFast, mines);
 			Pair<Integer, Integer> dimensions;
 			try {
 				dimensions = ArrayBounds.getArrayBounds(boardFast);
@@ -139,8 +151,6 @@ public class Test {
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
-
-			//System.out.println("number of mines: " + mines);
 			try {
 				try {
 					backtrackingSolver.solvePosition(boardFast, mines);
@@ -188,7 +198,7 @@ public class Test {
 		return board;
 	}
 
-	public static void performTestsForFractionOverflow(int numberOfTests) {
+	public static void performTestsWithBigIntSolverForLargerGrids(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 			int mines = 5;
@@ -212,6 +222,7 @@ public class Test {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 				}
 				if (minesweeperGame.getIsGameOver()) {
+					System.out.println("game over, void test");
 					continue;
 				}
 			} catch (Exception e) {
@@ -241,7 +252,9 @@ public class Test {
 
 						//noinspection SuspiciousNameCombination
 						if (!curr.getNumerator().equals(top) ||
-								!curr.getDenominator().equals(bottom)
+								!curr.getDenominator().equals(bottom) ||
+								boardFraction[i][j].getIsLogicalMine() != boardBigInt[i][j].getIsLogicalMine() ||
+								boardFraction[i][j].getIsLogicalFree() != boardBigInt[i][j].getIsLogicalFree()
 						) {
 							testPassed = false;
 							System.out.println("here, solver outputs don't match");
@@ -290,6 +303,7 @@ public class Test {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 				}
 				if (minesweeperGame.getIsGameOver()) {
+					System.out.println("game over, void test");
 					continue;
 				}
 			} catch (Exception e) {
@@ -339,7 +353,11 @@ public class Test {
 				VisibleTile slowTile = boardSlow[i][j];
 				BigFraction slow = new BigFraction(slowTile.getNumberOfMineConfigs());
 				slow.divideWith(slowTile.getNumberOfTotalConfigs());
-				if (!fast.getNumerator().equals(slow.getNumerator()) || !fast.getDenominator().equals(slow.getDenominator())) {
+				if (!fast.getNumerator().equals(slow.getNumerator()) ||
+						!fast.getDenominator().equals(slow.getDenominator()) ||
+						fastTile.getIsLogicalFree() != slowTile.getIsLogicalFree() ||
+						fastTile.getIsLogicalMine() != slowTile.getIsLogicalMine()
+				) {
 					passedTest = false;
 					System.out.println("here, solver outputs don't match");
 					System.out.println("i,j: " + i + " " + j);
@@ -381,6 +399,7 @@ public class Test {
 					minesweeperGame.clickCell(x, y, false);
 				}
 				if (minesweeperGame.getIsGameOver()) {
+					System.out.println("game over, void test");
 					continue;
 				}
 			} catch (Exception e) {
@@ -462,6 +481,7 @@ public class Test {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 				}
 				if (minesweeperGame.getIsGameOver()) {
+					System.out.println("game over, void test");
 					continue;
 				}
 			} catch (Exception e) {

@@ -174,7 +174,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					}
 					curr.numberOfMineConfigs.setValue(awayMineProbability);
 					curr.numberOfTotalConfigs.setValues(1, 1);
-					continue;
 				}
 				if (curr.getIsVisible() || curr.getIsLogicalMine() || curr.getIsLogicalFree()) {
 					continue;
