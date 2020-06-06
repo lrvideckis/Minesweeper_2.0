@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 //TODO: hard code in rules, then split components by logical cells
 public class BacktrackingSolver implements MinesweeperSolver {
 
-	private final static int iterationLimit = 20000;
+	public final static int iterationLimit = 20000;
 	private final int rows, cols;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
@@ -34,10 +34,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
 	private final GaussianEliminationSolver gaussianEliminationSolver;
-	private int totalIterations;
+	private int totalIterations, numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
-	private int numberOfMines;
 
 	public BacktrackingSolver(int rows, int cols) {
 		this.rows = rows;
@@ -123,12 +122,13 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			throw new HitIterationLimitException();
 		}
 
+		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
+
 		removeMineNumbersFromComponent();
 		BigFraction awayMineProbability = null;
-		if (AwayCell.getNumberOfAwayCells(board) > 0) {
+		if (numberOfAwayCells > 0) {
 			awayMineProbability = calculateAwayMineProbability();
 		}
-		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 		updateNumberOfConfigsForCurrent();
 
 

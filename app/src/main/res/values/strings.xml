@@ -11,7 +11,6 @@
 	<string name="flag_mode">Flag Mode</string>
 	<string name="backtracking">Back tracking</string>
 	<string name="show_mines">Show Mines</string>
-	<string name="hitIterationLimit">Backtracking solver hit iteration limit. Show Hints feature is no longer available.</string>
 	<string name="show_mine_probability">Mine Probability</string>
 	<string name="is_linear_layout">is_linear_layout</string>
 	<string name="is_game_canvas_layout">is_game_canvas_layout</string>

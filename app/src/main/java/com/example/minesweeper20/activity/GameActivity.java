@@ -13,11 +13,14 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
+import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.miscHelpers.PopupHelper;
 import com.example.minesweeper20.view.GameCanvas;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
@@ -203,6 +206,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		solverHitLimitPopup = PopupHelper.initializePopup(this, R.layout.solver_hit_limit_popup);
 		Button okButton = solverHitLimitPopup.getContentView().findViewById(R.id.solverHitLimitOkButton);
 		okButton.setOnClickListener(view -> solverHitLimitPopup.dismiss());
+		TextView textView = solverHitLimitPopup.getContentView().findViewById(R.id.iterationLimitText);
+		String text = "Backtracking solver took more than ";
+		text += NumberFormat.getNumberInstance(Locale.US).format(BacktrackingSolver.iterationLimit);
+		text += " iterations. Hints and mine probability features are no longer available.";
+		textView.setText(text);
 	}
 
 	private void setUpStackTracePopup() {
