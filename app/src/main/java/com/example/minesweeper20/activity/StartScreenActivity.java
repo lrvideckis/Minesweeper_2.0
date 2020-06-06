@@ -115,7 +115,9 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				setColsText(seekBar.getProgress());
 				break;
 			case R.id.mineInput:
-				setMinesText(seekBar.getProgress());
+				final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress();
+				final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress();
+				setMinesText(rows, cols, seekBar.getProgress());
 				break;
 		}
 	}
@@ -134,9 +136,12 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		setMaxMineSeekBar();
 	}
 
-	private void setMinesText(int val) {
+	private void setMinesText(int rows, int cols, int mines) {
 		TextView minesText = findViewById(R.id.mineText);
-		String text = "Mines: " + val;
+		String text = "Mines: " + mines + '\n';
+		double minePercentage = 100 * mines / (double) (rows * cols);
+		text += String.format(getResources().getString(R.string.two_decimal_places), minePercentage);
+		text += '%';
 		minesText.setText(text);
 	}
 
@@ -171,31 +176,35 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				rows = Math.max(4, rows - 1);
 				rowsInput.setProgress(rows);
 				setRowsText(rows);
+				setMinesText(rows, cols, mines);
 				break;
 			case R.id.rowsIncrement:
 				rows = Math.min(30, rows + 1);
 				rowsInput.setProgress(rows);
 				setRowsText(rows);
+				setMinesText(rows, cols, mines);
 				break;
 			case R.id.colsDecrement:
 				cols = Math.max(4, cols - 1);
 				colsInput.setProgress(cols);
 				setColsText(cols);
+				setMinesText(rows, cols, mines);
 				break;
 			case R.id.colsIncrement:
 				cols = Math.min(30, cols + 1);
 				colsInput.setProgress(cols);
 				setColsText(cols);
+				setMinesText(rows, cols, mines);
 				break;
 			case R.id.minesDecrement:
 				mines = Math.max(0, mines - 1);
 				minesInput.setProgress(mines);
-				setMinesText(mines);
+				setMinesText(rows, cols, mines);
 				break;
 			case R.id.minesIncrement:
 				mines = Math.min(rows * cols - 9, mines + 1);
 				minesInput.setProgress(mines);
-				setMinesText(mines);
+				setMinesText(rows, cols, mines);
 				break;
 		}
 	}

@@ -15,7 +15,8 @@
 	<string name="show_mine_probability">Mine Probability</string>
 	<string name="is_linear_layout">is_linear_layout</string>
 	<string name="is_game_canvas_layout">is_game_canvas_layout</string>
-	<string name="two_decimal_places">%.3f</string>
+	<string name="two_decimal_places">%.2f</string>
+	<string name="three_decimal_places">%.3f</string>
 	<string name="gauss_hints">Gauss</string>
 	<string name="initial_iterations">iterations: 0</string>
 	<string name="is_relative_layout">is_relative_layout</string>

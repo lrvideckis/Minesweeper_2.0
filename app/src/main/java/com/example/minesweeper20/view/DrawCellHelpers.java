@@ -162,7 +162,7 @@ class DrawCellHelpers {
 		final int digitsDenominator = probability.getDenominator().toString().length();
 		if (digitsNumerator + digitsDenominator >= 5) {
 			canvas.drawText(
-					String.format(resources.getString(R.string.two_decimal_places), probability.getDoubleValue()),
+					String.format(resources.getString(R.string.three_decimal_places), probability.getDoubleValue()),
 					startX,
 					startY + cellPixelLength / 3f,
 					black
