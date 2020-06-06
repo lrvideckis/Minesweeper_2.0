@@ -6,8 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.Button;
-import android.widget.PopupWindow;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.activity.GameActivity;
@@ -19,21 +17,21 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
-import com.example.minesweeper20.miscHelpers.PopupHelper;
 
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class GameCanvas extends View {
 
+	static final int cellPixelLength = 150;
+
 	private final ScaleListener scaleListener;
 	private final MinesweeperGame minesweeperGame;
-	private final int cellPixelLength = 150;
 	private final Paint black = new Paint();
 	private final VisibleTile[][] board;
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
 	private final BigFraction mineProbability = new BigFraction(0);
-	private PopupWindow endGamePopup;
+	private int lastTapRow, lastTapCol;
 
 	public GameCanvas(Context context, AttributeSet attrs) throws Exception {
 		super(context, attrs);
@@ -56,17 +54,6 @@ public class GameCanvas extends View {
 		gaussSolver = new GaussianEliminationSolver(
 				minesweeperGame.getNumberOfRows(),
 				minesweeperGame.getNumberOfCols());
-		setUpEndGamePopup();
-	}
-
-	private void setUpEndGamePopup() {
-		endGamePopup = PopupHelper.initializePopup(getContext().getApplicationContext(), R.layout.end_game_popup);
-		Button okButton = endGamePopup.getContentView().findViewById(R.id.closeEndGamePopup);
-		okButton.setOnClickListener(view -> {
-			endGamePopup.dismiss();
-			GameActivity gameActivity = (GameActivity) getContext();
-			gameActivity.onClick(null);
-		});
 	}
 
 	public void handleTap(float tapX, float tapY) {
@@ -80,6 +67,11 @@ public class GameCanvas extends View {
 		}
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
+
+		if (!minesweeperGame.getIsGameOver()) {
+			lastTapRow = row;
+			lastTapCol = col;
+		}
 
 		GameActivity gameActivity = (GameActivity) getContext();
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
@@ -136,7 +128,7 @@ public class GameCanvas extends View {
 		}
 	}
 
-	private void drawCell(Canvas canvas, VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j) throws Exception {
+	private void drawCell(Canvas canvas, VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, boolean drawRedBackground) throws Exception {
 		final int startX = j * cellPixelLength;
 		final int startY = i * cellPixelLength;
 
@@ -168,7 +160,10 @@ public class GameCanvas extends View {
 		final boolean showHints = (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleGaussHintsOn());
 
 		boolean displayedLogicalStuff = false;
-		if (solverCell.getIsLogicalMine() && showHints && !gameCell.isFlagged()) {
+		if (drawRedBackground) {
+			displayedLogicalStuff = true;
+			drawCellHelpers.drawEndGameTap(canvas, i, j);
+		} else if (solverCell.getIsLogicalMine() && showHints && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
 			drawCellHelpers.drawLogicalMine(canvas, i, j, getResources());
 		} else if (solverCell.getIsLogicalFree() && showHints && !gameCell.isFlagged()) {
@@ -196,6 +191,7 @@ public class GameCanvas extends View {
 		}
 	}
 
+	//TODO: change this logic back to using matrices
 	private boolean cellIsOffScreen(int startX, int startY) {
 		final float absoluteX = scaleListener.getAbsoluteX();
 		final float absoluteY = scaleListener.getAbsoluteY();
@@ -218,7 +214,6 @@ public class GameCanvas extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-
 		canvas.setMatrix(scaleListener.getMatrix());
 
 		final int numberOfRows = minesweeperGame.getNumberOfRows();
@@ -226,7 +221,7 @@ public class GameCanvas extends View {
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				try {
-					drawCell(canvas, board[i][j], minesweeperGame.getCell(i, j), i, j);
+					drawCell(canvas, board[i][j], minesweeperGame.getCell(i, j), i, j, (minesweeperGame.getIsGameOver() && i == lastTapRow && j == lastTapCol));
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);
@@ -239,10 +234,6 @@ public class GameCanvas extends View {
 		}
 		for (int i = 0; i <= numberOfRows; ++i) {
 			canvas.drawLine(0, i * cellPixelLength, numberOfCols * cellPixelLength, i * cellPixelLength, black);
-		}
-
-		if (minesweeperGame.getIsGameOver()) {
-			PopupHelper.displayPopup(endGamePopup, findViewById(R.id.gridCanvas), getResources());
 		}
 	}
 }

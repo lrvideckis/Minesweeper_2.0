@@ -67,6 +67,9 @@ public class MinesweeperGame {
 			firstClickedCell(row, col);
 			return;
 		}
+		if (isGameOver) {
+			return;
+		}
 		final Tile curr = getCell(row, col);
 		if (curr.getIsVisible()) {
 			checkToRevealAdjacentMines(row, col);

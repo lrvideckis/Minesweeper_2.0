@@ -20,8 +20,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: also break out early the moment we find a (conditioned) solution
-//TODO: split components by cells we know: like if we know these 4 cells in a row, then we can split it into 2 components
-//TODO: hard code in rules, then split components by logical cells
 public class BacktrackingSolver implements MinesweeperSolver {
 
 	public final static int iterationLimit = 20000;
