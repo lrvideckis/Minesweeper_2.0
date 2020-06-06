@@ -24,6 +24,25 @@ public class Test {
 
 	private final static String[][] previousFailedBoards = {
 
+			//gauss solver says a cell is both a logical mine, and logical free
+			{
+					"UUUUUUUUUUUU",
+					"U112UUUUUUUU",
+					"U1.23U4U6UUU",
+					"U2.2U4445UUU",
+					"U314U5UUU5UU",
+					"U3U4U6UU43UU",
+					"2U4U4UUU22UU",
+					"U5U45UUU21UU",
+					"U5U3UU4U223U",
+					"U5232222U23U",
+					"U5U21122UUUU",
+					"UUU43UUUUUUU",
+					"UUUUUUUUUUUU",
+
+					"61"
+			},
+
 			//cell (0,3) is a logical - free, but fast solver doesn't set it
 			//basically, testing if away cells are set as logical free/bomb
 			{

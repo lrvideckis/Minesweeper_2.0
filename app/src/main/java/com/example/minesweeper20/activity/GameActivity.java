@@ -78,13 +78,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				toggleFlagModeOn = isChecked;
 				break;
 			case R.id.toggleBacktrackingHints:
-				handleHintToggle(buttonView, isChecked);
+				handleHintToggle(isChecked);
 				break;
 			case R.id.toggleMines:
 				handleToggleShowMines(isChecked);
 				break;
 			case R.id.toggleMineProbability:
-				handleToggleMineProbability(buttonView, isChecked);
+				handleToggleMineProbability(isChecked);
 				break;
 			case R.id.toggleGaussHints:
 				handleGaussHintToggle(isChecked);
@@ -98,7 +98,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		gameCanvas.invalidate();
 	}
 
-	private void handleToggleMineProbability(CompoundButton buttonView, boolean isChecked) {
+	private void handleToggleMineProbability(boolean isChecked) {
 		toggleMineProbabilityOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
@@ -144,7 +144,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		gameCanvas.invalidate();
 	}
 
-	private void handleHintToggle(CompoundButton buttonView, boolean isChecked) {
+	private void handleHintToggle(boolean isChecked) {
 		toggleBacktrackingHintsOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {

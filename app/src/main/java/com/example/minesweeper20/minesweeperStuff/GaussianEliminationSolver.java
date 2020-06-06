@@ -55,7 +55,7 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 
 		for (int i : knownMines) {
 			if (knownFrees.contains(i)) {
-				throw new Exception("cell can't be both a logical mine, and logical free" + idToHiddenNode[i][0] + " " + idToHiddenNode[i][1]);
+				throw new Exception("cell can't be both a logical mine, and logical free " + idToHiddenNode[i][0] + " " + idToHiddenNode[i][1]);
 			}
 			board[idToHiddenNode[i][0]][idToHiddenNode[i][1]].isLogicalMine = true;
 		}
@@ -191,8 +191,14 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 	}
 
 	private void checkRowForSolvableStuff(double[] currRow, boolean[] isMine, boolean[] isFree) {
+		if (Math.abs(currRow[currRow.length - 1]) < EPSILON) {
+			return;
+		}
 		double sumPos = 0, sumNeg = 0;
 		for (int i = 0; i + 1 < currRow.length; ++i) {
+			if (Math.abs(currRow[i]) < EPSILON) {
+				continue;
+			}
 			if (currRow[i] > 0.0) {
 				sumPos += currRow[i];
 			}
@@ -202,6 +208,9 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 		}
 		if (Math.abs(sumPos - currRow[currRow.length - 1]) < EPSILON) {
 			for (int i = 0; i + 1 < currRow.length; ++i) {
+				if (Math.abs(currRow[i]) < EPSILON) {
+					continue;
+				}
 				if (currRow[i] > 0.0) {
 					isMine[i] = true;
 				}
@@ -213,6 +222,9 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 		}
 		if (Math.abs(sumNeg - currRow[currRow.length - 1]) < EPSILON) {
 			for (int i = 0; i + 1 < currRow.length; ++i) {
+				if (Math.abs(currRow[i]) < EPSILON) {
+					continue;
+				}
 				if (currRow[i] > 0.0) {
 					isFree[i] = true;
 				}
