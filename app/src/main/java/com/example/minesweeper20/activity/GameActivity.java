@@ -26,8 +26,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleBacktrackingHintsOn = false,
 			toggleGaussHintsOn = false,
 			toggleMinesOn = false,
-			toggleMineProbabilityOn = false,
-			solverHitIterationLimit = false;
+			toggleMineProbabilityOn = false;
 	private int numberOfRows, numberOfCols, numberOfMines;
 	private String gameMode;
 	private PopupWindow solverHitLimitPopup, stackStacePopup;
@@ -97,6 +96,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void handleToggleMineProbability(CompoundButton buttonView, boolean isChecked) {
+		/*
 		if (solverHitIterationLimit) {
 			buttonView.setChecked(false);
 			Switch showBacktrackingHints = findViewById(R.id.toggleBacktrackingHints);
@@ -105,6 +105,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 			return;
 		}
+		 */
 		toggleMineProbabilityOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
@@ -151,6 +152,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void handleHintToggle(CompoundButton buttonView, boolean isChecked) {
+		/*
 		if (solverHitIterationLimit) {
 			buttonView.setChecked(false);
 			Switch mineProbability = findViewById(R.id.toggleMineProbability);
@@ -159,6 +161,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 			return;
 		}
+		 */
 		toggleBacktrackingHintsOn = isChecked;
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
@@ -206,16 +209,24 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		stackStacePopup = PopupHelper.initializePopup(this, R.layout.stack_trace_popup);
 	}
 
-	public void solverHasJustHitIterationLimit() {
+	public void solverHitIterationLimit() {
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
+		//TODO: think about changing this behavior to just switching modes to back to normal mode
 		if (!gameMode.equals(gameChoices[0])) {
 			onClick(findViewById(R.id.gameLayout));
 			return;
 		}
-		solverHitIterationLimit = true;
-		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
-		toggleHints.setChecked(false);
-		toggleBacktrackingHintsOn = false;
+		if (toggleBacktrackingHintsOn) {
+			Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
+			toggleHints.setChecked(false);
+			toggleBacktrackingHintsOn = false;
+		}
+		if (toggleMineProbabilityOn) {
+			Switch toggleProb = findViewById(R.id.toggleMineProbability);
+			toggleProb.setChecked(false);
+			toggleMineProbabilityOn = false;
+		}
+		updateNumberOfSolverIterations(0);
 		PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 	}
 

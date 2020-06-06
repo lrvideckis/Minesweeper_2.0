@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: also break out early the moment we find a (conditioned) solution
 //TODO: split components by cells we know: like if we know these 4 cells in a row, then we can split it into 2 components
@@ -28,10 +29,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
 	private final ArrayList<ArrayList<ArrayList<Pair<Integer, Integer>>>> lastUnvisitedSpot;
-	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig;
+	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig = new ArrayList<>();
 	//TODO: remove mineProbPerCompPerNumMines denominator, and use mineConfig instead
-	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines;
-	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent;
+	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines = new ArrayList<>();
+	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
 	private final GaussianEliminationSolver gaussianEliminationSolver;
 	private int totalIterations;
 	private VisibleTile[][] board;
@@ -53,10 +54,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			}
 			lastUnvisitedSpot.add(currRow);
 		}
-		mineConfig = new ArrayList<>();
-		numberOfConfigsForCurrent = new ArrayList<>();
 		gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
-		mineProbPerCompPerNumMines = new ArrayList<>();
 	}
 
 	@Override
@@ -108,16 +106,22 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			componentIndexes.add(i);
 		}
 		totalIterations = 0;
+		AtomicBoolean hitIterationLimit = new AtomicBoolean(false);
 		componentIndexes.parallelStream().forEach(i -> {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
 			try {
 				solveComponent(0, i, currIterations, currNumberOfMines);
+			} catch (HitIterationLimitException e) {
+				hitIterationLimit.set(true);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			totalIterations += currIterations.get();
 		});
+		if (hitIterationLimit.get()) {
+			throw new HitIterationLimitException();
+		}
 
 		removeMineNumbersFromComponent();
 		BigFraction awayMineProbability = null;

@@ -121,7 +121,7 @@ public class GameCanvas extends View {
 			backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
 			gameActivity.updateNumberOfSolverIterations(backtrackingSolver.getNumberOfIterations());
 		} catch (HitIterationLimitException e) {
-			gameActivity.solverHasJustHitIterationLimit();
+			gameActivity.solverHitIterationLimit();
 		}
 	}
 
@@ -226,9 +226,7 @@ public class GameCanvas extends View {
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				try {
-
 					drawCell(canvas, board[i][j], minesweeperGame.getCell(i, j), i, j);
-
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);
