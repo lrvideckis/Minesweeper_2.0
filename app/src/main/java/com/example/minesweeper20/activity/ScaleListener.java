@@ -119,24 +119,4 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	public Matrix getMatrix() {
 		return matrix;
 	}
-
-	public float getAbsoluteX() {
-		return absoluteX;
-	}
-
-	public float getAbsoluteY() {
-		return absoluteY;
-	}
-
-	public float getScale() {
-		return scale;
-	}
-
-	public float getHalfOfScreenWidth() {
-		return halfScreenWidth;
-	}
-
-	public float getHalfOfScreenHeight() {
-		return halfScreenHeight;
-	}
 }

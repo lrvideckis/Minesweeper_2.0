@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -31,6 +32,7 @@ public class GameCanvas extends View {
 	private final MinesweeperSolver backtrackingSolver, gaussSolver;
 	private final DrawCellHelpers drawCellHelpers;
 	private final BigFraction mineProbability = new BigFraction(0);
+	private final RectF tempCellRect = new RectF();
 	private int lastTapRow, lastTapCol;
 
 	public GameCanvas(Context context, AttributeSet attrs) throws Exception {
@@ -191,24 +193,10 @@ public class GameCanvas extends View {
 		}
 	}
 
-	//TODO: change this logic back to using matrices
 	private boolean cellIsOffScreen(int startX, int startY) {
-		final float absoluteX = scaleListener.getAbsoluteX();
-		final float absoluteY = scaleListener.getAbsoluteY();
-		final float scale = scaleListener.getScale();
-		final float halfOfScreenWidth = scaleListener.getHalfOfScreenWidth();
-		final float halfOfScreenHeight = scaleListener.getHalfOfScreenHeight();
-
-		if ((startX + cellPixelLength + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth < 0) {
-			return true;
-		}
-		if ((startY + cellPixelLength + absoluteY - halfOfScreenHeight) * scale + halfOfScreenHeight < 0) {
-			return true;
-		}
-		if ((startX + absoluteX - halfOfScreenWidth) * scale + halfOfScreenWidth > getWidth()) {
-			return true;
-		}
-		return ((startY + absoluteY - halfOfScreenHeight) * scale + halfOfScreenHeight > getHeight());
+		tempCellRect.set(startX, startY, startX + cellPixelLength, startY + cellPixelLength);
+		scaleListener.getMatrix().mapRect(tempCellRect);
+		return (tempCellRect.right < 0 || tempCellRect.bottom < 0 || tempCellRect.top > getHeight() || tempCellRect.left > getWidth());
 	}
 
 	@Override
