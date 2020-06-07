@@ -32,7 +32,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleMineProbabilityOn = false;
 	private int numberOfRows, numberOfCols, numberOfMines;
 	private String gameMode;
-	private PopupWindow solverHitLimitPopup, stackStacePopup;
+	private PopupWindow solverHitLimitPopup, stackStacePopup, gameWonPopup;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -63,6 +63,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
 		setUpStackTracePopup();
+		setUpGameWonPopup();
 	}
 
 	@Override
@@ -182,6 +183,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		PopupHelper.displayPopup(stackStacePopup, findViewById(R.id.gameLayout), getResources());
 	}
 
+	public void displayGameWonPopup() {
+		PopupHelper.displayPopup(gameWonPopup, findViewById(R.id.gameLayout), getResources());
+	}
+
 	private void setUpIterationLimitPopup() {
 		solverHitLimitPopup = PopupHelper.initializePopup(this, R.layout.solver_hit_limit_popup);
 		Button okButton = solverHitLimitPopup.getContentView().findViewById(R.id.solverHitLimitOkButton);
@@ -195,6 +200,17 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void setUpStackTracePopup() {
 		stackStacePopup = PopupHelper.initializePopup(this, R.layout.stack_trace_popup);
+	}
+
+	private void setUpGameWonPopup() {
+		gameWonPopup = PopupHelper.initializePopup(this, R.layout.win_screen);
+		Button okButton = gameWonPopup.getContentView().findViewById(R.id.gameWonOkButton);
+		okButton.setOnClickListener(view -> {
+			gameWonPopup.dismiss();
+			Intent intent = new Intent(GameActivity.this, StartScreenActivity.class);
+			startActivity(intent);
+		});
+		gameWonPopup.setFocusable(false);
 	}
 
 	public void solverHitIterationLimit() {

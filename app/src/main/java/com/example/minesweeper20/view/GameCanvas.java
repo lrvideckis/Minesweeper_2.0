@@ -68,7 +68,7 @@ public class GameCanvas extends View {
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
 
-		if (!minesweeperGame.getIsGameOver()) {
+		if (!minesweeperGame.getIsGameLost()) {
 			lastTapRow = row;
 			lastTapCol = col;
 		}
@@ -89,7 +89,7 @@ public class GameCanvas extends View {
 			}
 
 			minesweeperGame.clickCell(row, col, gameActivity.getToggleFlagModeOn());
-			if (!minesweeperGame.getIsGameOver() && !(gameActivity.getToggleFlagModeOn() && !minesweeperGame.getCell(row, col).getIsVisible())) {
+			if (!minesweeperGame.getIsGameLost() && !(gameActivity.getToggleFlagModeOn() && !minesweeperGame.getCell(row, col).getIsVisible())) {
 				if (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn()) {
 					updateSolvedBoardWithBacktrackingSolver();
 				} else if (gameActivity.getToggleGaussHintsOn()) {
@@ -175,12 +175,12 @@ public class GameCanvas extends View {
 
 		if (gameCell.isFlagged()) {
 			drawCellHelpers.drawFlag(canvas, startX, startY);
-			if (minesweeperGame.getIsGameOver() && !gameCell.isMine()) {
+			if (minesweeperGame.getIsGameLost() && !gameCell.isMine()) {
 				drawCellHelpers.drawBlackX(canvas, startX, startY);
 			} else if (solverCell.getIsLogicalFree() && (showHints || gameActivity.getToggleMineProbabilityOn())) {
 				drawCellHelpers.drawBlackX(canvas, startX, startY);
 			}
-		} else if (gameCell.isMine() && (minesweeperGame.getIsGameOver() || gameActivity.getToggleMinesOn())) {
+		} else if (gameCell.isMine() && (minesweeperGame.getIsGameLost() || gameActivity.getToggleMinesOn())) {
 			drawCellHelpers.drawMine(canvas, startX, startY);
 		}
 
@@ -221,7 +221,7 @@ public class GameCanvas extends View {
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				try {
-					drawCell(canvas, board[i][j], minesweeperGame.getCell(i, j), i, j, (minesweeperGame.getIsGameOver() && i == lastTapRow && j == lastTapCol));
+					drawCell(canvas, board[i][j], minesweeperGame.getCell(i, j), i, j, (minesweeperGame.getIsGameLost() && i == lastTapRow && j == lastTapCol));
 				} catch (Exception e) {
 					GameActivity gameActivity = (GameActivity) getContext();
 					gameActivity.displayStackTracePopup(e);
@@ -234,6 +234,9 @@ public class GameCanvas extends View {
 		}
 		for (int i = 0; i <= numberOfRows; ++i) {
 			canvas.drawLine(0, i * cellPixelLength, numberOfCols * cellPixelLength, i * cellPixelLength, black);
+		}
+		if (minesweeperGame.getIsGameWon()) {
+			((GameActivity) getContext()).displayGameWonPopup();
 		}
 	}
 }

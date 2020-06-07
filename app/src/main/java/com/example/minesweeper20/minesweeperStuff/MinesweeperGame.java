@@ -262,8 +262,21 @@ public class MinesweeperGame {
 		}
 	}
 
-	public boolean getIsGameOver() {
+	public boolean getIsGameLost() {
 		return isGameOver;
+	}
+
+	//game is won if all free cells are visible
+	public boolean getIsGameWon() {
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
+				Tile currCell = getCell(i, j);
+				if (!currCell.isMine() && !currCell.isVisible) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	public static class Tile extends VisibleTile {
@@ -285,9 +298,12 @@ public class MinesweeperGame {
 			return isFlagged;
 		}
 
-		private void revealTile() {
+		private void revealTile() throws Exception {
 			isVisible = true;
 			isFlagged = false;
+			if (isMine) {
+				throw new Exception("can't reveal a mine");
+			}
 		}
 
 		private void toggleFlag() {

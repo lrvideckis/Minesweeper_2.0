@@ -44,7 +44,7 @@ public class Test {
 			},
 
 			//cell (0,3) is a logical - free, but fast solver doesn't set it
-			//basically, testing if away cells are set as logical free/bomb
+			//basically, testing if away cells are set as logical free/mine
 			{
 					"U3UU",
 					"UUUU",
@@ -237,10 +237,10 @@ public class Test {
 			try {
 				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 				int numberOfClicks = MyMath.getRand(3, 7);
-				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
+				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 				}
-				if (minesweeperGame.getIsGameOver()) {
+				if (minesweeperGame.getIsGameLost()) {
 					System.out.println("game over, void test");
 					continue;
 				}
@@ -318,10 +318,10 @@ public class Test {
 			try {
 				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 				int numberOfClicks = MyMath.getRand(0, 4);
-				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
+				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 				}
-				if (minesweeperGame.getIsGameOver()) {
+				if (minesweeperGame.getIsGameLost()) {
 					System.out.println("game over, void test");
 					continue;
 				}
@@ -412,12 +412,12 @@ public class Test {
 			try {
 				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 				int numberOfClicks = MyMath.getRand(0, 4);
-				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
+				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
 					int x = MyMath.getRand(0, rows - 1);
 					int y = MyMath.getRand(0, cols - 1);
 					minesweeperGame.clickCell(x, y, false);
 				}
-				if (minesweeperGame.getIsGameOver()) {
+				if (minesweeperGame.getIsGameLost()) {
 					System.out.println("game over, void test");
 					continue;
 				}
@@ -496,10 +496,10 @@ public class Test {
 			try {
 				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 				int numberOfClicks = MyMath.getRand(0, 4);
-				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameOver()) {
+				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
 					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 				}
-				if (minesweeperGame.getIsGameOver()) {
+				if (minesweeperGame.getIsGameLost()) {
 					System.out.println("game over, void test");
 					continue;
 				}
