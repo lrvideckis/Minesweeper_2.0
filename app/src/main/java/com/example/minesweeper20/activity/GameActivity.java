@@ -203,7 +203,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		TextView textView = solverHitLimitPopup.getContentView().findViewById(R.id.iterationLimitText);
 		String text = "Backtracking solver took more than ";
 		text += NumberFormat.getNumberInstance(Locale.US).format(BacktrackingSolver.iterationLimit);
-		text += " iterations. Hints and mine probability features are no longer available.";
+		text += " iterations. Hints and mine probability features are currently not available.";
 		textView.setText(text);
 	}
 
