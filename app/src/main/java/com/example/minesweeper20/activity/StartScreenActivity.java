@@ -27,6 +27,7 @@ import com.example.minesweeper20.miscHelpers.Test;
 //TODO: Easy mode: always keep playing if there is a combination of mines St the move doesn't lose
 //TODO: Make minesweeper endless: always force >= 1 visible tile on the screen
 //TODO: Recommend the guess which will reveal the greatest amount of further stuff
+//TODO: Don't have to guess mode
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
