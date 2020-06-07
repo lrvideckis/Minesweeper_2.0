@@ -119,6 +119,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				Switch gaussHints = findViewById(R.id.toggleGaussHints);
 				gaussHints.setChecked(false);
 			}
+		} else {
+			updateNumberOfSolverIterations(0);
 		}
 		gameCanvas.invalidate();
 	}
