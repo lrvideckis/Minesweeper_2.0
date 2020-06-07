@@ -35,6 +35,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private int totalIterations, numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
+	private boolean performCheckPositionValidity = false;
 
 	public BacktrackingSolver(int rows, int cols) {
 		this.rows = rows;
@@ -52,6 +53,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			lastUnvisitedSpot.add(currRow);
 		}
 		gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
+	}
+
+	public void doPerformCheckPositionValidity() {
+		performCheckPositionValidity = true;
 	}
 
 	@Override
@@ -470,8 +475,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 	private void handleSolution(int componentPos, int currNumberOfMines) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
-		//TODO: remove this extra computation once there is sufficient testing
-		checkPositionValidity(component, currNumberOfMines);
+		if (performCheckPositionValidity) {
+			checkPositionValidity(component, currNumberOfMines);
+		}
 
 		MutableInt count = mineConfig.get(componentPos).get(currNumberOfMines);
 		if (count == null) {

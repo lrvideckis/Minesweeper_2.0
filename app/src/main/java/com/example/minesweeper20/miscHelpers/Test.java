@@ -168,6 +168,7 @@ public class Test {
 			}
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+			backtrackingSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			try {
@@ -231,6 +232,7 @@ public class Test {
 			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+			backtrackingSolver.doPerformCheckPositionValidity();
 			BacktrackingSolverWithBigint backtrackingSolverWithBigint = new BacktrackingSolverWithBigint(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -312,6 +314,7 @@ public class Test {
 			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+			backtrackingSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -406,6 +409,7 @@ public class Test {
 			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+			backtrackingSolver.doPerformCheckPositionValidity();
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -490,6 +494,7 @@ public class Test {
 			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
+			backtrackingSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
