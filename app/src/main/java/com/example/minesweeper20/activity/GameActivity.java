@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -33,6 +34,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private int numberOfRows, numberOfCols, numberOfMines;
 	private String gameMode;
 	private PopupWindow solverHitLimitPopup, stackStacePopup, gameWonPopup;
+	private RelativeLayout layout_game;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -64,6 +66,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		setUpIterationLimitPopup();
 		setUpStackTracePopup();
 		setUpGameWonPopup();
+
+		layout_game = findViewById(R.id.gameLayout);
+		layout_game.getForeground().setAlpha(0);
 	}
 
 	@Override
@@ -185,6 +190,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void displayGameWonPopup() {
 		PopupHelper.displayPopup(gameWonPopup, findViewById(R.id.gameLayout), getResources());
+		layout_game.getForeground().setAlpha(125);
+		disableSwitches();
 	}
 
 	private void setUpIterationLimitPopup() {
@@ -215,7 +222,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void solverHitIterationLimit() {
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
-		//TODO: think about changing this behavior to just switching modes to back to normal mode
+		//TODO: think about changing this behavior to just (temporarily) switching modes to back to normal mode
 		if (!gameMode.equals(gameChoices[0])) {
 			onClick(findViewById(R.id.gameLayout));
 			return;
@@ -244,6 +251,23 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		TextView iterationTextView = findViewById(R.id.numberOfIterationsTextView);
 		final String iterationsText = "iterations: " + numberOfIterations;
 		iterationTextView.setText(iterationsText);
+	}
+
+	private void disableSwitches() {
+		Switch toggleFlagMode = findViewById(R.id.toggleFlagMode);
+		toggleFlagMode.setClickable(false);
+
+		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
+		toggleHints.setClickable(false);
+
+		Switch toggleMines = findViewById(R.id.toggleMines);
+		toggleMines.setClickable(false);
+
+		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
+		toggleProbability.setClickable(false);
+
+		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
+		toggleGaussHints.setClickable(false);
 	}
 
 	public int getNumberOfRows() {

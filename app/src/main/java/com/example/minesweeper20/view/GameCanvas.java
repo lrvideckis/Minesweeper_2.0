@@ -236,6 +236,7 @@ public class GameCanvas extends View {
 			canvas.drawLine(0, i * cellPixelLength, numberOfCols * cellPixelLength, i * cellPixelLength, black);
 		}
 		if (minesweeperGame.getIsGameWon()) {
+			setOnTouchListener(null);
 			((GameActivity) getContext()).displayGameWonPopup();
 		}
 	}
