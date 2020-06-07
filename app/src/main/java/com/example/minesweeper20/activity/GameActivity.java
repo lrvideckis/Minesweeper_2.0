@@ -255,7 +255,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		iterationTextView.setText(iterationsText);
 	}
 
-	private void disableSwitches() {
+	public void disableSwitches() {
 		Switch toggleFlagMode = findViewById(R.id.toggleFlagMode);
 		toggleFlagMode.setClickable(false);
 

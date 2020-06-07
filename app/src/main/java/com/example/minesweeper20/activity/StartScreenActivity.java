@@ -17,11 +17,8 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.miscHelpers.Test;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
-//TODO: undo button - only when you lose
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
 //TODO: make sure back button on bottom nav bar works
-//TODO: when you lose, you can't click the back button, you have to click the okay popup button - fix this
-//TODO: Backtracking popup shows twice when clicking mine probability
 //TODO: Win screen - make this look good and improve functionality
 //TODO: Hard mode: always lose if there exists a possible mine combination s.t. the move loses
 //TODO: Easy mode: always keep playing if there is a combination of mines St the move doesn't lose

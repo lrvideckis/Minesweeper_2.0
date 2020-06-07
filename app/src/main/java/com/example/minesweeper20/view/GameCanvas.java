@@ -226,6 +226,8 @@ public class GameCanvas extends View {
 		if (minesweeperGame.getIsGameWon()) {
 			setOnTouchListener(null);
 			((GameActivity) getContext()).displayGameWonPopup();
+		} else if (minesweeperGame.getIsGameLost()) {
+			((GameActivity) getContext()).disableSwitches();
 		}
 	}
 }
