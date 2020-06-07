@@ -12,7 +12,7 @@
 
 		<TextView
 			android:id="@+id/rowsText"
-			android:layout_width="70dp"
+			android:layout_width="80dp"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
 			android:text="Height: 4"
@@ -51,7 +51,7 @@
 
 		<TextView
 			android:id="@+id/colsText"
-			android:layout_width="70dp"
+			android:layout_width="80dp"
 			android:layout_height="wrap_content"
 			android:layout_alignParentStart="true"
 			android:layout_centerVertical="true"
@@ -91,7 +91,7 @@
 
 		<TextView
 			android:id="@+id/mineText"
-			android:layout_width="70dp"
+			android:layout_width="80dp"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
 			android:text="Mines: 0\n0.00%"
