@@ -32,7 +32,6 @@ public class GameCanvas extends View {
 		final int screenHeight = context.getResources().getDisplayMetrics().heightPixels;
 		scaleListener = new ScaleListener(context, this, screenWidth, screenHeight);
 		setOnTouchListener(scaleListener);
-		System.out.println("here, rows, cols: " + gameActivity.getNumberOfRows() + " " + gameActivity.getNumberOfCols());
 		drawCellHelpers = new DrawCellHelpers(context, gameActivity.getNumberOfRows(), gameActivity.getNumberOfCols());
 	}
 

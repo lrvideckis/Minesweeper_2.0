@@ -236,6 +236,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			editor.putInt(NUMBER_OF_MINES, numberOfMines);
 			editor.apply();
 
+			//TODO: look into removing this
 			if (MinesweeperGame.tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
 				System.out.println("too many mines for zero start, UI doesn't allow for this to happen");
 				return;
