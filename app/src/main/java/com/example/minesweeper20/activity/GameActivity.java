@@ -3,6 +3,7 @@ package com.example.minesweeper20.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -422,6 +423,16 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	public void setNewGameButtonDeadFace() {
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
 		newGameButton.setBackgroundResource(R.drawable.dead_face);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			Intent intent = new Intent(GameActivity.this, StartScreenActivity.class);
+			startActivity(intent);
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 
 	public MinesweeperGame getMinesweeperGame() {
