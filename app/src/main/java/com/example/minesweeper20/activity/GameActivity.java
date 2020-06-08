@@ -21,6 +21,7 @@ import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.example.minesweeper20.miscHelpers.PopupHelper;
 import com.example.minesweeper20.view.GameCanvas;
 
@@ -42,8 +43,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleGaussHintsOn = false,
 			toggleMinesOn = false,
 			toggleMineProbabilityOn = false;
-	private int numberOfRows, numberOfCols, numberOfMines;
-	private String gameMode;
+	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
 	private PopupWindow solverHitLimitPopup, stackStacePopup;
 
 	private MinesweeperGame minesweeperGame;
@@ -62,7 +62,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfRows = getIntent().getIntExtra("numberOfRows", 1);
 		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
 		numberOfMines = getIntent().getIntExtra("numberOfMines", 1);
-		gameMode = getIntent().getStringExtra("gameMode");
+		//default game mode is normal mode
+		gameMode = getIntent().getIntExtra("gameMode", 0);
 		setContentView(R.layout.game);
 
 		try {
@@ -123,7 +124,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 	}
 
-	public void handleTap(float tapX, float tapY) {
+	public void handleTap(float tapX, float tapY) throws Exception {
 		//TODO: have grid always fill screen
 		//eventually I won't need this check, as the grid always fills the screen
 		if (tapX < 0f ||
@@ -135,8 +136,17 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
 
-		if (minesweeperGame.isBeforeFirstClick()) {
+		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
 			updateTimeThread.start();
+			if (gameMode == 1 || gameMode == 2) {
+				CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
+				try {
+					minesweeperGame = createSolvableBoard.getSolvableBoard(row, col);
+				} catch (HitIterationLimitException e) {
+					//TODO: display popup notifying user that too many iterations were taken
+					e.printStackTrace();
+				}
+			}
 		}
 
 		if (!minesweeperGame.getIsGameLost()) {
@@ -148,9 +158,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		try {
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
-			if (!getGameMode().equals(gameChoices[0])) {
+			if (gameMode == 2 || gameMode == 3) {
 				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-				boolean wantMine = gameMode.equals(gameChoices[1]);
+				boolean wantMine = (gameMode == 2);
 				//TODO: bug: when toggle flags is on + hard mode: this will always put a mine under the cell you just flagged
 				boolean[][] newMineLocations = backtrackingSolver.getMineConfiguration(board, 0, row, col, wantMine);
 				if (newMineLocations != null) {
@@ -350,7 +360,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	public void solverHitIterationLimit() {
 		String[] gameChoices = getResources().getStringArray(R.array.game_type);
 		//TODO: think about changing this behavior to just (temporarily) switching modes to back to normal mode
-		if (!gameMode.equals(gameChoices[0])) {
+		if (gameMode == 2 || gameMode == 3) {
 			Intent intent = new Intent(GameActivity.this, StartScreenActivity.class);
 			startActivity(intent);
 			return;
@@ -477,10 +487,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		return toggleMineProbabilityOn;
 	}
 
-	public String getGameMode() {
-		return gameMode;
-	}
-
 	public boolean getToggleGaussHintsOn() {
 		return toggleGaussHintsOn;
 	}
@@ -504,9 +510,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				synchronized (this) {
 					AtomicInteger time = new AtomicInteger(-1);
 					while (time.incrementAndGet() <= 999) {
-						runOnUiThread(() -> {
-							updateTime(time.get());
-						});
+						runOnUiThread(() -> updateTime(time.get()));
 						wait(1000);
 					}
 				}

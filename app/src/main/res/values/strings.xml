@@ -21,6 +21,7 @@
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>
+		<item>No Guessing Mode</item>
 		<item>Always Guess Wrong Mode</item>
 		<item>Always Guess Correctly Mode</item>
 	</string-array>

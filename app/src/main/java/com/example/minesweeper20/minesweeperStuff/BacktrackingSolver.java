@@ -122,7 +122,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			totalIterations += currIterations.get();
 		});
 		if (hitIterationLimit.get()) {
-			throw new HitIterationLimitException();
+			throw new HitIterationLimitException("too many iterations");
 		}
 
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
@@ -409,7 +409,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 		currIterations.addWith(1);
 		if (currIterations.get() >= iterationLimit) {
-			throw new HitIterationLimitException();
+			throw new HitIterationLimitException("too many iterations");
 		}
 		final int i = component.get(pos).first;
 		final int j = component.get(pos).second;

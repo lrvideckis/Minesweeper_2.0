@@ -6,8 +6,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +26,8 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 //TODO: Recommend the guess which will reveal the greatest amount of further stuff
 //TODO: Don't have to guess mode
 //TODO: make top/bottom bars look nice (and more like other Minesweeper apps)
+//TODO: save personal high scores (the time) for beginner, intermediate, expert
+//TODO: figure out what to make button to the left of the yellow smiley face button
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
@@ -106,6 +110,24 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			colsInput.setProgress(30);
 			minesInput.setProgress(99);
 		});
+
+		setUpGameTypeRadioGroup();
+	}
+
+	private void setUpGameTypeRadioGroup() {
+		RadioGroup gameTypeGroup = findViewById(R.id.game_type_group);
+		String[] gameType = getResources().getStringArray(R.array.game_type);
+		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT
+		);
+		for (int i = 0; i < gameType.length; ++i) {
+			RadioButton radioButtonView = new RadioButton(this);
+			radioButtonView.setText(gameType[i]);
+			radioButtonView.setId(i);
+			gameTypeGroup.addView(radioButtonView, p);
+		}
+		gameTypeGroup.check(0);
 	}
 
 	@Override
@@ -242,14 +264,13 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				return;
 			}
 
-			Spinner gameType = findViewById(R.id.game_type);
-			String selectedGameType = gameType.getSelectedItem().toString();
+			final RadioGroup gameType = findViewById(R.id.game_type_group);
 
 			Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
 			intent.putExtra("numberOfRows", numberOfRows);
 			intent.putExtra("numberOfCols", numberOfCols);
 			intent.putExtra("numberOfMines", numberOfMines);
-			intent.putExtra("gameMode", selectedGameType);
+			intent.putExtra("gameMode", gameType.getCheckedRadioButtonId());
 			startActivity(intent);
 		}
 

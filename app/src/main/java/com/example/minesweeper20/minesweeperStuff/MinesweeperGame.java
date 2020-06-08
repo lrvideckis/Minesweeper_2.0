@@ -1,6 +1,7 @@
 package com.example.minesweeper20.minesweeperStuff;
 
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 
 import java.util.ArrayList;
@@ -31,6 +32,22 @@ public class MinesweeperGame {
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				grid[i][j] = new Tile();
+			}
+		}
+	}
+
+	//copy constructor
+	public MinesweeperGame(MinesweeperGame minesweeperGame) {
+		numberOfRows = minesweeperGame.getNumberOfRows();
+		numberOfCols = minesweeperGame.getNumberOfCols();
+		numberOfMines = minesweeperGame.getNumberOfMines();
+		numberOfFlags = minesweeperGame.numberOfFlags;
+		firstClick = minesweeperGame.firstClick;
+		isGameLost = minesweeperGame.isGameLost;
+		grid = new Tile[numberOfRows][numberOfCols];
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
+				grid[i][j] = new Tile(minesweeperGame.getCell(i, j));
 			}
 		}
 	}
@@ -293,6 +310,19 @@ public class MinesweeperGame {
 		private Tile() {
 			isFlagged = isMine = false;
 			numberSurroundingMines = 0;
+		}
+
+		//copy constructor
+		private Tile(Tile other) {
+			isMine = other.isMine;
+			isFlagged = other.isFlagged;
+
+			isVisible = other.isVisible;
+			isLogicalMine = other.isLogicalMine;
+			isLogicalFree = other.isLogicalFree;
+			numberSurroundingMines = other.numberSurroundingMines;
+			numberOfMineConfigs = new BigFraction(other.numberOfMineConfigs);
+			numberOfTotalConfigs = new BigFraction(other.numberOfTotalConfigs);
 		}
 
 		public boolean isMine() {

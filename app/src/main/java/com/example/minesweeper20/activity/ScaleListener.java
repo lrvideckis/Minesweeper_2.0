@@ -102,7 +102,11 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						newY += halfScreenHeight;
 						newY -= absoluteY;
 
-						((GameActivity) context).handleTap(newX, newY);
+						try {
+							((GameActivity) context).handleTap(newX, newY);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
 					break;
 			}
