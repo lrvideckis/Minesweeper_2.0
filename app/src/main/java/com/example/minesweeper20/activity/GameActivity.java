@@ -52,6 +52,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private int lastTapRow, lastTapCol;
 	private Thread updateTimeThread;
 
+	public void stopTimerThread() {
+		updateTimeThread.interrupt();
+	}
+
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -91,24 +95,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		setUpIterationLimitPopup();
 		setUpStackTracePopup();
 
-		updateTimeThread = new Thread() {
-			@Override
-			public void run() {
-				try {
-					synchronized (this) {
-						AtomicInteger time = new AtomicInteger(-1);
-						while (time.incrementAndGet() <= 999) {
-							runOnUiThread(() -> {
-								updateTime(time.get());
-							});
-							wait(1000);
-						}
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		};
+		updateTimeThread = new TimeUpdateThread();
 	}
 
 	@Override
@@ -217,6 +204,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			Button toggleFlagMode = findViewById(R.id.toggleFlagMode);
 			toggleFlagMode.setText(mineEmoji);
 		}
+
+		stopTimerThread();
+		updateTimeThread = new TimeUpdateThread();
+		updateTime(0);
 	}
 
 	@Override
@@ -391,7 +382,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		numberOfMines.setText(minesLeft);
 	}
 
-	public void updateTime(int newTime) {
+	private void updateTime(int newTime) {
 		String currTime;
 		if (newTime < 10) {
 			currTime = "00" + newTime;
@@ -504,5 +495,24 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public int getLastTapCol() {
 		return lastTapCol;
+	}
+
+	private class TimeUpdateThread extends Thread {
+		@Override
+		public void run() {
+			try {
+				synchronized (this) {
+					AtomicInteger time = new AtomicInteger(-1);
+					while (time.incrementAndGet() <= 999) {
+						runOnUiThread(() -> {
+							updateTime(time.get());
+						});
+						wait(1000);
+					}
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

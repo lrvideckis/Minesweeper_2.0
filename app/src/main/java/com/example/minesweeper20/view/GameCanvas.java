@@ -63,6 +63,9 @@ public class GameCanvas extends View {
 		if (solverCell.getIsLogicalFree() && gameCell.isMine()) {
 			throw new Exception("gauss solver says: logical free, but it's not free");
 		}
+		if (gameActivity.getMinesweeperGame().getIsGameWon() && gameActivity.getMinesweeperGame().getIsGameLost()) {
+			throw new Exception("game is both won and lost");
+		}
 
 		final boolean showHints = (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleGaussHintsOn());
 
@@ -132,9 +135,11 @@ public class GameCanvas extends View {
 		if (gameActivity.getMinesweeperGame().getIsGameWon()) {
 			gameActivity.disableSwitches();
 			gameActivity.setNewGameButtonWinFace();
+			gameActivity.stopTimerThread();
 		} else if (gameActivity.getMinesweeperGame().getIsGameLost()) {
 			gameActivity.disableSwitches();
 			gameActivity.setNewGameButtonDeadFace();
+			gameActivity.stopTimerThread();
 		}
 	}
 }

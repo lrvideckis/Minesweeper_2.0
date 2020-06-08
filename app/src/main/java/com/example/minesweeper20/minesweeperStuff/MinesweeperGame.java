@@ -273,6 +273,9 @@ public class MinesweeperGame {
 
 	//game is won if all free cells are visible
 	public boolean getIsGameWon() {
+		if (isGameLost) {
+			return false;
+		}
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				Tile currCell = getCell(i, j);

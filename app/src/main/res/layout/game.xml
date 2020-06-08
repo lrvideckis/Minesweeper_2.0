@@ -48,8 +48,8 @@
 			android:layout_height="50dp"
 			android:layout_centerVertical="true"
 			android:layout_marginStart="10dp"
-			android:textSize="20sp"
-			android:layout_toEndOf="@id/newGameButton" />
+			android:layout_toEndOf="@id/newGameButton"
+			android:textSize="20sp" />
 
 		<TextView
 			android:id="@+id/timeTextView"
