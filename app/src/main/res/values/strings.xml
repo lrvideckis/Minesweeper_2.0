@@ -24,5 +24,6 @@
 		<item>No Guessing Mode</item>
 		<item>Always Guess Wrong Mode</item>
 		<item>Always Guess Correctly Mode</item>
+		<item>Puzzle</item>
 	</string-array>
 </resources>

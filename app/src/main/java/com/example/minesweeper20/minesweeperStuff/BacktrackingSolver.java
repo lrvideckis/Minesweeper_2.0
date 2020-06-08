@@ -3,6 +3,7 @@ package com.example.minesweeper20.minesweeperStuff;
 import android.util.Pair;
 
 import com.example.minesweeper20.customExceptions.HitIterationLimitException;
+import com.example.minesweeper20.customExceptions.NoSolutionFoundException;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AllCellsAreHidden;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
@@ -103,27 +104,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
-		List<Integer> componentIndexes = new ArrayList<>();
-		for (int i = 0; i < components.size(); ++i) {
-			componentIndexes.add(i);
-		}
-		totalIterations = 0;
-		AtomicBoolean hitIterationLimit = new AtomicBoolean(false);
-		componentIndexes.parallelStream().forEach(i -> {
-			MutableInt currIterations = new MutableInt(0);
-			MutableInt currNumberOfMines = new MutableInt(0);
-			try {
-				solveComponent(0, i, currIterations, currNumberOfMines);
-			} catch (HitIterationLimitException e) {
-				hitIterationLimit.set(true);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			totalIterations += currIterations.get();
-		});
-		if (hitIterationLimit.get()) {
-			throw new HitIterationLimitException("too many iterations");
-		}
+		performBacktracktrackingInParallel();
 
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 
@@ -331,36 +312,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return prevWays;
 	}
 
-	//TODO: update this to do backtracking twice with dp in the middle
-	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
-		throw new Exception("not implemented");
-		/*
-		initialize(board, numberOfMines);
-		components = GetConnectedComponents.getComponents(board);
-		initializeLastUnvisitedSpot(components);
-
-		this.spotI = spotI;
-		this.spotJ = spotJ;
-		this.wantMine = wantMine;
-		foundMineConfiguration = false;
-
-		for (int i = 0; i < components.size(); ++i) {
-			ArrayList<Pair<Integer, Integer>> component = components.get(i);
-			needToCheckSpotCondition = false;
-			for (Pair<Integer, Integer> spot : component) {
-				if (spot.first.equals(spotI) && spot.second.equals(spotJ)) {
-					needToCheckSpotCondition = true;
-					break;
-				}
-			}
-			MutableInt currIterations = new MutableInt(0);
-			MutableInt currNumberOfMines = new MutableInt(0);
-			solveComponent(0, i, currIterations, currNumberOfMines, false);
-		}
-		return (foundMineConfiguration ? saveIsMine : null);
-		 */
-	}
-
 	private void initialize(VisibleTile[][] board, int numberOfMines) throws Exception {
 		this.board = board;
 		this.numberOfMines = numberOfMines;
@@ -537,5 +488,81 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 	public int getNumberOfIterations() {
 		return totalIterations;
+	}
+
+	private void performBacktracktrackingInParallel() throws HitIterationLimitException {
+		List<Integer> componentIndexes = new ArrayList<>();
+		for (int i = 0; i < components.size(); ++i) {
+			componentIndexes.add(i);
+		}
+		totalIterations = 0;
+		AtomicBoolean hitIterationLimit = new AtomicBoolean(false);
+		componentIndexes.parallelStream().forEach(i -> {
+			MutableInt currIterations = new MutableInt(0);
+			MutableInt currNumberOfMines = new MutableInt(0);
+			try {
+				solveComponent(0, i, currIterations, currNumberOfMines);
+			} catch (HitIterationLimitException e) {
+				hitIterationLimit.set(true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			totalIterations += currIterations.get();
+		});
+		if (hitIterationLimit.get()) {
+			throw new HitIterationLimitException("too many iterations");
+		}
+	}
+
+	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
+
+		if (AllCellsAreHidden.allCellsAreHidden(board)) {
+			throw new Exception("not implemented yet");
+		}
+
+		gaussianEliminationSolver.solvePosition(board, numberOfMines);
+
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (board[i][j].getIsVisible() && (board[i][j].getIsLogicalMine() || board[i][j].getIsLogicalFree())) {
+					throw new Exception("visible cells can't be logical frees/mines");
+				}
+				if (board[i][j].getIsLogicalMine()) {
+					if (i == spotI && j == spotJ && !wantMine) {
+						throw new NoSolutionFoundException("logical mine in spot where free was requested");
+					}
+					--numberOfMines;
+					board[i][j].numberOfMineConfigs.setValues(1, 1);
+					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+				} else if (board[i][j].getIsLogicalFree()) {
+					if (i == spotI && j == spotJ && wantMine) {
+						throw new NoSolutionFoundException("logical free in spot where mine was requested");
+					}
+					board[i][j].numberOfMineConfigs.setValues(0, 1);
+					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+				}
+				if (board[i][j].getIsVisible()) {
+					if (i == spotI && j == spotJ) {
+						throw new NoSolutionFoundException("requested (mine/free) cell is visible");
+					}
+					updatedNumberSurroundingMines[i][j] = board[i][j].getNumberSurroundingMines();
+					for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+						VisibleTile adjCell = board[adj[0]][adj[1]];
+						if (adjCell.getIsLogicalMine()) {
+							--updatedNumberSurroundingMines[i][j];
+						}
+					}
+				}
+			}
+		}
+
+		initialize(board, numberOfMines);
+		components = GetConnectedComponents.getComponentsWithKnownCells(board);
+		initializeLastUnvisitedSpot(components);
+
+		performBacktracktrackingInParallel();
+
+		removeMineNumbersFromComponent();
+		return null;
 	}
 }

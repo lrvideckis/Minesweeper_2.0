@@ -16,7 +16,7 @@ public interface MinesweeperSolver {
 	int getNumberOfIterations();
 
 	class VisibleTile {
-		final BigFraction numberOfMineConfigs = new BigFraction(0), numberOfTotalConfigs = new BigFraction(0);
+		BigFraction numberOfMineConfigs = new BigFraction(0), numberOfTotalConfigs = new BigFraction(0);
 		boolean isVisible, isLogicalMine, isLogicalFree;
 		int numberSurroundingMines;
 

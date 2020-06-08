@@ -154,8 +154,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			lastTapCol = col;
 		}
 
-		String[] gameChoices = getResources().getStringArray(R.array.game_type);
-
 		try {
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
 			if (gameMode == 2 || gameMode == 3) {
@@ -259,7 +257,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				Switch gaussHints = findViewById(R.id.toggleGaussHints);
 				gaussHints.setChecked(false);
 			}
-		} else {
+		} else if (!toggleBacktrackingHintsOn) {
 			updateNumberOfSolverIterations(0);
 		}
 		gameCanvas.invalidate();
@@ -327,7 +325,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					e.printStackTrace();
 				}
 			}
-			updateNumberOfSolverIterations(0);
+			if (!toggleMineProbabilityOn) {
+				updateNumberOfSolverIterations(0);
+			}
 		}
 		gameCanvas.invalidate();
 	}

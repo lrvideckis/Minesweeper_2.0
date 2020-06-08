@@ -158,6 +158,9 @@
 			android:textColor="@color/black" />
 	</TableRow>
 
+	<!--
+	TODO: add little info buttons which create a popup explaining the mode
+	-->
 	<RadioGroup
 		android:id="@+id/game_type_group"
 		android:layout_width="wrap_content"
