@@ -4,12 +4,13 @@
 	<color name="colorPrimaryDark">#3700B3</color>
 	<color name="colorAccent">#03DAC5</color>
 
-	<color name="lightGrey">#a6a6a6</color>
-	<color name="reallyLightGrey">#e6e6e6</color>
-	<color name="white">#ffffff</color>
+	<color name="lightGrey">#A6A6A6</color>
+	<color name="reallyLightGrey">#E6E6E6</color>
+	<color name="white">#FFFFFF</color>
 	<color name="black">#000000</color>
-	<color name="backgroundGreyBlankVisibleCell">#cccccc</color>
-	<color name="backgroundRedBlankVisibleCell">#ff0000</color>
+	<color name="backgroundGreyBlankVisibleCell">#CCCCCC</color>
+	<color name="backgroundRedBlankVisibleCell">#FF0000</color>
+	<color name="red">#FF0000</color>
 
 	<!-- colors for the numbers -->
 	<color name="one">#0000FF</color>
@@ -21,14 +22,14 @@
 	<color name="seven">#000000</color>
 	<color name="eight">#808080</color>
 
-	<color name="middleSquareColor">#b3b3b3</color>
+	<color name="middleSquareColor">#B3B3B3</color>
 	<color name="lowerTriangleColor">#666666</color>
 
-	<color name="upperRedTriangle">#ffcccc</color>
-	<color name="middleRedSquare">#ff6666</color>
-	<color name="lowerRedTriangle">#cc0000</color>
+	<color name="upperRedTriangle">#FFCCCC</color>
+	<color name="middleRedSquare">#FF6666</color>
+	<color name="lowerRedTriangle">#CC0000</color>
 
-	<color name="upperGreenTriangle">#ccffcc</color>
-	<color name="middleGreenSquare">#4dff4d</color>
-	<color name="lowerGreenTriangle">#00cc00</color>
+	<color name="upperGreenTriangle">#CCFFCC</color>
+	<color name="middleGreenSquare">#4DFF4D</color>
+	<color name="lowerGreenTriangle">#00CC00</color>
 </resources>

@@ -131,8 +131,8 @@ public class GameCanvas extends View {
 			canvas.drawLine(0, i * GameActivity.cellPixelLength, numberOfCols * GameActivity.cellPixelLength, i * GameActivity.cellPixelLength, black);
 		}
 		if (gameActivity.getMinesweeperGame().getIsGameWon()) {
-			setOnTouchListener(null);
-			gameActivity.displayGameWonPopup();
+			gameActivity.disableSwitches();
+			gameActivity.setNewGameButtonWinFace();
 		} else if (gameActivity.getMinesweeperGame().getIsGameLost()) {
 			gameActivity.disableSwitches();
 			gameActivity.setNewGameButtonDeadFace();

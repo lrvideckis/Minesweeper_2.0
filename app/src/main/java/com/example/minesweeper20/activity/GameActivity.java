@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -45,7 +44,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private int numberOfRows, numberOfCols, numberOfMines;
 	private String gameMode;
 	private PopupWindow solverHitLimitPopup, stackStacePopup, gameWonPopup;
-	private RelativeLayout layout_game;
 
 	private MinesweeperGame minesweeperGame;
 	private MinesweeperSolver backtrackingSolver, gaussSolver;
@@ -90,10 +88,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
 		setUpStackTracePopup();
-		setUpGameWonPopup();
-
-		layout_game = findViewById(R.id.gameLayout);
-		layout_game.getForeground().setAlpha(0);
 	}
 
 	@Override
@@ -322,12 +316,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		PopupHelper.displayPopup(stackStacePopup, findViewById(R.id.gameLayout), getResources());
 	}
 
-	public void displayGameWonPopup() {
-		PopupHelper.displayPopup(gameWonPopup, findViewById(R.id.gameLayout), getResources());
-		layout_game.getForeground().setAlpha(125);
-		disableSwitches();
-	}
-
 	private void setUpIterationLimitPopup() {
 		solverHitLimitPopup = PopupHelper.initializePopup(this, R.layout.solver_hit_limit_popup);
 		Button okButton = solverHitLimitPopup.getContentView().findViewById(R.id.solverHitLimitOkButton);
@@ -341,17 +329,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void setUpStackTracePopup() {
 		stackStacePopup = PopupHelper.initializePopup(this, R.layout.stack_trace_popup);
-	}
-
-	private void setUpGameWonPopup() {
-		gameWonPopup = PopupHelper.initializePopup(this, R.layout.win_screen);
-		Button okButton = gameWonPopup.getContentView().findViewById(R.id.gameWonOkButton);
-		okButton.setOnClickListener(view -> {
-			gameWonPopup.dismiss();
-			Intent intent = new Intent(GameActivity.this, StartScreenActivity.class);
-			startActivity(intent);
-		});
-		gameWonPopup.setFocusable(false);
 	}
 
 	public void solverHitIterationLimit() {
@@ -377,8 +354,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	public void updateNumberOfMines(int numberOfMinesLeft) {
+		String minesLeft;
+		if (numberOfMinesLeft < 10) {
+			minesLeft = "00" + numberOfMinesLeft;
+		} else if (numberOfMinesLeft < 100) {
+			minesLeft = "0" + numberOfMinesLeft;
+		} else {
+			minesLeft = String.valueOf(numberOfMinesLeft);
+		}
 		TextView numberOfMines = findViewById(R.id.showNumberOfMines);
-		final String minesLeft = "mines: " + numberOfMinesLeft;
 		numberOfMines.setText(minesLeft);
 	}
 
@@ -423,6 +407,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	public void setNewGameButtonDeadFace() {
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
 		newGameButton.setBackgroundResource(R.drawable.dead_face);
+	}
+
+	public void setNewGameButtonWinFace() {
+		ImageButton newGameButton = findViewById(R.id.newGameButton);
+		newGameButton.setBackgroundResource(R.drawable.win_face);
 	}
 
 	@Override
