@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.example.minesweeper20.miscHelpers.Test;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //ODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
@@ -40,11 +39,13 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
+		/*
 		Test.testPreviouslyFailedBoards();
 		Test.performTestsForMineProbability(20);
 		Test.performTestsWithBigIntSolverForLargerGrids(20);
 		Test.performTestsForGaussSolver(20);
 		Test.performTestsMultipleRunsOfSameBoard(10);
+		 */
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);

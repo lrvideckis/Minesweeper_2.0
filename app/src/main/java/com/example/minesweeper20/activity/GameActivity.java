@@ -185,6 +185,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		enableSwitchesAndSetToFalse();
+		try {
+			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (toggleFlagModeOn) {
+			toggleFlagModeOn = false;
+			Button toggleFlagMode = findViewById(R.id.toggleFlagMode);
+			toggleFlagMode.setText(mineEmoji);
+		}
 	}
 
 	@Override
@@ -299,6 +311,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		gameCanvas.invalidate();
 	}
 
+	//TODO: make all thrown places show this
 	public void displayStackTracePopup(Exception e) {
 		TextView textView = stackStacePopup.getContentView().findViewById(R.id.stackTrace);
 		StringWriter sw = new StringWriter();
@@ -386,6 +399,24 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
 		toggleGaussHints.setClickable(false);
+	}
+
+	public void enableSwitchesAndSetToFalse() {
+		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
+		toggleHints.setClickable(true);
+		toggleHints.setChecked(false);
+
+		Switch toggleMines = findViewById(R.id.toggleMines);
+		toggleMines.setClickable(true);
+		toggleMines.setChecked(false);
+
+		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
+		toggleProbability.setClickable(true);
+		toggleProbability.setChecked(false);
+
+		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
+		toggleGaussHints.setClickable(true);
+		toggleGaussHints.setChecked(false);
 	}
 
 	public void setNewGameButtonDeadFace() {
