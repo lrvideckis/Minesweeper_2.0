@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 	public final static String
@@ -49,6 +50,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private MinesweeperSolver backtrackingSolver, gaussSolver;
 	private MinesweeperSolver.VisibleTile[][] board;
 	private int lastTapRow, lastTapCol;
+	private Thread updateTimeThread;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -88,6 +90,25 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
 		setUpStackTracePopup();
+
+		updateTimeThread = new Thread() {
+			@Override
+			public void run() {
+				try {
+					synchronized (this) {
+						AtomicInteger time = new AtomicInteger(-1);
+						while (time.incrementAndGet() <= 999) {
+							runOnUiThread(() -> {
+								updateTime(time.get());
+							});
+							wait(1000);
+						}
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		};
 	}
 
 	@Override
@@ -126,6 +147,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
+
+		if (minesweeperGame.isBeforeFirstClick()) {
+			updateTimeThread.start();
+		}
 
 		if (!minesweeperGame.getIsGameLost()) {
 			lastTapRow = row;
@@ -364,6 +389,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 		TextView numberOfMines = findViewById(R.id.showNumberOfMines);
 		numberOfMines.setText(minesLeft);
+	}
+
+	public void updateTime(int newTime) {
+		String currTime;
+		if (newTime < 10) {
+			currTime = "00" + newTime;
+		} else if (newTime < 100) {
+			currTime = "0" + newTime;
+		} else {
+			currTime = String.valueOf(newTime);
+		}
+		TextView timeText = findViewById(R.id.timeTextView);
+		timeText.setText(currTime);
 	}
 
 	public void updateNumberOfSolverIterations(int numberOfIterations) {

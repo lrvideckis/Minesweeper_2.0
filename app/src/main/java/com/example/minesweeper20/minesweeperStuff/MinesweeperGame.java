@@ -55,6 +55,10 @@ public class MinesweeperGame {
 		return numberOfFlags;
 	}
 
+	public boolean isBeforeFirstClick() {
+		return firstClick;
+	}
+
 	public Tile getCell(int row, int col) {
 		if (ArrayBounds.outOfBounds(row, col, numberOfRows, numberOfCols)) {
 			throw new ArrayIndexOutOfBoundsException();
