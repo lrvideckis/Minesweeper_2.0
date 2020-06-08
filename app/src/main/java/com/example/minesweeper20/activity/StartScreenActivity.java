@@ -17,7 +17,7 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.miscHelpers.Test;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
-//TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
+//ODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
 //TODO: make sure back button on bottom nav bar works
 //TODO: Win screen - make this look good and improve functionality
 //TODO: Hard mode: always lose if there exists a possible mine combination s.t. the move loses

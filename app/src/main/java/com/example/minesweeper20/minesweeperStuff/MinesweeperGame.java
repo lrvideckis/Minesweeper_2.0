@@ -16,6 +16,7 @@ public class MinesweeperGame {
 
 	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfMines) throws Exception {
 
+		//TODO: look into removing this, it is kinda pointless
 		if (tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
 			throw new Exception("too many mines for zero start, UI doesn't allow for this to happen");
 		}

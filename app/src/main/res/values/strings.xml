@@ -1,13 +1,11 @@
 <resources>
 
 	<string name="app_name">Minesweeper 2.0</string>
-	<string name="back">Back</string>
 	<string name="ok">OK</string>
 	<string name="start_new_game">Start New Game</string>
 	<string name="beginner">beginner</string>
 	<string name="intermediate">intermediate</string>
 	<string name="expert">expert</string>
-	<string name="flag_mode">Flag Mode</string>
 	<string name="backtracking">Back tracking</string>
 	<string name="show_mines">Show Mines</string>
 	<string name="show_mine_probability">Mine Probability</string>

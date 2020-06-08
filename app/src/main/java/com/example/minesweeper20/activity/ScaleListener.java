@@ -15,6 +15,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private final GameCanvas gameCanvas;
 	private final Matrix matrix = new Matrix();
 	private final int halfScreenWidth, halfScreenHeight;
+	private final Context context;
 	private float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
 	private int prevPointerCount = 0;
 	//variables to handle a tap
@@ -22,6 +23,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
 
 	public ScaleListener(Context context, GameCanvas gameCanvas, int screenWidth, int screenHeight) {
+		this.context = context;
 		halfScreenWidth = screenWidth / 2;
 		halfScreenHeight = screenHeight / 2;
 		SGD = new ScaleGestureDetector(context, this);
@@ -100,7 +102,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						newY += halfScreenHeight;
 						newY -= absoluteY;
 
-						gameCanvas.handleTap(newX, newY);
+						((GameActivity) context).handleTap(newX, newY);
 					}
 					break;
 			}
