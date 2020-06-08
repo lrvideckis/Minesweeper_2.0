@@ -18,7 +18,6 @@
 	<string name="is_relative_layout">is_relative_layout</string>
 	<string name="decrement">-</string>
 	<string name="increment">+</string>
-	<string name="you_win">You Win!!!!!</string>
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>

@@ -43,7 +43,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleMineProbabilityOn = false;
 	private int numberOfRows, numberOfCols, numberOfMines;
 	private String gameMode;
-	private PopupWindow solverHitLimitPopup, stackStacePopup, gameWonPopup;
+	private PopupWindow solverHitLimitPopup, stackStacePopup;
 
 	private MinesweeperGame minesweeperGame;
 	private MinesweeperSolver backtrackingSolver, gaussSolver;

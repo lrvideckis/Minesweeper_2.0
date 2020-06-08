@@ -12,7 +12,7 @@ public class MinesweeperGame {
 	private final int numberOfRows, numberOfCols, numberOfMines;
 	private final Tile[][] grid;
 	private int numberOfFlags;
-	private boolean firstClick, isGameOver;
+	private boolean firstClick, isGameLost;
 
 	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfMines) throws Exception {
 
@@ -26,7 +26,7 @@ public class MinesweeperGame {
 		this.numberOfMines = numberOfMines;
 		numberOfFlags = 0;
 		firstClick = true;
-		isGameOver = false;
+		isGameLost = false;
 		grid = new Tile[numberOfRows][numberOfCols];
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
@@ -68,7 +68,7 @@ public class MinesweeperGame {
 			firstClickedCell(row, col);
 			return;
 		}
-		if (isGameOver) {
+		if (isGameLost || getIsGameWon()) {
 			return;
 		}
 		final Tile curr = getCell(row, col);
@@ -87,7 +87,7 @@ public class MinesweeperGame {
 			return;
 		}
 		if (curr.isMine && !curr.isFlagged()) {
-			isGameOver = true;
+			isGameLost = true;
 			return;
 		}
 		if (curr.isFlagged()) {
@@ -109,7 +109,7 @@ public class MinesweeperGame {
 						continue;
 					}
 					if (adj.isFlagged() && !adj.isMine) {
-						isGameOver = true;
+						isGameLost = true;
 						return;
 					}
 					if (adj.isFlagged() != adj.isMine) {
@@ -264,7 +264,7 @@ public class MinesweeperGame {
 	}
 
 	public boolean getIsGameLost() {
-		return isGameOver;
+		return isGameLost;
 	}
 
 	//game is won if all free cells are visible

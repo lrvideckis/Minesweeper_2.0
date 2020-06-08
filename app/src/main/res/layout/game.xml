@@ -20,9 +20,9 @@
 			android:layout_centerVertical="true"
 			android:layout_marginStart="10dp"
 			android:background="@drawable/border"
+			android:text="000"
 			android:textColor="@color/red"
 			android:textSize="20sp"
-			android:text="000"
 			tools:ignore="HardcodedText" />
 
 		<Button
