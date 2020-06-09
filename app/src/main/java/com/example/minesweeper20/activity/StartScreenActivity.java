@@ -31,7 +31,7 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-	public static final int rowsColsMax = 50;
+	public static final int rowsColsMax = 30;
 
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
