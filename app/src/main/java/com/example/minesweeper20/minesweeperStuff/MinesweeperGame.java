@@ -1,6 +1,7 @@
 package com.example.minesweeper20.minesweeperStuff;
 
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
+import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 
 import java.util.ArrayList;
@@ -12,10 +13,11 @@ public class MinesweeperGame {
 	private final int numberOfRows, numberOfCols, numberOfMines;
 	private final Tile[][] grid;
 	private int numberOfFlags;
-	private boolean firstClick, isGameOver;
+	private boolean firstClick, isGameLost;
 
 	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfMines) throws Exception {
 
+		//TODO: look into removing this, it is kinda pointless
 		if (tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
 			throw new Exception("too many mines for zero start, UI doesn't allow for this to happen");
 		}
@@ -25,11 +27,27 @@ public class MinesweeperGame {
 		this.numberOfMines = numberOfMines;
 		numberOfFlags = 0;
 		firstClick = true;
-		isGameOver = false;
+		isGameLost = false;
 		grid = new Tile[numberOfRows][numberOfCols];
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				grid[i][j] = new Tile();
+			}
+		}
+	}
+
+	//copy constructor
+	public MinesweeperGame(MinesweeperGame minesweeperGame) {
+		numberOfRows = minesweeperGame.getNumberOfRows();
+		numberOfCols = minesweeperGame.getNumberOfCols();
+		numberOfMines = minesweeperGame.getNumberOfMines();
+		numberOfFlags = minesweeperGame.numberOfFlags;
+		firstClick = minesweeperGame.firstClick;
+		isGameLost = minesweeperGame.isGameLost;
+		grid = new Tile[numberOfRows][numberOfCols];
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
+				grid[i][j] = new Tile(minesweeperGame.getCell(i, j));
 			}
 		}
 	}
@@ -54,6 +72,10 @@ public class MinesweeperGame {
 		return numberOfFlags;
 	}
 
+	public boolean isBeforeFirstClick() {
+		return firstClick;
+	}
+
 	public Tile getCell(int row, int col) {
 		if (ArrayBounds.outOfBounds(row, col, numberOfRows, numberOfCols)) {
 			throw new ArrayIndexOutOfBoundsException();
@@ -67,7 +89,7 @@ public class MinesweeperGame {
 			firstClickedCell(row, col);
 			return;
 		}
-		if (isGameOver) {
+		if (isGameLost || getIsGameWon()) {
 			return;
 		}
 		final Tile curr = getCell(row, col);
@@ -86,7 +108,7 @@ public class MinesweeperGame {
 			return;
 		}
 		if (curr.isMine && !curr.isFlagged()) {
-			isGameOver = true;
+			isGameLost = true;
 			return;
 		}
 		if (curr.isFlagged()) {
@@ -108,7 +130,7 @@ public class MinesweeperGame {
 						continue;
 					}
 					if (adj.isFlagged() && !adj.isMine) {
-						isGameOver = true;
+						isGameLost = true;
 						return;
 					}
 					if (adj.isFlagged() != adj.isMine) {
@@ -222,6 +244,17 @@ public class MinesweeperGame {
 	public void changeMineLocations(boolean[][] newMineLocations) throws Exception {
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
+				if (newMineLocations[i][j]) {
+					System.out.print('1');
+				} else {
+					System.out.print('0');
+				}
+			}
+			System.out.println();
+		}
+		System.out.println();
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
 				Tile curr = getCell(i, j);
 				if (!curr.getIsVisible()) {
 					continue;
@@ -233,6 +266,7 @@ public class MinesweeperGame {
 					}
 				}
 				if (cntSurroundingMines != getCell(i, j).numberSurroundingMines) {
+					System.out.println("i,j: " + i + " " + j);
 					throw new Exception("bad mine configuration: surrounding mine count doesn't match");
 				}
 			}
@@ -247,6 +281,7 @@ public class MinesweeperGame {
 			}
 		}
 		if (numberOfNewMines != numberOfMines) {
+			System.out.println("number of mines should be: " + numberOfMines + " but it is: " + numberOfNewMines);
 			throw new Exception("bad mine configuration: wrong # of mines");
 		}
 		for (int i = 0; i < numberOfRows; ++i) {
@@ -263,11 +298,14 @@ public class MinesweeperGame {
 	}
 
 	public boolean getIsGameLost() {
-		return isGameOver;
+		return isGameLost;
 	}
 
 	//game is won if all free cells are visible
 	public boolean getIsGameWon() {
+		if (isGameLost) {
+			return false;
+		}
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {
 				Tile currCell = getCell(i, j);
@@ -285,6 +323,19 @@ public class MinesweeperGame {
 		private Tile() {
 			isFlagged = isMine = false;
 			numberSurroundingMines = 0;
+		}
+
+		//copy constructor
+		private Tile(Tile other) {
+			isMine = other.isMine;
+			isFlagged = other.isFlagged;
+
+			isVisible = other.isVisible;
+			isLogicalMine = other.isLogicalMine;
+			isLogicalFree = other.isLogicalFree;
+			numberSurroundingMines = other.numberSurroundingMines;
+			numberOfMineConfigs = new BigFraction(other.numberOfMineConfigs);
+			numberOfTotalConfigs = new BigFraction(other.numberOfTotalConfigs);
 		}
 
 		public boolean isMine() {

@@ -480,6 +480,7 @@ public class Test {
 		System.out.println();
 	}
 
+	//TODO: test gauss solver also multiple times on the same board
 	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);

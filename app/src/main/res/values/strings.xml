@@ -1,13 +1,11 @@
 <resources>
 
 	<string name="app_name">Minesweeper 2.0</string>
-	<string name="back">Back</string>
 	<string name="ok">OK</string>
 	<string name="start_new_game">Start New Game</string>
 	<string name="beginner">beginner</string>
 	<string name="intermediate">intermediate</string>
 	<string name="expert">expert</string>
-	<string name="flag_mode">Flag Mode</string>
 	<string name="backtracking">Back tracking</string>
 	<string name="show_mines">Show Mines</string>
 	<string name="show_mine_probability">Mine Probability</string>
@@ -20,11 +18,12 @@
 	<string name="is_relative_layout">is_relative_layout</string>
 	<string name="decrement">-</string>
 	<string name="increment">+</string>
-	<string name="you_win">You Win!!!!!</string>
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>
+		<item>No Guessing Mode</item>
 		<item>Always Guess Wrong Mode</item>
 		<item>Always Guess Correctly Mode</item>
+		<item>Puzzle</item>
 	</string-array>
 </resources>

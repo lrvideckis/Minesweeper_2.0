@@ -6,19 +6,19 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.example.minesweeper20.miscHelpers.Test;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
-//TODO: make sure back button on bottom nav bar works
 //TODO: Win screen - make this look good and improve functionality
 //TODO: Hard mode: always lose if there exists a possible mine combination s.t. the move loses
 //TODO: Easy mode: always keep playing if there is a combination of mines St the move doesn't lose
@@ -26,10 +26,12 @@ import com.example.minesweeper20.miscHelpers.Test;
 //TODO: Recommend the guess which will reveal the greatest amount of further stuff
 //TODO: Don't have to guess mode
 //TODO: make top/bottom bars look nice (and more like other Minesweeper apps)
+//TODO: save personal high scores (the time) for beginner, intermediate, expert
+//TODO: figure out what to make button to the left of the yellow smiley face button
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-	public static final int rowsColsMax = 50;
+	public static final int rowsColsMax = 30;
 
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
@@ -40,11 +42,13 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
+		/*
 		Test.testPreviouslyFailedBoards();
 		Test.performTestsForMineProbability(20);
 		Test.performTestsWithBigIntSolverForLargerGrids(20);
 		Test.performTestsForGaussSolver(20);
 		Test.performTestsMultipleRunsOfSameBoard(10);
+		 */
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);
@@ -106,6 +110,24 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			colsInput.setProgress(30);
 			minesInput.setProgress(99);
 		});
+
+		setUpGameTypeRadioGroup();
+	}
+
+	private void setUpGameTypeRadioGroup() {
+		RadioGroup gameTypeGroup = findViewById(R.id.game_type_group);
+		String[] gameType = getResources().getStringArray(R.array.game_type);
+		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT
+		);
+		for (int i = 0; i < gameType.length; ++i) {
+			RadioButton radioButtonView = new RadioButton(this);
+			radioButtonView.setText(gameType[i]);
+			radioButtonView.setId(i);
+			gameTypeGroup.addView(radioButtonView, p);
+		}
+		gameTypeGroup.check(0);
 	}
 
 	@Override
@@ -236,19 +258,19 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			editor.putInt(NUMBER_OF_MINES, numberOfMines);
 			editor.apply();
 
+			//TODO: look into removing this
 			if (MinesweeperGame.tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
 				System.out.println("too many mines for zero start, UI doesn't allow for this to happen");
 				return;
 			}
 
-			Spinner gameType = findViewById(R.id.game_type);
-			String selectedGameType = gameType.getSelectedItem().toString();
+			final RadioGroup gameType = findViewById(R.id.game_type_group);
 
 			Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
 			intent.putExtra("numberOfRows", numberOfRows);
 			intent.putExtra("numberOfCols", numberOfCols);
 			intent.putExtra("numberOfMines", numberOfMines);
-			intent.putExtra("gameMode", selectedGameType);
+			intent.putExtra("gameMode", gameType.getCheckedRadioButtonId());
 			startActivity(intent);
 		}
 
