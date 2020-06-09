@@ -1,177 +1,264 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/startScreenLayout"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:background="@color/reallyLightGrey"
-	android:orientation="vertical">
+	android:tag="@string/is_relative_layout">
 
-	<RelativeLayout
+	<TextView
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content">
-
-		<TextView
-			android:id="@+id/rowsText"
-			android:layout_width="80dp"
-			android:layout_height="wrap_content"
-			android:layout_centerVertical="true"
-			android:text="Height: 4"
-			tools:ignore="HardcodedText" />
-
-		<SeekBar
-			android:id="@+id/rowsInput"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_centerVertical="true"
-			android:layout_toStartOf="@id/rowsDecrement"
-			android:layout_toEndOf="@id/rowsText"
-			android:min="4"
-			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
-
-		<Button
-			android:id="@+id/rowsDecrement"
-			android:layout_width="48dp"
-			android:layout_height="48dp"
-			android:layout_toStartOf="@id/rowsIncrement"
-			android:height="@android:dimen/app_icon_size"
-			android:text="@string/decrement" />
-
-		<Button
-			android:id="@+id/rowsIncrement"
-			android:layout_width="48dp"
-			android:layout_height="48dp"
-			android:layout_alignParentEnd="true"
-			android:text="@string/increment" />
-
-	</RelativeLayout>
-
-	<RelativeLayout
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content">
-
-		<TextView
-			android:id="@+id/colsText"
-			android:layout_width="80dp"
-			android:layout_height="wrap_content"
-			android:layout_alignParentStart="true"
-			android:layout_centerVertical="true"
-			android:text="Width: 4"
-			tools:ignore="HardcodedText" />
-
-		<SeekBar
-			android:id="@+id/colsInput"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_centerVertical="true"
-			android:layout_toStartOf="@id/colsDecrement"
-			android:layout_toEndOf="@id/colsText"
-			android:min="4"
-			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
-
-		<Button
-			android:id="@+id/colsDecrement"
-			android:layout_width="48dp"
-			android:layout_height="48dp"
-			android:layout_toStartOf="@id/colsIncrement"
-			android:text="@string/decrement" />
-
-		<Button
-			android:id="@+id/colsIncrement"
-			android:layout_width="48dp"
-			android:layout_height="48dp"
-			android:layout_alignParentEnd="true"
-			android:text="@string/increment" />
-
-
-	</RelativeLayout>
-
-	<RelativeLayout
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content">
-
-		<TextView
-			android:id="@+id/mineText"
-			android:layout_width="80dp"
-			android:layout_height="wrap_content"
-			android:layout_centerVertical="true"
-			android:text="Mines: 0\n0.00%"
-			tools:ignore="HardcodedText" />
-
-		<SeekBar
-			android:id="@+id/mineInput"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_centerVertical="true"
-			android:layout_toStartOf="@id/minesDecrement"
-			android:layout_toEndOf="@id/mineText"
-			android:max="7"
-			android:min="0"
-			android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
-
-		<Button
-			android:id="@+id/minesDecrement"
-			android:layout_width="48dp"
-			android:layout_height="48dp"
-			android:layout_toStartOf="@id/minesIncrement"
-			android:text="@string/decrement" />
-
-		<Button
-			android:id="@+id/minesIncrement"
-			android:layout_width="48dp"
-			android:layout_height="48dp"
-			android:layout_alignParentEnd="true"
-			android:text="@string/increment" />
-
-	</RelativeLayout>
-
-	<TableRow
-		style="?android:attr/buttonBarStyle"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content">
-
-		<Button
-			android:id="@+id/beginner"
-			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="wrap_content"
-			android:layout_height="70dp"
-			android:layout_weight="1"
-			android:text="@string/beginner"
-			android:textColor="@color/black" />
-
-		<Button
-			android:id="@+id/intermediate"
-			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="wrap_content"
-			android:layout_height="70dp"
-			android:layout_weight="1"
-			android:text="@string/intermediate"
-			android:textColor="@color/black" />
-
-		<Button
-			android:id="@+id/expert"
-			style="?android:attr/buttonBarButtonStyle"
-			android:layout_width="wrap_content"
-			android:layout_height="70dp"
-			android:layout_weight="1"
-			android:text="@string/expert"
-			android:textColor="@color/black" />
-	</TableRow>
-
-	<!--
-	TODO: add little info buttons which create a popup explaining the mode
-	-->
-	<RadioGroup
-		android:id="@+id/game_type_group"
-		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginStart="10dp"
-		android:layout_marginBottom="10dp" />
+		android:layout_above="@+id/gameControls"
+		android:layout_alignParentTop="true"
+		android:gravity="center"
+		android:text="@string/minesweeper"
+		android:textSize="40sp" />
 
-	<Button
-		android:id="@+id/startNewGameButton"
+	<LinearLayout
+		android:id="@+id/gameControls"
 		android:layout_width="match_parent"
-		android:layout_height="70dp"
-		android:text="@string/start_new_game" />
+		android:layout_height="wrap_content"
+		android:layout_centerVertical="true"
+		android:orientation="vertical">
 
-</LinearLayout>
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:id="@+id/rowsText"
+				android:layout_width="80dp"
+				android:layout_height="wrap_content"
+				android:layout_centerVertical="true"
+				android:text="Height: 4"
+				tools:ignore="HardcodedText" />
+
+			<SeekBar
+				android:id="@+id/rowsInput"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_centerVertical="true"
+				android:layout_toStartOf="@id/rowsDecrement"
+				android:layout_toEndOf="@id/rowsText"
+				android:min="4"
+				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
+
+			<Button
+				android:id="@+id/rowsDecrement"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_toStartOf="@id/rowsIncrement"
+				android:height="@android:dimen/app_icon_size"
+				android:text="@string/decrement" />
+
+			<Button
+				android:id="@+id/rowsIncrement"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_alignParentEnd="true"
+				android:text="@string/increment" />
+
+		</RelativeLayout>
+
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:id="@+id/colsText"
+				android:layout_width="80dp"
+				android:layout_height="wrap_content"
+				android:layout_alignParentStart="true"
+				android:layout_centerVertical="true"
+				android:text="Width: 4"
+				tools:ignore="HardcodedText" />
+
+			<SeekBar
+				android:id="@+id/colsInput"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_centerVertical="true"
+				android:layout_toStartOf="@id/colsDecrement"
+				android:layout_toEndOf="@id/colsText"
+				android:min="4"
+				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
+
+			<Button
+				android:id="@+id/colsDecrement"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_toStartOf="@id/colsIncrement"
+				android:text="@string/decrement" />
+
+			<Button
+				android:id="@+id/colsIncrement"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_alignParentEnd="true"
+				android:text="@string/increment" />
+
+
+		</RelativeLayout>
+
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:id="@+id/mineText"
+				android:layout_width="80dp"
+				android:layout_height="wrap_content"
+				android:layout_centerVertical="true"
+				android:text="Mines: 0\n0.00%"
+				tools:ignore="HardcodedText" />
+
+			<SeekBar
+				android:id="@+id/mineInput"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_centerVertical="true"
+				android:layout_toStartOf="@id/minesDecrement"
+				android:layout_toEndOf="@id/mineText"
+				android:max="7"
+				android:min="0"
+				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
+
+			<Button
+				android:id="@+id/minesDecrement"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_toStartOf="@id/minesIncrement"
+				android:text="@string/decrement" />
+
+			<Button
+				android:id="@+id/minesIncrement"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:layout_alignParentEnd="true"
+				android:text="@string/increment" />
+
+		</RelativeLayout>
+
+		<TableRow
+			style="?android:attr/buttonBarStyle"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<Button
+				android:id="@+id/beginner"
+				style="?android:attr/buttonBarButtonStyle"
+				android:layout_width="wrap_content"
+				android:layout_height="70dp"
+				android:layout_weight="1"
+				android:text="@string/beginner"
+				android:textColor="@color/black" />
+
+			<Button
+				android:id="@+id/intermediate"
+				style="?android:attr/buttonBarButtonStyle"
+				android:layout_width="wrap_content"
+				android:layout_height="70dp"
+				android:layout_weight="1"
+				android:text="@string/intermediate"
+				android:textColor="@color/black" />
+
+			<Button
+				android:id="@+id/expert"
+				style="?android:attr/buttonBarButtonStyle"
+				android:layout_width="wrap_content"
+				android:layout_height="70dp"
+				android:layout_weight="1"
+				android:text="@string/expert"
+				android:textColor="@color/black" />
+		</TableRow>
+
+		<!--
+		TODO: add little info buttons which create a popup explaining the mode
+		-->
+		<RadioGroup
+			android:id="@+id/game_type_group"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="10dp"
+			android:layout_marginBottom="10dp">
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="40dp"
+				android:orientation="horizontal">
+
+				<RadioButton
+					android:id="@+id/normal_mode"
+					android:layout_width="wrap_content"
+					android:layout_height="match_parent"
+					android:text="Normal Mode" />
+
+				<RelativeLayout
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_marginStart="10dp">
+
+					<TextView
+						android:id="@+id/normal_mode_info"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:layout_centerInParent="true"
+						android:gravity="center"
+						android:text="i"
+						android:textStyle="bold"
+						tools:ignore="HardcodedText" />
+
+					<TextView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:layout_centerInParent="true"
+						android:background="@drawable/circle" />
+				</RelativeLayout>
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="40dp"
+				android:orientation="horizontal">
+
+				<RadioButton
+					android:id="@+id/no_guessing_mode"
+					android:layout_width="wrap_content"
+					android:layout_height="match_parent"
+					android:text="No Guessing Mode" />
+
+				<RelativeLayout
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_marginStart="10dp">
+
+					<TextView
+						android:id="@+id/no_guessing_mode_info"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:layout_centerInParent="true"
+						android:gravity="center"
+						android:text="i"
+						android:textStyle="bold"
+						tools:ignore="HardcodedText" />
+
+					<TextView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:layout_centerInParent="true"
+						android:background="@drawable/circle" />
+				</RelativeLayout>
+			</LinearLayout>
+		</RadioGroup>
+
+		<Button
+			android:id="@+id/startNewGameButton"
+			android:layout_width="match_parent"
+			android:layout_height="70dp"
+			android:text="@string/start_new_game" />
+
+	</LinearLayout>
+
+</RelativeLayout>

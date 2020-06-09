@@ -18,12 +18,18 @@
 	<string name="is_relative_layout">is_relative_layout</string>
 	<string name="decrement">-</string>
 	<string name="increment">+</string>
+	<string name="minesweeper">Minesweeper</string>
+	<string name="normalModeExplanation">This mode is just normal minesweeper. The first square won\'t be a mine.</string>
+	<string name="no_guessing_mode_explanation">In this mode, it is possible to solve the entire grid by deduction. No guessing is required. The first square won\'t be a mine.</string>
 
 	<string-array name="game_type">
 		<item>Normal Mode</item>
 		<item>No Guessing Mode</item>
+		<!--
+		TODO: these modes
 		<item>Always Guess Wrong Mode</item>
 		<item>Always Guess Correctly Mode</item>
 		<item>Puzzle</item>
+		-->
 	</string-array>
 </resources>

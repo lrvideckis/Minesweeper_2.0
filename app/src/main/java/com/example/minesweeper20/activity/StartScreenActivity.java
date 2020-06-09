@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
+import com.example.minesweeper20.miscHelpers.PopupHelper;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
@@ -39,6 +40,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			NUMBER_OF_COLS = "numCols",
 			NUMBER_OF_MINES = "numMines";
 	private SharedPreferences sharedPreferences;
+	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -111,23 +113,21 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			minesInput.setProgress(99);
 		});
 
-		setUpGameTypeRadioGroup();
-	}
+		RadioButton normalMode = findViewById(R.id.normal_mode);
+		normalMode.setOnClickListener(this);
+		normalMode.setChecked(true);
 
-	private void setUpGameTypeRadioGroup() {
-		RadioGroup gameTypeGroup = findViewById(R.id.game_type_group);
-		String[] gameType = getResources().getStringArray(R.array.game_type);
-		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT
-		);
-		for (int i = 0; i < gameType.length; ++i) {
-			RadioButton radioButtonView = new RadioButton(this);
-			radioButtonView.setText(gameType[i]);
-			radioButtonView.setId(i);
-			gameTypeGroup.addView(radioButtonView, p);
-		}
-		gameTypeGroup.check(0);
+		RadioButton noGuessingMode = findViewById(R.id.no_guessing_mode);
+		noGuessingMode.setOnClickListener(this);
+
+		TextView normalModeInfo = findViewById(R.id.normal_mode_info);
+		normalModeInfo.setOnClickListener(this);
+
+		TextView noGuessingModeInfo = findViewById(R.id.no_guessing_mode_info);
+		noGuessingModeInfo.setOnClickListener(this);
+
+		setUpNormalModeInfoPopup();
+		setUpNoGuessingModeInfoPopup();
 	}
 
 	@Override
@@ -195,8 +195,23 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		int cols = colsInput.getProgress();
 		int mines = minesInput.getProgress();
 
-
 		switch (v.getId()) {
+			case R.id.normal_mode:
+				RadioButton noGuessingMode = findViewById(R.id.no_guessing_mode);
+				noGuessingMode.setChecked(false);
+				break;
+			case R.id.no_guessing_mode:
+				RadioButton normalMode = findViewById(R.id.normal_mode);
+				normalMode.setChecked(false);
+				break;
+			case R.id.normal_mode_info:
+				displayNormalModeInfoPopup();
+				break;
+			case R.id.no_guessing_mode_info:
+				displayNoGuessingModeInfoPopup();
+				break;
+
+
 			case R.id.rowsDecrement:
 				rows = Math.max(4, rows - 1);
 				rowsInput.setProgress(rows);
@@ -232,6 +247,26 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				setMinesText(rows, cols, mines);
 				break;
 		}
+	}
+
+	public void displayNormalModeInfoPopup() {
+		PopupHelper.displayPopup(normalModeInfoPopup, findViewById(R.id.startScreenLayout), getResources());
+	}
+
+	private void setUpNormalModeInfoPopup() {
+		normalModeInfoPopup = PopupHelper.initializePopup(this, R.layout.normal_mode_info);
+		Button okButton = normalModeInfoPopup.getContentView().findViewById(R.id.normalModeInfoOkButton);
+		okButton.setOnClickListener(view -> normalModeInfoPopup.dismiss());
+	}
+
+	public void displayNoGuessingModeInfoPopup() {
+		PopupHelper.displayPopup(noGuessingModeInfoPopup, findViewById(R.id.startScreenLayout), getResources());
+	}
+
+	private void setUpNoGuessingModeInfoPopup() {
+		noGuessingModeInfoPopup = PopupHelper.initializePopup(this, R.layout.no_guessing_mode_info);
+		Button okButton = noGuessingModeInfoPopup.getContentView().findViewById(R.id.noGuessingModeInfoOkButton);
+		okButton.setOnClickListener(view -> noGuessingModeInfoPopup.dismiss());
 	}
 
 	private class okButtonListener implements View.OnClickListener {

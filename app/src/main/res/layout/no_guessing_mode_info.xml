@@ -8,10 +8,11 @@
 	<TextView
 		android:id="@+id/iterationLimitText"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" />
+		android:layout_height="wrap_content"
+		android:text="@string/no_guessing_mode_explanation" />
 
 	<Button
-		android:id="@+id/solverHitLimitOkButton"
+		android:id="@+id/noGuessingModeInfoOkButton"
 		android:layout_width="48dp"
 		android:layout_height="48dp"
 		android:layout_gravity="center"
