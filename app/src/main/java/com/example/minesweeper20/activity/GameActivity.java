@@ -543,8 +543,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 						wait(1000);
 					}
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			} catch (InterruptedException ignored) {
 			}
 		}
 	}
