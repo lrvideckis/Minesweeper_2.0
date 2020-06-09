@@ -133,11 +133,11 @@ public class GameCanvas extends View {
 			canvas.drawLine(0, i * GameActivity.cellPixelLength, numberOfCols * GameActivity.cellPixelLength, i * GameActivity.cellPixelLength, black);
 		}
 		if (gameActivity.getMinesweeperGame().getIsGameWon()) {
-			gameActivity.disableSwitches();
+			gameActivity.disableSwitchesAndButtons();
 			gameActivity.setNewGameButtonWinFace();
 			gameActivity.stopTimerThread();
 		} else if (gameActivity.getMinesweeperGame().getIsGameLost()) {
-			gameActivity.disableSwitches();
+			gameActivity.disableSwitchesAndButtons();
 			gameActivity.setNewGameButtonDeadFace();
 			gameActivity.stopTimerThread();
 		}

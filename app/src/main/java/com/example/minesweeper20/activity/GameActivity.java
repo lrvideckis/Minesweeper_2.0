@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
+import com.example.minesweeper20.customExceptions.GameLostException;
 import com.example.minesweeper20.customExceptions.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
@@ -158,13 +159,26 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		try {
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
-			if ((gameMode == 2 || gameMode == 3) && !isFirstClick) {
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-				boolean wantMine = (gameMode == 2);
-				//TODO: bug: when toggle flags is on + hard mode: this will always put a mine under the cell you just flagged
-				boolean[][] newMineLocations = backtrackingSolver.getMineConfiguration(board, 0, row, col, wantMine);
-				if (newMineLocations != null) {
-					minesweeperGame.changeMineLocations(newMineLocations);
+			//TODO: don't change mine configuration when the current config matches what you want
+			MinesweeperGame.Tile curr = minesweeperGame.getCell(row, col);
+			if ((gameMode == 2 || gameMode == 3) && !isFirstClick && !(curr.getIsVisible() && curr.getNumberSurroundingMines() == 0)) {
+
+				if (curr.getIsVisible()) {
+					//TODO: consider flagged mines as clicked cells, and do the else branch stuff
+				} else {
+					ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+					boolean wantMine = (gameMode == 2);
+					//TODO: bug: when toggle flags is on + hard mode: this will always put a mine under the cell you just flagged
+					boolean[][] newMineLocations;
+					try {
+						newMineLocations = backtrackingSolver.getMineConfiguration(board, minesweeperGame.getNumberOfMines(), row, col, wantMine);
+						//newMineLocations==null when (row, col) is a logical cell, and it matches wantMine (basically the bombs shouldn't be changed
+						if (newMineLocations != null) {
+							minesweeperGame.changeMineLocations(newMineLocations);
+						}
+					} catch (GameLostException e) {
+						//this should only happen if cell is logical, and doesn't match the requested thing
+					}
 				}
 			}
 
@@ -202,7 +216,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		enableSwitchesAndSetToFalse();
+		enableButtonsAndSwitchesAndSetToFalse();
 		try {
 			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		} catch (Exception e) {
@@ -360,7 +374,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	public void solverHitIterationLimit() {
-		String[] gameChoices = getResources().getStringArray(R.array.game_type);
 		//TODO: think about changing this behavior to just (temporarily) switching modes to back to normal mode
 		if (gameMode == 2 || gameMode == 3) {
 			Intent intent = new Intent(GameActivity.this, StartScreenActivity.class);
@@ -413,7 +426,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		iterationTextView.setText(iterationsText);
 	}
 
-	public void disableSwitches() {
+	public void disableSwitchesAndButtons() {
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setClickable(false);
 
@@ -425,9 +438,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
 		toggleGaussHints.setClickable(false);
+
+		Button flagModeButton = findViewById(R.id.toggleFlagMode);
+		flagModeButton.setClickable(false);
+
+		Button isThereAnyLogicalStuffButton = findViewById(R.id.isThereAnyLogicalStuffButton);
+		isThereAnyLogicalStuffButton.setClickable(false);
 	}
 
-	public void enableSwitchesAndSetToFalse() {
+	public void enableButtonsAndSwitchesAndSetToFalse() {
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setClickable(true);
 		toggleHints.setChecked(false);
@@ -443,6 +462,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
 		toggleGaussHints.setClickable(true);
 		toggleGaussHints.setChecked(false);
+
+		Button flagModeButton = findViewById(R.id.toggleFlagMode);
+		flagModeButton.setClickable(true);
+		flagModeButton.setText(mineEmoji);
+		toggleFlagModeOn = false;
+
+		Button isThereAnyLogicalStuffButton = findViewById(R.id.isThereAnyLogicalStuffButton);
+		isThereAnyLogicalStuffButton.setClickable(true);
 	}
 
 	public void setNewGameButtonDeadFace() {

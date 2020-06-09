@@ -2,8 +2,8 @@ package com.example.minesweeper20.minesweeperStuff;
 
 import android.util.Pair;
 
+import com.example.minesweeper20.customExceptions.GameLostException;
 import com.example.minesweeper20.customExceptions.HitIterationLimitException;
-import com.example.minesweeper20.customExceptions.NoSolutionFoundException;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AllCellsAreHidden;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
@@ -558,16 +558,6 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 	}
 
-	private boolean[][] getCurrentMinConfiguration(VisibleTile[][] board) {
-		boolean[][] mines = new boolean[rows][cols];
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				mines[i][j] = (board[i][j].)
-				if(board[i][j])
-			}
-		}
-	}
-
 	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
 
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
@@ -583,25 +573,29 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				}
 				if (board[i][j].getIsLogicalMine()) {
 					if (i == spotI && j == spotJ) {
-						if(wantMine) {
-							boolean[][]
-						} else {
-							throw new NoSolutionFoundException("logical mine in spot where free was requested");
+						if (wantMine) {
+							System.out.println("here 3");
+							return null;
 						}
+						throw new GameLostException("logical mine in spot where free was requested");
 					}
 					--numberOfMines;
 					board[i][j].numberOfMineConfigs.setValues(1, 1);
 					board[i][j].numberOfTotalConfigs.setValues(1, 1);
 				} else if (board[i][j].getIsLogicalFree()) {
-					if (i == spotI && j == spotJ && wantMine) {
-						throw new NoSolutionFoundException("logical free in spot where mine was requested");
+					if (i == spotI && j == spotJ) {
+						if (wantMine) {
+							throw new GameLostException("logical free in spot where mine was requested");
+						}
+						System.out.println("return 2");
+						return null;
 					}
 					board[i][j].numberOfMineConfigs.setValues(0, 1);
 					board[i][j].numberOfTotalConfigs.setValues(1, 1);
 				}
 				if (board[i][j].getIsVisible()) {
 					if (i == spotI && j == spotJ) {
-						throw new NoSolutionFoundException("requested (mine/free) cell is visible");
+						throw new Exception("requested (mine/free) cell is visible");
 					}
 					updatedNumberSurroundingMines[i][j] = board[i][j].getNumberSurroundingMines();
 					for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
@@ -631,6 +625,13 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		}
 
 		boolean[][] newBombs = new boolean[rows][cols];
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (board[i][j].getIsLogicalMine()) {
+					newBombs[i][j] = true;
+				}
+			}
+		}
 
 		ArrayList<TreeSet<Integer>> dpTable = new ArrayList<>(components.size());
 		ArrayList<TreeMap<Integer, Integer>> parentTable = new ArrayList<>(components.size());
@@ -642,6 +643,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			if (i == 0) {
 				for (int entry : mineConfig.get(i).keySet()) {
 					dpTable.get(i).add(entry);
+					parentTable.get(i).put(entry, entry);
 				}
 				continue;
 			}
@@ -656,6 +658,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			if (i == components.size() - 1) {
 				for (int entry : mineConfig.get(i).keySet()) {
 					dpTable.get(i).add(entry);
+					parentTable.get(i).put(entry, entry);
 				}
 				continue;
 			}
@@ -672,32 +675,53 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		TreeSet<Integer> prev = new TreeSet<>();
 		prev.add(0);
 		if (interestingCell.cellComponent > 0) {
+			prev.clear();
 			prev = dpTable.get(interestingCell.cellComponent - 1);
 		}
 		TreeSet<Integer> after = new TreeSet<>();
 		after.add(0);
 		if (interestingCell.cellComponent + 1 < components.size()) {
+			after.clear();
 			after = dpTable.get(interestingCell.cellComponent + 1);
 		}
+		System.out.println("prev:");
+		for (int x : prev) System.out.print(x);
+		System.out.println();
+
+		System.out.println("after:");
+		for (int x : after) System.out.print(x);
+		System.out.println();
+
 		//TODO: change bomb to mine
 		for (TreeMap.Entry<Integer, ArrayList<Pair<Integer, Integer>>> entry : saveGoodBombConfigurations.entrySet()) {
 			int minesCurr = entry.getKey();
 			for (int minesBefore : prev) {
+				System.out.println("numberOfMines: " + numberOfMines);
+				System.out.println("lowor on: " + (1 + numberOfMines - minesBefore - minesCurr));
 				Integer minesAfter = after.lower(1 + numberOfMines - minesBefore - minesCurr);
 				if (minesAfter == null || minesBefore + minesAfter + minesCurr < numberOfMines - numberOfAwayCells) {
 					continue;
 				}
 				//found solution
+				System.out.println("here, setting curr component mines");
 
 				//set mines of current component
 				for (Pair<Integer, Integer> bombSpot : entry.getValue()) {
+					System.out.println("here current component, setting: " + bombSpot);
+					if (newBombs[bombSpot.first][bombSpot.second]) {
+						throw new Exception("already a mine, but it shouldn't be");
+					}
 					newBombs[bombSpot.first][bombSpot.second] = true;
 				}
 
 				//set mines of all components after current component
 				for (int i = interestingCell.cellComponent + 1; i < components.size(); ++i) {
-					int numBombsCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesAfter));
+					final int numBombsCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesAfter));
 					for (Pair<Integer, Integer> bombSpot : Objects.requireNonNull(savePositionsOfBombsPerCompPerCountBombs.get(i).get(numBombsCurrComponent))) {
+						System.out.println("here after, setting: " + bombSpot);
+						if (newBombs[bombSpot.first][bombSpot.second]) {
+							throw new Exception("already a mine, but it shouldn't be");
+						}
 						newBombs[bombSpot.first][bombSpot.second] = true;
 					}
 					minesAfter -= numBombsCurrComponent;
@@ -705,8 +729,12 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 				//set mines of all components before current component
 				for (int i = interestingCell.cellComponent - 1; i >= 0; --i) {
-					int numBombsCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesBefore));
+					final int numBombsCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesBefore));
 					for (Pair<Integer, Integer> bombSpot : Objects.requireNonNull(savePositionsOfBombsPerCompPerCountBombs.get(i).get(numBombsCurrComponent))) {
+						System.out.println("here prev, setting: " + bombSpot);
+						if (newBombs[bombSpot.first][bombSpot.second]) {
+							throw new Exception("already a mine, but it shouldn't be");
+						}
 						newBombs[bombSpot.first][bombSpot.second] = true;
 					}
 					minesBefore -= numBombsCurrComponent;
@@ -714,23 +742,29 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 				//set mines in away cells
 				final int minesLeft = numberOfMines - minesCurr - minesBefore - minesAfter;
-				ArrayList<Pair<Integer,Integer>> allAwayCells = new ArrayList<>();
+				System.out.println("number of away mines: " + minesLeft);
+				ArrayList<Pair<Integer, Integer>> allAwayCells = new ArrayList<>();
 				for (int i = 0; i < rows; ++i) {
 					for (int j = 0; j < cols; ++j) {
-						if(AwayCell.isAwayCell(board, i, j, rows, cols)) {
-							allAwayCells.add(new Pair<>(i,j));
+						if (AwayCell.isAwayCell(board, i, j, rows, cols)) {
+							allAwayCells.add(new Pair<>(i, j));
 						}
 					}
 				}
-				if(minesLeft < 0 || minesLeft > allAwayCells.size()) {
+				if (minesLeft < 0 || minesLeft > allAwayCells.size()) {
 					throw new Exception("number of mines left doesn't make a valid configuration");
 				}
 				//TODO: shuffle away cells array
 				for (int i = 0; i < minesLeft; ++i) {
+					System.out.println("setting away mine: " + allAwayCells.get(i));
+					if (newBombs[allAwayCells.get(i).first][allAwayCells.get(i).second]) {
+						throw new Exception("already a mine, but it shouldn't be");
+					}
 					newBombs[allAwayCells.get(i).first][allAwayCells.get(i).second] = true;
 				}
+				System.out.println("return 1");
+				return newBombs;
 			}
-			return newBombs;
 		}
 		throw new Exception("didn't find solution, but it should exist");
 	}
