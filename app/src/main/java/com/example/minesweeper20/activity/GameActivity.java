@@ -15,7 +15,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
-import com.example.minesweeper20.customExceptions.GameLostException;
 import com.example.minesweeper20.customExceptions.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
@@ -45,7 +44,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleMinesOn = false,
 			toggleMineProbabilityOn = false;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
-	private PopupWindow solverHitLimitPopup, stackStacePopup;
+	private PopupWindow solverHitLimitPopup, stackStacePopup, couldntFindNoGuessBoardPopup;
 
 	private MinesweeperGame minesweeperGame;
 	private MinesweeperSolver backtrackingSolver, gaussSolver;
@@ -60,11 +59,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		numberOfRows = getIntent().getIntExtra("numberOfRows", 1);
-		numberOfCols = getIntent().getIntExtra("numberOfCols", 1);
-		numberOfMines = getIntent().getIntExtra("numberOfMines", 1);
+		numberOfRows = getIntent().getIntExtra(StartScreenActivity.NUMBER_OF_ROWS, 1);
+		numberOfCols = getIntent().getIntExtra(StartScreenActivity.NUMBER_OF_COLS, 1);
+		numberOfMines = getIntent().getIntExtra(StartScreenActivity.NUMBER_OF_MINES, 1);
 		//default game mode is normal mode
-		gameMode = getIntent().getIntExtra("gameMode", 0);
+		gameMode = getIntent().getIntExtra(StartScreenActivity.GAME_MODE, R.id.normal_mode);
 		setContentView(R.layout.game);
 
 		try {
@@ -95,6 +94,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
+		setUpNoGuessBoardPopup();
 		setUpStackTracePopup();
 
 		updateTimeThread = new TimeUpdateThread();
@@ -108,7 +108,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				break;
 			case R.id.newGameButton:
 				ImageButton newGameButton = findViewById(R.id.newGameButton);
-				newGameButton.setBackgroundResource(R.drawable.smiley_face);
+				newGameButton.setImageResource(R.drawable.smiley_face);
 				startNewGame();
 				GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 				gameCanvas.invalidate();
@@ -137,17 +137,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
 
-		boolean isFirstClick = false;
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
-			isFirstClick = true;
 			updateTimeThread.start();
-			if (gameMode == 1 || gameMode == 2) {
+			if (gameMode == R.id.no_guessing_mode) {
 				CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
 				try {
 					minesweeperGame = createSolvableBoard.getSolvableBoard(row, col);
 				} catch (HitIterationLimitException e) {
 					//TODO: display popup notifying user that too many iterations were taken
-					e.printStackTrace();
+					displayNoGuessBoardPopup();
 				}
 			}
 		}
@@ -160,28 +158,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		try {
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
 			//TODO: don't change mine configuration when the current config matches what you want
-			MinesweeperGame.Tile curr = minesweeperGame.getCell(row, col);
-			if ((gameMode == 2 || gameMode == 3) && !isFirstClick && !(curr.getIsVisible() && curr.getNumberSurroundingMines() == 0)) {
-
-				if (curr.getIsVisible()) {
-					//TODO: consider flagged mines as clicked cells, and do the else branch stuff
-				} else {
-					ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-					boolean wantMine = (gameMode == 2);
-					//TODO: bug: when toggle flags is on + hard mode: this will always put a mine under the cell you just flagged
-					boolean[][] newMineLocations;
-					try {
-						newMineLocations = backtrackingSolver.getMineConfiguration(board, minesweeperGame.getNumberOfMines(), row, col, wantMine);
-						//newMineLocations==null when (row, col) is a logical cell, and it matches wantMine (basically the bombs shouldn't be changed
-						if (newMineLocations != null) {
-							minesweeperGame.changeMineLocations(newMineLocations);
-						}
-					} catch (GameLostException e) {
-						//this should only happen if cell is logical, and doesn't match the requested thing
-					}
-				}
-			}
-
 			minesweeperGame.clickCell(row, col, toggleFlagModeOn);
 			if (!minesweeperGame.getIsGameLost() && !(toggleFlagModeOn && !minesweeperGame.getCell(row, col).getIsVisible())) {
 				if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
@@ -369,17 +345,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		textView.setText(text);
 	}
 
+	private void setUpNoGuessBoardPopup() {
+		couldntFindNoGuessBoardPopup = PopupHelper.initializePopup(this, R.layout.couldnt_find_no_guess_board_popup);
+		Button okButton = couldntFindNoGuessBoardPopup.getContentView().findViewById(R.id.noGuessBoardOkButton);
+		okButton.setOnClickListener(view -> couldntFindNoGuessBoardPopup.dismiss());
+	}
+
+	private void displayNoGuessBoardPopup() {
+		PopupHelper.displayPopup(couldntFindNoGuessBoardPopup, findViewById(R.id.gameLayout), getResources());
+	}
+
 	private void setUpStackTracePopup() {
 		stackStacePopup = PopupHelper.initializePopup(this, R.layout.stack_trace_popup);
 	}
 
 	public void solverHitIterationLimit() {
 		//TODO: think about changing this behavior to just (temporarily) switching modes to back to normal mode
-		if (gameMode == 2 || gameMode == 3) {
-			Intent intent = new Intent(GameActivity.this, StartScreenActivity.class);
-			startActivity(intent);
-			return;
-		}
 		if (toggleBacktrackingHintsOn) {
 			Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 			toggleHints.setChecked(false);
@@ -474,12 +455,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void setNewGameButtonDeadFace() {
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
-		newGameButton.setBackgroundResource(R.drawable.dead_face);
+		newGameButton.setImageResource(R.drawable.dead_face);
 	}
 
 	public void setNewGameButtonWinFace() {
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
-		newGameButton.setBackgroundResource(R.drawable.win_face);
+		newGameButton.setImageResource(R.drawable.win_face);
 	}
 
 	@Override

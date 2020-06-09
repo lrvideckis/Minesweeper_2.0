@@ -29,10 +29,11 @@
 
 			<TextView
 				android:id="@+id/rowsText"
-				android:layout_width="80dp"
+				android:layout_width="70dp"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
-				android:text="Height: 4"
+				android:layout_marginStart="10dp"
+				android:text="Height: 8"
 				tools:ignore="HardcodedText" />
 
 			<SeekBar
@@ -42,7 +43,7 @@
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/rowsDecrement"
 				android:layout_toEndOf="@id/rowsText"
-				android:min="4"
+				android:min="8"
 				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 			<Button
@@ -58,6 +59,7 @@
 				android:layout_width="48dp"
 				android:layout_height="48dp"
 				android:layout_alignParentEnd="true"
+				android:layout_marginEnd="10dp"
 				android:text="@string/increment" />
 
 		</RelativeLayout>
@@ -68,11 +70,12 @@
 
 			<TextView
 				android:id="@+id/colsText"
-				android:layout_width="80dp"
+				android:layout_width="70dp"
 				android:layout_height="wrap_content"
 				android:layout_alignParentStart="true"
 				android:layout_centerVertical="true"
-				android:text="Width: 4"
+				android:layout_marginStart="10dp"
+				android:text="Width: 8"
 				tools:ignore="HardcodedText" />
 
 			<SeekBar
@@ -82,7 +85,7 @@
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/colsDecrement"
 				android:layout_toEndOf="@id/colsText"
-				android:min="4"
+				android:min="8"
 				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 			<Button
@@ -97,6 +100,7 @@
 				android:layout_width="48dp"
 				android:layout_height="48dp"
 				android:layout_alignParentEnd="true"
+				android:layout_marginEnd="10dp"
 				android:text="@string/increment" />
 
 
@@ -108,9 +112,10 @@
 
 			<TextView
 				android:id="@+id/mineText"
-				android:layout_width="80dp"
+				android:layout_width="70dp"
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
+				android:layout_marginStart="10dp"
 				android:text="Mines: 0\n0.00%"
 				tools:ignore="HardcodedText" />
 
@@ -137,6 +142,7 @@
 				android:layout_width="48dp"
 				android:layout_height="48dp"
 				android:layout_alignParentEnd="true"
+				android:layout_marginEnd="10dp"
 				android:text="@string/increment" />
 
 		</RelativeLayout>
@@ -177,12 +183,12 @@
 		<!--
 		TODO: add little info buttons which create a popup explaining the mode
 		-->
-		<RadioGroup
-			android:id="@+id/game_type_group"
+		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="10dp"
-			android:layout_marginBottom="10dp">
+			android:layout_marginBottom="10dp"
+			android:orientation="vertical">
 
 			<LinearLayout
 				android:layout_width="wrap_content"
@@ -251,7 +257,7 @@
 						android:background="@drawable/circle" />
 				</RelativeLayout>
 			</LinearLayout>
-		</RadioGroup>
+		</LinearLayout>
 
 		<Button
 			android:id="@+id/startNewGameButton"

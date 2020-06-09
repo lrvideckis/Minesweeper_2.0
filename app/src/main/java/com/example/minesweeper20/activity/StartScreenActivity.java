@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -38,7 +37,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			MY_PREFERENCES = "MyPrefs",
 			NUMBER_OF_ROWS = "numRows",
 			NUMBER_OF_COLS = "numCols",
-			NUMBER_OF_MINES = "numMines";
+			NUMBER_OF_MINES = "numMines",
+			GAME_MODE = "gameMode";
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup;
 
@@ -57,12 +57,12 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 		sharedPreferences = getSharedPreferences(MY_PREFERENCES, Context.MODE_PRIVATE);
 
-		Button rowsDecrement = findViewById(R.id.rowsDecrement);
-		Button rowsIncrement = findViewById(R.id.rowsIncrement);
-		Button colsDecrement = findViewById(R.id.colsDecrement);
-		Button colsIncrement = findViewById(R.id.colsIncrement);
-		Button minesDecrement = findViewById(R.id.minesDecrement);
-		Button minesIncrement = findViewById(R.id.minesIncrement);
+		final Button rowsDecrement = findViewById(R.id.rowsDecrement);
+		final Button rowsIncrement = findViewById(R.id.rowsIncrement);
+		final Button colsDecrement = findViewById(R.id.colsDecrement);
+		final Button colsIncrement = findViewById(R.id.colsIncrement);
+		final Button minesDecrement = findViewById(R.id.minesDecrement);
+		final Button minesIncrement = findViewById(R.id.minesIncrement);
 		rowsDecrement.setOnClickListener(this);
 		rowsIncrement.setOnClickListener(this);
 		colsDecrement.setOnClickListener(this);
@@ -81,16 +81,30 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		rowsInput.setMax(rowsColsMax);
 		colsInput.setMax(rowsColsMax);
 
+		RadioButton normalMode = findViewById(R.id.normal_mode);
+		normalMode.setOnClickListener(this);
+
+		RadioButton noGuessingMode = findViewById(R.id.no_guessing_mode);
+		noGuessingMode.setOnClickListener(this);
+
 		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 9);
 		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 9);
 		final int previousMines = sharedPreferences.getInt(NUMBER_OF_MINES, 10);
+		final int gameMode = sharedPreferences.getInt(GAME_MODE, R.id.normal_mode);
 
 		rowsInput.setProgress(previousRows);
 		colsInput.setProgress(previousCols);
 		minesInput.setProgress(previousMines);
+		if (gameMode == R.id.normal_mode) {
+			normalMode.setChecked(true);
+		} else if (gameMode == R.id.no_guessing_mode) {
+			noGuessingMode.setChecked(true);
+		} else {
+			normalMode.setChecked(true);
+		}
 
-		Button okButton = findViewById(R.id.startNewGameButton);
-		okButton.setOnClickListener(new okButtonListener(rowsInput, colsInput, minesInput));
+		Button startNewGameButton = findViewById(R.id.startNewGameButton);
+		startNewGameButton.setOnClickListener(new startNewGameButtonListener(rowsInput, colsInput, minesInput));
 
 		Button beginner = findViewById(R.id.beginner);
 		beginner.setOnClickListener(view -> {
@@ -112,13 +126,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			colsInput.setProgress(30);
 			minesInput.setProgress(99);
 		});
-
-		RadioButton normalMode = findViewById(R.id.normal_mode);
-		normalMode.setOnClickListener(this);
-		normalMode.setChecked(true);
-
-		RadioButton noGuessingMode = findViewById(R.id.no_guessing_mode);
-		noGuessingMode.setOnClickListener(this);
 
 		TextView normalModeInfo = findViewById(R.id.normal_mode_info);
 		normalModeInfo.setOnClickListener(this);
@@ -269,13 +276,13 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		okButton.setOnClickListener(view -> noGuessingModeInfoPopup.dismiss());
 	}
 
-	private class okButtonListener implements View.OnClickListener {
+	private class startNewGameButtonListener implements View.OnClickListener {
 
 		private final SeekBar rowInput;
 		private final SeekBar colInput;
 		private final SeekBar mineInput;
 
-		public okButtonListener(SeekBar rowInput, SeekBar colInput, SeekBar mineInput) {
+		public startNewGameButtonListener(SeekBar rowInput, SeekBar colInput, SeekBar mineInput) {
 			this.rowInput = rowInput;
 			this.colInput = colInput;
 			this.mineInput = mineInput;
@@ -287,10 +294,18 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			final int numberOfCols = this.colInput.getProgress();
 			final int numberOfMines = this.mineInput.getProgress();
 
+			final RadioButton normalMode = findViewById(R.id.normal_mode);
+			final RadioButton noGuessMode = findViewById(R.id.no_guessing_mode);
+
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putInt(NUMBER_OF_ROWS, numberOfRows);
 			editor.putInt(NUMBER_OF_COLS, numberOfCols);
 			editor.putInt(NUMBER_OF_MINES, numberOfMines);
+			if (normalMode.isChecked()) {
+				editor.putInt(GAME_MODE, R.id.normal_mode);
+			} else if (noGuessMode.isChecked()) {
+				editor.putInt(GAME_MODE, R.id.no_guessing_mode);
+			}
 			editor.apply();
 
 			//TODO: look into removing this
@@ -299,13 +314,15 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				return;
 			}
 
-			final RadioGroup gameType = findViewById(R.id.game_type_group);
-
 			Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
-			intent.putExtra("numberOfRows", numberOfRows);
-			intent.putExtra("numberOfCols", numberOfCols);
-			intent.putExtra("numberOfMines", numberOfMines);
-			intent.putExtra("gameMode", gameType.getCheckedRadioButtonId());
+			intent.putExtra(NUMBER_OF_ROWS, numberOfRows);
+			intent.putExtra(NUMBER_OF_COLS, numberOfCols);
+			intent.putExtra(NUMBER_OF_MINES, numberOfMines);
+			if (normalMode.isChecked()) {
+				intent.putExtra(GAME_MODE, R.id.normal_mode);
+			} else if (noGuessMode.isChecked()) {
+				intent.putExtra(GAME_MODE, R.id.no_guessing_mode);
+			}
 			startActivity(intent);
 		}
 

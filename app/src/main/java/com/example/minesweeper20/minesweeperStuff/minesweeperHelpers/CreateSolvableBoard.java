@@ -35,7 +35,7 @@ public class CreateSolvableBoard {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
 		}
-		for (int tries = 0; tries < 1000; ++tries) {
+		for (int tries = 0; tries < 20; ++tries) {
 			MinesweeperGame minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			minesweeperGame.clickCell(firstClickI, firstClickJ, false);
 			MinesweeperGame saveGame = new MinesweeperGame(minesweeperGame);
