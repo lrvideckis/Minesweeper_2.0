@@ -24,10 +24,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BacktrackingSolver implements MinesweeperSolver {
 
 	public final static int iterationLimit = 20000;
+
 	private final int rows, cols;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
 	private final ArrayList<ArrayList<ArrayList<Pair<Integer, Integer>>>> lastUnvisitedSpot;
+	private final ArrayList<TreeMap<Integer, ArrayList<Pair<Integer, Integer>>>> savePositionsOfBombsPerCompPerCountBombs = new ArrayList<>();
+	private final TreeMap<Integer, ArrayList<Pair<Integer, Integer>>> saveGoodBombConfigurations = new TreeMap<>();
 	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig = new ArrayList<>();
 	//TODO: remove mineProbPerCompPerNumMines denominator, and use mineConfig instead
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines = new ArrayList<>();
@@ -104,7 +107,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
-		performBacktracktrackingInParallel();
+		performBacktracktrackingInParallel(null);
 
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 
@@ -352,10 +355,10 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	//TODO: only re-run component solve if the component has changed
-	private void solveComponent(int pos, int componentPos, MutableInt currIterations, MutableInt currNumberOfMines) throws Exception {
+	private void solveComponent(int pos, int componentPos, MutableInt currIterations, MutableInt currNumberOfMines, InterestingCell interestingCell) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
 		if (pos == component.size()) {
-			handleSolution(componentPos, currNumberOfMines.get());
+			handleSolution(componentPos, currNumberOfMines.get(), interestingCell);
 			return;
 		}
 		currIterations.addWith(1);
@@ -370,7 +373,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		if (checkSurroundingConditions(i, j, component.get(pos), 1)) {
 			currNumberOfMines.addWith(1);
 			updateSurroundingMineCnt(i, j, 1);
-			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines);
+			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines, interestingCell);
 			updateSurroundingMineCnt(i, j, -1);
 			currNumberOfMines.addWith(-1);
 		}
@@ -378,7 +381,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		//try free
 		isMine[i][j] = false;
 		if (checkSurroundingConditions(i, j, component.get(pos), 0)) {
-			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines);
+			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines, interestingCell);
 		}
 	}
 
@@ -424,7 +427,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return true;
 	}
 
-	private void handleSolution(int componentPos, int currNumberOfMines) throws Exception {
+	private void handleSolution(int componentPos, int currNumberOfMines, InterestingCell interestingCell) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
 		if (performCheckPositionValidity) {
 			checkPositionValidity(component, currNumberOfMines);
@@ -448,13 +451,54 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for (int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
-			//VisibleTile curr = board[i][j];
 			Pair<MutableInt, MutableInt> curr = currArrayList.get(pos);
 
 			if (isMine[i][j]) {
 				curr.first.addWith(1);
 			}
 			curr.second.addWith(1);
+		}
+
+		if (interestingCell != null) {
+			saveCurrentConfiguration(componentPos, currNumberOfMines, component, interestingCell);
+		}
+	}
+
+	private void saveCurrentConfiguration(int componentPos, int currNumberOfMines, ArrayList<Pair<Integer, Integer>> component, InterestingCell interestingCell) {
+		final int spotI = interestingCell.getSpotI();
+		final int spotJ = interestingCell.getSpotJ();
+		final boolean wantMine = interestingCell.getWantMine();
+
+		boolean goodConfig = false, componentHasInterestingSpot = false;
+		for (int pos = 0; pos < component.size(); ++pos) {
+			final int i = component.get(pos).first;
+			final int j = component.get(pos).second;
+			if (i == spotI && j == spotJ) {
+				componentHasInterestingSpot = true;
+				interestingCell.cellComponent = componentPos;
+				if (isMine[i][j] == wantMine) {
+					goodConfig = true;
+				}
+				break;
+			}
+		}
+
+		if (componentHasInterestingSpot || !savePositionsOfBombsPerCompPerCountBombs.get(componentPos).containsKey(currNumberOfMines)) {
+			ArrayList<Pair<Integer, Integer>> currBombConfiguration = new ArrayList<>();
+			for (int pos = 0; pos < component.size(); ++pos) {
+				final int i = component.get(pos).first;
+				final int j = component.get(pos).second;
+				if (isMine[i][j]) {
+					currBombConfiguration.add(new Pair<>(i, j));
+				}
+			}
+			if (componentHasInterestingSpot) {
+				if (goodConfig && !saveGoodBombConfigurations.containsKey(currNumberOfMines)) {
+					saveGoodBombConfigurations.put(currNumberOfMines, currBombConfiguration);
+				}
+			} else {
+				savePositionsOfBombsPerCompPerCountBombs.get(componentPos).put(currNumberOfMines, currBombConfiguration);
+			}
 		}
 	}
 
@@ -490,7 +534,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return totalIterations;
 	}
 
-	private void performBacktracktrackingInParallel() throws HitIterationLimitException {
+	private void performBacktracktrackingInParallel(InterestingCell interestingCell) throws HitIterationLimitException {
 		List<Integer> componentIndexes = new ArrayList<>();
 		for (int i = 0; i < components.size(); ++i) {
 			componentIndexes.add(i);
@@ -501,7 +545,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
 			try {
-				solveComponent(0, i, currIterations, currNumberOfMines);
+				solveComponent(0, i, currIterations, currNumberOfMines, interestingCell);
 			} catch (HitIterationLimitException e) {
 				hitIterationLimit.set(true);
 			} catch (Exception e) {
@@ -511,6 +555,16 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		});
 		if (hitIterationLimit.get()) {
 			throw new HitIterationLimitException("too many iterations");
+		}
+	}
+
+	private boolean[][] getCurrentMinConfiguration(VisibleTile[][] board) {
+		boolean[][] mines = new boolean[rows][cols];
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				mines[i][j] = (board[i][j].)
+				if(board[i][j])
+			}
 		}
 	}
 
@@ -528,8 +582,12 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					throw new Exception("visible cells can't be logical frees/mines");
 				}
 				if (board[i][j].getIsLogicalMine()) {
-					if (i == spotI && j == spotJ && !wantMine) {
-						throw new NoSolutionFoundException("logical mine in spot where free was requested");
+					if (i == spotI && j == spotJ) {
+						if(wantMine) {
+							boolean[][]
+						} else {
+							throw new NoSolutionFoundException("logical mine in spot where free was requested");
+						}
 					}
 					--numberOfMines;
 					board[i][j].numberOfMineConfigs.setValues(1, 1);
@@ -560,9 +618,144 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
-		performBacktracktrackingInParallel();
+		savePositionsOfBombsPerCompPerCountBombs.clear();
+		for (int i = 0; i < components.size(); ++i) {
+			savePositionsOfBombsPerCompPerCountBombs.add(new TreeMap<>());
+		}
 
-		removeMineNumbersFromComponent();
-		return null;
+		InterestingCell interestingCell = new InterestingCell(spotI, spotJ, wantMine);
+
+		performBacktracktrackingInParallel(interestingCell);
+		if (interestingCell.cellComponent == -1) {
+			throw new Exception("Wanted (interesting) cell is an away cell, I haven't implemented this yet");
+		}
+
+		boolean[][] newBombs = new boolean[rows][cols];
+
+		ArrayList<TreeSet<Integer>> dpTable = new ArrayList<>(components.size());
+		ArrayList<TreeMap<Integer, Integer>> parentTable = new ArrayList<>(components.size());
+		for (int i = 0; i < components.size(); ++i) {
+			dpTable.add(new TreeSet<>());
+			parentTable.add(new TreeMap<>());
+		}
+		for (int i = 0; i < interestingCell.cellComponent; ++i) {
+			if (i == 0) {
+				for (int entry : mineConfig.get(i).keySet()) {
+					dpTable.get(i).add(entry);
+				}
+				continue;
+			}
+			for (int entry : mineConfig.get(i).keySet()) {
+				for (int val : dpTable.get(i - 1)) {
+					dpTable.get(i).add(val + entry);
+					parentTable.get(i).put(val + entry, entry);
+				}
+			}
+		}
+		for (int i = components.size() - 1; i > interestingCell.cellComponent; --i) {
+			if (i == components.size() - 1) {
+				for (int entry : mineConfig.get(i).keySet()) {
+					dpTable.get(i).add(entry);
+				}
+				continue;
+			}
+			for (int entry : mineConfig.get(i).keySet()) {
+				for (int val : dpTable.get(i + 1)) {
+					dpTable.get(i).add(val + entry);
+					parentTable.get(i).put(val + entry, entry);
+				}
+			}
+		}
+
+		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
+
+		TreeSet<Integer> prev = new TreeSet<>();
+		prev.add(0);
+		if (interestingCell.cellComponent > 0) {
+			prev = dpTable.get(interestingCell.cellComponent - 1);
+		}
+		TreeSet<Integer> after = new TreeSet<>();
+		after.add(0);
+		if (interestingCell.cellComponent + 1 < components.size()) {
+			after = dpTable.get(interestingCell.cellComponent + 1);
+		}
+		//TODO: change bomb to mine
+		for (TreeMap.Entry<Integer, ArrayList<Pair<Integer, Integer>>> entry : saveGoodBombConfigurations.entrySet()) {
+			int minesCurr = entry.getKey();
+			for (int minesBefore : prev) {
+				Integer minesAfter = after.lower(1 + numberOfMines - minesBefore - minesCurr);
+				if (minesAfter == null || minesBefore + minesAfter + minesCurr < numberOfMines - numberOfAwayCells) {
+					continue;
+				}
+				//found solution
+
+				//set mines of current component
+				for (Pair<Integer, Integer> bombSpot : entry.getValue()) {
+					newBombs[bombSpot.first][bombSpot.second] = true;
+				}
+
+				//set mines of all components after current component
+				for (int i = interestingCell.cellComponent + 1; i < components.size(); ++i) {
+					int numBombsCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesAfter));
+					for (Pair<Integer, Integer> bombSpot : Objects.requireNonNull(savePositionsOfBombsPerCompPerCountBombs.get(i).get(numBombsCurrComponent))) {
+						newBombs[bombSpot.first][bombSpot.second] = true;
+					}
+					minesAfter -= numBombsCurrComponent;
+				}
+
+				//set mines of all components before current component
+				for (int i = interestingCell.cellComponent - 1; i >= 0; --i) {
+					int numBombsCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesBefore));
+					for (Pair<Integer, Integer> bombSpot : Objects.requireNonNull(savePositionsOfBombsPerCompPerCountBombs.get(i).get(numBombsCurrComponent))) {
+						newBombs[bombSpot.first][bombSpot.second] = true;
+					}
+					minesBefore -= numBombsCurrComponent;
+				}
+
+				//set mines in away cells
+				final int minesLeft = numberOfMines - minesCurr - minesBefore - minesAfter;
+				ArrayList<Pair<Integer,Integer>> allAwayCells = new ArrayList<>();
+				for (int i = 0; i < rows; ++i) {
+					for (int j = 0; j < cols; ++j) {
+						if(AwayCell.isAwayCell(board, i, j, rows, cols)) {
+							allAwayCells.add(new Pair<>(i,j));
+						}
+					}
+				}
+				if(minesLeft < 0 || minesLeft > allAwayCells.size()) {
+					throw new Exception("number of mines left doesn't make a valid configuration");
+				}
+				//TODO: shuffle away cells array
+				for (int i = 0; i < minesLeft; ++i) {
+					newBombs[allAwayCells.get(i).first][allAwayCells.get(i).second] = true;
+				}
+			}
+			return newBombs;
+		}
+		throw new Exception("didn't find solution, but it should exist");
+	}
+
+	private static class InterestingCell {
+		private int spotI, spotJ;
+		private boolean wantMine;
+		private int cellComponent = -1;
+
+		InterestingCell(int spotI, int spotJ, boolean wantMine) {
+			this.spotI = spotI;
+			this.spotJ = spotJ;
+			this.wantMine = wantMine;
+		}
+
+		int getSpotI() {
+			return spotI;
+		}
+
+		int getSpotJ() {
+			return spotJ;
+		}
+
+		boolean getWantMine() {
+			return wantMine;
+		}
 	}
 }

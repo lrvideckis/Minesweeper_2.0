@@ -136,7 +136,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
 
+		boolean isFirstClick = false;
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
+			isFirstClick = true;
 			updateTimeThread.start();
 			if (gameMode == 1 || gameMode == 2) {
 				CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
@@ -156,7 +158,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		try {
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
-			if (gameMode == 2 || gameMode == 3) {
+			if ((gameMode == 2 || gameMode == 3) && !isFirstClick) {
 				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 				boolean wantMine = (gameMode == 2);
 				//TODO: bug: when toggle flags is on + hard mode: this will always put a mine under the cell you just flagged
