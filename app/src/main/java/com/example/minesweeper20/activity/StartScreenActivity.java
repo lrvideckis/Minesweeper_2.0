@@ -327,6 +327,5 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			}
 			startActivity(intent);
 		}
-
 	}
 }

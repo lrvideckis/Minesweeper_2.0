@@ -14,8 +14,9 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private final ScaleGestureDetector SGD;
 	private final GameCanvas gameCanvas;
 	private final Matrix matrix = new Matrix();
-	private int halfScreenWidth = 0, halfScreenHeight = 0, rows, cols;
 	private final Context context;
+	private final int rows, cols;
+	private int halfScreenWidth = 0, halfScreenHeight = 0;
 	private float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
 	private int prevPointerCount = 0;
 	//variables to handle a tap

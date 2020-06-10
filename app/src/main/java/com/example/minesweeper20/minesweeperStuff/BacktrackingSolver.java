@@ -107,7 +107,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
-		performBacktracktrackingInParallel(null);
+		performBacktrackingInParallel(null);
 
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 
@@ -534,7 +534,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return totalIterations;
 	}
 
-	private void performBacktracktrackingInParallel(InterestingCell interestingCell) throws HitIterationLimitException {
+	private void performBacktrackingInParallel(InterestingCell interestingCell) throws HitIterationLimitException {
 		List<Integer> componentIndexes = new ArrayList<>();
 		for (int i = 0; i < components.size(); ++i) {
 			componentIndexes.add(i);
@@ -619,7 +619,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		InterestingCell interestingCell = new InterestingCell(spotI, spotJ, wantMine);
 
-		performBacktracktrackingInParallel(interestingCell);
+		performBacktrackingInParallel(interestingCell);
 		if (interestingCell.cellComponent == -1) {
 			throw new Exception("Wanted (interesting) cell is an away cell, I haven't implemented this yet");
 		}
@@ -697,7 +697,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			int minesCurr = entry.getKey();
 			for (int minesBefore : prev) {
 				System.out.println("numberOfMines: " + numberOfMines);
-				System.out.println("lowor on: " + (1 + numberOfMines - minesBefore - minesCurr));
+				System.out.println("lower on: " + (1 + numberOfMines - minesBefore - minesCurr));
 				Integer minesAfter = after.lower(1 + numberOfMines - minesBefore - minesCurr);
 				if (minesAfter == null || minesBefore + minesAfter + minesCurr < numberOfMines - numberOfAwayCells) {
 					continue;
@@ -770,8 +770,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	}
 
 	private static class InterestingCell {
-		private int spotI, spotJ;
-		private boolean wantMine;
+		private final int spotI, spotJ;
+		private final boolean wantMine;
 		private int cellComponent = -1;
 
 		InterestingCell(int spotI, int spotJ, boolean wantMine) {

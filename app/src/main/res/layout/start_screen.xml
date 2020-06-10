@@ -199,7 +199,7 @@
 					android:id="@+id/normal_mode"
 					android:layout_width="wrap_content"
 					android:layout_height="match_parent"
-					android:text="Normal Mode" />
+					android:text="@string/normal_mode" />
 
 				<RelativeLayout
 					android:layout_width="40dp"
@@ -233,7 +233,7 @@
 					android:id="@+id/no_guessing_mode"
 					android:layout_width="wrap_content"
 					android:layout_height="match_parent"
-					android:text="No Guessing Mode" />
+					android:text="@string/no_guessing_mode" />
 
 				<RelativeLayout
 					android:layout_width="40dp"

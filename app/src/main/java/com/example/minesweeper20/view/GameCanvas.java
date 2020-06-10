@@ -17,11 +17,11 @@ import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.Visib
 
 public class GameCanvas extends View {
 
-	private ScaleListener scaleListener;
 	private final Paint black = new Paint();
 	private final DrawCellHelpers drawCellHelpers;
 	private final BigFraction mineProbability = new BigFraction(0);
 	private final RectF tempCellRect = new RectF();
+	private final ScaleListener scaleListener;
 
 	public GameCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);

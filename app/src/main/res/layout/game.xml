@@ -108,8 +108,8 @@
 			android:layout_height="match_parent"
 			android:layout_alignParentEnd="true"
 			android:layout_centerInParent="true"
-			android:layout_toEndOf="@id/toggleMineProbability"
 			android:layout_marginEnd="10dp"
+			android:layout_toEndOf="@id/toggleMineProbability"
 			android:gravity="center"
 			android:text="@string/initial_iterations" />
 

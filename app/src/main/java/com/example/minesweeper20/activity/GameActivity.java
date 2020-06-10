@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.minesweeper20.R;
 import com.example.minesweeper20.customExceptions.HitIterationLimitException;
 import com.example.minesweeper20.minesweeperStuff.BacktrackingSolver;
-import com.example.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
@@ -43,10 +42,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleMinesOn = false,
 			toggleMineProbabilityOn = false;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
-	private PopupWindow solverHitLimitPopup, stackStacePopup, couldntFindNoGuessBoardPopup;
+	private PopupWindow solverHitLimitPopup, stackStacePopup, couldNotFindNoGuessBoardPopup;
 
 	private MinesweeperGame minesweeperGame;
-	private MinesweeperSolver backtrackingSolver, gaussSolver;
+	private MinesweeperSolver backtrackingSolver;
 	private MinesweeperSolver.VisibleTile[][] board;
 	private int lastTapRow, lastTapCol;
 	private Thread updateTimeThread;
@@ -68,10 +67,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		try {
 			minesweeperGame = new MinesweeperGame(numberOfRows, numberOfCols, numberOfMines);
 		} catch (Exception e) {
+			displayStackTracePopup(e);
 			e.printStackTrace();
 		}
 		backtrackingSolver = new BacktrackingSolver(numberOfRows, numberOfCols);
-		gaussSolver = new GaussianEliminationSolver(numberOfRows, numberOfCols);
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
@@ -135,7 +134,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				try {
 					minesweeperGame = createSolvableBoard.getSolvableBoard(row, col);
 				} catch (HitIterationLimitException e) {
-					//TODO: display popup notifying user that too many iterations were taken
 					displayNoGuessBoardPopup();
 				}
 			}
@@ -165,26 +163,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		gameCanvas.invalidate();
 	}
 
-	public void updateSolvedBoardWithGaussSolver() throws Exception {
-		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-		try {
-			gaussSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
-		} catch (Exception e) {
-			displayStackTracePopup(e);
-			e.printStackTrace();
-		}
-	}
-
 	private void startNewGame() {
 		try {
 			minesweeperGame = new MinesweeperGame(numberOfRows, numberOfCols, numberOfMines);
 		} catch (Exception e) {
+			displayStackTracePopup(e);
 			e.printStackTrace();
 		}
 		enableButtonsAndSwitchesAndSetToFalse();
 		try {
 			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		} catch (Exception e) {
+			displayStackTracePopup(e);
 			e.printStackTrace();
 		}
 
@@ -265,7 +255,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		gameCanvas.invalidate();
 	}
 
-	//TODO: make all thrown places show this
 	public void displayStackTracePopup(Exception e) {
 		TextView textView = stackStacePopup.getContentView().findViewById(R.id.stackTrace);
 		StringWriter sw = new StringWriter();
@@ -287,13 +276,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void setUpNoGuessBoardPopup() {
-		couldntFindNoGuessBoardPopup = PopupHelper.initializePopup(this, R.layout.couldnt_find_no_guess_board_popup);
-		Button okButton = couldntFindNoGuessBoardPopup.getContentView().findViewById(R.id.noGuessBoardOkButton);
-		okButton.setOnClickListener(view -> couldntFindNoGuessBoardPopup.dismiss());
+		couldNotFindNoGuessBoardPopup = PopupHelper.initializePopup(this, R.layout.couldnt_find_no_guess_board_popup);
+		Button okButton = couldNotFindNoGuessBoardPopup.getContentView().findViewById(R.id.noGuessBoardOkButton);
+		okButton.setOnClickListener(view -> couldNotFindNoGuessBoardPopup.dismiss());
 	}
 
 	private void displayNoGuessBoardPopup() {
-		PopupHelper.displayPopup(couldntFindNoGuessBoardPopup, findViewById(R.id.gameLayout), getResources());
+		PopupHelper.displayPopup(couldNotFindNoGuessBoardPopup, findViewById(R.id.gameLayout), getResources());
 	}
 
 	private void setUpStackTracePopup() {
