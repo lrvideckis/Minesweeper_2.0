@@ -73,6 +73,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 					board[i][j].numberOfTotalConfigs.setValues(rows * cols, 1);
 				}
 			}
+			totalIterations = 0;
 			return;
 		}
 
