@@ -85,7 +85,7 @@ public class GameCanvas extends View {
 			} else if (solverCell.getIsLogicalFree() && (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn())) {
 				drawCellHelpers.drawBlackX(canvas, startX, startY);
 			}
-		} else if (gameCell.isMine() && (gameActivity.getMinesweeperGame().getIsGameLost() || gameActivity.getToggleMinesOn())) {
+		} else if (gameCell.isMine() && gameActivity.getMinesweeperGame().getIsGameLost()) {
 			drawCellHelpers.drawMine(canvas, startX, startY);
 		}
 	}
@@ -123,7 +123,6 @@ public class GameCanvas extends View {
 				try {
 					drawCell(canvas, gameActivity.getBoard()[i][j], gameActivity.getMinesweeperGame().getCell(i, j), i, j, startX, startY, (gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol()));
 				} catch (Exception e) {
-					gameActivity.displayStackTracePopup(e);
 					e.printStackTrace();
 				}
 			}

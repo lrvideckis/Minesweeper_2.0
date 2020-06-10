@@ -123,7 +123,6 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						try {
 							((GameActivity) context).handleTap(newX, newY);
 						} catch (Exception e) {
-							((GameActivity) context).displayStackTracePopup(e);
 							e.printStackTrace();
 						}
 					}

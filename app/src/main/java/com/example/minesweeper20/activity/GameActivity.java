@@ -2,7 +2,6 @@ package com.example.minesweeper20.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -23,8 +22,6 @@ import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.CreateSolva
 import com.example.minesweeper20.miscHelpers.PopupHelper;
 import com.example.minesweeper20.view.GameCanvas;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,10 +35,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private boolean
 			toggleFlagModeOn = false,
 			toggleBacktrackingHintsOn = false,
-			toggleMinesOn = false,
 			toggleMineProbabilityOn = false;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
-	private PopupWindow solverHitLimitPopup, stackStacePopup, couldNotFindNoGuessBoardPopup;
+	private PopupWindow solverHitLimitPopup, couldNotFindNoGuessBoardPopup;
 
 	private MinesweeperGame minesweeperGame;
 	private MinesweeperSolver backtrackingSolver;
@@ -66,7 +62,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		try {
 			minesweeperGame = new MinesweeperGame(numberOfRows, numberOfCols, numberOfMines);
 		} catch (Exception e) {
-			displayStackTracePopup(e);
 			e.printStackTrace();
 		}
 		backtrackingSolver = new BacktrackingSolver(numberOfRows, numberOfCols);
@@ -80,15 +75,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setOnCheckedChangeListener(this);
-		//Switch toggleMines = findViewById(R.id.toggleMines);
-		//toggleMines.setOnCheckedChangeListener(this);
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setOnCheckedChangeListener(this);
 
 		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
 		setUpNoGuessBoardPopup();
-		setUpStackTracePopup();
 
 		updateTimeThread = new TimeUpdateThread();
 	}
@@ -116,7 +108,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	public void handleTap(float tapX, float tapY) throws Exception {
-		//eventually I won't need this check, as the grid always fills the screen
 		if (tapX < 0f ||
 				tapY < 0f ||
 				tapX > numberOfCols * cellPixelLength ||
@@ -153,7 +144,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				}
 			}
 		} catch (Exception e) {
-			displayStackTracePopup(e);
 			e.printStackTrace();
 		}
 
@@ -166,14 +156,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		try {
 			minesweeperGame = new MinesweeperGame(numberOfRows, numberOfCols, numberOfMines);
 		} catch (Exception e) {
-			displayStackTracePopup(e);
 			e.printStackTrace();
 		}
 		enableButtonsAndSwitchesAndSetToFalse();
 		try {
 			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		} catch (Exception e) {
-			displayStackTracePopup(e);
 			e.printStackTrace();
 		}
 
@@ -194,22 +182,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			case R.id.toggleBacktrackingHints:
 				handleHintToggle(isChecked);
 				break;
-			//case R.id.toggleMines:
-			//handleToggleShowMines(isChecked);
-			//break;
 			case R.id.toggleMineProbability:
 				handleToggleMineProbability(isChecked);
 				break;
 		}
 	}
-
-	/*
-	private void handleToggleShowMines(boolean isChecked) {
-		toggleMinesOn = isChecked;
-		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
-		gameCanvas.invalidate();
-	}
-	 */
 
 	private void handleToggleMineProbability(boolean isChecked) {
 		toggleMineProbabilityOn = isChecked;
@@ -218,11 +195,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			try {
 				updateSolvedBoardWithBacktrackingSolver();
 			} catch (Exception e) {
-				displayStackTracePopup(e);
 				e.printStackTrace();
 			}
-		} else if (!toggleBacktrackingHintsOn) {
-			updateNumberOfSolverIterations(0);
 		}
 		gameCanvas.invalidate();
 	}
@@ -232,7 +206,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		try {
 			backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
-			updateNumberOfSolverIterations(backtrackingSolver.getNumberOfIterations());
 		} catch (HitIterationLimitException e) {
 			solverHitIterationLimit();
 		}
@@ -245,24 +218,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			try {
 				updateSolvedBoardWithBacktrackingSolver();
 			} catch (Exception e) {
-				displayStackTracePopup(e);
 				e.printStackTrace();
-			}
-		} else {
-			if (!toggleMineProbabilityOn) {
-				updateNumberOfSolverIterations(0);
 			}
 		}
 		gameCanvas.invalidate();
-	}
-
-	public void displayStackTracePopup(Exception e) {
-		TextView textView = stackStacePopup.getContentView().findViewById(R.id.stackTrace);
-		StringWriter sw = new StringWriter();
-		e.printStackTrace(new PrintWriter(sw));
-		textView.setText(sw.toString());
-		textView.setMovementMethod(new ScrollingMovementMethod());
-		PopupHelper.displayPopup(stackStacePopup, findViewById(R.id.gameLayout), getResources());
 	}
 
 	private void setUpIterationLimitPopup() {
@@ -286,10 +245,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		PopupHelper.displayPopup(couldNotFindNoGuessBoardPopup, findViewById(R.id.gameLayout), getResources());
 	}
 
-	private void setUpStackTracePopup() {
-		stackStacePopup = PopupHelper.initializePopup(this, R.layout.stack_trace_popup);
-	}
-
 	public void solverHitIterationLimit() {
 		//TODO: think about changing this behavior to just (temporarily) switching modes to back to normal mode
 		if (toggleBacktrackingHintsOn) {
@@ -302,7 +257,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleProb.setChecked(false);
 			toggleMineProbabilityOn = false;
 		}
-		updateNumberOfSolverIterations(0);
 		PopupHelper.displayPopup(solverHitLimitPopup, findViewById(R.id.gameLayout), getResources());
 	}
 
@@ -332,18 +286,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		timeText.setText(currTime);
 	}
 
-	public void updateNumberOfSolverIterations(int numberOfIterations) {
-		TextView iterationTextView = findViewById(R.id.numberOfIterationsTextView);
-		final String iterationsText = "Solver Iterations:\n" + numberOfIterations;
-		iterationTextView.setText(iterationsText);
-	}
-
 	public void disableSwitchesAndButtons() {
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setClickable(false);
-
-		//Switch toggleMines = findViewById(R.id.toggleMines);
-		//toggleMines.setClickable(false);
 
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setClickable(false);
@@ -356,10 +301,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setClickable(true);
 		toggleHints.setChecked(false);
-
-		//Switch toggleMines = findViewById(R.id.toggleMines);
-		//toggleMines.setClickable(true);
-		//toggleMines.setChecked(false);
 
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setClickable(true);
@@ -398,10 +339,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public int getNumberOfCols() {
 		return numberOfCols;
-	}
-
-	public boolean getToggleMinesOn() {
-		return toggleMinesOn;
 	}
 
 	public boolean getToggleBacktrackingHintsOn() {

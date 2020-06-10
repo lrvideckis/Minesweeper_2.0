@@ -59,19 +59,7 @@
 			android:textColor="@color/red"
 			android:textSize="20sp"
 			tools:ignore="HardcodedText" />
-
 	</RelativeLayout>
-
-
-	<!--
-	<Switch
-		android:id="@+id/toggleMines"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/topPanel"
-		android:text="@string/show_mines" />
-		-->
-
 
 	<com.example.minesweeper20.view.GameCanvas
 		android:id="@+id/gridCanvas"
@@ -91,31 +79,26 @@
 		android:background="@drawable/top_black_border"
 		android:orientation="horizontal">
 
-		<Switch
-			android:id="@+id/toggleBacktrackingHints"
-			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:layout_alignParentStart="true"
-			android:layout_marginStart="10dp"
-			android:text="@string/hints" />
-
-		<Switch
-			android:id="@+id/toggleMineProbability"
+		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
 			android:layout_centerInParent="true"
-			android:text="@string/show_mine_probability" />
+			android:orientation="horizontal"
+			tools:ignore="UselessParent">
 
-		<TextView
-			android:id="@+id/numberOfIterationsTextView"
-			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:layout_alignParentEnd="true"
-			android:layout_centerInParent="true"
-			android:layout_marginEnd="10dp"
-			android:layout_toEndOf="@id/toggleMineProbability"
-			android:gravity="center"
-			android:text="@string/initial_iterations" />
+			<Switch
+				android:id="@+id/toggleBacktrackingHints"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:text="@string/hints" />
+
+			<Switch
+				android:id="@+id/toggleMineProbability"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginStart="20dp"
+				android:text="@string/show_mine_probability" />
+		</LinearLayout>
 
 	</RelativeLayout>
 </RelativeLayout>

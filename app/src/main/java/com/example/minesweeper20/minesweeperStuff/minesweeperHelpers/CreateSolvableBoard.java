@@ -9,6 +9,7 @@ import com.example.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class CreateSolvableBoard {
+	private static final int maxIterationsToFindBoard = 5000;
 	private final MinesweeperSolver backtrackingSolver;
 	private final MinesweeperSolver gaussSolver;
 	private final VisibleTile[][] board;
@@ -31,15 +32,14 @@ public class CreateSolvableBoard {
 	}
 
 	//TODO: make this as fast as: https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html
+	//TODO: use previously found logical stuff (this can also be used to improve the gauss solver)
 	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
 		}
-		int totalTries = 20;
-		if (hasAn8) {
-			totalTries = 65;
-		}
-		for (int tries = 0; tries < totalTries; ++tries) {
+		int totalIterationsSoFar = 0;
+		//TODO: look into making this parallel
+		while (totalIterationsSoFar < maxIterationsToFindBoard) {
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			if (hasAn8) {
@@ -69,8 +69,10 @@ public class CreateSolvableBoard {
 				try {
 					backtrackingSolver.solvePosition(board, mines);
 				} catch (HitIterationLimitException ignored) {
+					totalIterationsSoFar += BacktrackingSolver.iterationLimit;
 					break;
 				}
+				totalIterationsSoFar += backtrackingSolver.getNumberOfIterations();
 				for (int i = 0; i < rows; ++i) {
 					for (int j = 0; j < cols; ++j) {
 						if (board[i][j].getIsLogicalFree()) {
@@ -84,7 +86,6 @@ public class CreateSolvableBoard {
 				}
 			}
 			if (minesweeperGame.getIsGameWon()) {
-				System.out.println("found solution on try: " + (tries + 1));
 				return saveGame;
 			}
 		}

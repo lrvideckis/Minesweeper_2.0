@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 //TODO: also break out early the moment we find a (conditioned) solution
 public class BacktrackingSolver implements MinesweeperSolver {
 
-	public final static int iterationLimit = 20000;
+	public final static int iterationLimit = 10000;
 
 	private final int rows, cols;
 	private final boolean[][] isMine;
@@ -535,6 +535,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return totalIterations;
 	}
 
+	//TODO: test this with time to determine if it's actually faster (it might not be)
 	private void performBacktrackingInParallel(InterestingCell interestingCell) throws HitIterationLimitException {
 		List<Integer> componentIndexes = new ArrayList<>();
 		for (int i = 0; i < components.size(); ++i) {

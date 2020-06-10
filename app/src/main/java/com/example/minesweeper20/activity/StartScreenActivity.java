@@ -50,7 +50,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		Test.performTestsWithBigIntSolverForLargerGrids(20);
 		Test.performTestsForGaussSolver(20);
 		Test.performTestsMultipleRunsOfSameBoard(10);
-		*/
+		 */
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);
