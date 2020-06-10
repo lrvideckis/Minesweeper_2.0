@@ -11,7 +11,6 @@
 	<string name="is_linear_layout">is_linear_layout</string>
 	<string name="is_game_canvas_layout">is_game_canvas_layout</string>
 	<string name="two_decimal_places">%.2f</string>
-	<string name="three_decimal_places">%.3f</string>
 	<string name="initial_iterations">Solver Iterations:\n0</string>
 	<string name="is_relative_layout">is_relative_layout</string>
 	<string name="decrement">-</string>

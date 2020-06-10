@@ -166,11 +166,15 @@ public class DrawCellHelpers {
 		final int digitsDenominator = probability.getDenominator().toString().length();
 		if (digitsNumerator + digitsDenominator >= 5) {
 			canvas.drawText(
-					String.format(resources.getString(R.string.three_decimal_places), probability.getDoubleValue()),
+					String.format(resources.getString(R.string.two_decimal_places), probability.getDoubleValue()),
 					startX,
 					startY + GameActivity.cellPixelLength / 3f,
 					black
 			);
+		} else if (probability.equals(1)) {
+			canvas.drawText("1", startX, startY + GameActivity.cellPixelLength / 3f, black);
+		} else if (probability.equals(0)) {
+			canvas.drawText("0", startX, startY + GameActivity.cellPixelLength / 3f, black);
 		} else {
 			canvas.drawText(probability.getNumerator() + "/" + probability.getDenominator(), startX, startY + GameActivity.cellPixelLength / 3f, black);
 		}
