@@ -14,11 +14,9 @@ import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MutableInt;
 import com.example.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: also break out early the moment we find a (conditioned) solution
 public class BacktrackingSolver implements MinesweeperSolver {
@@ -108,7 +106,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
-		performBacktrackingInParallel(null);
+		performBacktrackingSequentially(null);
 
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 
@@ -535,28 +533,13 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		return totalIterations;
 	}
 
-	//TODO: test this with time to determine if it's actually faster (it might not be)
-	private void performBacktrackingInParallel(InterestingCell interestingCell) throws HitIterationLimitException {
-		List<Integer> componentIndexes = new ArrayList<>();
-		for (int i = 0; i < components.size(); ++i) {
-			componentIndexes.add(i);
-		}
+	private void performBacktrackingSequentially(InterestingCell interestingCell) throws Exception {
 		totalIterations = 0;
-		AtomicBoolean hitIterationLimit = new AtomicBoolean(false);
-		componentIndexes.parallelStream().forEach(i -> {
+		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
-			try {
-				solveComponent(0, i, currIterations, currNumberOfMines, interestingCell);
-			} catch (HitIterationLimitException e) {
-				hitIterationLimit.set(true);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			solveComponent(0, i, currIterations, currNumberOfMines, interestingCell);
 			totalIterations += currIterations.get();
-		});
-		if (hitIterationLimit.get()) {
-			throw new HitIterationLimitException("too many iterations");
 		}
 	}
 
@@ -621,7 +604,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 
 		InterestingCell interestingCell = new InterestingCell(spotI, spotJ, wantMine);
 
-		performBacktrackingInParallel(interestingCell);
+		performBacktrackingSequentially(interestingCell);
 		if (interestingCell.cellComponent == -1) {
 			throw new Exception("Wanted (interesting) cell is an away cell, I haven't implemented this yet");
 		}
