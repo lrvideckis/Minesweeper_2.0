@@ -19,9 +19,12 @@
 	<string name="minesweeper">Minesweeper</string>
 	<string name="normalModeExplanation">This mode is just normal minesweeper. The first square won\'t be a mine.</string>
 	<string name="no_guessing_mode_explanation">In this mode, it is possible to solve the entire grid by deduction. No guessing is required. The first square won\'t be a mine.</string>
+	<string name="no_guessing_mode_with_8_explanation">This mode is the same as no guess mode, but there will be at least one 8 (which will also be deductible).</string>
+
 	<string name="hints">Hints</string>
 	<string name="normal_mode">Normal Mode</string>
 	<string name="no_guessing_mode">No Guessing Mode</string>
+	<string name="no_guessing_mode_with_an_8">No Guessing Mode With An 8</string>
 
 	<!--
 	TODO: these modes

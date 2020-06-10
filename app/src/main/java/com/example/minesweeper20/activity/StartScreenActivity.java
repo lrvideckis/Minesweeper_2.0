@@ -40,7 +40,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			NUMBER_OF_MINES = "numMines",
 			GAME_MODE = "gameMode";
 	private SharedPreferences sharedPreferences;
-	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup;
+	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -89,6 +89,9 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		RadioButton noGuessingMode = findViewById(R.id.no_guessing_mode);
 		noGuessingMode.setOnClickListener(this);
 
+		RadioButton noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
+		noGuessingModeWith8.setOnClickListener(this);
+
 		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 9);
 		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 9);
 		final int previousMines = sharedPreferences.getInt(NUMBER_OF_MINES, 10);
@@ -101,6 +104,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			normalMode.setChecked(true);
 		} else if (gameMode == R.id.no_guessing_mode) {
 			noGuessingMode.setChecked(true);
+		} else if (gameMode == R.id.noGuessingModeWithAn8) {
+			noGuessingModeWith8.setChecked(true);
 		} else {
 			normalMode.setChecked(true);
 		}
@@ -135,8 +140,12 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		TextView noGuessingModeInfo = findViewById(R.id.no_guessing_mode_info);
 		noGuessingModeInfo.setOnClickListener(this);
 
+		TextView noGuessingModeWith8Info = findViewById(R.id.no_guessing_mode_with_8_info);
+		noGuessingModeWith8Info.setOnClickListener(this);
+
 		setUpNormalModeInfoPopup();
 		setUpNoGuessingModeInfoPopup();
+		setUpNoGuessingWith8ModeInfoPopup();
 	}
 
 	@Override
@@ -208,16 +217,30 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			case R.id.normal_mode:
 				RadioButton noGuessingMode = findViewById(R.id.no_guessing_mode);
 				noGuessingMode.setChecked(false);
+				RadioButton noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
+				noGuessingModeWith8.setChecked(false);
+
 				break;
 			case R.id.no_guessing_mode:
 				RadioButton normalMode = findViewById(R.id.normal_mode);
 				normalMode.setChecked(false);
+				noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
+				noGuessingModeWith8.setChecked(false);
+				break;
+			case R.id.noGuessingModeWithAn8:
+				normalMode = findViewById(R.id.normal_mode);
+				normalMode.setChecked(false);
+				noGuessingMode = findViewById(R.id.no_guessing_mode);
+				noGuessingMode.setChecked(false);
 				break;
 			case R.id.normal_mode_info:
 				displayNormalModeInfoPopup();
 				break;
 			case R.id.no_guessing_mode_info:
 				displayNoGuessingModeInfoPopup();
+				break;
+			case R.id.no_guessing_mode_with_8_info:
+				displayNoGuessingWith8ModeInfoPopup();
 				break;
 
 
@@ -272,10 +295,20 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		PopupHelper.displayPopup(noGuessingModeInfoPopup, findViewById(R.id.startScreenLayout), getResources());
 	}
 
+	public void displayNoGuessingWith8ModeInfoPopup() {
+		PopupHelper.displayPopup(noGuessingModeWith8InfoPopup, findViewById(R.id.startScreenLayout), getResources());
+	}
+
 	private void setUpNoGuessingModeInfoPopup() {
 		noGuessingModeInfoPopup = PopupHelper.initializePopup(this, R.layout.no_guessing_mode_info);
 		Button okButton = noGuessingModeInfoPopup.getContentView().findViewById(R.id.noGuessingModeInfoOkButton);
 		okButton.setOnClickListener(view -> noGuessingModeInfoPopup.dismiss());
+	}
+
+	private void setUpNoGuessingWith8ModeInfoPopup() {
+		noGuessingModeWith8InfoPopup = PopupHelper.initializePopup(this, R.layout.no_guessing_mode_with_8_info);
+		Button okButton = noGuessingModeWith8InfoPopup.getContentView().findViewById(R.id.noGuessingModeWith8InfoOkButton);
+		okButton.setOnClickListener(view -> noGuessingModeWith8InfoPopup.dismiss());
 	}
 
 	private class startNewGameButtonListener implements View.OnClickListener {
@@ -298,6 +331,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 			final RadioButton normalMode = findViewById(R.id.normal_mode);
 			final RadioButton noGuessMode = findViewById(R.id.no_guessing_mode);
+			final RadioButton noGuessModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
 
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putInt(NUMBER_OF_ROWS, numberOfRows);
@@ -307,6 +341,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				editor.putInt(GAME_MODE, R.id.normal_mode);
 			} else if (noGuessMode.isChecked()) {
 				editor.putInt(GAME_MODE, R.id.no_guessing_mode);
+			} else if (noGuessModeWith8.isChecked()) {
+				editor.putInt(GAME_MODE, R.id.noGuessingModeWithAn8);
 			}
 			editor.apply();
 
@@ -324,6 +360,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				intent.putExtra(GAME_MODE, R.id.normal_mode);
 			} else if (noGuessMode.isChecked()) {
 				intent.putExtra(GAME_MODE, R.id.no_guessing_mode);
+			} else if (noGuessModeWith8.isChecked()) {
+				intent.putExtra(GAME_MODE, R.id.noGuessingModeWithAn8);
 			}
 			startActivity(intent);
 		}

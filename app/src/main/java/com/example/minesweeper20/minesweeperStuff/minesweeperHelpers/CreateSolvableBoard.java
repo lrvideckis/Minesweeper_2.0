@@ -31,12 +31,17 @@ public class CreateSolvableBoard {
 	}
 
 	//TODO: make this as fast as: https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html
-	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ) throws Exception {
+	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
 		}
 		for (int tries = 0; tries < 20; ++tries) {
-			MinesweeperGame minesweeperGame = new MinesweeperGame(rows, cols, mines);
+			MinesweeperGame minesweeperGame;
+			if (hasAn8) {
+
+			} else {
+				minesweeperGame = new MinesweeperGame(rows, cols, mines);
+			}
 			minesweeperGame.clickCell(firstClickI, firstClickJ, false);
 			MinesweeperGame saveGame = new MinesweeperGame(minesweeperGame);
 			while (!minesweeperGame.getIsGameLost() && !minesweeperGame.getIsGameWon()) {

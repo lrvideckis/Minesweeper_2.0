@@ -129,10 +129,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
 			updateTimeThread.start();
-			if (gameMode == R.id.no_guessing_mode) {
+			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
 				CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
 				try {
-					minesweeperGame = createSolvableBoard.getSolvableBoard(row, col);
+					minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8);
 				} catch (HitIterationLimitException e) {
 					displayNoGuessBoardPopup();
 				}
