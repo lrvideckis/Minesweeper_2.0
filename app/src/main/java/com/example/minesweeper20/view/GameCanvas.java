@@ -39,14 +39,7 @@ public class GameCanvas extends View {
 		scaleListener.setScreenWidthAndHeight(getWidth(), getHeight());
 	}
 
-	private void drawCell(Canvas canvas, VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, boolean drawRedBackground) throws Exception {
-		final int startX = j * GameActivity.cellPixelLength;
-		final int startY = i * GameActivity.cellPixelLength;
-
-		if (cellIsOffScreen(startX, startY)) {
-			return;
-		}
-
+	private void drawCell(Canvas canvas, VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, int startX, int startY, boolean drawRedBackground) throws Exception {
 		if (gameCell.getIsVisible()) {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingMines(), i, j, startX, startY);
 			return;
@@ -112,14 +105,30 @@ public class GameCanvas extends View {
 
 		final int numberOfRows = gameActivity.getMinesweeperGame().getNumberOfRows();
 		final int numberOfCols = gameActivity.getMinesweeperGame().getNumberOfCols();
+
+		boolean haveDrawnARow = false;
 		for (int i = 0; i < numberOfRows; ++i) {
+			boolean haveDrawnACell = false;
 			for (int j = 0; j < numberOfCols; ++j) {
+				final int startX = j * GameActivity.cellPixelLength;
+				final int startY = i * GameActivity.cellPixelLength;
+				if (cellIsOffScreen(startX, startY)) {
+					if (haveDrawnACell) {
+						break;
+					}
+					continue;
+				}
+				haveDrawnACell = true;
+				haveDrawnARow = true;
 				try {
-					drawCell(canvas, gameActivity.getBoard()[i][j], gameActivity.getMinesweeperGame().getCell(i, j), i, j, (gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol()));
+					drawCell(canvas, gameActivity.getBoard()[i][j], gameActivity.getMinesweeperGame().getCell(i, j), i, j, startX, startY, (gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol()));
 				} catch (Exception e) {
 					gameActivity.displayStackTracePopup(e);
 					e.printStackTrace();
 				}
+			}
+			if (!haveDrawnACell && haveDrawnARow) {
+				break;
 			}
 		}
 		for (int j = 0; j <= numberOfCols; ++j) {
