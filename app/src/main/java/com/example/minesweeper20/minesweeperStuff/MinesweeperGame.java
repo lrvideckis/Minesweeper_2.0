@@ -13,10 +13,31 @@ public class MinesweeperGame {
 	private final int numberOfRows, numberOfCols, numberOfMines;
 	private final Tile[][] grid;
 	private int numberOfFlags;
-	private boolean firstClick, isGameLost;
+	private boolean firstClick, isGameLost, hasAn8 = false;
 
 	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfMines) throws Exception {
 
+		//TODO: look into removing this, it is kinda pointless
+		if (tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
+			throw new Exception("too many mines for zero start, UI doesn't allow for this to happen");
+		}
+
+		this.numberOfRows = numberOfRows;
+		this.numberOfCols = numberOfCols;
+		this.numberOfMines = numberOfMines;
+		numberOfFlags = 0;
+		firstClick = true;
+		isGameLost = false;
+		grid = new Tile[numberOfRows][numberOfCols];
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
+				grid[i][j] = new Tile();
+			}
+		}
+	}
+
+	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfMines, boolean hasAn8) throws Exception {
+		this.hasAn8 = hasAn8;
 		//TODO: look into removing this, it is kinda pointless
 		if (tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
 			throw new Exception("too many mines for zero start, UI doesn't allow for this to happen");
@@ -41,6 +62,7 @@ public class MinesweeperGame {
 		numberOfRows = minesweeperGame.getNumberOfRows();
 		numberOfCols = minesweeperGame.getNumberOfCols();
 		numberOfMines = minesweeperGame.getNumberOfMines();
+		hasAn8 = minesweeperGame.hasAn8;
 		numberOfFlags = minesweeperGame.numberOfFlags;
 		firstClick = minesweeperGame.firstClick;
 		isGameLost = minesweeperGame.isGameLost;
@@ -86,7 +108,11 @@ public class MinesweeperGame {
 	public void clickCell(int row, int col, boolean toggleMines) throws Exception {
 		if (firstClick && !toggleMines) {
 			firstClick = false;
-			firstClickedCell(row, col);
+			if (hasAn8) {
+				firstClickedCellWith8(row, col);
+			} else {
+				firstClickedCell(row, col);
+			}
 			return;
 		}
 		if (isGameLost || getIsGameWon()) {
@@ -190,6 +216,87 @@ public class MinesweeperGame {
 			int mineCol = spotsJ.get(permutation.get(i));
 			getCell(mineRow, mineCol).isMine = true;
 			incrementSurroundingMineCounts(mineRow, mineCol);
+		}
+		if (getCell(row, col).isMine) {
+			throw new Exception("starting click shouldn't be a mine");
+		}
+		revealCell(row, col);
+	}
+
+	private void firstClickedCellWith8(int row, int col) throws Exception {
+		ArrayList<Integer> spotsI = new ArrayList<>();
+		ArrayList<Integer> spotsJ = new ArrayList<>();
+		ArrayList<Integer> permutation = new ArrayList<>();
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
+				if (Math.abs(row - i) <= 1 && Math.abs(col - j) <= 1) {
+					continue;
+				}
+				permutation.add(spotsI.size());
+				spotsI.add(i);
+				spotsJ.add(j);
+			}
+		}
+
+		if (spotsI.size() != spotsJ.size() || permutation.size() != spotsJ.size()) {
+			throw new Exception("array list not working as expected");
+		}
+
+		if (spotsI.size() < numberOfMines) {
+			throw new Exception("too many mines to have a zero start");
+		}
+
+		if (numberOfMines < 8) {
+			throw new Exception("too few mines for an 8");
+		}
+
+		Collections.shuffle(permutation);
+
+		int rowWith8 = -1, colWith8 = -1;
+
+		for (int pos = 0; pos < permutation.size(); ++pos) {
+			int i = spotsI.get(permutation.get(pos));
+			int j = spotsJ.get(permutation.get(pos));
+			if (i == 0 || j == 0 || i == numberOfRows - 1 || j == numberOfCols - 1) {
+				continue;
+			}
+			rowWith8 = i;
+			colWith8 = j;
+			for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, numberOfRows, numberOfCols)) {
+				final int adjI = adj[0], adjJ = adj[1];
+				getCell(adjI, adjJ).isMine = true;
+				incrementSurroundingMineCounts(adjI, adjJ);
+			}
+			break;
+		}
+		if (rowWith8 == -1) {
+			throw new Exception("didn't find a spot for an 8, but there should be one");
+		}
+
+		spotsI.clear();
+		spotsJ.clear();
+		permutation.clear();
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
+				if (Math.abs(row - i) <= 1 && Math.abs(col - j) <= 1) {
+					continue;
+				}
+				if (Math.abs(rowWith8 - i) <= 1 && Math.abs(colWith8 - j) <= 1) {
+					continue;
+				}
+				permutation.add(spotsI.size());
+				spotsI.add(i);
+				spotsJ.add(j);
+			}
+		}
+
+		Collections.shuffle(permutation);
+
+		for (int pos = 0; pos < numberOfMines - 8; ++pos) {
+			int i = spotsI.get(permutation.get(pos));
+			int j = spotsJ.get(permutation.get(pos));
+			getCell(i, j).isMine = true;
+			incrementSurroundingMineCounts(i, j);
 		}
 		if (getCell(row, col).isMine) {
 			throw new Exception("starting click shouldn't be a mine");

@@ -35,10 +35,14 @@ public class CreateSolvableBoard {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
 		}
-		for (int tries = 0; tries < 20; ++tries) {
+		int totalTries = 20;
+		if (hasAn8) {
+			totalTries = 65;
+		}
+		for (int tries = 0; tries < totalTries; ++tries) {
 			MinesweeperGame minesweeperGame;
 			if (hasAn8) {
-
+				minesweeperGame = new MinesweeperGame(rows, cols, mines, true);
 			} else {
 				minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			}
@@ -81,6 +85,7 @@ public class CreateSolvableBoard {
 				}
 			}
 			if (minesweeperGame.getIsGameWon()) {
+				System.out.println("found solution on try: " + (tries + 1));
 				return saveGame;
 			}
 		}

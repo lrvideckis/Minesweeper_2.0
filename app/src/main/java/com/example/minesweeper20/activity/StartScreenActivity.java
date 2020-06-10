@@ -41,6 +41,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			GAME_MODE = "gameMode";
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup;
+	private int minesMin = 0;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -50,7 +51,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		Test.performTestsWithBigIntSolverForLargerGrids(20);
 		Test.performTestsForGaussSolver(20);
 		Test.performTestsMultipleRunsOfSameBoard(10);
-		 */
+		*/
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);
@@ -106,6 +107,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			noGuessingMode.setChecked(true);
 		} else if (gameMode == R.id.noGuessingModeWithAn8) {
 			noGuessingModeWith8.setChecked(true);
+			minesInput.setMin(8);
+			minesMin = 8;
 		} else {
 			normalMode.setChecked(true);
 		}
@@ -219,19 +222,24 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				noGuessingMode.setChecked(false);
 				RadioButton noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
 				noGuessingModeWith8.setChecked(false);
-
+				minesInput.setMin(0);
+				minesMin = 0;
 				break;
 			case R.id.no_guessing_mode:
 				RadioButton normalMode = findViewById(R.id.normal_mode);
 				normalMode.setChecked(false);
 				noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
 				noGuessingModeWith8.setChecked(false);
+				minesInput.setMin(0);
+				minesMin = 0;
 				break;
 			case R.id.noGuessingModeWithAn8:
 				normalMode = findViewById(R.id.normal_mode);
 				normalMode.setChecked(false);
 				noGuessingMode = findViewById(R.id.no_guessing_mode);
 				noGuessingMode.setChecked(false);
+				minesInput.setMin(8);
+				minesMin = 8;
 				break;
 			case R.id.normal_mode_info:
 				displayNormalModeInfoPopup();
@@ -269,7 +277,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				setMinesText(rows, cols, mines);
 				break;
 			case R.id.minesDecrement:
-				mines = Math.max(0, mines - 1);
+				mines = Math.max(minesMin, mines - 1);
 				minesInput.setProgress(mines);
 				setMinesText(rows, cols, mines);
 				break;
