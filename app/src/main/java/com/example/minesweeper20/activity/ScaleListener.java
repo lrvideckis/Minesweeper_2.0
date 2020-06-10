@@ -14,20 +14,29 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private final ScaleGestureDetector SGD;
 	private final GameCanvas gameCanvas;
 	private final Matrix matrix = new Matrix();
-	private final int halfScreenWidth, halfScreenHeight;
+	private int halfScreenWidth = 0, halfScreenHeight = 0, rows, cols;
 	private final Context context;
 	private float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
 	private int prevPointerCount = 0;
 	//variables to handle a tap
 	private boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
 	private float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
+	private float minScaleVal;
 
-	public ScaleListener(Context context, GameCanvas gameCanvas, int screenWidth, int screenHeight) {
+	public ScaleListener(Context context, GameCanvas gameCanvas, int rows, int cols) {
+		this.rows = rows;
+		this.cols = cols;
 		this.context = context;
-		halfScreenWidth = screenWidth / 2;
-		halfScreenHeight = screenHeight / 2;
 		SGD = new ScaleGestureDetector(context, this);
 		this.gameCanvas = gameCanvas;
+	}
+
+	public void setScreenWidthAndHeight(float screenWidth, float screenHeight) {
+		halfScreenWidth = (int) (screenWidth / 2f);
+		halfScreenHeight = (int) (screenHeight / 2f);
+
+		minScaleVal = screenWidth / (float) (GameActivity.cellPixelLength * cols);
+		minScaleVal = Math.max(minScaleVal, screenHeight / (float) (GameActivity.cellPixelLength * rows));
 	}
 
 	@Override
@@ -45,6 +54,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		absoluteY += (detector.getFocusY() - prevFocusY) / scale;
 		prevFocusX = detector.getFocusX();
 		prevFocusY = detector.getFocusY();
+		makeSureGridIsOnScreen();
 		return true;
 	}
 
@@ -82,10 +92,12 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 					absoluteY += (event.getY() - prevFocusY) / scale;
 					prevFocusX = event.getX();
 					prevFocusY = event.getY();
+					makeSureGridIsOnScreen();
 					break;
 				case MotionEvent.ACTION_UP:
 					absoluteX += (event.getX() - prevFocusX) / scale;
 					absoluteY += (event.getY() - prevFocusY) / scale;
+					makeSureGridIsOnScreen();
 					if (checkIfTap(event)) {
 						absoluteX = startAbsoluteX;
 						absoluteY = startAbsoluteY;
@@ -120,6 +132,31 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 			gameCanvas.invalidate();
 		}
 		return true;
+	}
+
+	private void makeSureGridIsOnScreen() {
+		scale = Math.max(scale, minScaleVal);
+
+		final float newX = (absoluteX - halfScreenWidth) * scale + halfScreenWidth;
+		final float newY = (absoluteY - halfScreenHeight) * scale + halfScreenHeight;
+
+		if (newX > 0) {
+			absoluteX = (-halfScreenWidth) / scale + halfScreenWidth;
+		} else {
+			final float boundX = GameActivity.cellPixelLength * scale * cols - (2 * halfScreenWidth);
+			if (newX < -boundX) {
+				absoluteX = (-boundX - halfScreenWidth) / scale + halfScreenWidth;
+			}
+		}
+
+		if (newY > 0) {
+			absoluteY = (-halfScreenHeight) / scale + halfScreenHeight;
+		} else {
+			final float boundY = GameActivity.cellPixelLength * scale * rows - (2 * halfScreenHeight);
+			if (newY < -boundY) {
+				absoluteY = (-boundY - halfScreenHeight) / scale + halfScreenHeight;
+			}
+		}
 	}
 
 	public Matrix getMatrix() {

@@ -17,7 +17,7 @@ import static com.example.minesweeper20.minesweeperStuff.MinesweeperSolver.Visib
 
 public class GameCanvas extends View {
 
-	private final ScaleListener scaleListener;
+	private ScaleListener scaleListener;
 	private final Paint black = new Paint();
 	private final DrawCellHelpers drawCellHelpers;
 	private final BigFraction mineProbability = new BigFraction(0);
@@ -28,11 +28,15 @@ public class GameCanvas extends View {
 		black.setColor(Color.BLACK);
 		black.setStrokeWidth(3);
 		final GameActivity gameActivity = (GameActivity) getContext();
-		final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-		final int screenHeight = context.getResources().getDisplayMetrics().heightPixels;
-		scaleListener = new ScaleListener(context, this, screenWidth, screenHeight);
+		scaleListener = new ScaleListener(context, this, gameActivity.getNumberOfRows(), gameActivity.getNumberOfCols());
 		setOnTouchListener(scaleListener);
 		drawCellHelpers = new DrawCellHelpers(context, gameActivity.getNumberOfRows(), gameActivity.getNumberOfCols());
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		scaleListener.setScreenWidthAndHeight(getWidth(), getHeight());
 	}
 
 	private void drawCell(Canvas canvas, VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, boolean drawRedBackground) throws Exception {

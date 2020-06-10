@@ -31,7 +31,7 @@ import com.example.minesweeper20.miscHelpers.PopupHelper;
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-	public static final int rowsColsMax = 30;
+	public static final int rowsColsMax = 30, rowsColsMin = 8;
 
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
@@ -78,6 +78,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		colsInput.setOnSeekBarChangeListener(this);
 		minesInput.setOnSeekBarChangeListener(this);
 
+		rowsInput.setMin(rowsColsMin);
+		colsInput.setMin(rowsColsMin);
 		rowsInput.setMax(rowsColsMax);
 		colsInput.setMax(rowsColsMax);
 
@@ -220,7 +222,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 
 			case R.id.rowsDecrement:
-				rows = Math.max(4, rows - 1);
+				rows = Math.max(rowsColsMin, rows - 1);
 				rowsInput.setProgress(rows);
 				setRowsText(rows);
 				setMinesText(rows, cols, mines);
@@ -232,7 +234,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				setMinesText(rows, cols, mines);
 				break;
 			case R.id.colsDecrement:
-				cols = Math.max(4, cols - 1);
+				cols = Math.max(rowsColsMin, cols - 1);
 				colsInput.setProgress(cols);
 				setColsText(cols);
 				setMinesText(rows, cols, mines);
