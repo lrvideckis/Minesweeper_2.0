@@ -13,7 +13,7 @@
 	<string name="two_decimal_places">%.2f</string>
 	<string name="three_decimal_places">%.3f</string>
 	<string name="gauss_hints">Gauss</string>
-	<string name="initial_iterations">Iterations: 0</string>
+	<string name="initial_iterations">Solver Iterations:\n0</string>
 	<string name="is_relative_layout">is_relative_layout</string>
 	<string name="decrement">-</string>
 	<string name="increment">+</string>

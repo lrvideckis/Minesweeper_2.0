@@ -80,7 +80,7 @@
 		android:layout_alignParentEnd="true"
 		android:tag="@string/is_game_canvas_layout" />
 
-	<LinearLayout
+	<RelativeLayout
 		android:id="@+id/bottomPanel"
 		android:layout_width="match_parent"
 		android:layout_height="48dp"
@@ -89,30 +89,29 @@
 
 		<Switch
 			android:id="@+id/toggleBacktrackingHints"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
-			android:layout_gravity="center_vertical"
+			android:layout_alignParentStart="true"
 			android:layout_marginStart="10dp"
-			android:layout_weight="2"
 			android:text="@string/hints" />
 
 		<Switch
 			android:id="@+id/toggleMineProbability"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
-			android:layout_gravity="center_vertical"
-			android:layout_weight="3"
+			android:layout_centerInParent="true"
 			android:text="@string/show_mine_probability" />
 
 		<TextView
 			android:id="@+id/numberOfIterationsTextView"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
+			android:layout_alignParentEnd="true"
+			android:layout_centerInParent="true"
+			android:layout_toEndOf="@id/toggleMineProbability"
 			android:layout_marginEnd="10dp"
-			android:layout_gravity="center_vertical"
 			android:gravity="center"
-			android:layout_weight="2"
 			android:text="@string/initial_iterations" />
 
-	</LinearLayout>
+	</RelativeLayout>
 </RelativeLayout>

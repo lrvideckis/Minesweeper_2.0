@@ -344,7 +344,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void updateNumberOfSolverIterations(int numberOfIterations) {
 		TextView iterationTextView = findViewById(R.id.numberOfIterationsTextView);
-		final String iterationsText = "Iterations: " + numberOfIterations;
+		final String iterationsText = "Solver Iterations:\n" + numberOfIterations;
 		iterationTextView.setText(iterationsText);
 	}
 
