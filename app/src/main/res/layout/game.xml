@@ -11,6 +11,7 @@
 		android:id="@+id/topPanel"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
+		android:background="@drawable/bottom_black_border"
 		android:layout_alignParentTop="true">
 
 		<TextView
@@ -86,6 +87,7 @@
 		android:id="@+id/bottomPanel"
 		android:layout_width="match_parent"
 		android:layout_height="48dp"
+		android:background="@drawable/top_black_border"
 		android:layout_alignParentBottom="true"
 		android:orientation="horizontal">
 
