@@ -55,12 +55,6 @@ public class GameCanvas extends View {
 		GameActivity gameActivity = (GameActivity) getContext();
 
 
-		if (gameActivity.getToggleBacktrackingHintsOn() && gameActivity.getToggleGaussHintsOn()) {
-			throw new Exception("can't have both solvers on at once");
-		}
-		if (gameActivity.getToggleGaussHintsOn() && gameActivity.getToggleMineProbabilityOn()) {
-			throw new Exception("can't have gauss hints and probability on");
-		}
 		if (solverCell.getIsLogicalMine() && !gameCell.isMine()) {
 			throw new Exception("solver says: logical mine, but it's not a mine");
 		}
@@ -71,37 +65,35 @@ public class GameCanvas extends View {
 			throw new Exception("game is both won and lost");
 		}
 
-		final boolean showHints = (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleGaussHintsOn());
-
 		boolean displayedLogicalStuff = false;
 		if (drawRedBackground) {
 			displayedLogicalStuff = true;
 			drawCellHelpers.drawEndGameTap(canvas, i, j);
-		} else if (solverCell.getIsLogicalMine() && showHints && !gameCell.isFlagged()) {
+		} else if (solverCell.getIsLogicalMine() && gameActivity.getToggleBacktrackingHintsOn() && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
 			drawCellHelpers.drawLogicalMine(canvas, i, j, getResources());
-		} else if (solverCell.getIsLogicalFree() && showHints && !gameCell.isFlagged()) {
+		} else if (solverCell.getIsLogicalFree() && gameActivity.getToggleBacktrackingHintsOn() && !gameCell.isFlagged()) {
 			displayedLogicalStuff = true;
 			drawCellHelpers.drawLogicalFree(canvas, i, j, getResources());
 		} else {
 			drawCellHelpers.drawBlankCell(canvas, i, j, getResources());
 		}
 
-		if (gameCell.isFlagged()) {
-			drawCellHelpers.drawFlag(canvas, startX, startY);
-			if (gameActivity.getMinesweeperGame().getIsGameLost() && !gameCell.isMine()) {
-				drawCellHelpers.drawBlackX(canvas, startX, startY);
-			} else if (solverCell.getIsLogicalFree() && (showHints || gameActivity.getToggleMineProbabilityOn())) {
-				drawCellHelpers.drawBlackX(canvas, startX, startY);
-			}
-		} else if (gameCell.isMine() && (gameActivity.getMinesweeperGame().getIsGameLost() || gameActivity.getToggleMinesOn())) {
-			drawCellHelpers.drawMine(canvas, startX, startY);
-		}
-
 		if (gameActivity.getToggleMineProbabilityOn() && !solverCell.getIsVisible() && !displayedLogicalStuff && !gameCell.isFlagged()) {
 			mineProbability.setValue(solverCell.getNumberOfMineConfigs());
 			mineProbability.divideWith(solverCell.getNumberOfTotalConfigs());
 			drawCellHelpers.drawMineProbability(canvas, startX, startY, mineProbability, getResources());
+		}
+
+		if (gameCell.isFlagged()) {
+			drawCellHelpers.drawFlag(canvas, startX, startY);
+			if (gameActivity.getMinesweeperGame().getIsGameLost() && !gameCell.isMine()) {
+				drawCellHelpers.drawBlackX(canvas, startX, startY);
+			} else if (solverCell.getIsLogicalFree() && (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn())) {
+				drawCellHelpers.drawBlackX(canvas, startX, startY);
+			}
+		} else if (gameCell.isMine() && (gameActivity.getMinesweeperGame().getIsGameLost() || gameActivity.getToggleMinesOn())) {
+			drawCellHelpers.drawMine(canvas, startX, startY);
 		}
 	}
 

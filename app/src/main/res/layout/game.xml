@@ -25,14 +25,6 @@
 			android:textSize="20sp"
 			tools:ignore="HardcodedText" />
 
-		<Button
-			android:id="@+id/isThereAnyLogicalStuffButton"
-			android:layout_width="50dp"
-			android:layout_height="50dp"
-			android:layout_centerVertical="true"
-			android:layout_marginEnd="10dp"
-			android:layout_toStartOf="@id/newGameButton" />
-
 		<ImageButton
 			android:id="@+id/newGameButton"
 			android:layout_width="40dp"
@@ -91,40 +83,34 @@
 	<LinearLayout
 		android:id="@+id/bottomPanel"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="48dp"
 		android:layout_alignParentBottom="true"
-		android:layout_marginBottom="5dp"
 		android:orientation="horizontal">
-
-		<Switch
-			android:id="@+id/toggleGaussHints"
-			android:layout_width="0dp"
-			android:layout_height="match_parent"
-			android:layout_gravity="center_vertical"
-			android:layout_weight="3"
-			android:text="@string/gauss_hints" />
 
 		<Switch
 			android:id="@+id/toggleBacktrackingHints"
 			android:layout_width="0dp"
-			android:layout_height="wrap_content"
+			android:layout_height="match_parent"
 			android:layout_gravity="center_vertical"
-			android:layout_weight="3"
-			android:text="@string/backtracking" />
+			android:layout_marginStart="10dp"
+			android:layout_weight="2"
+			android:text="@string/hints" />
 
 		<Switch
 			android:id="@+id/toggleMineProbability"
 			android:layout_width="0dp"
-			android:layout_height="wrap_content"
+			android:layout_height="match_parent"
 			android:layout_gravity="center_vertical"
-			android:layout_weight="4"
+			android:layout_weight="3"
 			android:text="@string/show_mine_probability" />
 
 		<TextView
 			android:id="@+id/numberOfIterationsTextView"
 			android:layout_width="0dp"
-			android:layout_height="wrap_content"
+			android:layout_height="match_parent"
+			android:layout_marginEnd="10dp"
 			android:layout_gravity="center_vertical"
+			android:gravity="center"
 			android:layout_weight="2"
 			android:text="@string/initial_iterations" />
 

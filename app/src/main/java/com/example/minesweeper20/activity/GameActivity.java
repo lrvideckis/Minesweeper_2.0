@@ -40,7 +40,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private boolean
 			toggleFlagModeOn = false,
 			toggleBacktrackingHintsOn = false,
-			toggleGaussHintsOn = false,
 			toggleMinesOn = false,
 			toggleMineProbabilityOn = false;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
@@ -75,8 +74,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		gaussSolver = new GaussianEliminationSolver(numberOfRows, numberOfCols);
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
-		Button isThereAnyLogicalStuff = findViewById(R.id.isThereAnyLogicalStuffButton);
-		isThereAnyLogicalStuff.setOnClickListener(this);
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
 		newGameButton.setOnClickListener(this);
 		Button toggleFlagMode = findViewById(R.id.toggleFlagMode);
@@ -89,8 +86,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		toggleMines.setOnCheckedChangeListener(this);
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setOnCheckedChangeListener(this);
-		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
-		toggleGaussHints.setOnCheckedChangeListener(this);
 
 		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
@@ -103,9 +98,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-			case R.id.isThereAnyLogicalStuffButton:
-				System.out.println("is there any logical stuff button");
-				break;
 			case R.id.newGameButton:
 				ImageButton newGameButton = findViewById(R.id.newGameButton);
 				newGameButton.setImageResource(R.drawable.smiley_face);
@@ -161,8 +153,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			if (!minesweeperGame.getIsGameLost() && !(toggleFlagModeOn && !minesweeperGame.getCell(row, col).getIsVisible())) {
 				if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
 					updateSolvedBoardWithBacktrackingSolver();
-				} else if (toggleGaussHintsOn) {
-					updateSolvedBoardWithGaussSolver();
 				}
 			}
 		} catch (Exception e) {
@@ -221,9 +211,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			case R.id.toggleMineProbability:
 				handleToggleMineProbability(isChecked);
 				break;
-			case R.id.toggleGaussHints:
-				handleGaussHintToggle(isChecked);
-				break;
 		}
 	}
 
@@ -243,40 +230,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				displayStackTracePopup(e);
 				e.printStackTrace();
 			}
-			if (toggleGaussHintsOn) {
-				toggleGaussHintsOn = false;
-				Switch gaussHints = findViewById(R.id.toggleGaussHints);
-				gaussHints.setChecked(false);
-			}
 		} else if (!toggleBacktrackingHintsOn) {
 			updateNumberOfSolverIterations(0);
-		}
-		gameCanvas.invalidate();
-	}
-
-	private void handleGaussHintToggle(boolean isChecked) {
-		toggleGaussHintsOn = isChecked;
-		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
-		if (isChecked) {
-
-			if (toggleBacktrackingHintsOn) {
-				toggleBacktrackingHintsOn = false;
-				Switch backtrackingHints = findViewById(R.id.toggleBacktrackingHints);
-				backtrackingHints.setChecked(false);
-			}
-
-			if (toggleMineProbabilityOn) {
-				toggleMineProbabilityOn = false;
-				Switch mineProbability = findViewById(R.id.toggleMineProbability);
-				mineProbability.setChecked(false);
-			}
-
-			try {
-				updateSolvedBoardWithGaussSolver();
-			} catch (Exception e) {
-				displayStackTracePopup(e);
-				e.printStackTrace();
-			}
 		}
 		gameCanvas.invalidate();
 	}
@@ -302,20 +257,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				displayStackTracePopup(e);
 				e.printStackTrace();
 			}
-			if (toggleGaussHintsOn) {
-				toggleGaussHintsOn = false;
-				Switch gaussHints = findViewById(R.id.toggleGaussHints);
-				gaussHints.setChecked(false);
-			}
 		} else {
-			if (toggleGaussHintsOn) {
-				try {
-					updateSolvedBoardWithGaussSolver();
-				} catch (Exception e) {
-					displayStackTracePopup(e);
-					e.printStackTrace();
-				}
-			}
 			if (!toggleMineProbabilityOn) {
 				updateNumberOfSolverIterations(0);
 			}
@@ -402,7 +344,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void updateNumberOfSolverIterations(int numberOfIterations) {
 		TextView iterationTextView = findViewById(R.id.numberOfIterationsTextView);
-		final String iterationsText = "iterations: " + numberOfIterations;
+		final String iterationsText = "Iterations: " + numberOfIterations;
 		iterationTextView.setText(iterationsText);
 	}
 
@@ -416,14 +358,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setClickable(false);
 
-		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
-		toggleGaussHints.setClickable(false);
-
 		Button flagModeButton = findViewById(R.id.toggleFlagMode);
 		flagModeButton.setClickable(false);
-
-		Button isThereAnyLogicalStuffButton = findViewById(R.id.isThereAnyLogicalStuffButton);
-		isThereAnyLogicalStuffButton.setClickable(false);
 	}
 
 	public void enableButtonsAndSwitchesAndSetToFalse() {
@@ -439,17 +375,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		toggleProbability.setClickable(true);
 		toggleProbability.setChecked(false);
 
-		Switch toggleGaussHints = findViewById(R.id.toggleGaussHints);
-		toggleGaussHints.setClickable(true);
-		toggleGaussHints.setChecked(false);
-
 		Button flagModeButton = findViewById(R.id.toggleFlagMode);
 		flagModeButton.setClickable(true);
 		flagModeButton.setText(mineEmoji);
 		toggleFlagModeOn = false;
-
-		Button isThereAnyLogicalStuffButton = findViewById(R.id.isThereAnyLogicalStuffButton);
-		isThereAnyLogicalStuffButton.setClickable(true);
 	}
 
 	public void setNewGameButtonDeadFace() {
@@ -494,10 +423,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public boolean getToggleMineProbabilityOn() {
 		return toggleMineProbabilityOn;
-	}
-
-	public boolean getToggleGaussHintsOn() {
-		return toggleGaussHintsOn;
 	}
 
 	public MinesweeperSolver.VisibleTile[][] getBoard() {
