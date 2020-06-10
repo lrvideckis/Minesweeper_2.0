@@ -81,8 +81,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setOnCheckedChangeListener(this);
-		Switch toggleMines = findViewById(R.id.toggleMines);
-		toggleMines.setOnCheckedChangeListener(this);
+		//Switch toggleMines = findViewById(R.id.toggleMines);
+		//toggleMines.setOnCheckedChangeListener(this);
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setOnCheckedChangeListener(this);
 
@@ -195,9 +195,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			case R.id.toggleBacktrackingHints:
 				handleHintToggle(isChecked);
 				break;
-			case R.id.toggleMines:
-				handleToggleShowMines(isChecked);
-				break;
+			//case R.id.toggleMines:
+			//handleToggleShowMines(isChecked);
+			//break;
 			case R.id.toggleMineProbability:
 				handleToggleMineProbability(isChecked);
 				break;
@@ -341,8 +341,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleHints = findViewById(R.id.toggleBacktrackingHints);
 		toggleHints.setClickable(false);
 
-		Switch toggleMines = findViewById(R.id.toggleMines);
-		toggleMines.setClickable(false);
+		//Switch toggleMines = findViewById(R.id.toggleMines);
+		//toggleMines.setClickable(false);
 
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setClickable(false);
@@ -356,9 +356,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		toggleHints.setClickable(true);
 		toggleHints.setChecked(false);
 
-		Switch toggleMines = findViewById(R.id.toggleMines);
-		toggleMines.setClickable(true);
-		toggleMines.setChecked(false);
+		//Switch toggleMines = findViewById(R.id.toggleMines);
+		//toggleMines.setClickable(true);
+		//toggleMines.setChecked(false);
 
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setClickable(true);

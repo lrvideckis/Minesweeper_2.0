@@ -62,12 +62,14 @@
 	</RelativeLayout>
 
 
+	<!--
 	<Switch
 		android:id="@+id/toggleMines"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/topPanel"
 		android:text="@string/show_mines" />
+		-->
 
 
 	<com.example.minesweeper20.view.GameCanvas
@@ -75,7 +77,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_above="@id/bottomPanel"
-		android:layout_below="@id/toggleMines"
+		android:layout_below="@id/topPanel"
 		android:layout_alignParentStart="true"
 		android:layout_alignParentEnd="true"
 		android:tag="@string/is_game_canvas_layout" />

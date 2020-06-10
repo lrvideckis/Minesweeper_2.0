@@ -195,7 +195,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress();
 		final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress();
 		SeekBar minesInput = findViewById(R.id.mineInput);
-		minesInput.setMax(rows * cols - 9);
+		minesInput.setMax(rows * cols - 10);
 	}
 
 	@Override
@@ -282,7 +282,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				setMinesText(rows, cols, mines);
 				break;
 			case R.id.minesIncrement:
-				mines = Math.min(rows * cols - 9, mines + 1);
+				mines = Math.min(rows * cols - 10, mines + 1);
 				minesInput.setProgress(mines);
 				setMinesText(rows, cols, mines);
 				break;
