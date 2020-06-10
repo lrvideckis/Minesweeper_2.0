@@ -11,9 +11,7 @@
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
-		<activity
-			android:name=".activity.StartScreenActivity"
-			android:noHistory="true">
+		<activity android:name=".activity.StartScreenActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
@@ -23,8 +21,7 @@
 		<activity
 			android:name=".activity.GameActivity"
 			android:hardwareAccelerated="true"
-			android:label="@string/app_name"
-			android:noHistory="true" />
+			android:label="@string/app_name" />
 	</application>
 
 </manifest>

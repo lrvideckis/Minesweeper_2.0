@@ -36,27 +36,6 @@ public class MinesweeperGame {
 		}
 	}
 
-	public MinesweeperGame(int numberOfRows, int numberOfCols, int numberOfMines, boolean hasAn8) throws Exception {
-		this.hasAn8 = hasAn8;
-		//TODO: look into removing this, it is kinda pointless
-		if (tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
-			throw new Exception("too many mines for zero start, UI doesn't allow for this to happen");
-		}
-
-		this.numberOfRows = numberOfRows;
-		this.numberOfCols = numberOfCols;
-		this.numberOfMines = numberOfMines;
-		numberOfFlags = 0;
-		firstClick = true;
-		isGameLost = false;
-		grid = new Tile[numberOfRows][numberOfCols];
-		for (int i = 0; i < numberOfRows; ++i) {
-			for (int j = 0; j < numberOfCols; ++j) {
-				grid[i][j] = new Tile();
-			}
-		}
-	}
-
 	//copy constructor
 	public MinesweeperGame(MinesweeperGame minesweeperGame) {
 		numberOfRows = minesweeperGame.getNumberOfRows();
@@ -76,6 +55,10 @@ public class MinesweeperGame {
 
 	public static boolean tooManyMinesForZeroStart(int numberOfRows, int numberOfCols, int numberOfMines) {
 		return (numberOfMines > numberOfRows * numberOfCols - 9);
+	}
+
+	public void setHavingAn8() {
+		hasAn8 = true;
 	}
 
 	public int getNumberOfRows() {

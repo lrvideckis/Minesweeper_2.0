@@ -41,10 +41,9 @@ public class CreateSolvableBoard {
 		}
 		for (int tries = 0; tries < totalTries; ++tries) {
 			MinesweeperGame minesweeperGame;
+			minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			if (hasAn8) {
-				minesweeperGame = new MinesweeperGame(rows, cols, mines, true);
-			} else {
-				minesweeperGame = new MinesweeperGame(rows, cols, mines);
+				minesweeperGame.setHavingAn8();
 			}
 			minesweeperGame.clickCell(firstClickI, firstClickJ, false);
 			MinesweeperGame saveGame = new MinesweeperGame(minesweeperGame);

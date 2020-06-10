@@ -14,7 +14,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.minesweeper20.R;
-import com.example.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.example.minesweeper20.miscHelpers.PopupHelper;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
@@ -354,12 +353,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			}
 			editor.apply();
 
-			//TODO: look into removing this
-			if (MinesweeperGame.tooManyMinesForZeroStart(numberOfRows, numberOfCols, numberOfMines)) {
-				System.out.println("too many mines for zero start, UI doesn't allow for this to happen");
-				return;
-			}
-
 			Intent intent = new Intent(StartScreenActivity.this, GameActivity.class);
 			intent.putExtra(NUMBER_OF_ROWS, numberOfRows);
 			intent.putExtra(NUMBER_OF_COLS, numberOfCols);
@@ -373,5 +366,10 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			}
 			startActivity(intent);
 		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		moveTaskToBack(true);
 	}
 }

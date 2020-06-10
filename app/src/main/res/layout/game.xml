@@ -11,8 +11,8 @@
 		android:id="@+id/topPanel"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:background="@drawable/bottom_black_border"
-		android:layout_alignParentTop="true">
+		android:layout_alignParentTop="true"
+		android:background="@drawable/bottom_black_border">
 
 		<TextView
 			android:id="@+id/showNumberOfMines"
@@ -87,8 +87,8 @@
 		android:id="@+id/bottomPanel"
 		android:layout_width="match_parent"
 		android:layout_height="48dp"
-		android:background="@drawable/top_black_border"
 		android:layout_alignParentBottom="true"
+		android:background="@drawable/top_black_border"
 		android:orientation="horizontal">
 
 		<Switch
