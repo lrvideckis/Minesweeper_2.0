@@ -292,6 +292,10 @@ public class MinesweeperGame {
 
 		Collections.shuffle(permutation);
 
+		if (spotsI.size() < numberOfMines - 8) {
+			throw new Exception("too many mines to have a zero start with an 8");
+		}
+
 		for (int pos = 0; pos < numberOfMines - 8; ++pos) {
 			int i = spotsI.get(permutation.get(pos));
 			int j = spotsJ.get(permutation.get(pos));
