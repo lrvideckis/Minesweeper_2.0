@@ -318,6 +318,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		okButton.setOnClickListener(view -> noGuessingModeWith8InfoPopup.dismiss());
 	}
 
+	@Override
+	public void onBackPressed() {
+		moveTaskToBack(true);
+	}
+
 	private class startNewGameButtonListener implements View.OnClickListener {
 
 		private final SeekBar rowInput;
@@ -366,10 +371,5 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			}
 			startActivity(intent);
 		}
-	}
-
-	@Override
-	public void onBackPressed() {
-		moveTaskToBack(true);
 	}
 }
