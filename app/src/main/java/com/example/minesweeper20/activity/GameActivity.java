@@ -126,13 +126,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	public void handleTap(float tapX, float tapY) throws Exception {
-		//TODO: have grid always fill screen
 		//eventually I won't need this check, as the grid always fills the screen
 		if (tapX < 0f ||
 				tapY < 0f ||
 				tapX > numberOfCols * cellPixelLength ||
 				tapY > numberOfRows * cellPixelLength) {
-			return;
+			throw new Exception("tap is off screen, but the grid always fills the screen");
 		}
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);

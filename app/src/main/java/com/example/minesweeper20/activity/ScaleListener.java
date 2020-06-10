@@ -37,6 +37,11 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 		minScaleVal = screenWidth / (float) (GameActivity.cellPixelLength * cols);
 		minScaleVal = Math.max(minScaleVal, screenHeight / (float) (GameActivity.cellPixelLength * rows));
+
+		makeSureGridIsOnScreen();
+		matrix.setTranslate(absoluteX, absoluteY);
+		matrix.postScale(scale, scale, halfScreenWidth, halfScreenHeight);
+		gameCanvas.invalidate();
 	}
 
 	@Override
