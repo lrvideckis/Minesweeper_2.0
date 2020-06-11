@@ -44,14 +44,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
-		/*
-		Test.testPreviouslyFailedBoards();
-		Test.performTestsForMineProbability(20);
-		Test.performTestsWithBigIntSolverForLargerGrids(20);
-		Test.performTestsForGaussSolver(20);
-		Test.performTestsMultipleRunsOfSameBoard(10);
-		 */
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);
 

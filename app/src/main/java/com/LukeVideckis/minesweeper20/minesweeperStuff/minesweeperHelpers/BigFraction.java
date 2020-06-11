@@ -29,15 +29,6 @@ public class BigFraction {
 		reduceAndSet(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
 	}
 
-	public void addWith(int delta) {
-		BigInteger currNumerator = numerator.add(BigInteger.valueOf(delta).multiply(denominator));
-		try {
-			reduceAndSet(currNumerator, denominator);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void addWith(BigFraction delta) {
 		try {
 			BigInteger newNumerator = numerator.multiply(delta.getDenominator()).add(denominator.multiply(delta.getNumerator()));

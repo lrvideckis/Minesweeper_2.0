@@ -17,51 +17,6 @@ public class GetConnectedComponents {
 		return i * cols + j;
 	}
 
-	public static ArrayList<ArrayList<Pair<Integer, Integer>>> getComponents(VisibleTile[][] board) throws Exception {
-		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
-		rows = dimensions.first;
-		cols = dimensions.second;
-		Dsu disjointSet = new Dsu(rows * cols);
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (!board[i][j].getIsVisible()) {
-					continue;
-				}
-				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-					final int adjI = adj[0], adjJ = adj[1];
-					VisibleTile adjTile = board[adjI][adjJ];
-					if (adjTile.getIsVisible()) {
-						continue;
-					}
-					disjointSet.merge(getNode(i, j), getNode(adjI, adjJ));
-				}
-			}
-		}
-		ArrayList<ArrayList<Pair<Integer, Integer>>> tempComponents = new ArrayList<>(rows * cols);
-		for (int i = 0; i < rows * cols; ++i) {
-			tempComponents.add(new ArrayList<>());
-		}
-
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				VisibleTile currTile = board[i][j];
-				if (currTile.getIsVisible()) {
-					continue;
-				}
-				if (!AwayCell.isAwayCell(board, i, j, rows, cols)) {
-					tempComponents.get(disjointSet.find(getNode(i, j))).add(new Pair<>(i, j));
-				}
-			}
-		}
-		ArrayList<ArrayList<Pair<Integer, Integer>>> components = new ArrayList<>();
-		for (ArrayList<Pair<Integer, Integer>> component : tempComponents) {
-			if (!component.isEmpty()) {
-				components.add(component);
-			}
-		}
-		return components;
-	}
-
 	public static ArrayList<ArrayList<Pair<Integer, Integer>>> getComponentsWithKnownCells(VisibleTile[][] board) throws Exception {
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;

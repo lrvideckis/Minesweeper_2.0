@@ -5,14 +5,6 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFra
 public interface MinesweeperSolver {
 	void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception;
 
-	boolean[][] getMineConfiguration(
-			VisibleTile[][] board,
-			int numberOfMines,
-			int spotI,
-			int spotJ,
-			boolean wantMine
-	) throws Exception;
-
 	int getNumberOfIterations();
 
 	class VisibleTile {
@@ -64,14 +56,6 @@ public interface MinesweeperSolver {
 			isVisible = tile.isVisible;
 			if (isVisible) {
 				numberSurroundingMines = tile.numberSurroundingMines;
-			}
-		}
-
-		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) {
-			reset();
-			this.isVisible = isVisible;
-			if (isVisible) {
-				this.numberSurroundingMines = numberSurroundingMines;
 			}
 		}
 	}
