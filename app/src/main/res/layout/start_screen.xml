@@ -147,38 +147,38 @@
 
 		</RelativeLayout>
 
-		<TableRow
-			style="?android:attr/buttonBarStyle"
+		<RelativeLayout
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content">
+			android:layout_height="60dp">
 
 			<Button
 				android:id="@+id/beginner"
-				style="?android:attr/buttonBarButtonStyle"
 				android:layout_width="wrap_content"
-				android:layout_height="70dp"
-				android:layout_weight="1"
+				android:layout_height="match_parent"
+				android:layout_alignParentStart="true"
+				android:layout_marginStart="10dp"
+				android:layout_toStartOf="@id/intermediate"
 				android:text="@string/beginner"
 				android:textColor="@color/black" />
 
 			<Button
 				android:id="@+id/intermediate"
-				style="?android:attr/buttonBarButtonStyle"
 				android:layout_width="wrap_content"
-				android:layout_height="70dp"
-				android:layout_weight="1"
+				android:layout_height="match_parent"
+				android:layout_centerInParent="true"
 				android:text="@string/intermediate"
 				android:textColor="@color/black" />
 
 			<Button
 				android:id="@+id/expert"
-				style="?android:attr/buttonBarButtonStyle"
 				android:layout_width="wrap_content"
-				android:layout_height="70dp"
-				android:layout_weight="1"
+				android:layout_height="match_parent"
+				android:layout_alignParentEnd="true"
+				android:layout_marginEnd="10dp"
+				android:layout_toEndOf="@id/intermediate"
 				android:text="@string/expert"
 				android:textColor="@color/black" />
-		</TableRow>
+		</RelativeLayout>
 
 		<!--
 		TODO: add little info buttons which create a popup explaining the mode
@@ -199,7 +199,7 @@
 					android:id="@+id/normal_mode"
 					android:layout_width="wrap_content"
 					android:layout_height="match_parent"
-					android:text="Normal Mode" />
+					android:text="@string/normal_mode" />
 
 				<RelativeLayout
 					android:layout_width="40dp"
@@ -233,7 +233,7 @@
 					android:id="@+id/no_guessing_mode"
 					android:layout_width="wrap_content"
 					android:layout_height="match_parent"
-					android:text="No Guessing Mode" />
+					android:text="@string/no_guessing_mode" />
 
 				<RelativeLayout
 					android:layout_width="40dp"
@@ -257,12 +257,48 @@
 						android:background="@drawable/circle" />
 				</RelativeLayout>
 			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="40dp"
+				android:orientation="horizontal">
+
+				<RadioButton
+					android:id="@+id/noGuessingModeWithAn8"
+					android:layout_width="wrap_content"
+					android:layout_height="match_parent"
+					android:text="@string/no_guessing_mode_with_an_8" />
+
+				<RelativeLayout
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_marginStart="10dp">
+
+					<TextView
+						android:id="@+id/no_guessing_mode_with_8_info"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:layout_centerInParent="true"
+						android:gravity="center"
+						android:text="i"
+						android:textStyle="bold"
+						tools:ignore="HardcodedText" />
+
+					<TextView
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:layout_centerInParent="true"
+						android:background="@drawable/circle" />
+				</RelativeLayout>
+			</LinearLayout>
 		</LinearLayout>
 
 		<Button
 			android:id="@+id/startNewGameButton"
 			android:layout_width="match_parent"
 			android:layout_height="70dp"
+			android:layout_marginStart="10dp"
+			android:layout_marginEnd="10dp"
 			android:text="@string/start_new_game" />
 
 	</LinearLayout>

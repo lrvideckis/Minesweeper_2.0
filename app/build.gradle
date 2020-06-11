@@ -1,11 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release_config {
+            storeFile file('/home/twenty_one/keystore.properties.jks')
+            storePassword 'VideDUQ7052'
+            keyPassword 'VideDUQ7052'
+            keyAlias 'key0'
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.example.minesweeper20"
+        applicationId 'com.LukeVideckis.minesweeper'
         minSdkVersion 29
         targetSdkVersion 29
         versionCode 1
@@ -18,6 +26,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release_config
         }
     }
     compileOptions {
@@ -32,7 +41,7 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
