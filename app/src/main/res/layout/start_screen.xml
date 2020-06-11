@@ -180,9 +180,6 @@
 				android:textColor="@color/black" />
 		</RelativeLayout>
 
-		<!--
-		TODO: add little info buttons which create a popup explaining the mode
-		-->
 		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"

@@ -18,13 +18,8 @@ import com.LukeVideckis.minesweeper20.miscHelpers.PopupHelper;
 
 //TODO: change game board scale to be pivoted around focus point instead of the middle of the screen
 //TODO: add settings page were you can choose whether or not to have a zero-start, also choose iteration limit of backtracking solver, also choose defaults for Flag Mode, Game mode, etc
-//TODO: Win screen - make this look good and improve functionality
-//TODO: Hard mode: always lose if there exists a possible mine combination s.t. the move loses
-//TODO: Easy mode: always keep playing if there is a combination of mines St the move doesn't lose
 //TODO: Make minesweeper endless: always force >= 1 visible tile on the screen
 //TODO: Recommend the guess which will reveal the greatest amount of further stuff
-//TODO: Don't have to guess mode
-//TODO: make top/bottom bars look nice (and more like other Minesweeper apps)
 //TODO: save personal high scores (the time) for beginner, intermediate, expert
 //TODO: figure out what to make button to the left of the yellow smiley face button
 

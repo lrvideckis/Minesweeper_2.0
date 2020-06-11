@@ -27,8 +27,8 @@ public class BacktrackingSolver implements MinesweeperSolver {
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
 	private final ArrayList<ArrayList<ArrayList<Pair<Integer, Integer>>>> lastUnvisitedSpot;
-	private final ArrayList<TreeMap<Integer, ArrayList<Pair<Integer, Integer>>>> savePositionsOfBombsPerCompPerCountBombs = new ArrayList<>();
-	private final TreeMap<Integer, ArrayList<Pair<Integer, Integer>>> saveGoodBombConfigurations = new TreeMap<>();
+	private final ArrayList<TreeMap<Integer, ArrayList<Pair<Integer, Integer>>>> savePositionsOfMinesPerCompPerCountMines = new ArrayList<>();
+	private final TreeMap<Integer, ArrayList<Pair<Integer, Integer>>> saveGoodMineConfigurations = new TreeMap<>();
 	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig = new ArrayList<>();
 	//TODO: remove mineProbPerCompPerNumMines denominator, and use mineConfig instead
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines = new ArrayList<>();
@@ -482,21 +482,21 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			}
 		}
 
-		if (componentHasInterestingSpot || !savePositionsOfBombsPerCompPerCountBombs.get(componentPos).containsKey(currNumberOfMines)) {
-			ArrayList<Pair<Integer, Integer>> currBombConfiguration = new ArrayList<>();
+		if (componentHasInterestingSpot || !savePositionsOfMinesPerCompPerCountMines.get(componentPos).containsKey(currNumberOfMines)) {
+			ArrayList<Pair<Integer, Integer>> currMineConfiguration = new ArrayList<>();
 			for (int pos = 0; pos < component.size(); ++pos) {
 				final int i = component.get(pos).first;
 				final int j = component.get(pos).second;
 				if (isMine[i][j]) {
-					currBombConfiguration.add(new Pair<>(i, j));
+					currMineConfiguration.add(new Pair<>(i, j));
 				}
 			}
 			if (componentHasInterestingSpot) {
-				if (goodConfig && !saveGoodBombConfigurations.containsKey(currNumberOfMines)) {
-					saveGoodBombConfigurations.put(currNumberOfMines, currBombConfiguration);
+				if (goodConfig && !saveGoodMineConfigurations.containsKey(currNumberOfMines)) {
+					saveGoodMineConfigurations.put(currNumberOfMines, currMineConfiguration);
 				}
 			} else {
-				savePositionsOfBombsPerCompPerCountBombs.get(componentPos).put(currNumberOfMines, currBombConfiguration);
+				savePositionsOfMinesPerCompPerCountMines.get(componentPos).put(currNumberOfMines, currMineConfiguration);
 			}
 		}
 	}
@@ -597,9 +597,9 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		initializeLastUnvisitedSpot(components);
 
-		savePositionsOfBombsPerCompPerCountBombs.clear();
+		savePositionsOfMinesPerCompPerCountMines.clear();
 		for (int i = 0; i < components.size(); ++i) {
-			savePositionsOfBombsPerCompPerCountBombs.add(new TreeMap<>());
+			savePositionsOfMinesPerCompPerCountMines.add(new TreeMap<>());
 		}
 
 		InterestingCell interestingCell = new InterestingCell(spotI, spotJ, wantMine);
@@ -609,11 +609,11 @@ public class BacktrackingSolver implements MinesweeperSolver {
 			throw new Exception("Wanted (interesting) cell is an away cell, I haven't implemented this yet");
 		}
 
-		boolean[][] newBombs = new boolean[rows][cols];
+		boolean[][] newMines = new boolean[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				if (board[i][j].getIsLogicalMine()) {
-					newBombs[i][j] = true;
+					newMines[i][j] = true;
 				}
 			}
 		}
@@ -677,8 +677,7 @@ public class BacktrackingSolver implements MinesweeperSolver {
 		for (int x : after) System.out.print(x);
 		System.out.println();
 
-		//TODO: change bomb to mine
-		for (TreeMap.Entry<Integer, ArrayList<Pair<Integer, Integer>>> entry : saveGoodBombConfigurations.entrySet()) {
+		for (TreeMap.Entry<Integer, ArrayList<Pair<Integer, Integer>>> entry : saveGoodMineConfigurations.entrySet()) {
 			int minesCurr = entry.getKey();
 			for (int minesBefore : prev) {
 				System.out.println("numberOfMines: " + numberOfMines);
@@ -691,38 +690,38 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				System.out.println("here, setting curr component mines");
 
 				//set mines of current component
-				for (Pair<Integer, Integer> bombSpot : entry.getValue()) {
-					System.out.println("here current component, setting: " + bombSpot);
-					if (newBombs[bombSpot.first][bombSpot.second]) {
+				for (Pair<Integer, Integer> mineSpot : entry.getValue()) {
+					System.out.println("here current component, setting: " + mineSpot);
+					if (newMines[mineSpot.first][mineSpot.second]) {
 						throw new Exception("already a mine, but it shouldn't be");
 					}
-					newBombs[bombSpot.first][bombSpot.second] = true;
+					newMines[mineSpot.first][mineSpot.second] = true;
 				}
 
 				//set mines of all components after current component
 				for (int i = interestingCell.cellComponent + 1; i < components.size(); ++i) {
-					final int numBombsCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesAfter));
-					for (Pair<Integer, Integer> bombSpot : Objects.requireNonNull(savePositionsOfBombsPerCompPerCountBombs.get(i).get(numBombsCurrComponent))) {
-						System.out.println("here after, setting: " + bombSpot);
-						if (newBombs[bombSpot.first][bombSpot.second]) {
+					final int numMinesCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesAfter));
+					for (Pair<Integer, Integer> mineSpot : Objects.requireNonNull(savePositionsOfMinesPerCompPerCountMines.get(i).get(numMinesCurrComponent))) {
+						System.out.println("here after, setting: " + mineSpot);
+						if (newMines[mineSpot.first][mineSpot.second]) {
 							throw new Exception("already a mine, but it shouldn't be");
 						}
-						newBombs[bombSpot.first][bombSpot.second] = true;
+						newMines[mineSpot.first][mineSpot.second] = true;
 					}
-					minesAfter -= numBombsCurrComponent;
+					minesAfter -= numMinesCurrComponent;
 				}
 
 				//set mines of all components before current component
 				for (int i = interestingCell.cellComponent - 1; i >= 0; --i) {
-					final int numBombsCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesBefore));
-					for (Pair<Integer, Integer> bombSpot : Objects.requireNonNull(savePositionsOfBombsPerCompPerCountBombs.get(i).get(numBombsCurrComponent))) {
-						System.out.println("here prev, setting: " + bombSpot);
-						if (newBombs[bombSpot.first][bombSpot.second]) {
+					final int numMinesCurrComponent = Objects.requireNonNull(parentTable.get(i).get(minesBefore));
+					for (Pair<Integer, Integer> mineSpot : Objects.requireNonNull(savePositionsOfMinesPerCompPerCountMines.get(i).get(numMinesCurrComponent))) {
+						System.out.println("here prev, setting: " + mineSpot);
+						if (newMines[mineSpot.first][mineSpot.second]) {
 							throw new Exception("already a mine, but it shouldn't be");
 						}
-						newBombs[bombSpot.first][bombSpot.second] = true;
+						newMines[mineSpot.first][mineSpot.second] = true;
 					}
-					minesBefore -= numBombsCurrComponent;
+					minesBefore -= numMinesCurrComponent;
 				}
 
 				//set mines in away cells
@@ -742,13 +741,13 @@ public class BacktrackingSolver implements MinesweeperSolver {
 				//TODO: shuffle away cells array
 				for (int i = 0; i < minesLeft; ++i) {
 					System.out.println("setting away mine: " + allAwayCells.get(i));
-					if (newBombs[allAwayCells.get(i).first][allAwayCells.get(i).second]) {
+					if (newMines[allAwayCells.get(i).first][allAwayCells.get(i).second]) {
 						throw new Exception("already a mine, but it shouldn't be");
 					}
-					newBombs[allAwayCells.get(i).first][allAwayCells.get(i).second] = true;
+					newMines[allAwayCells.get(i).first][allAwayCells.get(i).second] = true;
 				}
 				System.out.println("return 1");
-				return newBombs;
+				return newMines;
 			}
 		}
 		throw new Exception("didn't find solution, but it should exist");
