@@ -4,10 +4,10 @@ import android.util.Pair;
 
 import com.LukeVideckis.minesweeper20.customExceptions.HitIterationLimitException;
 import com.LukeVideckis.minesweeper20.customExceptions.NoSolutionFoundException;
-import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolverWithBigint;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.MyBacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.SlowBacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
@@ -54,7 +54,7 @@ public class Test {
 					"5"
 			},
 
-			//failed test after basically redoing BacktrackingSolver to be more efficient with BigIntegr
+			//failed test after basically redoing MyBacktrackingSolver to be more efficient with BigIntegr
 			{
 					"U1......",
 					"U1111...",
@@ -167,13 +167,13 @@ public class Test {
 				continue;
 			}
 
-			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
-			backtrackingSolver.doPerformCheckPositionValidity();
+			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
+			myBacktrackingSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			try {
 				try {
-					backtrackingSolver.solvePosition(boardFast, mines);
+					myBacktrackingSolver.solvePosition(boardFast, mines);
 				} catch (NoSolutionFoundException ignored) {
 					continue;
 				}
@@ -231,8 +231,8 @@ public class Test {
 			}
 			mines = Math.min(mines, rows * cols - 9);
 
-			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
-			backtrackingSolver.doPerformCheckPositionValidity();
+			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
+			myBacktrackingSolver.doPerformCheckPositionValidity();
 			BacktrackingSolverWithBigint backtrackingSolverWithBigint = new BacktrackingSolverWithBigint(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -254,7 +254,7 @@ public class Test {
 			VisibleTile[][] boardBigInt = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				backtrackingSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfMines());
+				myBacktrackingSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfMines());
 				backtrackingSolverWithBigint.solvePosition(boardBigInt, minesweeperGame.getNumberOfMines());
 				boolean testPassed = true;
 				for (int i = 0; i < rows; ++i) {
@@ -313,8 +313,8 @@ public class Test {
 			}
 			mines = Math.min(mines, rows * cols - 9);
 
-			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
-			backtrackingSolver.doPerformCheckPositionValidity();
+			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
+			myBacktrackingSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -336,7 +336,7 @@ public class Test {
 			VisibleTile[][] boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
+				myBacktrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
 				try {
 					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
 				} catch (HitIterationLimitException ignored) {
@@ -408,8 +408,8 @@ public class Test {
 			}
 			mines = Math.min(mines, rows * cols - 9);
 
-			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
-			backtrackingSolver.doPerformCheckPositionValidity();
+			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
+			myBacktrackingSolver.doPerformCheckPositionValidity();
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -433,7 +433,7 @@ public class Test {
 			VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				backtrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
+				myBacktrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
 				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
 				if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardBacktracking, boardGauss)) {
 					return;
@@ -502,8 +502,8 @@ public class Test {
 			}
 			mines = Math.min(mines, rows * cols - 9);
 
-			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
-			backtrackingSolver.doPerformCheckPositionValidity();
+			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
+			myBacktrackingSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
@@ -537,7 +537,7 @@ public class Test {
 			for (int i = 0; i < 3; ++i) {
 				VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 				try {
-					backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
+					myBacktrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
 					if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 						return;
 					}

@@ -5,16 +5,6 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFra
 public interface MinesweeperSolver {
 	void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception;
 
-	boolean[][] getMineConfiguration(
-			VisibleTile[][] board,
-			int numberOfMines,
-			int spotI,
-			int spotJ,
-			boolean wantMine
-	) throws Exception;
-
-	int getNumberOfIterations();
-
 	class VisibleTile {
 		BigFraction numberOfMineConfigs = new BigFraction(0), numberOfTotalConfigs = new BigFraction(0);
 		boolean isVisible, isLogicalMine, isLogicalFree;

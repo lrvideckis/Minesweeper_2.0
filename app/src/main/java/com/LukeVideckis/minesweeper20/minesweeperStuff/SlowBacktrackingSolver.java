@@ -11,7 +11,7 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.Mutabl
 
 import java.util.ArrayList;
 
-public class SlowBacktrackingSolver implements MinesweeperSolver {
+public class SlowBacktrackingSolver implements BacktrackingSolver {
 
 	private final static int iterationLimit = 100000;
 	private final int[][][] lastUnvisitedSpot;

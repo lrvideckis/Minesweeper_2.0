@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class BacktrackingSolverWithBigint implements MinesweeperSolver {
+public class BacktrackingSolverWithBigint implements BacktrackingSolver {
 	private final static int iterationLimit = 20000;
 	private final BigInteger[][] BIG_numberOfMineConfigs, BIG_numberOfTotalConfigs;
 	private final boolean[][] isMine;

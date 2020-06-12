@@ -14,9 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.LukeVideckis.minesweeper20.R;
 import com.LukeVideckis.minesweeper20.customExceptions.HitIterationLimitException;
-import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.MyBacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.LukeVideckis.minesweeper20.miscHelpers.PopupHelper;
@@ -64,7 +64,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		backtrackingSolver = new BacktrackingSolver(numberOfRows, numberOfCols);
+		backtrackingSolver = new MyBacktrackingSolver(numberOfRows, numberOfCols);
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
@@ -230,7 +230,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		okButton.setOnClickListener(view -> solverHitLimitPopup.dismiss());
 		TextView textView = solverHitLimitPopup.getContentView().findViewById(R.id.iterationLimitText);
 		String text = "Backtracking solver took more than ";
-		text += NumberFormat.getNumberInstance(Locale.US).format(BacktrackingSolver.iterationLimit);
+		text += NumberFormat.getNumberInstance(Locale.US).format(MyBacktrackingSolver.iterationLimit);
 		text += " iterations. Hints and mine probability are currently not available.";
 		textView.setText(text);
 	}

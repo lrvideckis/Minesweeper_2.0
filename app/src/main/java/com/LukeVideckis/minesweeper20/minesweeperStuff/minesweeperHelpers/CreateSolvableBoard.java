@@ -5,12 +5,13 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.MyBacktrackingSolver;
 
 import static com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class CreateSolvableBoard {
 	private static final int maxIterationsToFindBoard = 5000;
-	private final MinesweeperSolver backtrackingSolver;
+	private final BacktrackingSolver myBacktrackingSolver;
 	private final MinesweeperSolver gaussSolver;
 	private final VisibleTile[][] board;
 	private final int rows;
@@ -18,7 +19,7 @@ public class CreateSolvableBoard {
 	private final int mines;
 
 	public CreateSolvableBoard(int rows, int cols, int mines) {
-		backtrackingSolver = new BacktrackingSolver(rows, cols);
+		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
 		board = new VisibleTile[rows][cols];
 		for (int i = 0; i < rows; ++i) {
@@ -67,12 +68,12 @@ public class CreateSolvableBoard {
 				//then try to solve with backtracking solver
 				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 				try {
-					backtrackingSolver.solvePosition(board, mines);
+					myBacktrackingSolver.solvePosition(board, mines);
 				} catch (HitIterationLimitException ignored) {
-					totalIterationsSoFar += BacktrackingSolver.iterationLimit;
+					totalIterationsSoFar += MyBacktrackingSolver.iterationLimit;
 					break;
 				}
-				totalIterationsSoFar += backtrackingSolver.getNumberOfIterations();
+				totalIterationsSoFar += myBacktrackingSolver.getNumberOfIterations();
 				for (int i = 0; i < rows; ++i) {
 					for (int j = 0; j < cols; ++j) {
 						if (board[i][j].getIsLogicalFree()) {
