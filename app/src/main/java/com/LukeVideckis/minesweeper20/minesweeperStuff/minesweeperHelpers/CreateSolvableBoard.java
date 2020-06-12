@@ -38,6 +38,7 @@ public class CreateSolvableBoard {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
 		}
+		long totalTimeGauss = 0, totalTimeBacktracking = 0;
 		int totalIterationsSoFar = 0;
 		//TODO: look into making this parallel
 		while (totalIterationsSoFar < maxIterationsToFindBoard) {
@@ -51,7 +52,9 @@ public class CreateSolvableBoard {
 			while (!minesweeperGame.getIsGameLost() && !minesweeperGame.getIsGameWon()) {
 				//try to solve with gauss solver first
 				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+				long startTime = System.currentTimeMillis();
 				gaussSolver.solvePosition(board, mines);
+				totalTimeGauss += System.currentTimeMillis() - startTime;
 				boolean foundLogicalFree = false;
 				for (int i = 0; i < rows; ++i) {
 					for (int j = 0; j < cols; ++j) {
@@ -68,7 +71,9 @@ public class CreateSolvableBoard {
 				//then try to solve with backtracking solver
 				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 				try {
+					startTime = System.currentTimeMillis();
 					myBacktrackingSolver.solvePosition(board, mines);
+					totalTimeBacktracking += System.currentTimeMillis() - startTime;
 				} catch (HitIterationLimitException ignored) {
 					totalIterationsSoFar += MyBacktrackingSolver.iterationLimit;
 					break;
@@ -86,6 +91,7 @@ public class CreateSolvableBoard {
 					break;
 				}
 			}
+			System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
 			if (minesweeperGame.getIsGameWon()) {
 				return saveGame;
 			}

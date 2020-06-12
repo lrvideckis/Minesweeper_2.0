@@ -6,6 +6,7 @@ import com.LukeVideckis.minesweeper20.customExceptions.HitIterationLimitExceptio
 import com.LukeVideckis.minesweeper20.customExceptions.NoSolutionFoundException;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolverWithBigint;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.ImprovedGaussSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MyBacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.SlowBacktrackingSolver;
@@ -557,6 +558,84 @@ public class Test {
 					e.printStackTrace();
 					return;
 				}
+			}
+		}
+		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
+	}
+
+
+	public static void performTestComparingOldAndNewGaussSolvers(int numberOfTests) {
+		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.println("test number: " + testID);
+			int mines = 5;
+			int rows = 5, cols = 5;
+			try {
+				rows = MyMath.getRand(3, 8);
+				cols = MyMath.getRand(3, 40 / rows);
+				mines = MyMath.getRand(2, 9);
+			} catch (Exception ignored) {
+			}
+			mines = Math.min(mines, rows * cols - 9);
+
+			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
+			ImprovedGaussSolver improvedGaussSolver = new ImprovedGaussSolver(rows, cols);
+
+			MinesweeperGame minesweeperGame;
+			try {
+				minesweeperGame = new MinesweeperGame(rows, cols, mines);
+				int numberOfClicks = MyMath.getRand(0, 4);
+				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
+					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
+				}
+				if (minesweeperGame.getIsGameLost()) {
+					System.out.println("game over, void test");
+					continue;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+			VisibleTile[][] boardOld = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+			VisibleTile[][] boardNew = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+
+			try {
+				/*
+						mines: 5
+						board is:
+						...1UUU
+						...1UUU
+					    ...1UUU
+						.111UUU
+						.1UUUUU
+				 */
+				gaussianEliminationSolver.solvePosition(boardOld, minesweeperGame.getNumberOfMines());
+				improvedGaussSolver.solvePosition(boardNew, minesweeperGame.getNumberOfMines());
+				boolean passedTest = true;
+				for (int i = 0; i < rows; ++i) {
+					for (int j = 0; j < cols; ++j) {
+						if (boardNew[i][j].getIsVisible()) {
+							continue;
+						}
+						if (boardNew[i][j].getIsLogicalFree() != boardOld[i][j].getIsLogicalFree()) {
+							System.out.println("logical free doesn't match: " + boardNew[i][j].getIsLogicalFree() + " " + boardOld[i][j].getIsLogicalFree());
+							System.out.println("cell: (i,j): " + i + " " + j);
+							passedTest = false;
+						}
+						if (boardNew[i][j].getIsLogicalMine() != boardOld[i][j].getIsLogicalMine()) {
+							System.out.println("logical mine doesn't match: " + boardNew[i][j].getIsLogicalMine() + " " + boardOld[i][j].getIsLogicalMine());
+							System.out.println("cell: (i,j): " + i + " " + j);
+							passedTest = false;
+						}
+					}
+				}
+				if (!passedTest) {
+					printBoardDebug(boardNew, mines);
+					return;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				printBoardDebug(boardNew, mines);
+				return;
 			}
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");

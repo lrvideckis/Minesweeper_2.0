@@ -5,6 +5,7 @@ import android.util.Pair;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.util.Arrays;
 import java.util.TreeSet;
@@ -102,7 +103,7 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 			matrix[currentClue++][i] = 1;
 		}
 
-		performGaussianElimination(matrix);
+		MyMath.performGaussianElimination(matrix);
 
 		boolean foundNewStuff = false;
 		boolean[] isMine = new boolean[numberOfHiddenNodes + 1];
@@ -233,43 +234,6 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 					isMine[i] = true;
 				}
 			}
-		}
-	}
-
-	private void performGaussianElimination(double[][] matrix) {
-		if (matrix.length == 0 || matrix[0].length == 0) {
-			return;
-		}
-		final int rows = matrix.length;
-		final int cols = matrix[0].length;
-		for (int col = 0, row = 0; col < cols && row < rows; ++col) {
-			int sel = row;
-			for (int i = row + 1; i < rows; ++i) {
-				if (Math.abs(matrix[i][col]) > Math.abs(matrix[sel][col])) {
-					sel = i;
-				}
-			}
-			if (Math.abs(matrix[sel][col]) < EPSILON) {
-				continue;
-			}
-			for (int j = 0; j < cols; ++j) {
-				double temp = matrix[sel][j];
-				matrix[sel][j] = matrix[row][j];
-				matrix[row][j] = temp;
-			}
-			double s = (1.0 / matrix[row][col]);
-			for (int j = 0; j < cols; ++j) {
-				matrix[row][j] = matrix[row][j] * s;
-			}
-			for (int i = 0; i < rows; ++i) {
-				if (i != row && Math.abs(matrix[i][col]) > EPSILON) {
-					double t = matrix[i][col];
-					for (int j = 0; j < cols; ++j) {
-						matrix[i][j] = matrix[i][j] - (matrix[row][j] * t);
-					}
-				}
-			}
-			++row;
 		}
 	}
 }
