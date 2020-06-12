@@ -12,7 +12,7 @@ import java.util.TreeSet;
 //TODO: make this account for number of mines (by adding a single row: 1,1,1,1,..., #mines) to the matrix
 public class GaussianEliminationSolver implements MinesweeperSolver {
 
-	private static final double EPSILON = 0.00000001;
+	private static final double EPSILON = 1e-8;
 	private final int rows, cols;
 	private final int[][] hiddenNodeToId, idToHiddenNode;
 

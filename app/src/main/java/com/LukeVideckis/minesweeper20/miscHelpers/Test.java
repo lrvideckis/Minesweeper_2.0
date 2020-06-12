@@ -435,21 +435,7 @@ public class Test {
 			try {
 				backtrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
 				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
-				boolean passedTest = true;
-				for (int i = 0; i < rows; ++i) {
-					for (int j = 0; j < cols; ++j) {
-						if (!boardBacktracking[i][j].getIsLogicalMine() && boardGauss[i][j].getIsLogicalMine()) {
-							passedTest = false;
-							System.out.println("it isn't a logical mine, but Gauss solver says it's a logical mine " + i + " " + j);
-						}
-						if (!boardBacktracking[i][j].getIsLogicalFree() && boardGauss[i][j].getIsLogicalFree()) {
-							passedTest = false;
-							System.out.println("it isn't a logical free, but Gauss solver says it's a logical free " + i + " " + j);
-						}
-					}
-				}
-				if (!passedTest) {
-					printBoardDebug(boardBacktracking, mines);
+				if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardBacktracking, boardGauss)) {
 					return;
 				}
 			} catch (Exception e) {
@@ -458,6 +444,28 @@ public class Test {
 			}
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
+	}
+
+	//returns true if test failed
+	private static boolean isFailed_compareGaussBoardToBacktrackingBoard(int rows, int cols, int mines, VisibleTile[][] boardBacktracking, VisibleTile[][] boardGauss) {
+		boolean passedTest = true;
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (!boardBacktracking[i][j].getIsLogicalMine() && boardGauss[i][j].getIsLogicalMine()) {
+					passedTest = false;
+					System.out.println("it isn't a logical mine, but Gauss solver says it's a logical mine " + i + " " + j);
+				}
+				if (!boardBacktracking[i][j].getIsLogicalFree() && boardGauss[i][j].getIsLogicalFree()) {
+					passedTest = false;
+					System.out.println("it isn't a logical free, but Gauss solver says it's a logical free " + i + " " + j);
+				}
+			}
+		}
+		if (!passedTest) {
+			printBoardDebug(boardBacktracking, mines);
+			return true;
+		}
+		return false;
 	}
 
 	private static void printBoardDebug(VisibleTile[][] board, int mines) {
@@ -497,6 +505,7 @@ public class Test {
 			BacktrackingSolver backtrackingSolver = new BacktrackingSolver(rows, cols);
 			backtrackingSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			try {
@@ -525,7 +534,7 @@ public class Test {
 				e.printStackTrace();
 				continue;
 			}
-			for (int i = 0; i < 5; ++i) {
+			for (int i = 0; i < 3; ++i) {
 				VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 				try {
 					backtrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
@@ -535,6 +544,17 @@ public class Test {
 				} catch (Exception e) {
 					e.printStackTrace();
 					printBoardDebug(boardFast, mines);
+					return;
+				}
+
+				VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+				try {
+					gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
+					if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardFast, boardGauss)) {
+						return;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 					return;
 				}
 			}
