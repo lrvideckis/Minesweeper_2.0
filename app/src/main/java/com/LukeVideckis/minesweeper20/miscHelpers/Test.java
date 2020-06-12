@@ -599,15 +599,6 @@ public class Test {
 			VisibleTile[][] boardNew = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				/*
-						mines: 5
-						board is:
-						...1UUU
-						...1UUU
-					    ...1UUU
-						.111UUU
-						.1UUUUU
-				 */
 				gaussianEliminationSolver.solvePosition(boardOld, minesweeperGame.getNumberOfMines());
 				improvedGaussSolver.solvePosition(boardNew, minesweeperGame.getNumberOfMines());
 				boolean passedTest = true;

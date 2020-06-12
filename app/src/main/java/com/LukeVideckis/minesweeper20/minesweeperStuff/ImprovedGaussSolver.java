@@ -61,7 +61,7 @@ public class ImprovedGaussSolver implements MinesweeperSolver {
 					boolean foundAdjacentUnknown = false;
 					for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 						final int adjI = adj[0], adjJ = adj[1];
-						if (!board[adjI][adjJ].isLogicalMine) {
+						if (board[adjI][adjJ].isLogicalMine) {
 							--newSurroundingMineCounts[i][j];
 						}
 						if (!board[adjI][adjJ].isLogicalMine && !board[adjI][adjJ].isLogicalFree) {
@@ -102,7 +102,6 @@ public class ImprovedGaussSolver implements MinesweeperSolver {
 				matrix[currentClue][hiddenNodeToId[adjI][adjJ]] = 1;
 			}
 			matrix[currentClue][numberOfHiddenNodes] = newSurroundingMineCounts[i][j];
-			++currentClue;
 		}
 
 		MyMath.performGaussianElimination(matrix);
@@ -131,60 +130,66 @@ public class ImprovedGaussSolver implements MinesweeperSolver {
 			}
 		}
 
-		return (foundNewStuff || checkForTrivialStuff(board, clueSpots));
+		return (foundNewStuff || checkForTrivialStuff(board));
 	}
 
 	//TODO: pull this out into static helper
-	private boolean checkForTrivialStuff(VisibleTile[][] board, ArrayList<Pair<Integer, Integer>> clueSpots) {
+	private boolean checkForTrivialStuff(VisibleTile[][] board) {
 		boolean foundNewStuff = false;
-		for (int currentClue = 0; currentClue < clueSpots.size(); ++currentClue) {
-			final int i = clueSpots.get(currentClue).first;
-			final int j = clueSpots.get(currentClue).second;
-			VisibleTile cell = board[i][j];
-			final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i, j, rows, cols);
-			int cntAdjacentMines = 0, cntAdjacentFrees = 0, cntTotalAdjacentCells = 0;
-			for (int[] adj : adjCells) {
-				final int adjI = adj[0], adjJ = adj[1];
-				if (board[adjI][adjJ].getIsVisible()) {
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				VisibleTile cell = board[i][j];
+				if (!cell.getIsVisible()) {
 					continue;
 				}
-				++cntTotalAdjacentCells;
-				if (board[adjI][adjJ].isLogicalMine) {
-					++cntAdjacentMines;
-				}
-				if (board[adjI][adjJ].isLogicalFree) {
-					++cntAdjacentFrees;
-				}
-			}
-			if (cntAdjacentMines == cell.getNumberSurroundingMines()) {
-				//anything that's not a mine is free
+				final int[][] adjCells = GetAdjacentCells.getAdjacentCells(i, j, rows, cols);
+				int cntAdjacentMines = 0, cntAdjacentFrees = 0, cntTotalAdjacentCells = 0;
 				for (int[] adj : adjCells) {
 					final int adjI = adj[0], adjJ = adj[1];
 					if (board[adjI][adjJ].getIsVisible()) {
 						continue;
 					}
+					++cntTotalAdjacentCells;
 					if (board[adjI][adjJ].isLogicalMine) {
-						continue;
-					}
-					if (!board[adjI][adjJ].isLogicalFree) {
-						foundNewStuff = true;
-						board[adjI][adjJ].isLogicalFree = true;
-					}
-				}
-			}
-			if (cntTotalAdjacentCells - cntAdjacentFrees == cell.getNumberSurroundingMines()) {
-				//anything that's not free is a mine
-				for (int[] adj : adjCells) {
-					final int adjI = adj[0], adjJ = adj[1];
-					if (board[adjI][adjJ].getIsVisible()) {
-						continue;
+						++cntAdjacentMines;
 					}
 					if (board[adjI][adjJ].isLogicalFree) {
-						continue;
+						++cntAdjacentFrees;
 					}
-					if (!board[adjI][adjJ].isLogicalMine) {
-						foundNewStuff = true;
-						board[adjI][adjJ].isLogicalMine = true;
+				}
+				if (cntTotalAdjacentCells == 0) {
+					continue;
+				}
+				if (cntAdjacentMines == cell.getNumberSurroundingMines()) {
+					//anything that's not a mine is free
+					for (int[] adj : adjCells) {
+						final int adjI = adj[0], adjJ = adj[1];
+						if (board[adjI][adjJ].getIsVisible()) {
+							continue;
+						}
+						if (board[adjI][adjJ].isLogicalMine) {
+							continue;
+						}
+						if (!board[adjI][adjJ].isLogicalFree) {
+							foundNewStuff = true;
+							board[adjI][adjJ].isLogicalFree = true;
+						}
+					}
+				}
+				if (cntTotalAdjacentCells - cntAdjacentFrees == cell.getNumberSurroundingMines()) {
+					//anything that's not free is a mine
+					for (int[] adj : adjCells) {
+						final int adjI = adj[0], adjJ = adj[1];
+						if (board[adjI][adjJ].getIsVisible()) {
+							continue;
+						}
+						if (board[adjI][adjJ].isLogicalFree) {
+							continue;
+						}
+						if (!board[adjI][adjJ].isLogicalMine) {
+							foundNewStuff = true;
+							board[adjI][adjJ].isLogicalMine = true;
+						}
 					}
 				}
 			}
