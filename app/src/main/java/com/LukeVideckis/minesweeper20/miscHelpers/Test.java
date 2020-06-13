@@ -13,6 +13,7 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayB
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.math.BigInteger;
@@ -561,4 +562,112 @@ public class Test {
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
+
+	//TODO: modify this to include boards with an 8
+	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) {
+		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.println("test number: " + testID);
+
+			/*
+			int rows = 5, cols = 5;
+			int mines = 5;
+			try {
+				//rows = MyMath.getRand(5, 30);
+				//cols = MyMath.getRand(5, 30);
+				//mines = MyMath.getRand(2, 300);
+				rows = MyMath.getRand(5, 15);
+				cols = MyMath.getRand(5, 15);
+				mines = MyMath.getRand(2, 75);
+			} catch (Exception ignored) {
+			}
+			mines = Math.min(mines, rows * cols - 9);
+			 */
+			int rows = 9, cols = 9;
+			int mines = 18;
+
+			MyBacktrackingSolver solver = new MyBacktrackingSolver(rows, cols);
+
+			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
+			final int firstClickkI;
+			final int firstClickJ;
+			try {
+				firstClickkI = MyMath.getRand(0, rows - 1);
+				firstClickJ = MyMath.getRand(0, cols - 1);
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			MinesweeperGame game;
+			try {
+				long startTime = System.currentTimeMillis();
+				game = createSolvableBoard.getSolvableBoard(firstClickkI, firstClickJ, false);
+				System.out.println("time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
+			} catch (Exception e) {
+				System.out.println("createSolvableBoard threw an exception, test failed");
+				e.printStackTrace();
+				return;
+			}
+			VisibleTile[][] visibleBoard = new VisibleTile[rows][cols];
+			for (int i = 0; i < rows; ++i) {
+				for (int j = 0; j < cols; ++j) {
+					visibleBoard[i][j] = new VisibleTile();
+				}
+			}
+			while (!game.getIsGameLost() && !game.getIsGameWon()) {
+				System.out.println("here, start of solving loop");
+				try {
+					ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard);
+				} catch (Exception e) {
+					System.out.println("convert existing board threw an exception, test failed");
+					e.printStackTrace();
+					return;
+				}
+				printBoardDebug(visibleBoard, game.getNumberOfMines());
+				try {
+					solver.solvePosition(visibleBoard, mines);
+				} catch (Exception e) {
+					System.out.println("solver failed, so test failed");
+					e.printStackTrace();
+					return;
+				}
+				if (!CreateSolvableBoard.isLogicalFree(visibleBoard)) {
+					System.out.println("no logical frees, failed test");
+					return;
+				}
+
+				for (int i = 0; i < rows; ++i) {
+					for (int j = 0; j < cols; ++j) {
+						if (visibleBoard[i][j].getIsLogicalFree()) {
+							try {
+								game.clickCell(i, j, false);
+							} catch (Exception e) {
+								System.out.println("game threw exception, failed test");
+								e.printStackTrace();
+								return;
+							}
+						}
+					}
+				}
+			}
+			if (!game.getIsGameWon()) {
+				System.out.println("game is not won, failed test");
+				return;
+			}
+		}
+		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
+	}
+	/*
+mines: 18
+
+    .........
+    .........
+    11.......
+    B3221....
+    B5BB2....
+    UUUB2.111
+    UUU42.2B3
+    UUBB113BB
+    UUB311B32
+	* */
+
 }

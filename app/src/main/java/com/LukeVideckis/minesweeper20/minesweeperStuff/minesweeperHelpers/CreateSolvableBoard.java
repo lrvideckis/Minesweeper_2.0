@@ -7,8 +7,6 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MyBacktrackingSolver;
 
-import java.util.ArrayList;
-
 import static com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class CreateSolvableBoard {
@@ -81,119 +79,8 @@ public class CreateSolvableBoard {
 		System.out.println();
 	}
 
-	//TODO: make this as fast as: https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html
-	//TODO: use previously found logical stuff (this can also be used to improve the gauss solver)
-	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
-		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
-			throw new Exception("first click is out of bounds");
-		}
-		long totalTimeGauss = 0, totalTimeBacktracking = 0;
-		int totalIterationsSoFar = 0;
-		while (totalIterationsSoFar < maxIterationsToFindBoard) {
-			MinesweeperGame minesweeperGame;
-			minesweeperGame = new MinesweeperGame(rows, cols, mines);
-			if (hasAn8) {
-				minesweeperGame.setHavingAn8();
-			}
-			System.out.println("here, starting new game");
-			minesweeperGame.clickCell(firstClickI, firstClickJ, false);
-
-			ArrayList<MinesweeperGame> gameStack = new ArrayList<>();
-
-			while (totalIterationsSoFar < maxIterationsToFindBoard && !minesweeperGame.getIsGameLost() && !minesweeperGame.getIsGameWon()) {
-				//try to solve with gauss solver first
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-				long startTime = System.currentTimeMillis();
-				gaussSolver.solvePosition(board, mines);
-				totalTimeGauss += System.currentTimeMillis() - startTime;
-
-
-				if (isLogicalFree(board)) {
-					gameStack.add(new MinesweeperGame(minesweeperGame));
-					for (int i = 0; i < rows; ++i) {
-						for (int j = 0; j < cols; ++j) {
-							if (board[i][j].getIsLogicalFree()) {
-								minesweeperGame.clickCell(i, j, false);
-							}
-						}
-					}
-					continue;
-				}
-
-				//then try to solve with backtracking solver
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-				try {
-					startTime = System.currentTimeMillis();
-					myBacktrackingSolver.solvePosition(board, mines);
-					totalTimeBacktracking += System.currentTimeMillis() - startTime;
-				} catch (HitIterationLimitException ignored) {
-					totalIterationsSoFar += MyBacktrackingSolver.iterationLimit;
-					break;
-				}
-				totalIterationsSoFar += myBacktrackingSolver.getNumberOfIterations();
-
-				if (isLogicalFree(board)) {
-					gameStack.add(new MinesweeperGame(minesweeperGame));
-					for (int i = 0; i < rows; ++i) {
-						for (int j = 0; j < cols; ++j) {
-							if (board[i][j].getIsLogicalFree()) {
-								minesweeperGame.clickCell(i, j, false);
-							}
-						}
-					}
-					continue;
-				}
-
-
-				if (minesweeperGame.getIsGameWon()) {
-					System.out.println("here, FOUND!!!!!!!!!!!!!!");
-					return null;
-				}
-
-				if (gameStack.size() >= 5) {
-
-
-					System.out.println("here, stack size: " + gameStack.size());
-					System.out.println("total iterations: " + totalIterationsSoFar);
-					int cnt = 0;
-					for (int i = 0; i < rows; ++i) {
-						for (int j = 0; j < cols; ++j) {
-							if (AwayCell.isAwayCell(minesweeperGame, i, j)) ++cnt;
-						}
-					}
-					System.out.println("number of away cells: " + cnt);
-
-
-					gameStack.remove(gameStack.size() - 1);
-					gameStack.remove(gameStack.size() - 1);
-					gameStack.remove(gameStack.size() - 1);
-					gameStack.remove(gameStack.size() - 1);
-
-					MinesweeperGame pointer = gameStack.get(gameStack.size() - 1);
-					pointer.shuffleAwayMines();
-					minesweeperGame = new MinesweeperGame(pointer);
-
-
-					ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-					MyBacktrackingSolver asdf = new MyBacktrackingSolver(rows, cols);
-					asdf.solvePosition(board, mines);
-					printBoardDebug(board);
-
-				} else {
-					break;
-				}
-			}
-			System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
-			if (minesweeperGame.getIsGameWon()) {
-				System.out.println("here, FOUND!!!!!!!!!!!!!!");
-				return null;
-				//return saveGame;
-			}
-		}
-		throw new HitIterationLimitException("took too many tries (>= 1000) to find a solvable board");
-	}
-
-	private boolean isLogicalFree(VisibleTile[][] board) {
+	//TODO: move to helper file
+	public static boolean isLogicalFree(VisibleTile[][] board) {
 		for (VisibleTile[] row : board) {
 			for (VisibleTile cell : row) {
 				if (cell.getIsLogicalFree()) {
@@ -202,5 +89,149 @@ public class CreateSolvableBoard {
 			}
 		}
 		return false;
+	}
+
+	//TODO: make this as fast as: https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html
+	//TODO: use previously found logical stuff (this can also be used to improve the gauss solver)
+	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
+		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
+			throw new Exception("first click is out of bounds");
+		}
+		long totalTimeGauss = 0, totalTimeBacktracking = 0;
+		int totalIterationsSoFar = 0;
+		MinesweeperGame minesweeperGame;
+		minesweeperGame = new MinesweeperGame(rows, cols, mines);
+		if (hasAn8) {
+			minesweeperGame.setHavingAn8();
+		}
+		minesweeperGame.clickCell(firstClickI, firstClickJ, false);
+
+		/* Main board generation loop.
+		 */
+		int numberOfTriesShufflingInteresgingMines = 0;
+		int numberOfTriesRemoving1InteresgingMine = 0;
+		while (totalIterationsSoFar < maxIterationsToFindBoard && !minesweeperGame.getIsGameWon()) {
+			if (minesweeperGame.getIsGameLost()) {
+				throw new Exception("game is lost, but board generator should never lose");
+			}
+
+
+			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+			printBoardDebug(board);
+
+
+
+
+
+			/*try to deduce free squares with gauss solver first. Gaussian Elimination has the
+			 * possibility of not finding deducible free squares, even if they exist.
+			 */
+			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+			long startTime = System.currentTimeMillis();
+			gaussSolver.solvePosition(board, mines);
+			totalTimeGauss += System.currentTimeMillis() - startTime;
+
+			/* if there are any deducible free squares, click them, and continue on
+			 */
+			if (isLogicalFree(board)) {
+				System.out.println("gauss solver found free cell(s)");
+				numberOfTriesShufflingInteresgingMines = 0;
+				numberOfTriesRemoving1InteresgingMine = 0;
+				for (int i = 0; i < rows; ++i) {
+					for (int j = 0; j < cols; ++j) {
+						if (board[i][j].getIsLogicalFree()) {
+							minesweeperGame.clickCell(i, j, false);
+						}
+					}
+				}
+				continue;
+			}
+
+			/* then try to deduce free squares with backtracking solver (if there are any free
+			 * squares, this will find them)
+			 */
+			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+			try {
+				startTime = System.currentTimeMillis();
+				myBacktrackingSolver.solvePosition(board, mines);
+				totalTimeBacktracking += System.currentTimeMillis() - startTime;
+			} catch (HitIterationLimitException ignored) {
+				//TODO: think about starting over, instead of just quitting
+				break;
+			}
+			totalIterationsSoFar += myBacktrackingSolver.getNumberOfIterations();
+
+			/* if there are any deducible free squares, click them, and continue on
+			 */
+			if (isLogicalFree(board)) {
+				System.out.println("backtracking solver found free cell(s)");
+				numberOfTriesShufflingInteresgingMines = 0;
+				numberOfTriesRemoving1InteresgingMine = 0;
+				for (int i = 0; i < rows; ++i) {
+					for (int j = 0; j < cols; ++j) {
+						if (board[i][j].getIsLogicalFree()) {
+							minesweeperGame.clickCell(i, j, false);
+						}
+					}
+				}
+				continue;
+			}
+
+			/* At this point, there are no deducible free squares to click on. Some options are:
+			 *
+			 * 1) start over, and generate a new random board
+			 * 		After trying this approach, I found that for larger grids, and for high mine
+			 * 		percentages, this will rarely find a solvable grid. It's simply too unlikely
+			 * 		that a randomly generated grid will be completely solvable.
+			 *
+			 * 2) keep the existing grid, and rearrange the mines (randomly) in the hope of creating
+			 * new deducible free squares
+			 * 		The question is what mines do you rearrange?
+			 * 		- Mines adjacent to a clue (or visible number) which I'll call "interesting"
+			 * 		- Mines not adjacent to any clue
+			 *  	- Previously deduced mines (this would be moving backwards)
+			 */
+
+			/* First try rearranging mines adjacent to visible clues
+			 */
+
+			if (numberOfTriesShufflingInteresgingMines < 5) {
+				numberOfTriesRemoving1InteresgingMine = 0;
+				System.out.println("here, shuffling interesting mines");
+				++numberOfTriesShufflingInteresgingMines;
+				minesweeperGame.shuffleInterestingMines();
+				continue;
+			}
+
+			/* Shuffling interesting mines failed 5 times in a row, we need to do something more
+			 * extreme. Now we'll try removing 1 interesting mine, and making it an away mine (not
+			 * next to any clue).
+			 */
+
+			System.out.println("shuffling interesting mines, and making one an away mine");
+
+			numberOfTriesShufflingInteresgingMines = 0;
+			++numberOfTriesRemoving1InteresgingMine;
+			minesweeperGame.shuffleInterestingMinesAndMakeOneAway();
+		}
+		System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
+		if (minesweeperGame.getIsGameWon()) {
+			System.out.println("here, FOUND!!!!!!!!!!!!!!");
+			//return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
+
+			printBoardDebugMines(minesweeperGame);
+
+
+			MinesweeperGame res = new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
+
+			printBoardDebugMines(res);
+
+			return res;
+		}
+		if (totalIterationsSoFar < maxIterationsToFindBoard) {
+			System.out.println("game isn't won, and iteration limit isn't hit, this is bad");
+			return null;
+		}
+		throw new HitIterationLimitException("took too many iterations to find a solvable board");
 	}
 }

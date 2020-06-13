@@ -56,6 +56,16 @@ public class MinesweeperGame {
 		}
 	}
 
+	public MinesweeperGame(MinesweeperGame game, int firstClickI, int firstClickJ) throws Exception {
+		this(game);
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				getCell(i, j).isVisible = false;
+			}
+		}
+		revealCell(firstClickI, firstClickJ);
+	}
+
 	public static boolean tooManyMinesForZeroStart(int rows, int cols, int numberOfMines) {
 		return (numberOfMines > rows * cols - 9);
 	}
@@ -322,19 +332,14 @@ public class MinesweeperGame {
 		ArrayList<Pair<Integer, Integer>> allAwayCells = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (!AwayCell.isAwayCell(this, i, j)) {
-					continue;
-				}
-				if (hasAn8 && Math.abs(i - rowWith8) <= 1 && Math.abs(j - colWith8) <= 1) {
+				if (!AwayCell.isAwayCell(this, i, j) ||
+						(hasAn8 && Math.abs(i - rowWith8) <= 1 && Math.abs(j - colWith8) <= 1)
+				) {
 					continue;
 				}
 				if (getCell(i, j).isMine()) {
 					++numberOfAwayMines;
-					grid[i][j].isMine = false;
-					for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-						final int adjI = adj[0], adjJ = adj[1];
-						getCell(adjI, adjJ).numberSurroundingMines--;
-					}
+					changeMineStatus(i, j, false);
 
 				}
 				allAwayCells.add(new Pair<>(i, j));
@@ -344,15 +349,96 @@ public class MinesweeperGame {
 		for (int pos = 0; pos < numberOfAwayMines; ++pos) {
 			final int i = allAwayCells.get(pos).first;
 			final int j = allAwayCells.get(pos).second;
-			grid[i][j].isMine = true;
-			for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-				final int adjI = adj[0], adjJ = adj[1];
-				getCell(adjI, adjJ).numberSurroundingMines++;
+			changeMineStatus(i, j, true);
+		}
+	}
+
+	private boolean isInterestingCell(int i, int j) {
+		if (getCell(i, j).isVisible) {
+			return false;
+		}
+		if (AwayCell.isAwayCell(this, i, j)) {
+			return false;
+		}
+		return !hasAn8 || Math.abs(i - rowWith8) > 1 || Math.abs(j - colWith8) > 1;
+	}
+
+	//interesting mines are mines which are adjacent to a visible clue
+	public void shuffleInterestingMines() throws Exception {
+		int numberInterestingMines = 0;
+		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (isInterestingCell(i, j)) {
+					if (getCell(i, j).isMine) {
+						++numberInterestingMines;
+						changeMineStatus(i, j, false);
+					}
+					interestingSpots.add(new Pair<>(i, j));
+				}
+			}
+		}
+		Collections.shuffle(interestingSpots);
+		for (int pos = 0; pos < numberInterestingMines; ++pos) {
+			final int i = interestingSpots.get(pos).first;
+			final int j = interestingSpots.get(pos).second;
+			changeMineStatus(i, j, true);
+		}
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (getCell(i, j).isVisible) {
+					revealCell(i, j);
+				}
 			}
 		}
 	}
 
-	public void changeMineLocations(boolean[][] newMineLocations) throws Exception {
+	public void shuffleInterestingMinesAndMakeOneAway() throws Exception {
+		int interestingMines = 0;
+		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
+		ArrayList<Pair<Integer, Integer>> freeAwayCells = new ArrayList<>();
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (isInterestingCell(i, j)) {
+					if (getCell(i, j).isMine) {
+						++interestingMines;
+						changeMineStatus(i, j, false);
+					}
+					interestingSpots.add(new Pair<>(i, j));
+				}
+				if (AwayCell.isAwayCell(this, i, j) && !getCell(i, j).isMine) {
+					freeAwayCells.add(new Pair<>(i, j));
+				}
+			}
+		}
+		if (interestingMines == 0) {
+			throw new Exception("no interesting mines, but there needs to be one to remove");
+		}
+		if (freeAwayCells.isEmpty()) {
+			throw new Exception("no free away cells");
+		}
+		Collections.shuffle(interestingSpots);
+		for (int pos = 0; pos < interestingMines - 1; ++pos) {
+			final int i = interestingSpots.get(pos).first;
+			final int j = interestingSpots.get(pos).second;
+			changeMineStatus(i, j, true);
+		}
+		Collections.shuffle(freeAwayCells);
+		int i = freeAwayCells.get(0).first;
+		int j = freeAwayCells.get(0).second;
+		changeMineStatus(i, j, true);
+
+		for (i = 0; i < rows; ++i) {
+			for (j = 0; j < cols; ++j) {
+				if (getCell(i, j).isVisible) {
+					revealCell(i, j);
+				}
+			}
+		}
+	}
+
+	//TODO: this doesn't take into account the guaranteed 8
+	public void changeMineLocationsWithoutChangingVisibleClues(boolean[][] newMineLocations) throws Exception {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				if (newMineLocations[i][j]) {
@@ -404,6 +490,21 @@ public class MinesweeperGame {
 				if (getCell(i, j).isMine) {
 					incrementSurroundingMineCounts(i, j);
 				}
+			}
+		}
+	}
+
+	private void changeMineStatus(int i, int j, boolean isMine) {
+		if (getCell(i, j).isMine == isMine) {
+			return;
+		}
+		getCell(i, j).isMine = isMine;
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+			final int adjI = adj[0], adjJ = adj[1];
+			if (isMine) {
+				getCell(adjI, adjJ).numberSurroundingMines++;
+			} else {
+				getCell(adjI, adjJ).numberSurroundingMines--;
 			}
 		}
 	}
