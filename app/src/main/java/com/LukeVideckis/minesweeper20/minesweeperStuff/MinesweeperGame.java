@@ -202,8 +202,7 @@ public class MinesweeperGame {
 		for (int pos = 0; pos < numberOfMines; ++pos) {
 			final int mineRow = spots.get(pos).first;
 			final int mineCol = spots.get(pos).second;
-			getCell(mineRow, mineCol).isMine = true;
-			incrementSurroundingMineCounts(mineRow, mineCol);
+			changeMineStatus(mineRow, mineCol, true);
 		}
 		if (getCell(row, col).isMine) {
 			throw new Exception("starting click shouldn't be a mine");
@@ -242,8 +241,7 @@ public class MinesweeperGame {
 			colWith8 = j;
 			for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 				final int adjI = adj[0], adjJ = adj[1];
-				getCell(adjI, adjJ).isMine = true;
-				incrementSurroundingMineCounts(adjI, adjJ);
+				changeMineStatus(adjI, adjJ, true);
 			}
 			break;
 		}
