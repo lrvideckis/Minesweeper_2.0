@@ -2,6 +2,7 @@ package com.LukeVideckis.minesweeper20.minesweeperStuff;
 
 import android.util.Pair;
 
+import com.LukeVideckis.minesweeper20.customExceptions.NoInterestingMinesException;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
@@ -38,7 +39,7 @@ public class MinesweeperGame {
 	}
 
 	//copy constructor
-	public MinesweeperGame(MinesweeperGame minesweeperGame) {
+	public MinesweeperGame(MinesweeperGame minesweeperGame) throws Exception {
 		rows = minesweeperGame.getRows();
 		cols = minesweeperGame.getCols();
 		numberOfMines = minesweeperGame.getNumberOfMines();
@@ -54,6 +55,32 @@ public class MinesweeperGame {
 				grid[i][j] = new Tile(minesweeperGame.getCell(i, j));
 			}
 		}
+
+		boolean foundAn8 = false;
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (grid[i][j].isMine) {
+					continue;
+				}
+
+				if (grid[i][j].numberSurroundingMines == 8) {
+					foundAn8 = true;
+				}
+				int cntSurroundingMines = 0;
+				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+					final int adjI = adj[0], adjJ = adj[1];
+					if (getCell(adjI, adjJ).isMine) {
+						++cntSurroundingMines;
+					}
+				}
+				if (cntSurroundingMines != grid[i][j].numberSurroundingMines) {
+					throw new Exception("number of surrounding mines doesn't match");
+				}
+			}
+		}
+		if (hasAn8 && !foundAn8) {
+			throw new Exception("game should have an 8, but no 8 was found");
+		}
 	}
 
 	public MinesweeperGame(MinesweeperGame game, int firstClickI, int firstClickJ) throws Exception {
@@ -62,6 +89,12 @@ public class MinesweeperGame {
 			for (int j = 0; j < cols; ++j) {
 				getCell(i, j).isVisible = false;
 			}
+		}
+		if (getCell(firstClickI, firstClickJ).isMine) {
+			throw new Exception("first clicked cell shouldn't be a mine");
+		}
+		if (getCell(firstClickI, firstClickJ).numberSurroundingMines != 0) {
+			throw new Exception("first clicked cell isn't a zero start");
 		}
 		revealCell(firstClickI, firstClickJ);
 	}
@@ -362,12 +395,12 @@ public class MinesweeperGame {
 	}
 
 	//interesting mines are mines which are adjacent to a visible clue
-	public void shuffleInterestingMines() throws Exception {
+	public void shuffleInterestingMines(VisibleTile[][] visibleBoard) throws Exception {
 		int numberInterestingMines = 0;
 		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (isInterestingCell(i, j)) {
+				if (isInterestingCell(i, j) && !visibleBoard[i][j].isLogicalMine) {
 					if (getCell(i, j).isMine) {
 						++numberInterestingMines;
 						changeMineStatus(i, j, false);
@@ -391,13 +424,13 @@ public class MinesweeperGame {
 		}
 	}
 
-	public void shuffleInterestingMinesAndMakeOneAway() throws Exception {
+	public void shuffleInterestingMinesAndMakeOneAway(VisibleTile[][] visibleBoard) throws Exception {
 		int interestingMines = 0;
 		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
 		ArrayList<Pair<Integer, Integer>> freeAwayCells = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (isInterestingCell(i, j)) {
+				if (isInterestingCell(i, j) && !visibleBoard[i][j].isLogicalMine) {
 					if (getCell(i, j).isMine) {
 						++interestingMines;
 						changeMineStatus(i, j, false);
@@ -410,7 +443,7 @@ public class MinesweeperGame {
 			}
 		}
 		if (interestingMines == 0) {
-			throw new Exception("no interesting mines, but there needs to be one to remove");
+			throw new NoInterestingMinesException("no interesting mines, but there needs to be one to remove");
 		}
 		if (freeAwayCells.isEmpty()) {
 			throw new Exception("no free away cells");
