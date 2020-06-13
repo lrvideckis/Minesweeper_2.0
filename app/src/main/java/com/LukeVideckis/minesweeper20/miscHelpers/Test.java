@@ -568,7 +568,6 @@ public class Test {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 
-			/*
 			int rows = 5, cols = 5;
 			int mines = 5;
 			try {
@@ -581,9 +580,11 @@ public class Test {
 			} catch (Exception ignored) {
 			}
 			mines = Math.min(mines, rows * cols - 9);
-			 */
-			int rows = 9, cols = 9;
-			int mines = 18;
+			mines = Math.min(mines, (int) (rows * cols * 0.4f));
+
+			System.out.println("rows, cols, mines: " + rows + " " + cols + " " + mines);
+			float perc = mines / (float) (rows * cols);
+			System.out.println("percentage: " + String.format("%.2f", perc));
 
 			MyBacktrackingSolver solver = new MyBacktrackingSolver(rows, cols);
 
