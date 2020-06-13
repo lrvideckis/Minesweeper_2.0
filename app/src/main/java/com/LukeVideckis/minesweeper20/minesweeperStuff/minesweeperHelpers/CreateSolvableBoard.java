@@ -102,12 +102,6 @@ public class CreateSolvableBoard {
 		}
 		long totalTimeGauss = 0, totalTimeBacktracking = 0;
 		int totalIterationsSoFar = 0;
-		MinesweeperGame minesweeperGame;
-		minesweeperGame = new MinesweeperGame(rows, cols, mines);
-		if (hasAn8) {
-			minesweeperGame.setHavingAn8();
-		}
-		minesweeperGame.clickCell(firstClickI, firstClickJ, false);
 
 		/* Main board generation loop.
 		 * I'm calling an "interesting" mine a mine which is next to at least 1 clue
@@ -160,16 +154,24 @@ public class CreateSolvableBoard {
 
 		while (totalIterationsSoFar < maxIterationsToFindBoard) {
 
+			//System.out.println("start of main loop");
 
-			int numberOfTriesShufflingInteresgingMines = 0;
+			MinesweeperGame minesweeperGame;
+			minesweeperGame = new MinesweeperGame(rows, cols, mines);
+			if (hasAn8) {
+				minesweeperGame.setHavingAn8();
+			}
+			minesweeperGame.clickCell(firstClickI, firstClickJ, false);
+
+			int numberOfTriesShufflingInterestingMines = 0;
 			while (totalIterationsSoFar < maxIterationsToFindBoard && !minesweeperGame.getIsGameWon()) {
 				if (minesweeperGame.getIsGameLost()) {
 					throw new Exception("game is lost, but board generator should never lose");
 				}
 
 
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-				printBoardDebug(board);
+				//ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+				//printBoardDebug(board);
 
 
 
@@ -186,8 +188,8 @@ public class CreateSolvableBoard {
 				/* if there are any deducible free squares, click them, and continue on
 				 */
 				if (isLogicalFree(board)) {
-					System.out.println("gauss solver found free cell(s)");
-					numberOfTriesShufflingInteresgingMines = 0;
+					//System.out.println("gauss solver found free cell(s)");
+					numberOfTriesShufflingInterestingMines = 0;
 					for (int i = 0; i < rows; ++i) {
 						for (int j = 0; j < cols; ++j) {
 							if (board[i][j].getIsLogicalFree()) {
@@ -215,8 +217,8 @@ public class CreateSolvableBoard {
 				/* if there are any deducible free squares, click them, and continue on
 				 */
 				if (isLogicalFree(board)) {
-					System.out.println("backtracking solver found free cell(s)");
-					numberOfTriesShufflingInteresgingMines = 0;
+					//System.out.println("backtracking solver found free cell(s)");
+					numberOfTriesShufflingInterestingMines = 0;
 					for (int i = 0; i < rows; ++i) {
 						for (int j = 0; j < cols; ++j) {
 							if (board[i][j].getIsLogicalFree()) {
@@ -245,35 +247,38 @@ public class CreateSolvableBoard {
 				/* First try rearranging mines adjacent to visible clues
 				 */
 
-				if (numberOfTriesShufflingInteresgingMines < 5) {
-					System.out.println("here, shuffling interesting mines");
-					++numberOfTriesShufflingInteresgingMines;
+				if (numberOfTriesShufflingInterestingMines < 5) {
+					//System.out.println("here, shuffling interesting mines");
+					++numberOfTriesShufflingInterestingMines;
 					minesweeperGame.shuffleInterestingMines(board);
 					continue;
 				}
 
 				/* Shuffling interesting mines failed 5 times in a row, we need to do something more
-				 * extreme. Now we'll try removing 1 interesting mine, and making it an away mine (not
-				 * next to any clue).
+				 * extreme. Now we'll try removing 1 interesting mine, and making it an away mine
+				 * (not next to any clue).
 				 */
 
-				System.out.println("shuffling interesting mines, and making one an away mine");
+				//System.out.println("shuffling interesting mines, and making one an away mine");
 
 
-				numberOfTriesShufflingInteresgingMines = 0;
+				numberOfTriesShufflingInterestingMines = 0;
 				try {
 					minesweeperGame.shuffleInterestingMinesAndMakeOneAway(board);
 				} catch (NoInterestingMinesException ignored) {
-					System.out.println("starting over - no interesting mines");
+					//System.out.println("starting over - no interesting mines to remove");
+					break;
 				} catch (NoAwayCellsToMoveAMineToException ignored) {
-					System.out.println("starting over - no away cells to move a mine to");
+					//System.out.println("starting over - no away cells to move a mine to");
+					break;
 				}
 			}
-			System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
+			//System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
 			if (minesweeperGame.getIsGameWon()) {
-				System.out.println("here, FOUND!!!!!!!!!!!!!!");
-				//return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
+				//System.out.println("here, FOUND!!!!!!!!!!!!!!");
+				return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
 
+				/*
 				printBoardDebugMines(minesweeperGame);
 
 
@@ -282,11 +287,8 @@ public class CreateSolvableBoard {
 				printBoardDebugMines(res);
 
 				return res;
+				 */
 			}
-		}
-		if (totalIterationsSoFar < maxIterationsToFindBoard) {
-			System.out.println("game isn't won, and iteration limit isn't hit, this is bad");
-			return null;
 		}
 		throw new HitIterationLimitException("took too many iterations to find a solvable board");
 	}
@@ -347,5 +349,35 @@ public class CreateSolvableBoard {
 	B322BBB31
     BB11BU31.
     221.1U1..
+
+
+    15 out of 18 mines marked
+
+    board is:
+    .2BUUUUUU
+    .2BB3B3BU
+    .1333134U
+    .12B113BB
+    .1B321BB3
+    .13B22331
+    ..2B21B1.
+    11111111.
+    B1.......
+
+
+
+
+    //create solvable board alg output:
+
+    .2UUUU322
+    .2UU4U3UU
+    .13331344
+    .12U113UU
+    .1U321UU3
+    .13U22331
+    ..2U21U1.
+    11111111.
+    U1.......
+
 	 */
 }

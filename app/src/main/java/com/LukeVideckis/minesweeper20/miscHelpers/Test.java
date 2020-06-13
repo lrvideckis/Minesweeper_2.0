@@ -614,7 +614,7 @@ public class Test {
 				}
 			}
 			while (!game.getIsGameLost() && !game.getIsGameWon()) {
-				System.out.println("here, start of solving loop");
+				//System.out.println("here, start of solving loop");
 				try {
 					ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard);
 				} catch (Exception e) {
@@ -622,7 +622,7 @@ public class Test {
 					e.printStackTrace();
 					return;
 				}
-				printBoardDebug(visibleBoard, game.getNumberOfMines());
+				//printBoardDebug(visibleBoard, game.getNumberOfMines());
 				try {
 					solver.solvePosition(visibleBoard, mines);
 				} catch (Exception e) {
