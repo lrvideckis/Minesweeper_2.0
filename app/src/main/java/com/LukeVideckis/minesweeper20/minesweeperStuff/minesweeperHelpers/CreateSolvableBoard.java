@@ -116,12 +116,13 @@ public class CreateSolvableBoard {
 		 *
 		 * 		while(board isn't won yet) {
 		 *	 		while (there exists a deducible non-mine square) {
-		 * 				click all those deducible non-mine squares
-		 * 				continue
+		 * 				click all those deducible non-mine squares;
+		 * 				continue;
 		 *  		}
 		 *
-		 * 			//now there aren't any deducible mine-free squares, so we resort to moving
-		 *			//positions of mines. This will hopefully create new deducible free squares.
+		 * 			//now there aren't any deducible mine-free squares and the game isn't won, so
+		 * 			//we resort to moving positions of mines. This will hopefully create new
+		 * 			//deducible free squares.
 		 *
 		 * 			at most 5 times in a row do:
 		 * 				randomly move the positions of non-deducible "interesting" mines;
@@ -130,11 +131,15 @@ public class CreateSolvableBoard {
 		 * 			//if we've reached here, we've tried the previous step 5 times without
 		 * 			//successfully creating a new deducible free square. So we resort to a more
 		 * 			//extreme step:	randomly move the positions of non-deducible "interesting" mines
-		 * 			//next to a clue, with 1 difference: change 1 mine to a non-"interesting" square
-		 * 			//(a square not next to any clue)
+		 * 			//with 1 difference: change 1 mine to a non-"interesting" square (a square not
+		 * 			//next to any clue). Doing this has downsides:
+		 * 			//		- many mines will be eventually moved to the outside of the board
+		 * 			//		  effectively making the board smaller
+		 * 			//		- the mine density of the inside of the board will be smaller, which
+		 * 			//		  generally creates easier boards
 		 *
 		 * 			randomly move the positions of non-deducible "interesting" mines, and move 1
-		 * 			"interesting" mine to a square not next to any mines
+		 * 			"interesting" mine to a square not next to any mines;
 		 *  	}
 		 *
 		 *
