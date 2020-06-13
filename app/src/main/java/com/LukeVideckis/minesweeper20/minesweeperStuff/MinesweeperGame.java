@@ -2,6 +2,7 @@ package com.LukeVideckis.minesweeper20.minesweeperStuff;
 
 import android.util.Pair;
 
+import com.LukeVideckis.minesweeper20.customExceptions.NoAwayCellsToMoveAMineToException;
 import com.LukeVideckis.minesweeper20.customExceptions.NoInterestingMinesException;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
@@ -446,7 +447,7 @@ public class MinesweeperGame {
 			throw new NoInterestingMinesException("no interesting mines, but there needs to be one to remove");
 		}
 		if (freeAwayCells.isEmpty()) {
-			throw new Exception("no free away cells");
+			throw new NoAwayCellsToMoveAMineToException("no free away cells");
 		}
 		Collections.shuffle(interestingSpots);
 		for (int pos = 0; pos < interestingMines - 1; ++pos) {

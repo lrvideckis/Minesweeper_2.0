@@ -1,6 +1,7 @@
 package com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers;
 
 import com.LukeVideckis.minesweeper20.customExceptions.HitIterationLimitException;
+import com.LukeVideckis.minesweeper20.customExceptions.NoAwayCellsToMoveAMineToException;
 import com.LukeVideckis.minesweeper20.customExceptions.NoInterestingMinesException;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
@@ -132,13 +133,19 @@ public class CreateSolvableBoard {
 		 * 			//successfully creating a new deducible free square. So we resort to a more
 		 * 			//extreme step:	randomly move the positions of non-deducible "interesting" mines
 		 * 			//with 1 difference: change 1 mine to a non-"interesting" square (a square not
-		 * 			//next to any clue). Doing this has downsides:
+		 * 			//next to any clue).
+		 *
+		 * 			//Doing this has pros:
+		 * 			//		- the entire board generation algorithm runs faster (fast enough to
+		 * 			//		  execute in real time for the user).
+		 * 			//		- this step will always eventually produce a deducible free square as
+		 * 			//		  eventually one border clue will become 0, leading to more clues.
+		 *
+		 * 			//And cons:
 		 * 			//		- many mines will be eventually moved to the outside of the board
 		 * 			//		  effectively making the board smaller
 		 * 			//		- the mine density of the inside of the board will be smaller, which
 		 * 			//		  generally creates easier boards
-		 * 			//Despite these downsides, the single pro is that the entire board generation
-		 * 			//algorithm runs faster (fast enough to execute in real time for the user).
 		 *
 		 * 			randomly move the positions of non-deducible "interesting" mines, and move 1
 		 * 			"interesting" mine to a square not next to any mines;
@@ -250,11 +257,6 @@ public class CreateSolvableBoard {
 				 * next to any clue).
 				 */
 
-				if (AwayCell.getNumberOfAwayCells(board) == 0) {
-					System.out.println("out of options: no away cells, board generation failed");
-					return null;
-				}
-
 				System.out.println("shuffling interesting mines, and making one an away mine");
 
 
@@ -263,6 +265,8 @@ public class CreateSolvableBoard {
 					minesweeperGame.shuffleInterestingMinesAndMakeOneAway(board);
 				} catch (NoInterestingMinesException ignored) {
 					System.out.println("starting over - no interesting mines");
+				} catch (NoAwayCellsToMoveAMineToException ignored) {
+					System.out.println("starting over - no away cells to move a mine to");
 				}
 			}
 			System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
