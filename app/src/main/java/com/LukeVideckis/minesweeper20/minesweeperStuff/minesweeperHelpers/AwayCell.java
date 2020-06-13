@@ -2,6 +2,7 @@ package com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers;
 
 import android.util.Pair;
 
+import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver;
 
 public class AwayCell {
@@ -28,6 +29,19 @@ public class AwayCell {
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
 			if (board[adjI][adjJ].getIsVisible()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean isAwayCell(MinesweeperGame minesweeperGame, int row, int col) {
+		if (minesweeperGame.getCell(row, col).getIsVisible()) {
+			return false;
+		}
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, minesweeperGame.getRows(), minesweeperGame.getCols())) {
+			final int adjI = adj[0], adjJ = adj[1];
+			if (minesweeperGame.getCell(adjI, adjJ).getIsVisible()) {
 				return false;
 			}
 		}

@@ -103,8 +103,8 @@ public class GameCanvas extends View {
 
 		GameActivity gameActivity = (GameActivity) getContext();
 
-		final int numberOfRows = gameActivity.getMinesweeperGame().getNumberOfRows();
-		final int numberOfCols = gameActivity.getMinesweeperGame().getNumberOfCols();
+		final int numberOfRows = gameActivity.getMinesweeperGame().getRows();
+		final int numberOfCols = gameActivity.getMinesweeperGame().getCols();
 
 		boolean haveDrawnARow = false;
 		for (int i = 0; i < numberOfRows; ++i) {

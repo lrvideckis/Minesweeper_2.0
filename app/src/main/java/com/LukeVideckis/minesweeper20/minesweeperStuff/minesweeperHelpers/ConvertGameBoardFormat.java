@@ -6,8 +6,8 @@ import static com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver.
 
 public class ConvertGameBoardFormat {
 	public static VisibleTile[][] convertToNewBoard(MinesweeperGame minesweeperGame) {
-		final int rows = minesweeperGame.getNumberOfRows();
-		final int cols = minesweeperGame.getNumberOfCols();
+		final int rows = minesweeperGame.getRows();
+		final int cols = minesweeperGame.getCols();
 		VisibleTile[][] board = new VisibleTile[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -19,8 +19,8 @@ public class ConvertGameBoardFormat {
 	}
 
 	public static void convertToExistingBoard(MinesweeperGame minesweeperGame, VisibleTile[][] board) throws Exception {
-		final int rows = minesweeperGame.getNumberOfRows();
-		final int cols = minesweeperGame.getNumberOfCols();
+		final int rows = minesweeperGame.getRows();
+		final int cols = minesweeperGame.getCols();
 		if (board.length != rows) {
 			throw new Exception("minesweeper game rows doesn't match board rows");
 		}
