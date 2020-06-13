@@ -137,6 +137,8 @@ public class CreateSolvableBoard {
 		 * 			//		  effectively making the board smaller
 		 * 			//		- the mine density of the inside of the board will be smaller, which
 		 * 			//		  generally creates easier boards
+		 * 			//Despite these downsides, the single pro is that the entire board generation
+		 * 			//algorithm runs faster (fast enough to execute in real time for the user).
 		 *
 		 * 			randomly move the positions of non-deducible "interesting" mines, and move 1
 		 * 			"interesting" mine to a square not next to any mines;
