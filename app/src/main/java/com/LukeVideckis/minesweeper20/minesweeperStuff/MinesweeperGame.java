@@ -175,44 +175,29 @@ public class MinesweeperGame {
 
 	private void checkToRevealAdjacentMines(int row, int col) throws Exception {
 		boolean revealSurroundingCells = true;
-		for (int dRow = -1; dRow <= 1; ++dRow) {
-			for (int dCol = -1; dCol <= 1; ++dCol) {
-				if (dRow == 0 && dCol == 0) {
-					continue;
-				}
-				try {
-					Tile adj = getCell(row + dRow, col + dCol);
-					if (adj.getIsVisible()) {
-						continue;
-					}
-					if (adj.isFlagged() && !adj.isMine) {
-						isGameLost = true;
-						return;
-					}
-					if (adj.isFlagged() != adj.isMine) {
-						revealSurroundingCells = false;
-					}
-				} catch (ArrayIndexOutOfBoundsException ignored) {
-				}
+		for (int[] adjCells : GetAdjacentCells.getAdjacentCells(row, col, rows, cols)) {
+			Tile adj = getCell(adjCells[0], adjCells[1]);
+			if (adj.getIsVisible()) {
+				continue;
+			}
+			if (adj.isFlagged() && !adj.isMine) {
+				isGameLost = true;
+				return;
+			}
+			if (adj.isFlagged() != adj.isMine) {
+				revealSurroundingCells = false;
 			}
 		}
 		if (!revealSurroundingCells) {
 			return;
 		}
-		for (int dRow = -1; dRow <= 1; ++dRow) {
-			for (int dCol = -1; dCol <= 1; ++dCol) {
-				if (dRow == 0 && dCol == 0) {
-					continue;
-				}
-				try {
-					Tile adj = getCell(row + dRow, col + dCol);
-					if (adj.isMine) {
-						continue;
-					}
-					revealCell(row + dRow, col + dCol);
-				} catch (ArrayIndexOutOfBoundsException ignored) {
-				}
+		for (int[] adjCells : GetAdjacentCells.getAdjacentCells(row, col, rows, cols)) {
+			final int adjI = adjCells[0], adjJ = adjCells[0];
+			Tile adj = getCell(adjI, adjJ);
+			if (adj.isMine) {
+				continue;
 			}
+			revealCell(adjI, adjJ);
 		}
 	}
 
@@ -314,18 +299,10 @@ public class MinesweeperGame {
 		revealCell(row, col);
 	}
 
-	//TODO: make this use adjacent cell helper
+	//TODO: replace this with update mine status function
 	private void incrementSurroundingMineCounts(int mineRow, int mineCol) {
-		for (int dRow = -1; dRow <= 1; ++dRow) {
-			for (int dCol = -1; dCol <= 1; ++dCol) {
-				if (dRow == 0 && dCol == 0) {
-					continue;
-				}
-				try {
-					getCell(mineRow + dRow, mineCol + dCol).numberSurroundingMines++;
-				} catch (ArrayIndexOutOfBoundsException ignored) {
-				}
-			}
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(mineRow, mineCol, rows, cols)) {
+			getCell(adj[0], adj[1]).numberSurroundingMines++;
 		}
 	}
 
@@ -344,20 +321,12 @@ public class MinesweeperGame {
 		if (curr.numberSurroundingMines > 0) {
 			return;
 		}
-		for (int dRow = -1; dRow <= 1; ++dRow) {
-			for (int dCol = -1; dCol <= 1; ++dCol) {
-				if (dRow == 0 && dCol == 0) {
-					continue;
-				}
-				try {
-					final int adjRow = row + dRow;
-					final int adjCol = col + dCol;
-					Tile adjacent = getCell(adjRow, adjCol);
-					if (!adjacent.getIsVisible()) {
-						revealCell(adjRow, adjCol);
-					}
-				} catch (ArrayIndexOutOfBoundsException ignored) {
-				}
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, rows, cols)) {
+			final int adjRow = adj[0];
+			final int adjCol = adj[1];
+			Tile adjacent = getCell(adjRow, adjCol);
+			if (!adjacent.getIsVisible()) {
+				revealCell(adjRow, adjCol);
 			}
 		}
 	}

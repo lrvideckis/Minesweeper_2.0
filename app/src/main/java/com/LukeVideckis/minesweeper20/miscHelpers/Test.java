@@ -14,6 +14,7 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCe
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ExistsLogicalFree;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.math.BigInteger;
@@ -431,7 +432,6 @@ public class Test {
 		System.out.println();
 	}
 
-	//TODO: test gauss solver also multiple times on the same board
 	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
@@ -518,7 +518,7 @@ public class Test {
 				solver.solvePosition(visibleBoard, mines);
 				game.updateLogicalStuff(visibleBoard);
 
-				if (!CreateSolvableBoard.isLogicalFree(visibleBoard)) {
+				if (!ExistsLogicalFree.isLogicalFree(visibleBoard)) {
 					System.out.println("no logical frees, failed test");
 					return;
 				}

@@ -83,18 +83,6 @@ public class CreateSolvableBoard {
 		System.out.println();
 	}
 
-	//TODO: move to helper file
-	public static boolean isLogicalFree(VisibleTile[][] board) {
-		for (VisibleTile[] row : board) {
-			for (VisibleTile cell : row) {
-				if (cell.getIsLogicalFree()) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	//TODO: make this as fast as: https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html
 	//TODO: use previously found logical stuff (this can also be used to improve the gauss solver)
 	//TODO: look at average number of iterations
@@ -181,7 +169,7 @@ public class CreateSolvableBoard {
 
 				/* if there are any deducible free squares, click them, and continue on
 				 */
-				if (isLogicalFree(board)) {
+				if (ExistsLogicalFree.isLogicalFree(board)) {
 					numberOfTriesShufflingInterestingMines = 0;
 					for (int i = 0; i < rows; ++i) {
 						for (int j = 0; j < cols; ++j) {
