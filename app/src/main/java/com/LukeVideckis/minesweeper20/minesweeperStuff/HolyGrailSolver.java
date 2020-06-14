@@ -4,8 +4,8 @@ public class HolyGrailSolver implements BacktrackingSolver {
 
 	private int numberOfIterations = 0;
 	//TODO: try to change MyBacktrackingSolver back to BacktrackingSolver interface
-	private MyBacktrackingSolver myBacktrackingSolver;
-	private MinesweeperSolver gaussSolver;
+	private final MyBacktrackingSolver myBacktrackingSolver;
+	private final MinesweeperSolver gaussSolver;
 
 	public HolyGrailSolver(int rows, int cols) {
 		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
