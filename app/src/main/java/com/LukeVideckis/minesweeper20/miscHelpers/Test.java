@@ -6,8 +6,8 @@ import com.LukeVideckis.minesweeper20.customExceptions.HitIterationLimitExceptio
 import com.LukeVideckis.minesweeper20.customExceptions.NoSolutionFoundException;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolverWithBigint;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
-import com.LukeVideckis.minesweeper20.minesweeperStuff.MyBacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.SlowBacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
@@ -55,7 +55,7 @@ public class Test {
 					"5"
 			},
 
-			//failed test after basically redoing MyBacktrackingSolver to be more efficient with BigIntegr
+			//failed test after basically redoing HolyGrailSolver to be more efficient with BigIntegr
 			{
 					"U1......",
 					"U1111...",
@@ -158,12 +158,12 @@ public class Test {
 				continue;
 			}
 
-			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
-			myBacktrackingSolver.doPerformCheckPositionValidity();
+			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
+			holyGrailSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			try {
-				myBacktrackingSolver.solvePosition(boardFast, mines);
+				holyGrailSolver.solvePosition(boardFast, mines);
 			} catch (NoSolutionFoundException ignored) {
 				System.out.println("no solution found, void test");
 				continue;
@@ -212,8 +212,8 @@ public class Test {
 			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
-			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
-			myBacktrackingSolver.doPerformCheckPositionValidity();
+			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
+			holyGrailSolver.doPerformCheckPositionValidity();
 			BacktrackingSolverWithBigint backtrackingSolverWithBigint = new BacktrackingSolverWithBigint(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -230,7 +230,7 @@ public class Test {
 			VisibleTile[][] boardBigInt = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 			try {
-				myBacktrackingSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfMines());
+				holyGrailSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfMines());
 				backtrackingSolverWithBigint.solvePosition(boardBigInt, minesweeperGame.getNumberOfMines());
 			} catch (HitIterationLimitException ignored) {
 				System.out.println("hit iteration limit, void test");
@@ -282,8 +282,8 @@ public class Test {
 			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
-			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
-			myBacktrackingSolver.doPerformCheckPositionValidity();
+			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
+			holyGrailSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -299,7 +299,7 @@ public class Test {
 			VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 			VisibleTile[][] boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
-			myBacktrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
+			holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
 			try {
 				slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
 			} catch (HitIterationLimitException ignored) {
@@ -361,8 +361,8 @@ public class Test {
 			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
-			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
-			myBacktrackingSolver.doPerformCheckPositionValidity();
+			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
+			holyGrailSolver.doPerformCheckPositionValidity();
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -380,7 +380,7 @@ public class Test {
 			VisibleTile[][] boardBacktracking = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 			VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
-			myBacktrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
+			holyGrailSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
 			gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
 			if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardBacktracking, boardGauss)) {
 				return;
@@ -440,8 +440,8 @@ public class Test {
 			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
-			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
-			myBacktrackingSolver.doPerformCheckPositionValidity();
+			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
+			holyGrailSolver.doPerformCheckPositionValidity();
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
@@ -465,7 +465,7 @@ public class Test {
 			}
 			for (int i = 0; i < 3; ++i) {
 				VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
-				myBacktrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
+				holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
 				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 					return;
 				}
@@ -497,7 +497,7 @@ public class Test {
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.print(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
 
-			MyBacktrackingSolver solver = new MyBacktrackingSolver(rows, cols);
+			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
 
 			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
 			final int firstClickI = MyMath.getRand(0, rows - 1);

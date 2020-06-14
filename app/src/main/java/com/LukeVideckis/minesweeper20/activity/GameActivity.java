@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.LukeVideckis.minesweeper20.R;
 import com.LukeVideckis.minesweeper20.customExceptions.HitIterationLimitException;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MyBacktrackingSolver;
@@ -40,7 +41,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private PopupWindow solverHitLimitPopup, couldNotFindNoGuessBoardPopup;
 
 	private MinesweeperGame minesweeperGame;
-	private MinesweeperSolver backtrackingSolver;
+	private MinesweeperSolver holyGrailSolver;
 	private MinesweeperSolver.VisibleTile[][] board;
 	private int lastTapRow, lastTapCol;
 	private Thread updateTimeThread;
@@ -64,7 +65,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		backtrackingSolver = new MyBacktrackingSolver(numberOfRows, numberOfCols);
+		holyGrailSolver = new HolyGrailSolver(numberOfRows, numberOfCols);
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
@@ -205,7 +206,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		//TODO: only run solver if board has changed since last time
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		try {
-			backtrackingSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
+			holyGrailSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
 		} catch (HitIterationLimitException e) {
 			solverHitIterationLimit();
 		}

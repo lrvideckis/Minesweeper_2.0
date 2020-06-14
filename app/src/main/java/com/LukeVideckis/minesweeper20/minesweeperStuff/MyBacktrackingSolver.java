@@ -33,7 +33,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 	//TODO: remove mineProbPerCompPerNumMines denominator, and use mineConfig instead
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
-	private final GaussianEliminationSolver gaussianEliminationSolver;
 	private int totalIterations, numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
@@ -54,7 +53,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			lastUnvisitedSpot.add(currRow);
 		}
-		gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 	}
 
 	public void doPerformCheckPositionValidity() {
@@ -74,8 +72,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			totalIterations = 0;
 			return;
 		}
-
-		gaussianEliminationSolver.solvePosition(board, numberOfMines);
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -548,8 +544,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
 			throw new Exception("not implemented yet");
 		}
-
-		gaussianEliminationSolver.solvePosition(board, numberOfMines);
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
