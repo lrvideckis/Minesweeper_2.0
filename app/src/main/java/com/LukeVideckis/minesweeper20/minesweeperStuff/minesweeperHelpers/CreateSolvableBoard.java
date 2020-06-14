@@ -144,6 +144,8 @@ public class CreateSolvableBoard {
 
 		while (totalIterationsSoFar < maxIterationsToFindBoard) {
 
+			System.out.println("here starting new board attempt");
+
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			if (hasAn8) {
@@ -160,7 +162,7 @@ public class CreateSolvableBoard {
 				/*try to deduce free squares with gauss solver first. Gaussian Elimination has the
 				 * possibility of not finding deducible free squares, even if they exist.
 				 */
-				ConvertGameBoardFormat.convertToExistingBoardAndKeepLogicalStuff(minesweeperGame, board);
+				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, true);
 				long startTime = System.currentTimeMillis();
 				gaussSolver.solvePosition(board, mines);
 				minesweeperGame.updateLogicalStuff(board);

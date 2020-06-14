@@ -2,10 +2,10 @@ package com.LukeVideckis.minesweeper20.minesweeperStuff;
 
 public class HolyGrailSolver implements BacktrackingSolver {
 
-	private int numberOfIterations = 0;
 	//TODO: try to change MyBacktrackingSolver back to BacktrackingSolver interface
 	private final MyBacktrackingSolver myBacktrackingSolver;
 	private final MinesweeperSolver gaussSolver;
+	private int numberOfIterations = 0;
 
 	public HolyGrailSolver(int rows, int cols) {
 		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);

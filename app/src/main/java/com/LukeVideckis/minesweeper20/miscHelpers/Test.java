@@ -514,7 +514,7 @@ public class Test {
 				}
 			}
 			while (!game.getIsGameLost() && !game.getIsGameWon()) {
-				ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard);
+				ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard, false);
 				solver.solvePosition(visibleBoard, mines);
 				game.updateLogicalStuff(visibleBoard);
 
