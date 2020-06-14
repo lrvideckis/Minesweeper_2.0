@@ -90,9 +90,7 @@ public interface MinesweeperSolver {
 		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) {
 			reset();
 			this.isVisible = isVisible;
-			if (isVisible) {
-				this.numberSurroundingMines = numberSurroundingMines;
-			}
+			this.numberSurroundingMines = numberSurroundingMines;
 		}
 	}
 }

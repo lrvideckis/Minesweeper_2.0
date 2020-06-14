@@ -483,9 +483,6 @@ public class Test {
 	//TODO: modify this to include boards with an 8
 	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
-			System.out.println("hi1");
-			System.out.println("hi2");
-			System.out.println("hi3");
 			System.out.print("test number: " + testID);
 
 			final int rows = MyMath.getRand(5, 30);
@@ -500,10 +497,6 @@ public class Test {
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.print(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
-
-			System.out.println("hi4");
-			System.out.println("hi5");
-			System.out.println("hi6");
 
 			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
 
