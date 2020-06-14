@@ -140,7 +140,7 @@ public class Test {
 			}
 	};
 
-	public static void testPreviouslyFailedBoards() {
+	public static void testPreviouslyFailedBoards() throws Exception {
 		int testID = 1;
 		for (String[] stringBoard : previousFailedBoards) {
 			System.out.println("test number: " + (testID++));
@@ -149,20 +149,10 @@ public class Test {
 			final int mines = Integer.parseInt(stringBoard[stringBoard.length - 1]);
 			VisibleTile[][] boardFast;
 			VisibleTile[][] boardSlow;
-			try {
-				boardFast = convertFormat(stringBoard);
-				boardSlow = convertFormat(stringBoard);
-			} catch (Exception e) {
-				e.printStackTrace();
-				continue;
-			}
+			boardFast = convertFormat(stringBoard);
+			boardSlow = convertFormat(stringBoard);
 			Pair<Integer, Integer> dimensions;
-			try {
-				dimensions = ArrayBounds.getArrayBounds(boardFast);
-			} catch (Exception e) {
-				e.printStackTrace();
-				continue;
-			}
+			dimensions = ArrayBounds.getArrayBounds(boardFast);
 			if (rows != dimensions.first || cols != dimensions.second) {
 				System.out.print("bounds don't match");
 				continue;
@@ -173,26 +163,21 @@ public class Test {
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			try {
-				try {
-					myBacktrackingSolver.solvePosition(boardFast, mines);
-				} catch (NoSolutionFoundException ignored) {
-					continue;
-				}
-				try {
-					slowBacktrackingSolver.solvePosition(boardSlow, mines);
-				} catch (NoSolutionFoundException ignored) {
-					System.out.println("SLOW solver didn't find a solution, void test");
-					continue;
-				} catch (HitIterationLimitException ignored) {
-					System.out.println("SLOW solver hit iteration limit, void test");
-					continue;
-				}
-				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
-					return;
-				}
-			} catch (Exception e) {
-				System.out.println("one of the solvers threw exception, failed test");
-				e.printStackTrace();
+				myBacktrackingSolver.solvePosition(boardFast, mines);
+			} catch (NoSolutionFoundException ignored) {
+				System.out.println("no solution found, void test");
+				continue;
+			}
+			try {
+				slowBacktrackingSolver.solvePosition(boardSlow, mines);
+			} catch (NoSolutionFoundException ignored) {
+				System.out.println("SLOW solver didn't find a solution, void test");
+				continue;
+			} catch (HitIterationLimitException ignored) {
+				System.out.println("SLOW solver hit iteration limit, void test");
+				continue;
+			}
+			if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 				return;
 			}
 		}
@@ -219,17 +204,12 @@ public class Test {
 		return board;
 	}
 
-	public static void performTestsWithBigIntSolverForLargerGrids(int numberOfTests) {
+	public static void performTestsWithBigIntSolverForLargerGrids(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int mines = 5;
-			int rows = 5, cols = 5;
-			try {
-				rows = MyMath.getRand(10, 30);
-				cols = MyMath.getRand(10, 30);
-				mines = MyMath.getRand(2, 50);
-			} catch (Exception ignored) {
-			}
+			int rows = MyMath.getRand(10, 30);
+			int cols = MyMath.getRand(10, 30);
+			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
 			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
@@ -237,19 +217,14 @@ public class Test {
 			BacktrackingSolverWithBigint backtrackingSolverWithBigint = new BacktrackingSolverWithBigint(rows, cols);
 
 			MinesweeperGame minesweeperGame;
-			try {
-				minesweeperGame = new MinesweeperGame(rows, cols, mines);
-				int numberOfClicks = MyMath.getRand(3, 7);
-				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
-					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
-				}
-				if (minesweeperGame.getIsGameLost()) {
-					System.out.println("game over, void test");
-					continue;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				return;
+			minesweeperGame = new MinesweeperGame(rows, cols, mines);
+			int numberOfClicks = MyMath.getRand(3, 7);
+			while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
+				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
+			}
+			if (minesweeperGame.getIsGameLost()) {
+				System.out.println("game over, void test");
+				continue;
 			}
 			VisibleTile[][] boardFraction = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 			VisibleTile[][] boardBigInt = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
@@ -257,43 +232,41 @@ public class Test {
 			try {
 				myBacktrackingSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfMines());
 				backtrackingSolverWithBigint.solvePosition(boardBigInt, minesweeperGame.getNumberOfMines());
-				boolean testPassed = true;
-				for (int i = 0; i < rows; ++i) {
-					for (int j = 0; j < cols; ++j) {
-						if (boardBigInt[i][j].getIsVisible()) {
-							continue;
-						}
-						BigFraction curr = boardFraction[i][j].getNumberOfMineConfigs();
-						curr.divideWith(boardFraction[i][j].getNumberOfTotalConfigs());
-
-						BigInteger top = backtrackingSolverWithBigint.getNumberOfMineConfigs(i, j);
-						BigInteger bottom = backtrackingSolverWithBigint.getNumberOfTotalConfigs(i, j);
-						BigInteger gcd = top.gcd(bottom);
-						top = top.divide(gcd);
-						bottom = bottom.divide(gcd);
-
-						//noinspection SuspiciousNameCombination
-						if (!curr.getNumerator().equals(top) ||
-								!curr.getDenominator().equals(bottom) ||
-								boardFraction[i][j].getIsLogicalMine() != boardBigInt[i][j].getIsLogicalMine() ||
-								boardFraction[i][j].getIsLogicalFree() != boardBigInt[i][j].getIsLogicalFree()
-						) {
-							testPassed = false;
-							System.out.println("here, solver outputs don't match");
-							System.out.println("i,j: " + i + " " + j);
-							System.out.println("fraction solver " + curr.getNumerator() + '/' + curr.getDenominator());
-							System.out.println("big int solver " + top + '/' + bottom);
-						}
-					}
-				}
-				if (!testPassed) {
-					printBoardDebug(boardBigInt, mines);
-					return;
-				}
 			} catch (HitIterationLimitException ignored) {
 				System.out.println("hit iteration limit, void test");
-			} catch (Exception e) {
-				e.printStackTrace();
+				continue;
+			}
+
+			boolean testPassed = true;
+			for (int i = 0; i < rows; ++i) {
+				for (int j = 0; j < cols; ++j) {
+					if (boardBigInt[i][j].getIsVisible()) {
+						continue;
+					}
+					BigFraction curr = boardFraction[i][j].getNumberOfMineConfigs();
+					curr.divideWith(boardFraction[i][j].getNumberOfTotalConfigs());
+
+					BigInteger top = backtrackingSolverWithBigint.getNumberOfMineConfigs(i, j);
+					BigInteger bottom = backtrackingSolverWithBigint.getNumberOfTotalConfigs(i, j);
+					BigInteger gcd = top.gcd(bottom);
+					top = top.divide(gcd);
+					bottom = bottom.divide(gcd);
+
+					//noinspection SuspiciousNameCombination
+					if (!curr.getNumerator().equals(top) ||
+							!curr.getDenominator().equals(bottom) ||
+							boardFraction[i][j].getIsLogicalMine() != boardBigInt[i][j].getIsLogicalMine() ||
+							boardFraction[i][j].getIsLogicalFree() != boardBigInt[i][j].getIsLogicalFree()
+					) {
+						testPassed = false;
+						System.out.println("here, solver outputs don't match");
+						System.out.println("i,j: " + i + " " + j);
+						System.out.println("fraction solver " + curr.getNumerator() + '/' + curr.getDenominator());
+						System.out.println("big int solver " + top + '/' + bottom);
+					}
+				}
+			}
+			if (!testPassed) {
 				printBoardDebug(boardBigInt, mines);
 				return;
 			}
@@ -301,17 +274,12 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	public static void performTestsForMineProbability(int numberOfTests) {
+	public static void performTestsForMineProbability(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int mines = 5;
-			int rows = 5, cols = 5;
-			try {
-				rows = MyMath.getRand(3, 8);
-				cols = MyMath.getRand(3, 40 / rows);
-				mines = MyMath.getRand(2, 9);
-			} catch (Exception ignored) {
-			}
+			int rows = MyMath.getRand(3, 8);
+			int cols = MyMath.getRand(3, 40 / rows);
+			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
 			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
@@ -319,37 +287,26 @@ public class Test {
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
-			try {
-				minesweeperGame = new MinesweeperGame(rows, cols, mines);
-				int numberOfClicks = MyMath.getRand(0, 4);
-				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
-					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
-				}
-				if (minesweeperGame.getIsGameLost()) {
-					System.out.println("game over, void test");
-					continue;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				return;
+			minesweeperGame = new MinesweeperGame(rows, cols, mines);
+			int numberOfClicks = MyMath.getRand(0, 4);
+			while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
+				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
+			}
+			if (minesweeperGame.getIsGameLost()) {
+				System.out.println("game over, void test");
+				continue;
 			}
 			VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 			VisibleTile[][] boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
+			myBacktrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
 			try {
-				myBacktrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
-				try {
-					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
-				} catch (HitIterationLimitException ignored) {
-					System.out.println("slow solver hit iteration limit, void test");
-					continue;
-				}
-				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
-					return;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				printBoardDebug(boardFast, mines);
+				slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
+			} catch (HitIterationLimitException ignored) {
+				System.out.println("slow solver hit iteration limit, void test");
+				continue;
+			}
+			if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 				return;
 			}
 		}
@@ -396,17 +353,12 @@ public class Test {
 		return !passedTest;
 	}
 
-	public static void performTestsForGaussSolver(int numberOfTests) {
+	public static void performTestsForGaussSolver(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int mines = 5;
-			int rows = 5, cols = 5;
-			try {
-				rows = MyMath.getRand(3, 15);
-				cols = MyMath.getRand(3, 15);
-				mines = MyMath.getRand(2, 50);
-			} catch (Exception ignored) {
-			}
+			int rows = MyMath.getRand(3, 15);
+			int cols = MyMath.getRand(3, 15);
+			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
 			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
@@ -414,33 +366,23 @@ public class Test {
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
-			try {
-				minesweeperGame = new MinesweeperGame(rows, cols, mines);
-				int numberOfClicks = MyMath.getRand(0, 4);
-				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
-					int x = MyMath.getRand(0, rows - 1);
-					int y = MyMath.getRand(0, cols - 1);
-					minesweeperGame.clickCell(x, y, false);
-				}
-				if (minesweeperGame.getIsGameLost()) {
-					System.out.println("game over, void test");
-					continue;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				return;
+			minesweeperGame = new MinesweeperGame(rows, cols, mines);
+			int numberOfClicks = MyMath.getRand(0, 4);
+			while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
+				int x = MyMath.getRand(0, rows - 1);
+				int y = MyMath.getRand(0, cols - 1);
+				minesweeperGame.clickCell(x, y, false);
+			}
+			if (minesweeperGame.getIsGameLost()) {
+				System.out.println("game over, void test");
+				continue;
 			}
 			VisibleTile[][] boardBacktracking = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 			VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
-			try {
-				myBacktrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
-				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
-				if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardBacktracking, boardGauss)) {
-					return;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			myBacktrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
+			gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
+			if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardBacktracking, boardGauss)) {
 				return;
 			}
 		}
@@ -490,17 +432,12 @@ public class Test {
 	}
 
 	//TODO: test gauss solver also multiple times on the same board
-	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) {
+	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int mines = 5;
-			int rows = 5, cols = 5;
-			try {
-				rows = MyMath.getRand(3, 8);
-				cols = MyMath.getRand(3, 40 / rows);
-				mines = MyMath.getRand(2, 9);
-			} catch (Exception ignored) {
-			}
+			int rows = MyMath.getRand(3, 8);
+			int cols = MyMath.getRand(3, 40 / rows);
+			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
 			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
@@ -509,19 +446,14 @@ public class Test {
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
-			try {
-				minesweeperGame = new MinesweeperGame(rows, cols, mines);
-				int numberOfClicks = MyMath.getRand(0, 4);
-				while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
-					minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
-				}
-				if (minesweeperGame.getIsGameLost()) {
-					System.out.println("game over, void test");
-					continue;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				return;
+			minesweeperGame = new MinesweeperGame(rows, cols, mines);
+			int numberOfClicks = MyMath.getRand(0, 4);
+			while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
+				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
+			}
+			if (minesweeperGame.getIsGameLost()) {
+				System.out.println("game over, void test");
+				continue;
 			}
 			VisibleTile[][] boardSlow = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
@@ -530,32 +462,17 @@ public class Test {
 			} catch (HitIterationLimitException ignored) {
 				System.out.println("slow solver hit iteration limit, void test");
 				continue;
-			} catch (Exception e) {
-				System.out.println("slow solver crashed, void test");
-				e.printStackTrace();
-				continue;
 			}
 			for (int i = 0; i < 3; ++i) {
 				VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
-				try {
-					myBacktrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
-					if (areBoardsDifferent(boardFast, boardSlow, mines)) {
-						return;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					printBoardDebug(boardFast, mines);
+				myBacktrackingSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
+				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 					return;
 				}
 
 				VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
-				try {
-					gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
-					if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardFast, boardGauss)) {
-						return;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
+				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
+				if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardFast, boardGauss)) {
 					return;
 				}
 			}
@@ -564,21 +481,16 @@ public class Test {
 	}
 
 	//TODO: modify this to include boards with an 8
-	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) {
+	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 
-			int rows = 5, cols = 5;
-			int mines = 5;
-			try {
-				//rows = MyMath.getRand(5, 30);
-				//cols = MyMath.getRand(5, 30);
-				//mines = MyMath.getRand(2, 300);
-				rows = MyMath.getRand(5, 15);
-				cols = MyMath.getRand(5, 15);
-				mines = MyMath.getRand(2, 75);
-			} catch (Exception ignored) {
-			}
+			//rows = MyMath.getRand(5, 30);
+			//cols = MyMath.getRand(5, 30);
+			//mines = MyMath.getRand(2, 300);
+			int rows = MyMath.getRand(5, 15);
+			int cols = MyMath.getRand(5, 15);
+			int mines = MyMath.getRand(2, 75);
 			mines = Math.min(mines, rows * cols - 9);
 			mines = Math.min(mines, (int) (rows * cols * 0.4f));
 
@@ -588,25 +500,12 @@ public class Test {
 			MyBacktrackingSolver solver = new MyBacktrackingSolver(rows, cols);
 
 			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
-			final int firstClickI;
-			final int firstClickJ;
-			try {
-				firstClickI = MyMath.getRand(0, rows - 1);
-				firstClickJ = MyMath.getRand(0, cols - 1);
-			} catch (Exception e) {
-				e.printStackTrace();
-				continue;
-			}
+			final int firstClickI = MyMath.getRand(0, rows - 1);
+			final int firstClickJ = MyMath.getRand(0, cols - 1);
 			MinesweeperGame game;
-			try {
-				long startTime = System.currentTimeMillis();
-				game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, false);
-				System.out.println("time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
-			} catch (Exception e) {
-				System.out.println("createSolvableBoard threw an exception, test failed");
-				e.printStackTrace();
-				return;
-			}
+			long startTime = System.currentTimeMillis();
+			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, false);
+			System.out.println("time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
 			VisibleTile[][] visibleBoard = new VisibleTile[rows][cols];
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {
@@ -614,22 +513,9 @@ public class Test {
 				}
 			}
 			while (!game.getIsGameLost() && !game.getIsGameWon()) {
-				//System.out.println("here, start of solving loop");
-				try {
-					ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard);
-				} catch (Exception e) {
-					System.out.println("convert existing board threw an exception, test failed");
-					e.printStackTrace();
-					return;
-				}
-				//printBoardDebug(visibleBoard, game.getNumberOfMines());
-				try {
-					solver.solvePosition(visibleBoard, mines);
-				} catch (Exception e) {
-					System.out.println("solver failed, so test failed");
-					e.printStackTrace();
-					return;
-				}
+				ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard);
+				solver.solvePosition(visibleBoard, mines);
+
 				if (!CreateSolvableBoard.isLogicalFree(visibleBoard)) {
 					System.out.println("no logical frees, failed test");
 					return;
@@ -638,13 +524,7 @@ public class Test {
 				for (int i = 0; i < rows; ++i) {
 					for (int j = 0; j < cols; ++j) {
 						if (visibleBoard[i][j].getIsLogicalFree()) {
-							try {
-								game.clickCell(i, j, false);
-							} catch (Exception e) {
-								System.out.println("game threw exception, failed test");
-								e.printStackTrace();
-								return;
-							}
+							game.clickCell(i, j, false);
 						}
 					}
 				}
