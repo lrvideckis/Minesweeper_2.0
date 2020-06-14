@@ -49,8 +49,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		 */
 
 
-
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);
 

@@ -583,16 +583,15 @@ public class Test {
 			mines = Math.min(mines, (int) (rows * cols * 0.4f));
 
 			System.out.println("rows, cols, mines: " + rows + " " + cols + " " + mines);
-			float perc = mines / (float) (rows * cols);
-			System.out.println("percentage: " + String.format("%.2f", perc));
+			System.out.println("percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
 
 			MyBacktrackingSolver solver = new MyBacktrackingSolver(rows, cols);
 
 			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
-			final int firstClickkI;
+			final int firstClickI;
 			final int firstClickJ;
 			try {
-				firstClickkI = MyMath.getRand(0, rows - 1);
+				firstClickI = MyMath.getRand(0, rows - 1);
 				firstClickJ = MyMath.getRand(0, cols - 1);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -601,7 +600,7 @@ public class Test {
 			MinesweeperGame game;
 			try {
 				long startTime = System.currentTimeMillis();
-				game = createSolvableBoard.getSolvableBoard(firstClickkI, firstClickJ, false);
+				game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, false);
 				System.out.println("time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
 			} catch (Exception e) {
 				System.out.println("createSolvableBoard threw an exception, test failed");
@@ -657,18 +656,4 @@ public class Test {
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
-	/*
-mines: 18
-
-    .........
-    .........
-    11.......
-    B3221....
-    B5BB2....
-    UUUB2.111
-    UUU42.2B3
-    UUBB113BB
-    UUB311B32
-	* */
-
 }

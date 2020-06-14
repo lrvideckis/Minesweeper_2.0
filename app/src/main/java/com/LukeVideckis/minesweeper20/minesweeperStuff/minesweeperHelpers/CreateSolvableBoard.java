@@ -35,6 +35,7 @@ public class CreateSolvableBoard {
 		this.mines = mines;
 	}
 
+	@SuppressWarnings("unused")
 	private static void printBoardDebug(VisibleTile[][] board) {
 		System.out.println("visible board is:");
 		for (VisibleTile[] visibleTiles : board) {
@@ -58,6 +59,7 @@ public class CreateSolvableBoard {
 		System.out.println();
 	}
 
+	@SuppressWarnings("unused")
 	private static void printBoardDebugMines(MinesweeperGame game) {
 		System.out.println("\nmines: " + game.getNumberOfMines());
 		System.out.println("board and mines are:");
@@ -154,8 +156,6 @@ public class CreateSolvableBoard {
 
 		while (totalIterationsSoFar < maxIterationsToFindBoard) {
 
-			//System.out.println("start of main loop");
-
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			if (hasAn8) {
@@ -168,14 +168,6 @@ public class CreateSolvableBoard {
 				if (minesweeperGame.getIsGameLost()) {
 					throw new Exception("game is lost, but board generator should never lose");
 				}
-
-
-				//ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-				//printBoardDebug(board);
-
-
-
-
 
 				/*try to deduce free squares with gauss solver first. Gaussian Elimination has the
 				 * possibility of not finding deducible free squares, even if they exist.
@@ -217,7 +209,6 @@ public class CreateSolvableBoard {
 				/* if there are any deducible free squares, click them, and continue on
 				 */
 				if (isLogicalFree(board)) {
-					//System.out.println("backtracking solver found free cell(s)");
 					numberOfTriesShufflingInterestingMines = 0;
 					for (int i = 0; i < rows; ++i) {
 						for (int j = 0; j < cols; ++j) {
@@ -248,7 +239,6 @@ public class CreateSolvableBoard {
 				 */
 
 				if (numberOfTriesShufflingInterestingMines < 5) {
-					//System.out.println("here, shuffling interesting mines");
 					++numberOfTriesShufflingInterestingMines;
 					minesweeperGame.shuffleInterestingMines(board);
 					continue;
@@ -259,125 +249,19 @@ public class CreateSolvableBoard {
 				 * (not next to any clue).
 				 */
 
-				//System.out.println("shuffling interesting mines, and making one an away mine");
-
-
 				numberOfTriesShufflingInterestingMines = 0;
 				try {
 					minesweeperGame.shuffleInterestingMinesAndMakeOneAway(board);
-				} catch (NoInterestingMinesException ignored) {
-					//System.out.println("starting over - no interesting mines to remove");
-					break;
-				} catch (NoAwayCellsToMoveAMineToException ignored) {
-					//System.out.println("starting over - no away cells to move a mine to");
+				} catch (NoInterestingMinesException | NoAwayCellsToMoveAMineToException ignored) {
 					break;
 				}
+
 			}
-			//System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
 			if (minesweeperGame.getIsGameWon()) {
-				//System.out.println("here, FOUND!!!!!!!!!!!!!!");
+				System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
 				return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
-
-				/*
-				printBoardDebugMines(minesweeperGame);
-
-
-				MinesweeperGame res = new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
-
-				printBoardDebugMines(res);
-
-				return res;
-				 */
 			}
 		}
 		throw new HitIterationLimitException("took too many iterations to find a solvable board");
 	}
-	/*
-	game ended in a 50/50
-    1122U2B1.
-    1B3BU421.
-    113BBB31.
-    .1245BB21
-    .1B2B33B1
-    .22422111
-	.2B4B1...
-	.3BB31...
-	.2BB2....
-
-	game ended in a 50/50
-    ....1B1..
-    2211221..
-    BB22B1...
-    U5B3331..
-    UB43BB21.
-    BBB224B2.
-    343212B2.
-    B23B2111.
-	2B3B2....
-
-
-	game ended in a 50/50, and there are no interesting non-logical mines to move
-    11113BB1.
-    B22B3B31.
-    23B221111
-    B211...1B
-    11....122
-    1122212B3
-    1B2BB13BB
-    2232213BU
-    1B1...2BU
-
-
-	game ended in a 50/50
-    UUB22B2..
-	3BB22B211
-    3B632111B
-    2BBB1..11
-    12432....
-    113B31222
-    2B4B3B2BB
-    2B3121222
-    111......
-
-	game ended in a 50/50
-    ...1B2B3B
-    .112122B2
-    23B1..111
-    BB321....
-    223B21221
-    112B44BB1
-	B322BBB31
-    BB11BU31.
-    221.1U1..
-
-
-    15 out of 18 mines marked
-
-    board is:
-    .2BUUUUUU
-    .2BB3B3BU
-    .1333134U
-    .12B113BB
-    .1B321BB3
-    .13B22331
-    ..2B21B1.
-    11111111.
-    B1.......
-
-
-
-
-    //create solvable board alg output:
-
-    .2UUUU322
-    .2UU4U3UU
-    .13331344
-    .12U113UU
-    .1U321UU3
-    .13U22331
-    ..2U21U1.
-    11111111.
-    U1.......
-
-	 */
 }

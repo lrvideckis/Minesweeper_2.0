@@ -64,6 +64,7 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 						if (board[adjI][adjJ].isLogicalMine) {
 							--newSurroundingMineCounts[i][j];
 						}
+						//noinspection IfStatementMissingBreakInLoop
 						if (!board[adjI][adjJ].isLogicalMine && !board[adjI][adjJ].isLogicalFree) {
 							foundAdjacentUnknown = true;
 						}
