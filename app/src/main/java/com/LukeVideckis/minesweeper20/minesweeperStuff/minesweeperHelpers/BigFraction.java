@@ -95,13 +95,6 @@ public class BigFraction {
 	public void setValue(BigFraction other) throws Exception {
 		numerator = other.numerator;
 		denominator = other.denominator;
-		System.out.println("here, doing some nice checking");
-		if (!numerator.equals(other.numerator)) {
-			throw new Exception("numerator set didn't work");
-		}
-		if (!denominator.equals(other.denominator)) {
-			throw new Exception("denominator set didn't work");
-		}
 		if (!numerator.gcd(denominator).equals(BigInteger.ONE)) {
 			throw new Exception("fraction isn't in reduced form, but I reduced after every operation");
 		}

@@ -66,7 +66,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			e.printStackTrace();
 		}
 		holyGrailSolver = new HolyGrailSolver(numberOfRows, numberOfCols);
-		//TODO: remove all these extra board conversions, I'm changing it to all be done in getBoard();
 		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
@@ -125,17 +124,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
 				try {
 					minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8);
-					for (int i = 0; i < numberOfRows; ++i) {
-						for (int j = 0; j < numberOfCols; ++j) {
-							if (minesweeperGame.getCell(i, j).getIsLogicalFree()) {
-								System.out.println("HEREEEEEEEEEE, logical free");
-							}
-							if (minesweeperGame.getCell(i, j).getIsLogicalMine()) {
-								System.out.println("HEREEEEEEEEEE, logical mine");
-							}
-						}
-					}
-					//ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 				} catch (HitIterationLimitException e) {
 					displayNoGuessBoardPopup();
 				}
@@ -151,7 +139,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
 			//TODO: don't change mine configuration when the current config matches what you want
 			minesweeperGame.clickCell(row, col, toggleFlagModeOn);
-			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 			if (!minesweeperGame.getIsGameLost() && !(toggleFlagModeOn && !minesweeperGame.getCell(row, col).getIsVisible())) {
 				if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
 					updateSolvedBoardWithBacktrackingSolver();
@@ -173,13 +160,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			e.printStackTrace();
 		}
 		enableButtonsAndSwitchesAndSetToFalse();
-		try {
-			//on every board change, the visible board should be updated to match the game board
-			//so that they always match
-			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
 		if (toggleFlagModeOn) {
 			toggleFlagModeOn = false;
@@ -213,36 +193,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else if (!((Switch) findViewById(R.id.toggleBacktrackingHints)).isChecked()) {
-			try {
-				//ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 		findViewById(R.id.gridCanvas).invalidate();
 	}
 
 	public void updateSolvedBoardWithBacktrackingSolver() throws Exception {
 		//TODO: only run solver if board has changed since last time
+		//TODO: change this to convert with logical stuff
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 		try {
 			holyGrailSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
-			System.out.println("before, checking for bug spot #2");
-			for (int i = 0; i < numberOfRows; ++i) {
-				for (int j = 0; j < numberOfCols; ++j) {
-					if (board[i][j].getIsVisible()) {
-						if (board[i][j].getNumberOfTotalConfigs().equals(0)) {
-							System.out.println("HHHHHEEEERRRREEE, bug spot #2");
-						}
-					}
-				}
-			}
-			System.out.println("after, checking for bug spot #2");
 		} catch (HitIterationLimitException e) {
 			solverHitIterationLimit();
 		}
-		System.out.println("here, updating board");
 		minesweeperGame.updateLogicalStuff(board);
 	}
 
@@ -252,12 +215,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		if (isChecked) {
 			try {
 				updateSolvedBoardWithBacktrackingSolver();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else if (!((Switch) findViewById(R.id.toggleMineProbability)).isChecked()) {
-			try {
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

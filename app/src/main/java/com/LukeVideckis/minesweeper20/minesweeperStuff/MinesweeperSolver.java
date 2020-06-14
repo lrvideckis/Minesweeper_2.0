@@ -15,35 +15,11 @@ public interface MinesweeperSolver {
 		}
 
 		public boolean isNonLogicalStuffEqual(VisibleTile other) {
-			if (isVisible != other.isVisible) {
-				System.out.println("visible doesn't match");
-			}
-			if (numberSurroundingMines != other.numberSurroundingMines) {
-				System.out.println("numberSurroundingMines doesn't match");
-			}
 			return isVisible == other.isVisible &&
 					numberSurroundingMines == other.numberSurroundingMines;
 		}
 
 		public boolean isEverythingEqual(VisibleTile other) {
-			if (isVisible != other.isVisible) {
-				System.out.println("visible doesn't match");
-			}
-			if (isLogicalMine != other.isLogicalMine) {
-				System.out.println("isLogicalMine doesn't match");
-			}
-			if (isLogicalFree != other.isLogicalFree) {
-				System.out.println("isLogicalFree doesn't match");
-			}
-			if (numberSurroundingMines != other.numberSurroundingMines) {
-				System.out.println("numberSurroundingMines doesn't match, visibility: " + isVisible);
-			}
-			if (!numberOfMineConfigs.equals(other.numberOfMineConfigs)) {
-				System.out.println("numberOfMineConfigs doesn't match");
-			}
-			if (!numberOfTotalConfigs.equals(other.numberOfTotalConfigs)) {
-				System.out.println("numberOfTotalConfigs doesn't match");
-			}
 			return isVisible == other.isVisible &&
 					isLogicalMine == other.isLogicalMine &&
 					isLogicalFree == other.isLogicalFree &&

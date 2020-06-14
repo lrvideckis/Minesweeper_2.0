@@ -543,33 +543,10 @@ public class MinesweeperGame {
 						throw new Exception("visible cells can't be logical");
 					}
 				}
-
-				if (visibleBoard[i][j].isVisible) {
-					if (visibleBoard[i][j].numberOfTotalConfigs.equals(0)) {
-						System.out.println("CCHHIICCKKEENN!!!!!!!!!!!!!");
-					}
-				}
-
-				if (getCell(i, j).isVisible != visibleBoard[i][j].isVisible) {
-					System.out.println("visibiles don't match");
-				}
-
 				getCell(i, j).isLogicalFree = visibleBoard[i][j].isLogicalFree;
 				getCell(i, j).isLogicalMine = visibleBoard[i][j].isLogicalMine;
-				//getCell(i, j).numberOfMineConfigs = visibleBoard[i][j].numberOfMineConfigs;
-				//getCell(i, j).numberOfTotalConfigs = visibleBoard[i][j].numberOfTotalConfigs;
 				getCell(i, j).numberOfMineConfigs.setValue(visibleBoard[i][j].numberOfMineConfigs);
 				getCell(i, j).numberOfTotalConfigs.setValue(visibleBoard[i][j].numberOfTotalConfigs);
-
-
-				if (getCell(i, j).isVisible) {
-					if (getCell(i, j).numberOfTotalConfigs.equals(0)) {
-						System.out.println("HHHHHHHHHEEEEEEEERRRRRRRRREEEEEE is the bug");
-					}
-					if (visibleBoard[i][j].getNumberOfTotalConfigs().equals(0)) {
-						System.out.println("HHHHHHHHHEEEEEEEERRRRRRRRREEEEEE is the bug part 2");
-					}
-				}
 			}
 		}
 	}

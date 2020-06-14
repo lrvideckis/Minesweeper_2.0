@@ -161,7 +161,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					curr.numberOfMineConfigs.setValue(awayMineProbability);
 					curr.numberOfTotalConfigs.setValues(1, 1);
 				}
-				System.out.println("here, doing extra checks");
 				if (curr.getIsVisible() && !curr.numberOfMineConfigs.equals(0)) {
 					throw new Exception("found a visible with non-zero number of mine configurations");
 				}
@@ -181,7 +180,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				}
 
 				if (curr.getIsVisible()) {
-					System.out.println("here, setting total configs of visible cell to 1");
 					curr.numberOfTotalConfigs.setValues(1, 1);
 				}
 				if (curr.getIsVisible() || curr.getIsLogicalMine() || curr.getIsLogicalFree()) {
