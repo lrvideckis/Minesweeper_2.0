@@ -334,6 +334,9 @@ public class MinesweeperGame {
 		if (curr.isMine) {
 			throw new Exception("can't reveal a mine");
 		}
+		if (curr.isLogicalMine) {
+			throw new Exception("can't reveal a logical mine");
+		}
 		if (curr.isFlagged()) {
 			--numberOfFlags;
 		}
@@ -526,6 +529,51 @@ public class MinesweeperGame {
 		}
 	}
 
+	public void updateLogicalStuff(VisibleTile[][] visibleBoard) throws Exception {
+		if (visibleBoard.length != rows) {
+			throw new Exception("visibleBoard has wrong dimensions");
+		}
+		for (int i = 0; i < rows; ++i) {
+			if (visibleBoard[i].length != cols) {
+				throw new Exception("visibleBoard has wrong dimensions");
+			}
+			for (int j = 0; j < cols; ++j) {
+				if (visibleBoard[i][j].isLogicalFree || visibleBoard[i][j].isLogicalMine) {
+					if (getCell(i, j).isVisible) {
+						throw new Exception("visible cells can't be logical");
+					}
+				}
+
+				if (visibleBoard[i][j].isVisible) {
+					if (visibleBoard[i][j].numberOfTotalConfigs.equals(0)) {
+						System.out.println("CCHHIICCKKEENN!!!!!!!!!!!!!");
+					}
+				}
+
+				if (getCell(i, j).isVisible != visibleBoard[i][j].isVisible) {
+					System.out.println("visibiles don't match");
+				}
+
+				getCell(i, j).isLogicalFree = visibleBoard[i][j].isLogicalFree;
+				getCell(i, j).isLogicalMine = visibleBoard[i][j].isLogicalMine;
+				//getCell(i, j).numberOfMineConfigs = visibleBoard[i][j].numberOfMineConfigs;
+				//getCell(i, j).numberOfTotalConfigs = visibleBoard[i][j].numberOfTotalConfigs;
+				getCell(i, j).numberOfMineConfigs.setValue(visibleBoard[i][j].numberOfMineConfigs);
+				getCell(i, j).numberOfTotalConfigs.setValue(visibleBoard[i][j].numberOfTotalConfigs);
+
+
+				if (getCell(i, j).isVisible) {
+					if (getCell(i, j).numberOfTotalConfigs.equals(0)) {
+						System.out.println("HHHHHHHHHEEEEEEEERRRRRRRRREEEEEE is the bug");
+					}
+					if (visibleBoard[i][j].getNumberOfTotalConfigs().equals(0)) {
+						System.out.println("HHHHHHHHHEEEEEEEERRRRRRRRREEEEEE is the bug part 2");
+					}
+				}
+			}
+		}
+	}
+
 	private void changeMineStatus(int i, int j, boolean isMine) {
 		if (getCell(i, j).isMine == isMine) {
 			return;
@@ -596,8 +644,12 @@ public class MinesweeperGame {
 		private void revealTile() throws Exception {
 			isVisible = true;
 			isFlagged = false;
+			isLogicalFree = false;
 			if (isMine) {
 				throw new Exception("can't reveal a mine");
+			}
+			if (isLogicalMine) {
+				throw new Exception("can't reveal a logical mine");
 			}
 		}
 

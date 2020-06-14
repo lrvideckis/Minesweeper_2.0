@@ -22,6 +22,7 @@ public class GameCanvas extends View {
 	private final BigFraction mineProbability = new BigFraction(0);
 	private final RectF tempCellRect = new RectF();
 	private final ScaleListener scaleListener;
+	private VisibleTile[][] visibleBoard;
 
 	public GameCanvas(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -40,14 +41,18 @@ public class GameCanvas extends View {
 	}
 
 	private void drawCell(Canvas canvas, VisibleTile solverCell, MinesweeperGame.Tile gameCell, int i, int j, int startX, int startY, boolean drawRedBackground) throws Exception {
-		if (gameCell.getIsVisible()) {
-			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingMines(), i, j, startX, startY);
-			return;
-		}
 
+		//error checking
 		GameActivity gameActivity = (GameActivity) getContext();
-
-
+		if (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn()) {
+			if (!solverCell.isEverythingEqual(gameCell)) {
+				throw new Exception("solver cell doesn't match game cell (including logical stuff)");
+			}
+		} else {
+			if (!solverCell.isNonLogicalStuffEqual(gameCell)) {
+				throw new Exception("solver cell doesn't match game cell (non logical stuff)");
+			}
+		}
 		if (solverCell.getIsLogicalMine() && !gameCell.isMine()) {
 			throw new Exception("solver says: logical mine, but it's not a mine");
 		}
@@ -56,6 +61,12 @@ public class GameCanvas extends View {
 		}
 		if (gameActivity.getMinesweeperGame().getIsGameWon() && gameActivity.getMinesweeperGame().getIsGameLost()) {
 			throw new Exception("game is both won and lost");
+		}
+
+
+		if (gameCell.getIsVisible()) {
+			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingMines(), i, j, startX, startY);
+			return;
 		}
 
 		boolean displayedLogicalStuff = false;
@@ -85,7 +96,7 @@ public class GameCanvas extends View {
 			} else if (solverCell.getIsLogicalFree() && (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn())) {
 				drawCellHelpers.drawBlackX(canvas, startX, startY);
 			}
-		} else if (gameCell.isMine() && gameActivity.getMinesweeperGame().getIsGameLost()) {
+		} else if (gameCell.isMine() && (gameActivity.getMinesweeperGame().getIsGameLost() || !displayedLogicalStuff)) {
 			drawCellHelpers.drawMine(canvas, startX, startY);
 		}
 	}
@@ -107,6 +118,13 @@ public class GameCanvas extends View {
 		final int numberOfCols = gameActivity.getMinesweeperGame().getCols();
 
 		boolean haveDrawnARow = false;
+
+		try {
+			visibleBoard = gameActivity.getBoard();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		for (int i = 0; i < numberOfRows; ++i) {
 			boolean haveDrawnACell = false;
 			for (int j = 0; j < numberOfCols; ++j) {
@@ -121,7 +139,7 @@ public class GameCanvas extends View {
 				haveDrawnACell = true;
 				haveDrawnARow = true;
 				try {
-					drawCell(canvas, gameActivity.getBoard()[i][j], gameActivity.getMinesweeperGame().getCell(i, j), i, j, startX, startY, (gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol()));
+					drawCell(canvas, visibleBoard[i][j], gameActivity.getMinesweeperGame().getCell(i, j), i, j, startX, startY, (gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

@@ -207,8 +207,8 @@ public class Test {
 	public static void performTestsWithBigIntSolverForLargerGrids(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int rows = MyMath.getRand(10, 30);
-			int cols = MyMath.getRand(10, 30);
+			final int rows = MyMath.getRand(10, 30);
+			final int cols = MyMath.getRand(10, 30);
 			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
@@ -277,8 +277,8 @@ public class Test {
 	public static void performTestsForMineProbability(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int rows = MyMath.getRand(3, 8);
-			int cols = MyMath.getRand(3, 40 / rows);
+			final int rows = MyMath.getRand(3, 8);
+			final int cols = MyMath.getRand(3, 40 / rows);
 			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
@@ -356,8 +356,8 @@ public class Test {
 	public static void performTestsForGaussSolver(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int rows = MyMath.getRand(3, 15);
-			int cols = MyMath.getRand(3, 15);
+			final int rows = MyMath.getRand(3, 15);
+			final int cols = MyMath.getRand(3, 15);
 			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
@@ -435,8 +435,8 @@ public class Test {
 	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			int rows = MyMath.getRand(3, 8);
-			int cols = MyMath.getRand(3, 40 / rows);
+			final int rows = MyMath.getRand(3, 8);
+			final int cols = MyMath.getRand(3, 40 / rows);
 			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
@@ -483,19 +483,27 @@ public class Test {
 	//TODO: modify this to include boards with an 8
 	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.println("hi1");
+			System.out.println("hi2");
+			System.out.println("hi3");
 			System.out.print("test number: " + testID);
 
-			//rows = MyMath.getRand(5, 30);
-			//cols = MyMath.getRand(5, 30);
-			//mines = MyMath.getRand(2, 300);
-			int rows = MyMath.getRand(5, 15);
-			int cols = MyMath.getRand(5, 15);
-			int mines = MyMath.getRand(2, 75);
+			final int rows = MyMath.getRand(5, 30);
+			final int cols = MyMath.getRand(5, 30);
+			int mines = MyMath.getRand(2, 300);
+
+			//final int rows = MyMath.getRand(5, 15);
+			//final int cols = MyMath.getRand(5, 15);
+			//final int mines = MyMath.getRand(2, 75);
 			mines = Math.min(mines, rows * cols - 9);
 			mines = Math.min(mines, (int) (rows * cols * 0.4f));
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.print(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
+
+			System.out.println("hi4");
+			System.out.println("hi5");
+			System.out.println("hi6");
 
 			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
 
@@ -515,6 +523,7 @@ public class Test {
 			while (!game.getIsGameLost() && !game.getIsGameWon()) {
 				ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard);
 				solver.solvePosition(visibleBoard, mines);
+				game.updateLogicalStuff(visibleBoard);
 
 				if (!CreateSolvableBoard.isLogicalFree(visibleBoard)) {
 					System.out.println("no logical frees, failed test");

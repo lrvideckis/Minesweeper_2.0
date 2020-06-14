@@ -14,6 +14,44 @@ public interface MinesweeperSolver {
 			reset();
 		}
 
+		public boolean isNonLogicalStuffEqual(VisibleTile other) {
+			if (isVisible != other.isVisible) {
+				System.out.println("visible doesn't match");
+			}
+			if (numberSurroundingMines != other.numberSurroundingMines) {
+				System.out.println("numberSurroundingMines doesn't match");
+			}
+			return isVisible == other.isVisible &&
+					numberSurroundingMines == other.numberSurroundingMines;
+		}
+
+		public boolean isEverythingEqual(VisibleTile other) {
+			if (isVisible != other.isVisible) {
+				System.out.println("visible doesn't match");
+			}
+			if (isLogicalMine != other.isLogicalMine) {
+				System.out.println("isLogicalMine doesn't match");
+			}
+			if (isLogicalFree != other.isLogicalFree) {
+				System.out.println("isLogicalFree doesn't match");
+			}
+			if (numberSurroundingMines != other.numberSurroundingMines) {
+				System.out.println("numberSurroundingMines doesn't match, visibility: " + isVisible);
+			}
+			if (!numberOfMineConfigs.equals(other.numberOfMineConfigs)) {
+				System.out.println("numberOfMineConfigs doesn't match");
+			}
+			if (!numberOfTotalConfigs.equals(other.numberOfTotalConfigs)) {
+				System.out.println("numberOfTotalConfigs doesn't match");
+			}
+			return isVisible == other.isVisible &&
+					isLogicalMine == other.isLogicalMine &&
+					isLogicalFree == other.isLogicalFree &&
+					numberSurroundingMines == other.numberSurroundingMines &&
+					numberOfMineConfigs.equals(other.numberOfMineConfigs) &&
+					numberOfTotalConfigs.equals(other.numberOfTotalConfigs);
+		}
+
 		private void reset() {
 			isLogicalFree = isLogicalMine = isVisible = false;
 			numberSurroundingMines = 0;
@@ -52,9 +90,25 @@ public interface MinesweeperSolver {
 		public void updateVisibilityAndSurroundingMines(MinesweeperGame.Tile tile) {
 			reset();
 			isVisible = tile.isVisible;
-			if (isVisible) {
-				numberSurroundingMines = tile.numberSurroundingMines;
+			numberSurroundingMines = tile.numberSurroundingMines;
+		}
+
+		public void updateVisibilitySurroundingMinesAndLogicalStuff(MinesweeperGame.Tile tile) throws Exception {
+			if (tile.isLogicalFree && tile.isLogicalMine) {
+				throw new Exception("tile can't be both logical free and mine");
 			}
+			if (tile.isVisible) {
+				if (tile.isLogicalFree || tile.isLogicalMine) {
+					throw new Exception("visible tiles can't be logical stuff");
+				}
+			}
+			reset();
+			isVisible = tile.isVisible;
+			numberSurroundingMines = tile.numberSurroundingMines;
+			isLogicalMine = tile.isLogicalMine;
+			isLogicalFree = tile.isLogicalFree;
+			numberOfMineConfigs.setValue(tile.numberOfMineConfigs);
+			numberOfTotalConfigs.setValue(tile.numberOfTotalConfigs);
 		}
 
 		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) {

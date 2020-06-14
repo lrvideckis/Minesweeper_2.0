@@ -10,5 +10,4 @@ public interface BacktrackingSolver extends MinesweeperSolver {
 	) throws Exception;
 
 	int getNumberOfIterations();
-
 }

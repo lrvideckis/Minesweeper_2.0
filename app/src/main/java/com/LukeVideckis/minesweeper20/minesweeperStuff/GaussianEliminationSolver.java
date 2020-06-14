@@ -44,9 +44,6 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				if (cell.isLogicalMine && cell.isLogicalFree) {
 					throw new Exception("cell can't be both logical mine and free");
 				}
-				if (!cell.getIsVisible() && cell.getNumberSurroundingMines() > 0) {
-					throw new Exception("non-visible cells should have 0 surrounding mines, but it doesn't");
-				}
 				newSurroundingMineCounts[i][j] = cell.getNumberSurroundingMines();
 				hiddenNodeToId[i][j] = -1;
 			}

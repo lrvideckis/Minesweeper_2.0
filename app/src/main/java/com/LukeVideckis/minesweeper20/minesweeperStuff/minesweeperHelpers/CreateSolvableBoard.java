@@ -13,7 +13,7 @@ import static com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperSolver.
 
 public class CreateSolvableBoard {
 	//TODO: change this back to something smaller
-	private static final int maxIterationsToFindBoard = 500000000;
+	private static final int maxIterationsToFindBoard = 200000000;
 	private final BacktrackingSolver myBacktrackingSolver;
 	private final MinesweeperSolver gaussSolver;
 	private final VisibleTile[][] board;
@@ -172,38 +172,12 @@ public class CreateSolvableBoard {
 				/*try to deduce free squares with gauss solver first. Gaussian Elimination has the
 				 * possibility of not finding deducible free squares, even if they exist.
 				 */
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+				ConvertGameBoardFormat.convertToExistingBoardAndKeepLogicalStuff(minesweeperGame, board);
 				long startTime = System.currentTimeMillis();
 				gaussSolver.solvePosition(board, mines);
+				minesweeperGame.updateLogicalStuff(board);
+
 				totalTimeGauss += System.currentTimeMillis() - startTime;
-
-				/* if there are any deducible free squares, click them, and continue on
-				 */
-				if (isLogicalFree(board)) {
-					numberOfTriesShufflingInterestingMines = 0;
-					for (int i = 0; i < rows; ++i) {
-						for (int j = 0; j < cols; ++j) {
-							if (board[i][j].getIsLogicalFree()) {
-								minesweeperGame.clickCell(i, j, false);
-							}
-						}
-					}
-					continue;
-				}
-
-				/* then try to deduce free squares with backtracking solver (if there are any free
-				 * squares, this will find them)
-				 */
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-				try {
-					startTime = System.currentTimeMillis();
-					myBacktrackingSolver.solvePosition(board, mines);
-					totalTimeBacktracking += System.currentTimeMillis() - startTime;
-				} catch (HitIterationLimitException ignored) {
-					//TODO: think about starting over, instead of just quitting
-					break;
-				}
-				totalIterationsSoFar += myBacktrackingSolver.getNumberOfIterations();
 
 				/* if there are any deducible free squares, click them, and continue on
 				 */
@@ -237,11 +211,13 @@ public class CreateSolvableBoard {
 				/* First try rearranging mines adjacent to visible clues
 				 */
 
-				if (numberOfTriesShufflingInterestingMines < 5) {
+				/*
+				if (numberOfTriesShufflingInterestingMines < 2) {
 					++numberOfTriesShufflingInterestingMines;
 					minesweeperGame.shuffleInterestingMines(board);
 					continue;
 				}
+				 */
 
 				/* Shuffling interesting mines failed 5 times in a row, we need to do something more
 				 * extreme. Now we'll try removing 1 interesting mine, and making it an away mine
@@ -254,10 +230,10 @@ public class CreateSolvableBoard {
 				} catch (NoInterestingMinesException | NoAwayCellsToMoveAMineToException ignored) {
 					break;
 				}
-
 			}
 			if (minesweeperGame.getIsGameWon()) {
 				System.out.println(" here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
+				System.out.println("total iterations: " + totalIterationsSoFar);
 				return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
 			}
 		}
