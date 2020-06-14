@@ -180,7 +180,6 @@ public class CreateSolvableBoard {
 				/* if there are any deducible free squares, click them, and continue on
 				 */
 				if (isLogicalFree(board)) {
-					//System.out.println("gauss solver found free cell(s)");
 					numberOfTriesShufflingInterestingMines = 0;
 					for (int i = 0; i < rows; ++i) {
 						for (int j = 0; j < cols; ++j) {
@@ -258,7 +257,7 @@ public class CreateSolvableBoard {
 
 			}
 			if (minesweeperGame.getIsGameWon()) {
-				System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
+				System.out.println(" here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
 				return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
 			}
 		}

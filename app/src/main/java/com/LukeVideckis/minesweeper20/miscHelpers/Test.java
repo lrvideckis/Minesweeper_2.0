@@ -483,7 +483,7 @@ public class Test {
 	//TODO: modify this to include boards with an 8
 	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
-			System.out.println("test number: " + testID);
+			System.out.print("test number: " + testID);
 
 			//rows = MyMath.getRand(5, 30);
 			//cols = MyMath.getRand(5, 30);
@@ -494,8 +494,8 @@ public class Test {
 			mines = Math.min(mines, rows * cols - 9);
 			mines = Math.min(mines, (int) (rows * cols * 0.4f));
 
-			System.out.println("rows, cols, mines: " + rows + " " + cols + " " + mines);
-			System.out.println("percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
+			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
+			System.out.print(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
 
 			MyBacktrackingSolver solver = new MyBacktrackingSolver(rows, cols);
 
@@ -505,7 +505,7 @@ public class Test {
 			MinesweeperGame game;
 			long startTime = System.currentTimeMillis();
 			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, false);
-			System.out.println("time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
+			System.out.println(" time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
 			VisibleTile[][] visibleBoard = new VisibleTile[rows][cols];
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {
