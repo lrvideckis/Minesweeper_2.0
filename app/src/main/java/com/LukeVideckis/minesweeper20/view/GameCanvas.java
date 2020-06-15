@@ -96,6 +96,7 @@ public class GameCanvas extends View {
 			} else if (solverCell.getIsLogicalFree() && (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn())) {
 				drawCellHelpers.drawBlackX(canvas, startX, startY);
 			}
+			//} else if (gameCell.isMine() && (gameActivity.getMinesweeperGame().getIsGameLost() || !displayedLogicalStuff)) {
 		} else if (gameCell.isMine() && gameActivity.getMinesweeperGame().getIsGameLost()) {
 			drawCellHelpers.drawMine(canvas, startX, startY);
 		}

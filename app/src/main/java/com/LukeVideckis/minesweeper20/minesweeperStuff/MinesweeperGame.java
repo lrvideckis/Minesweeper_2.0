@@ -192,7 +192,7 @@ public class MinesweeperGame {
 			return;
 		}
 		for (int[] adjCells : GetAdjacentCells.getAdjacentCells(row, col, rows, cols)) {
-			final int adjI = adjCells[0], adjJ = adjCells[0];
+			final int adjI = adjCells[0], adjJ = adjCells[1];
 			Tile adj = getCell(adjI, adjJ);
 			if (adj.isMine) {
 				continue;
@@ -331,30 +331,8 @@ public class MinesweeperGame {
 		}
 	}
 
-	public void shuffleAwayMines() {
-		int numberOfAwayMines = 0;
-		ArrayList<Pair<Integer, Integer>> allAwayCells = new ArrayList<>();
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (!AwayCell.isAwayCell(this, i, j) ||
-						(hasAn8 && Math.abs(i - rowWith8) <= 1 && Math.abs(j - colWith8) <= 1)
-				) {
-					continue;
-				}
-				if (getCell(i, j).isMine()) {
-					++numberOfAwayMines;
-					changeMineStatus(i, j, false);
-
-				}
-				allAwayCells.add(new Pair<>(i, j));
-			}
-		}
-		Collections.shuffle(allAwayCells);
-		for (int pos = 0; pos < numberOfAwayMines; ++pos) {
-			final int i = allAwayCells.get(pos).first;
-			final int j = allAwayCells.get(pos).second;
-			changeMineStatus(i, j, true);
-		}
+	private boolean notPartOfThe8(int i, int j) {
+		return !(hasAn8 && Math.abs(i - rowWith8) <= 1 && Math.abs(j - colWith8) <= 1);
 	}
 
 	private boolean isInterestingCell(int i, int j) {
@@ -364,7 +342,7 @@ public class MinesweeperGame {
 		if (AwayCell.isAwayCell(this, i, j)) {
 			return false;
 		}
-		return !hasAn8 || Math.abs(i - rowWith8) > 1 || Math.abs(j - colWith8) > 1;
+		return notPartOfThe8(i, j);
 	}
 
 	//interesting mines are mines which are adjacent to a visible clue
@@ -410,7 +388,10 @@ public class MinesweeperGame {
 					}
 					interestingSpots.add(new Pair<>(i, j));
 				}
-				if (AwayCell.isAwayCell(this, i, j) && !getCell(i, j).isMine) {
+				if (AwayCell.isAwayCell(this, i, j) &&
+						!getCell(i, j).isMine &&
+						notPartOfThe8(i, j)
+				) {
 					freeAwayCells.add(new Pair<>(i, j));
 				}
 			}

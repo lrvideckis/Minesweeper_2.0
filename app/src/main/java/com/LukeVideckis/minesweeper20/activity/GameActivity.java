@@ -199,8 +199,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void updateSolvedBoardWithBacktrackingSolver() throws Exception {
 		//TODO: only run solver if board has changed since last time
-		//TODO: change this to convert with logical stuff
-		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
+		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, false);
 		try {
 			holyGrailSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
 		} catch (HitIterationLimitException e) {
@@ -227,7 +226,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Button okButton = solverHitLimitPopup.getContentView().findViewById(R.id.solverHitLimitOkButton);
 		okButton.setOnClickListener(view -> solverHitLimitPopup.dismiss());
 		TextView textView = solverHitLimitPopup.getContentView().findViewById(R.id.iterationLimitText);
-		String text = "Backtracking solver took more than ";
+		String text = "Solver took more than ";
 		text += NumberFormat.getNumberInstance(Locale.US).format(MyBacktrackingSolver.iterationLimit);
 		text += " iterations. Hints and mine probability are currently not available.";
 		textView.setText(text);
@@ -348,11 +347,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	public MinesweeperSolver.VisibleTile[][] getBoard() throws Exception {
-		if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
-			ConvertGameBoardFormat.convertToExistingBoardAndKeepLogicalStuff(minesweeperGame, board);
-		} else {
-			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board);
-		}
+		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, (toggleBacktrackingHintsOn || toggleMineProbabilityOn));
 		return board;
 	}
 
