@@ -199,8 +199,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public void updateSolvedBoardWithBacktrackingSolver() throws Exception {
 		//TODO: only run solver if board has changed since last time
-		//TODO: change this to convert with logical stuff
-		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, true);
+		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, false);
 		try {
 			holyGrailSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
 		} catch (HitIterationLimitException e) {

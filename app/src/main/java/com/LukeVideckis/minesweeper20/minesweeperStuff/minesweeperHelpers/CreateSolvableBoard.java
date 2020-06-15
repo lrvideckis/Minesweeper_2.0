@@ -144,8 +144,6 @@ public class CreateSolvableBoard {
 
 		while (totalIterationsSoFar < maxIterationsToFindBoard) {
 
-			System.out.println("here starting new board attempt");
-
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			if (hasAn8) {
