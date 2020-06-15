@@ -124,7 +124,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
 				try {
 					minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8);
-				} catch (HitIterationLimitException e) {
+				} catch (HitIterationLimitException ignored) {
 					displayNoGuessBoardPopup();
 				}
 			}

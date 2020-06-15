@@ -78,6 +78,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				if (board[i][j].getIsVisible() && (board[i][j].getIsLogicalMine() || board[i][j].getIsLogicalFree())) {
 					throw new Exception("visible cells can't be logical frees/mines");
 				}
+				if (board[i][j].getIsLogicalMine() && board[i][j].getIsLogicalFree()) {
+					throw new Exception("cell can't be both logical free and logical mine");
+				}
 				if (board[i][j].getIsLogicalMine()) {
 					if (!AwayCell.isAwayCell(board, i, j, rows, cols)) {
 						--numberOfMines;
@@ -85,6 +88,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					board[i][j].numberOfMineConfigs.setValues(1, 1);
 					board[i][j].numberOfTotalConfigs.setValues(1, 1);
 				} else if (board[i][j].getIsLogicalFree()) {
+					board[i][j].numberOfMineConfigs.setValues(0, 1);
+					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+				} else {
 					board[i][j].numberOfMineConfigs.setValues(0, 1);
 					board[i][j].numberOfTotalConfigs.setValues(1, 1);
 				}
@@ -164,7 +170,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					curr.numberOfTotalConfigs.setValues(1, 1);
 				}
 				if (curr.getIsVisible() && !curr.numberOfMineConfigs.equals(0)) {
-					throw new Exception("found a visible with non-zero number of mine configurations");
+					throw new Exception("found a visible cell with non-zero number of mine configurations");
 				}
 				if (curr.getIsLogicalMine()) {
 					if (!curr.numberOfMineConfigs.equals(1) ||

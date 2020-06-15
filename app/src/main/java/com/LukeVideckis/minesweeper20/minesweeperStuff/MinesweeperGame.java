@@ -345,13 +345,22 @@ public class MinesweeperGame {
 		return notPartOfThe8(i, j);
 	}
 
+	private void resetLogicalStuff(int i, int j) throws Exception {
+		getCell(i, j).isLogicalFree = false;
+		getCell(i, j).isLogicalMine = false;
+		getCell(i, j).numberOfMineConfigs.setValues(0, 1);
+		getCell(i, j).numberOfTotalConfigs.setValues(1, 1);
+	}
+
 	//interesting mines are mines which are adjacent to a visible clue
 	public void shuffleInterestingMines(VisibleTile[][] visibleBoard) throws Exception {
 		int numberInterestingMines = 0;
 		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
+				//TODO: think about changing this to include mines next to away cells instead of known mines
 				if (isInterestingCell(i, j) && !visibleBoard[i][j].isLogicalMine) {
+					resetLogicalStuff(i, j);
 					if (getCell(i, j).isMine) {
 						++numberInterestingMines;
 						changeMineStatus(i, j, false);
@@ -493,6 +502,15 @@ public class MinesweeperGame {
 						throw new Exception("visible cells can't be logical");
 					}
 				}
+				if (visibleBoard[i][j].isLogicalFree && visibleBoard[i][j].isLogicalMine) {
+					throw new Exception("cell can't be both logical free and logical mine");
+				}
+				if (visibleBoard[i][j].isLogicalMine && !getCell(i, j).isMine) {
+					throw new Exception("logical mine which isn't a mine");
+				}
+				if (visibleBoard[i][j].isLogicalFree && getCell(i, j).isMine) {
+					throw new Exception("logical free which is a mine");
+				}
 				getCell(i, j).isLogicalFree = visibleBoard[i][j].isLogicalFree;
 				getCell(i, j).isLogicalMine = visibleBoard[i][j].isLogicalMine;
 				getCell(i, j).numberOfMineConfigs.setValue(visibleBoard[i][j].numberOfMineConfigs);
@@ -572,6 +590,8 @@ public class MinesweeperGame {
 			isVisible = true;
 			isFlagged = false;
 			isLogicalFree = false;
+			numberOfMineConfigs.setValues(0, 1);
+			numberOfTotalConfigs.setValues(1, 1);
 			if (isMine) {
 				throw new Exception("can't reveal a mine");
 			}
