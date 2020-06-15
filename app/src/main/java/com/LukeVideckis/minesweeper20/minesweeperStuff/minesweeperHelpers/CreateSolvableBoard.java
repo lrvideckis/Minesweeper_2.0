@@ -36,7 +36,7 @@ public class CreateSolvableBoard {
 	}
 
 	@SuppressWarnings("unused")
-	private static void printBoardDebug(VisibleTile[][] board) {
+	public static void printBoardDebug(VisibleTile[][] board) {
 		System.out.println("visible board is:");
 		for (VisibleTile[] visibleTiles : board) {
 			for (VisibleTile visibleTile : visibleTiles) {
@@ -60,7 +60,7 @@ public class CreateSolvableBoard {
 	}
 
 	@SuppressWarnings("unused")
-	private static void printBoardDebugMines(MinesweeperGame game) {
+	public static void printBoardDebugMines(MinesweeperGame game) {
 		System.out.println("\nmines: " + game.getNumberOfMines());
 		System.out.println("board and mines are:");
 		for (int i = 0; i < game.getRows(); ++i) {

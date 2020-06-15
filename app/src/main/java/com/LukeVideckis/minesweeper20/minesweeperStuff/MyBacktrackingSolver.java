@@ -79,7 +79,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					throw new Exception("visible cells can't be logical frees/mines");
 				}
 				if (board[i][j].getIsLogicalMine()) {
-					--numberOfMines;
+					if (!AwayCell.isAwayCell(board, i, j, rows, cols)) {
+						--numberOfMines;
+					}
 					board[i][j].numberOfMineConfigs.setValues(1, 1);
 					board[i][j].numberOfTotalConfigs.setValues(1, 1);
 				} else if (board[i][j].getIsLogicalFree()) {

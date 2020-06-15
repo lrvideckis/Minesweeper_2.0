@@ -8,6 +8,7 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolverWithBig
 import com.LukeVideckis.minesweeper20.minesweeperStuff.GaussianEliminationSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.MinesweeperGame;
+import com.LukeVideckis.minesweeper20.minesweeperStuff.MyBacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.SlowBacktrackingSolver;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.AwayCell;
@@ -25,6 +26,15 @@ public class Test {
 	@SuppressWarnings("SpellCheckingInspection")
 
 	private final static String[][] previousFailedBoards = {
+			//board where gauss solver determines away cells as mines
+			{
+					"UUUUU",
+					"235UU",
+					"..3UU",
+					"..2UU",
+
+					"11"
+			},
 
 			//gauss solver says a cell is both a logical mine, and logical free
 			{
@@ -362,8 +372,8 @@ public class Test {
 			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
-			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
-			holyGrailSolver.doPerformCheckPositionValidity();
+			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
+			myBacktrackingSolver.doPerformCheckPositionValidity();
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -381,7 +391,12 @@ public class Test {
 			VisibleTile[][] boardBacktracking = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 			VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 
-			holyGrailSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
+			try {
+				myBacktrackingSolver.solvePosition(boardBacktracking, minesweeperGame.getNumberOfMines());
+			} catch (HitIterationLimitException ignored) {
+				System.out.println("backtracking solver hit iteration limit, void test");
+				continue;
+			}
 			gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
 			if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardBacktracking, boardGauss)) {
 				return;

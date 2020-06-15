@@ -10,9 +10,9 @@ import com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers.MyMath
 import java.util.ArrayList;
 import java.util.Arrays;
 
-//TODO: make this account for number of mines (by adding a single row: 1,1,1,1,..., #mines) to the matrix
 public class GaussianEliminationSolver implements MinesweeperSolver {
 
+	private static final int maxAwayCellsToIncludeThem = 10;
 	private final int rows, cols;
 	private final int[][] hiddenNodeToId, idToHiddenNode, newSurroundingMineCounts;
 
@@ -32,17 +32,21 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 		}
 
 		//noinspection StatementWithEmptyBody
-		while (runGaussSolverOnce(board))
+		while (runGaussSolverOnce(board, numberOfMines))
 			;
 	}
 
 	//returns true if extra stuff is found
-	private boolean runGaussSolverOnce(VisibleTile[][] board) throws Exception {
+	private boolean runGaussSolverOnce(VisibleTile[][] board, int numberOfMines) throws Exception {
+		final boolean includeAwayCells = (AwayCell.getNumberOfAwayCells(board) <= maxAwayCellsToIncludeThem);
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				final VisibleTile cell = board[i][j];
 				if (cell.isLogicalMine && cell.isLogicalFree) {
 					throw new Exception("cell can't be both logical mine and free");
+				}
+				if (cell.getIsLogicalMine()) {
+					--numberOfMines;
 				}
 				newSurroundingMineCounts[i][j] = cell.getNumberSurroundingMines();
 				hiddenNodeToId[i][j] = -1;
@@ -72,7 +76,7 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 					}
 					continue;
 				}
-				if (AwayCell.isAwayCell(board, i, j, rows, cols)) {
+				if (AwayCell.isAwayCell(board, i, j, rows, cols) && !includeAwayCells) {
 					continue;
 				}
 				if (cell.isLogicalFree || cell.isLogicalMine) {
@@ -83,6 +87,9 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				idToHiddenNode[numberOfHiddenNodes][1] = j;
 				numberOfHiddenNodes++;
 			}
+		}
+		if (includeAwayCells) {
+			++numberOfClues;
 		}
 
 		double[][] matrix = new double[numberOfClues][numberOfHiddenNodes + 1];
@@ -100,6 +107,16 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 				matrix[currentClue][hiddenNodeToId[adjI][adjJ]] = 1;
 			}
 			matrix[currentClue][numberOfHiddenNodes] = newSurroundingMineCounts[i][j];
+		}
+
+		if (includeAwayCells) {
+			if (clueSpots.size() != numberOfClues - 1) {
+				throw new Exception("wrong number of clues");
+			}
+			for (int j = 0; j < numberOfHiddenNodes; ++j) {
+				matrix[numberOfClues - 1][j] = 1;
+			}
+			matrix[numberOfClues - 1][numberOfHiddenNodes] = numberOfMines;
 		}
 
 		MyMath.performGaussianElimination(matrix);
