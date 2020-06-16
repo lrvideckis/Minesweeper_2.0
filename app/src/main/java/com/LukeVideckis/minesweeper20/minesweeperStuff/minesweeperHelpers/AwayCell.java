@@ -47,4 +47,14 @@ public class AwayCell {
 		}
 		return true;
 	}
+
+	public static boolean isNextToAnAwayCell(MinesweeperSolver.VisibleTile[][] board, int row, int col, int rows, int cols) {
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, rows, cols)) {
+			final int adjI = adj[0], adjJ = adj[1];
+			if (isAwayCell(board, adjI, adjJ, rows, cols)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

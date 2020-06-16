@@ -624,4 +624,47 @@ public class Test {
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
+
+	public static void CompareTimeOfSolvers(int numberOfTests) throws Exception {
+
+		long[][] times = new long[numberOfTests][2];
+		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.print("test number: " + testID);
+
+			final int rows = 16;
+			final int cols = 30;
+			final int mines = 170;//about 35% mines
+
+			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
+
+			long startTime = System.currentTimeMillis();
+			try {
+				boardGen.getSolvableBoard(10, 10, false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			long timeFirst = System.currentTimeMillis() - startTime;
+
+
+			boardGen = new CreateSolvableBoard(rows, cols, mines);
+
+			startTime = System.currentTimeMillis();
+			try {
+				boardGen.getSolvableBoardSlow(10, 10, false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			long timeSecond = System.currentTimeMillis() - startTime;
+
+			times[testID - 1][0] = timeFirst;
+			times[testID - 1][1] = timeSecond;
+		}
+		long totalFirst = 0, totalSecond = 0;
+		for (long[] time : times) {
+			System.out.println("first, second: " + time[0] + " " + time[1]);
+			totalFirst += time[0];
+			totalSecond += time[1];
+		}
+		System.out.println("average first, second: " + totalFirst / numberOfTests + " " + totalSecond / numberOfTests);
+	}
 }

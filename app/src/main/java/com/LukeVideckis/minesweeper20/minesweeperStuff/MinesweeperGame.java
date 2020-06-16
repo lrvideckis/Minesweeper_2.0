@@ -358,14 +358,14 @@ public class MinesweeperGame {
 		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				//TODO: think about changing this to include mines next to away cells instead of known mines
-				if (isInterestingCell(i, j) && !visibleBoard[i][j].isLogicalMine) {
+				if (isInterestingCell(i, j) && AwayCell.isNextToAnAwayCell(visibleBoard, i, j, rows, cols)) {
 					resetLogicalStuff(i, j);
 					if (getCell(i, j).isMine) {
 						++numberInterestingMines;
 						changeMineStatus(i, j, false);
 					}
 					interestingSpots.add(new Pair<>(i, j));
+					resetLogicalStuff(i, j);
 				}
 			}
 		}
@@ -390,12 +390,14 @@ public class MinesweeperGame {
 		ArrayList<Pair<Integer, Integer>> freeAwayCells = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (isInterestingCell(i, j) && !visibleBoard[i][j].isLogicalMine) {
+				//if (isInterestingCell(i, j) && !visibleBoard[i][j].isLogicalMine) {
+				if (isInterestingCell(i, j) && AwayCell.isNextToAnAwayCell(visibleBoard, i, j, rows, cols)) {
 					if (getCell(i, j).isMine) {
 						++interestingMines;
 						changeMineStatus(i, j, false);
 					}
 					interestingSpots.add(new Pair<>(i, j));
+					resetLogicalStuff(i, j);
 				}
 				if (AwayCell.isAwayCell(this, i, j) &&
 						!getCell(i, j).isMine &&
