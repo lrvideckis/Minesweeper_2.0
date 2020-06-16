@@ -26,16 +26,16 @@ import com.LukeVideckis.minesweeper20.miscHelpers.PopupHelper;
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
 	public static final int rowsColsMax = 30, rowsColsMin = 8;
-
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
 			NUMBER_OF_ROWS = "numRows",
 			NUMBER_OF_COLS = "numCols",
 			NUMBER_OF_MINES = "numMines",
 			GAME_MODE = "gameMode";
+	private static final float maxMinePercentage = 0.4f, maxMinePercentageWith8 = 0.3f;
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup;
-	private int minesMin = 0;
+	private int minesMin = 0, minesMax = 8 * 9 - 10, gameMode;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -96,22 +96,19 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 9);
 		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 9);
 		final int previousMines = sharedPreferences.getInt(NUMBER_OF_MINES, 10);
-		final int gameMode = sharedPreferences.getInt(GAME_MODE, R.id.normal_mode);
+		gameMode = sharedPreferences.getInt(GAME_MODE, R.id.normal_mode);
 
 		rowsInput.setProgress(previousRows);
 		colsInput.setProgress(previousCols);
 		minesInput.setProgress(previousMines);
-		if (gameMode == R.id.normal_mode) {
-			normalMode.setChecked(true);
-		} else if (gameMode == R.id.no_guessing_mode) {
+		if (gameMode == R.id.no_guessing_mode) {
 			noGuessingMode.setChecked(true);
 		} else if (gameMode == R.id.noGuessingModeWithAn8) {
 			noGuessingModeWith8.setChecked(true);
-			minesInput.setMin(8);
-			minesMin = 8;
-		} else {
+		} else {//default is normal mode
 			normalMode.setChecked(true);
 		}
+		setMinesMinMaxAndText(previousRows, previousCols);
 
 		Button startNewGameButton = findViewById(R.id.startNewGameButton);
 		startNewGameButton.setOnClickListener(new startNewGameButtonListener(rowsInput, colsInput, minesInput));
@@ -153,17 +150,20 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+		final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress();
+		final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress();
+
 		switch (seekBar.getId()) {
 			case R.id.rowsInput:
 				setRowsText(seekBar.getProgress());
+				setMinesMinMaxAndText(seekBar.getProgress(), cols);
 				break;
 			case R.id.colsInput:
 				setColsText(seekBar.getProgress());
+				setMinesMinMaxAndText(rows, seekBar.getProgress());
 				break;
 			case R.id.mineInput:
-				final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress();
-				final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress();
-				setMinesText(rows, cols, seekBar.getProgress());
+				setMinesMinMaxAndText(rows, cols);
 				break;
 		}
 	}
@@ -172,30 +172,38 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		TextView rowsText = findViewById(R.id.rowsText);
 		String text = "Height: " + val;
 		rowsText.setText(text);
-		setMaxMineSeekBar();
 	}
 
 	private void setColsText(int val) {
 		TextView colsText = findViewById(R.id.colsText);
 		String text = "Width: " + val;
 		colsText.setText(text);
-		setMaxMineSeekBar();
 	}
 
-	private void setMinesText(int rows, int cols, int mines) {
+	private void setMinesMinMaxAndText(int rows, int cols) {
+		if (gameMode == R.id.no_guessing_mode) {
+			minesMin = 0;
+			minesMax = (int) (rows * cols * maxMinePercentage);
+		} else if (gameMode == R.id.noGuessingModeWithAn8) {
+			minesMin = 8;
+			minesMax = (int) (rows * cols * maxMinePercentageWith8);
+		} else {
+			minesMin = 0;
+			minesMax = rows * cols - 10;
+		}
+		SeekBar minesInput = findViewById(R.id.mineInput);
+		minesInput.setMin(minesMin);
+		minesInput.setMax(minesMax);
+
+		final int mines = minesInput.getProgress();
+
+		//update text
 		TextView minesText = findViewById(R.id.mineText);
 		String text = "Mines: " + mines + '\n';
 		double minePercentage = 100 * mines / (double) (rows * cols);
 		text += String.format(getResources().getString(R.string.two_decimal_places), minePercentage);
 		text += '%';
 		minesText.setText(text);
-	}
-
-	private void setMaxMineSeekBar() {
-		final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress();
-		final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress();
-		SeekBar minesInput = findViewById(R.id.mineInput);
-		minesInput.setMax(rows * cols - 10);
 	}
 
 	@Override
@@ -222,25 +230,26 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				noGuessingMode.setChecked(false);
 				RadioButton noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
 				noGuessingModeWith8.setChecked(false);
-				minesInput.setMin(0);
-				minesMin = 0;
+				gameMode = R.id.normal_mode;
+				setMinesMinMaxAndText(rows, cols);
 				break;
 			case R.id.no_guessing_mode:
 				RadioButton normalMode = findViewById(R.id.normal_mode);
 				normalMode.setChecked(false);
 				noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
 				noGuessingModeWith8.setChecked(false);
-				minesInput.setMin(0);
-				minesMin = 0;
+				gameMode = R.id.no_guessing_mode;
+				setMinesMinMaxAndText(rows, cols);
 				break;
 			case R.id.noGuessingModeWithAn8:
 				normalMode = findViewById(R.id.normal_mode);
 				normalMode.setChecked(false);
 				noGuessingMode = findViewById(R.id.no_guessing_mode);
 				noGuessingMode.setChecked(false);
-				minesInput.setMin(8);
-				minesMin = 8;
+				gameMode = R.id.noGuessingModeWithAn8;
+				setMinesMinMaxAndText(rows, cols);
 				break;
+
 			case R.id.normal_mode_info:
 				displayNormalModeInfoPopup();
 				break;
@@ -251,40 +260,37 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				displayNoGuessingWith8ModeInfoPopup();
 				break;
 
-
 			case R.id.rowsDecrement:
 				rows = Math.max(rowsColsMin, rows - 1);
 				rowsInput.setProgress(rows);
 				setRowsText(rows);
-				setMinesText(rows, cols, mines);
+				setMinesMinMaxAndText(rows, cols);
 				break;
 			case R.id.rowsIncrement:
 				rows = Math.min(rowsColsMax, rows + 1);
 				rowsInput.setProgress(rows);
 				setRowsText(rows);
-				setMinesText(rows, cols, mines);
+				setMinesMinMaxAndText(rows, cols);
 				break;
 			case R.id.colsDecrement:
 				cols = Math.max(rowsColsMin, cols - 1);
 				colsInput.setProgress(cols);
 				setColsText(cols);
-				setMinesText(rows, cols, mines);
+				setMinesMinMaxAndText(rows, cols);
 				break;
 			case R.id.colsIncrement:
 				cols = Math.min(rowsColsMax, cols + 1);
 				colsInput.setProgress(cols);
 				setColsText(cols);
-				setMinesText(rows, cols, mines);
+				setMinesMinMaxAndText(rows, cols);
 				break;
 			case R.id.minesDecrement:
 				mines = Math.max(minesMin, mines - 1);
 				minesInput.setProgress(mines);
-				setMinesText(rows, cols, mines);
 				break;
 			case R.id.minesIncrement:
-				mines = Math.min(rows * cols - 10, mines + 1);
+				mines = Math.min(minesMax, mines + 1);
 				minesInput.setProgress(mines);
-				setMinesText(rows, cols, mines);
 				break;
 		}
 	}
