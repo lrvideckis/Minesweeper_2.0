@@ -23,6 +23,8 @@ public class CreateSolvableBoard {
 
 	public CreateSolvableBoard(int rows, int cols, int mines) {
 		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
+		//TODO: find a way to change iteration limit to something smaller
+		//MyBacktrackingSolver.iterationLimit = 500;
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
 		board = new VisibleTile[rows][cols];
 		for (int i = 0; i < rows; ++i) {
@@ -173,7 +175,45 @@ public class CreateSolvableBoard {
 					numberOfTriesShufflingInterestingMines = 0;
 					for (int i = 0; i < rows; ++i) {
 						for (int j = 0; j < cols; ++j) {
+							if (board[i][j].getIsLogicalMine() && !minesweeperGame.getCell(i, j).isMine()) {
+								throw new Exception("found a logical mine which is free");
+							}
 							if (board[i][j].getIsLogicalFree()) {
+								if (minesweeperGame.getCell(i, j).isMine()) {
+									throw new Exception("found a logical free which is mine");
+								}
+								minesweeperGame.clickCell(i, j, false);
+							}
+						}
+					}
+					continue;
+				}
+
+				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, true);
+				try {
+					startTime = System.currentTimeMillis();
+					myBacktrackingSolver.solvePosition(board, mines);
+					totalTimeBacktracking += System.currentTimeMillis() - startTime;
+
+					minesweeperGame.updateLogicalStuff(board);
+				} catch (HitIterationLimitException ignored) {
+					totalIterationsSoFar += MyBacktrackingSolver.iterationLimit;
+				}
+
+
+				/* if there are any deducible free squares, click them, and continue on
+				 */
+				if (ExistsLogicalFree.isLogicalFree(board)) {
+					numberOfTriesShufflingInterestingMines = 0;
+					for (int i = 0; i < rows; ++i) {
+						for (int j = 0; j < cols; ++j) {
+							if (board[i][j].getIsLogicalMine() && !minesweeperGame.getCell(i, j).isMine()) {
+								throw new Exception("found a logical mine which is free");
+							}
+							if (board[i][j].getIsLogicalFree()) {
+								if (minesweeperGame.getCell(i, j).isMine()) {
+									throw new Exception("clicking on a logical free which is a mine");
+								}
 								minesweeperGame.clickCell(i, j, false);
 							}
 						}
@@ -199,15 +239,13 @@ public class CreateSolvableBoard {
 				/* First try rearranging mines adjacent to visible clues
 				 */
 
-				/*
-				if (numberOfTriesShufflingInterestingMines < 2) {
+				if (numberOfTriesShufflingInterestingMines < 3) {
 					++numberOfTriesShufflingInterestingMines;
 					minesweeperGame.shuffleInterestingMines(board);
 					continue;
 				}
-				 */
 
-				/* Shuffling interesting mines failed 5 times in a row, we need to do something more
+				/* Shuffling interesting mines failed 3 times in a row, we need to do something more
 				 * extreme. Now we'll try removing 1 interesting mine, and making it an away mine
 				 * (not next to any clue).
 				 */

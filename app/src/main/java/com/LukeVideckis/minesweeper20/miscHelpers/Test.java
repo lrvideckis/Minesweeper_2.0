@@ -495,7 +495,6 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	//TODO: modify this to include boards with an 8
 	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.print("test number: " + testID);
@@ -548,6 +547,78 @@ public class Test {
 			}
 			if (!game.getIsGameWon()) {
 				System.out.println("game is not won, failed test");
+				return;
+			}
+		}
+		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
+	}
+
+	public static void TestThatSolvableBoardsWith8AreSolvable(int numberOfTests) throws Exception {
+		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.print("test number: " + testID);
+
+			//final int rows = MyMath.getRand(5, 30);
+			//final int cols = MyMath.getRand(5, 30);
+			//int mines = MyMath.getRand(2, 300);
+
+			final int rows = MyMath.getRand(8, 15);
+			final int cols = MyMath.getRand(8, 15);
+			int mines = MyMath.getRand(8, 50);
+			mines = Math.min(mines, rows * cols - 9);
+			mines = Math.min(mines, (int) (rows * cols * 0.3f));
+			mines = Math.max(mines, 8);
+
+			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
+			System.out.print(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
+
+			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
+
+			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
+			final int firstClickI = MyMath.getRand(0, rows - 1);
+			final int firstClickJ = MyMath.getRand(0, cols - 1);
+			MinesweeperGame game;
+			long startTime = System.currentTimeMillis();
+			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, true);
+			System.out.println(" time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
+			VisibleTile[][] visibleBoard = new VisibleTile[rows][cols];
+			for (int i = 0; i < rows; ++i) {
+				for (int j = 0; j < cols; ++j) {
+					visibleBoard[i][j] = new VisibleTile();
+				}
+			}
+			while (!game.getIsGameLost() && !game.getIsGameWon()) {
+				ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard, false);
+				solver.solvePosition(visibleBoard, mines);
+				game.updateLogicalStuff(visibleBoard);
+
+				if (!ExistsLogicalFree.isLogicalFree(visibleBoard)) {
+					System.out.println("no logical frees, failed test");
+					return;
+				}
+
+				for (int i = 0; i < rows; ++i) {
+					for (int j = 0; j < cols; ++j) {
+						if (visibleBoard[i][j].getIsLogicalFree()) {
+							game.clickCell(i, j, false);
+						}
+					}
+				}
+			}
+			if (!game.getIsGameWon()) {
+				System.out.println("game is not won, failed test");
+				return;
+			}
+			boolean foundAn8 = false;
+			for (int i = 0; i < rows && !foundAn8; ++i) {
+				for (int j = 0; j < cols; ++j) {
+					if (game.getCell(i, j).getNumberSurroundingMines() == 8) {
+						foundAn8 = true;
+						break;
+					}
+				}
+			}
+			if (!foundAn8) {
+				System.out.println("no 8 found, failed test");
 				return;
 			}
 		}
