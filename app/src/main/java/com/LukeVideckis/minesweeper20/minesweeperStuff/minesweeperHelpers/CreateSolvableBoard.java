@@ -223,7 +223,6 @@ public class CreateSolvableBoard {
 			return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
 		}
 		printBoardDebug(board);
-		System.out.println("asdf");
 		printBoardDebugMines(minesweeperGame);
 
 		throw new Exception("no solution found");
@@ -352,7 +351,6 @@ public class CreateSolvableBoard {
 			return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
 		}
 		printBoardDebug(board);
-		System.out.println("asdf");
 		printBoardDebugMines(minesweeperGame);
 
 		throw new Exception("no solution found");
@@ -438,7 +436,6 @@ public class CreateSolvableBoard {
 		}
 		ConvertGameBoardFormat.convertToExistingBoard(game, board, true);
 		printBoardDebug(board);
-		System.out.println("asdf");
 		printBoardDebugMines(game);
 
 		if (game.getIsGameWon()) {
@@ -448,39 +445,3 @@ public class CreateSolvableBoard {
 		throw new Exception("no solution found");
 	}
 }
-/*
-
-			BB2.1B3BB1..12222323B322222BBB
-			3B31213B43333BB2BBB4BB3BB4B5B4
-			235B2.113BBBB422233B33B5BB45B3
-			2BBB311.3B55B5211121113B43BB3B
-			4B533B113B44BBB11B33224B313331
-			BB22B311B4BB442123BBB3BB422B21
-			2335B3.13B43B2233B3434B4BB44B2
-			23BBB31.2B4322BBB321B3223B3BB4
-			BB6B5B3333BB22333B234B311134BB
-			UUUB43BBB3222B1.12B4BBB1..1B43
-			UUU55B44B2..222..23BB532.124B2
-			UUUBBB3233322B1..1B322B212B5B4
-			UUUUU43B4BBB211..111123B12B5BB
-			UUUUUB33BB642..111..1B43213B42
-			UUUUU5B324BB2113B32344BB113B42
-			UUUUUUB2.2B4B11BB3BBBB3211B3BB
-
-			**2.1*3**1..12222323*322222***
-			3*31213*43333**2***4**3**4*5*4
-			235*2.113****422233*33*5**45*3
-			2***311.3*55*5211121113*43**3*
-			4*533*113*44***11*33224*313331
-			**22*311*4**442123***3**422*21
-			2335*3.13*43*2233*3434*4**44*2
-			23***31.2*4322***321*3223*3**4
-			**6*5*3333**22333*234*311134**
-			*U**43***3222*1.12*4***1..1*43
-			***55*44*2..222..23**532.124*2
-			**U***3233322*1..1*322*212*5*4
-			****U43*4***211..111123*12*5**
-			******33**642..111..1*43213*42
-			****U5*324**2113*32344**113*42
-			*****U*2.2*4*11**3****3211*3**
- */
