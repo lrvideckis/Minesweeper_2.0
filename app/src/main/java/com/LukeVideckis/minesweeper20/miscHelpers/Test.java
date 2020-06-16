@@ -447,6 +447,30 @@ public class Test {
 		System.out.println();
 	}
 
+	public static void printBoardDebugWithLogicalStuff(VisibleTile[][] board, int mines) {
+		System.out.println("\nmines: " + mines);
+		System.out.println("board is:");
+		for (VisibleTile[] visibleTiles : board) {
+			for (VisibleTile visibleTile : visibleTiles) {
+				if (visibleTile.getIsVisible()) {
+					if (visibleTile.getNumberSurroundingMines() == 0) {
+						System.out.print('.');
+					} else {
+						System.out.print(visibleTile.getNumberSurroundingMines());
+					}
+				} else if (visibleTile.getIsLogicalMine()) {
+					System.out.print('B');
+				} else if (visibleTile.getIsLogicalFree()) {
+					System.out.print('F');
+				} else {
+					System.out.print('U');
+				}
+			}
+			System.out.println();
+		}
+		System.out.println();
+	}
+
 	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
@@ -625,9 +649,10 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	public static void CompareTimeOfSolvers(int numberOfTests) throws Exception {
 
-		long[][] times = new long[numberOfTests][2];
+	public static void BestSolverOnly(int numberOfTests) throws Exception {
+
+		long[] times = new long[numberOfTests];
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.print("test number: " + testID);
 
@@ -636,35 +661,130 @@ public class Test {
 			final int mines = 170;//about 35% mines
 
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
-
 			long startTime = System.currentTimeMillis();
 			try {
-				boardGen.getSolvableBoard(10, 10, false);
+				boardGen.getSolvableBoardAlwaysMove1MineAwayNoBacktracking(10, 10, false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			long timeFirst = System.currentTimeMillis() - startTime;
-
-
-			boardGen = new CreateSolvableBoard(rows, cols, mines);
-
-			startTime = System.currentTimeMillis();
-			try {
-				boardGen.getSolvableBoardSlow(10, 10, false);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			long timeSecond = System.currentTimeMillis() - startTime;
-
-			times[testID - 1][0] = timeFirst;
-			times[testID - 1][1] = timeSecond;
+			times[testID - 1] = System.currentTimeMillis() - startTime;
 		}
-		long totalFirst = 0, totalSecond = 0;
-		for (long[] time : times) {
-			System.out.println("first, second: " + time[0] + " " + time[1]);
-			totalFirst += time[0];
-			totalSecond += time[1];
+		long totalFirst = 0;
+		for (long time : times) {
+			System.out.println("time " + time);
+			totalFirst += time;
 		}
-		System.out.println("average first, second: " + totalFirst / numberOfTests + " " + totalSecond / numberOfTests);
+		System.out.println("average " + totalFirst / numberOfTests);
+	}
+
+	public static void TestNaiveStuff() throws Exception {
+		String[] board = {
+				"UUUU1U12U3UU4UUUU2U113U311111.",
+				"UUUU2223U33U4U5U43112UU3U22U32",
+				"UUU3U22U42234344U2213U322U44UU",
+				"UU2UU43UU21UU2UU4U2U333123UU43",
+				"13U5U4U5U333435U63423UU22U433U",
+				"U4U535U53U2U2U3UUU2U2222U23U53",
+				"U43UU4UU4332322232222112323UUU",
+				"23U335U6UU22U2233211U11U3U34UU",
+				"U4332UUU54U212UUUU211113U5U34U",
+				"3UU3U45UU21113444U312223UU44U3",
+				"U44U4U3331..1UU1112U2UU45UU5U3",
+				"U22U313U2..12322223233UU6UUU4U",
+				"33211.2U4211U222UU3U224UUU55U3",
+				"UU311122UU123U3U6U42U24U53U5U3",
+				"3UU34U322211U24U7U424U4U224UU3",
+				"123UUUU1...1112UUU3U3U3111UUUU",
+
+				"170"
+		};
+		final int rows = 16;
+		final int cols = 30;
+		final int mines = 170;//about 35% mines
+
+		GaussianEliminationSolver gauss = new GaussianEliminationSolver(rows, cols);
+		VisibleTile[][] visibleBoard = convertFormat(board);
+
+		printBoardDebug(visibleBoard, mines);
+		gauss.solvePosition(visibleBoard, mines);
+		printBoardDebugWithLogicalStuff(visibleBoard, mines);
 	}
 }
+
+/*
+
+
+
+
+
+    UUUU1B12B3BB4BBBB2B113B311111.
+    UUUU2223B33B4B5B43112BB3B22B32
+    UUU3B22B42234344B2213B322B44BB
+    UU2BB43BB21BB2BB4B2B333123BB43
+    13B5B4B5B333435B63423BB22B433B
+    B4B535B53B2B2B3BBB2B2222B23B53
+    B43BB4BB4332322232222112323BBB
+    23B335B6BB22B2233211B11B3B34BB
+    B4332BBB54B212BBBB211113B5B34B
+    3BB3B45BB21113444B312223BB44B3
+    B44B4B3331..1BB1112B2BB45BB5B3
+    B22B313B2..12322223233BB6BBB4B
+	33211.2B4211B222BB3B224BBB55B3
+    BB311122BB123B3B6B42B24B53B5B3
+    3BB34B322211B24B7B424B4B224BB3
+    123BBBB1...1112BBB3B3B3111BBUU
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			.1BB32UUUUB312B22B4B3B2B1.1B3B
+			.13B4BUU34BB23B22B4B313231325B
+			12235B42B4432B223342324B3B2B4B
+			B2B4BB322BB11112BB3B3BBB42424B
+			122BB6B22321...2B33B44B43B2B32
+			1123BB44B2.1111232323B3B2134B2
+			2B325BB3B2.1B22B4B3B4342212BB2
+			2B3B3B4311.23B34BB33BB3B33B321
+			223243B321.1B3B4B412B6B4BB3211
+			B32B3B3BB1.12434B2123BB65B43B2
+			BB32B22221.12BB3221B35BBB5BB4B
+			UB3322...123B322B234B5BBUUBUUU
+			U4B2B211.1BB42135B3BBB5B4UUUUU
+			B31212B2234BB21BBB325B424UUUUU
+			U3122445BB45B43353213B21BBUUUU
+			U2B2BBBBBBUUBB2B2B11B2113BUUUU
+
+			U******4******U**U2**4*21*U***
+			14*5455**5*6*4UU*U*43**443UUUU
+			.3*43**3222*4*3UUU*4335***2111
+			.2**5*421234*4**4***3*4*55*22*
+			1235**21*2**44***4424*522**23*
+			*11**432234*4*4*4*334**333334*
+			11123*2*22*3*22134***43**22**3
+			....11213*5421123**7*32333*6*3
+			12321..13***1.1**4**3*12*43**3
+			1***2111*3321.1334333222*4*45*
+			23322*3321.11213*3*11*112*3*4*
+			*11123**2111*4*5*32233311133U*
+			111*13*64*233***212*3**1..2***
+			111113***5*3*332213*3232113*4U
+			*2.124*44**422..1*22212*32*2UU
+			*2.1**212*32*1..1111*12*3*21U*
+
+ */

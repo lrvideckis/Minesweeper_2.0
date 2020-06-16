@@ -35,23 +35,33 @@ public class AwayCell {
 		return true;
 	}
 
-	public static boolean isAwayCell(MinesweeperGame minesweeperGame, int row, int col) {
-		if (minesweeperGame.getCell(row, col).getIsVisible()) {
+	public static boolean isAwayCell(MinesweeperGame game, int row, int col) {
+		if (game.getCell(row, col).getIsVisible()) {
 			return false;
 		}
-		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, minesweeperGame.getRows(), minesweeperGame.getCols())) {
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, game.getRows(), game.getCols())) {
 			final int adjI = adj[0], adjJ = adj[1];
-			if (minesweeperGame.getCell(adjI, adjJ).getIsVisible()) {
+			if (game.getCell(adjI, adjJ).getIsVisible()) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public static boolean isNextToAnAwayCell(MinesweeperSolver.VisibleTile[][] board, int row, int col, int rows, int cols) {
-		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, rows, cols)) {
+	public static boolean isNextToAnAwayCell(MinesweeperGame game, int row, int col) {
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, game.getRows(), game.getCols())) {
 			final int adjI = adj[0], adjJ = adj[1];
-			if (isAwayCell(board, adjI, adjJ, rows, cols)) {
+			if (isAwayCell(game, adjI, adjJ)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isNextToAnAwayMine(MinesweeperGame game, int row, int col) {
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(row, col, game.getRows(), game.getCols())) {
+			final int adjI = adj[0], adjJ = adj[1];
+			if (isAwayCell(game, adjI, adjJ) && game.getCell(adjI, adjJ).isMine()) {
 				return true;
 			}
 		}

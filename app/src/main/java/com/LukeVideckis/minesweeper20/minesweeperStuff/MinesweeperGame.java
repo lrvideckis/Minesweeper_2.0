@@ -353,12 +353,12 @@ public class MinesweeperGame {
 	}
 
 	//interesting mines are mines which are adjacent to a visible clue
-	public void shuffleInterestingMines(VisibleTile[][] visibleBoard) throws Exception {
+	public void shuffleInterestingMines() throws Exception {
 		int numberInterestingMines = 0;
 		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (isInterestingCell(i, j) && AwayCell.isNextToAnAwayCell(visibleBoard, i, j, rows, cols)) {
+				if (isInterestingCell(i, j) && AwayCell.isNextToAnAwayCell(this, i, j)) {
 					resetLogicalStuff(i, j);
 					if (getCell(i, j).isMine) {
 						++numberInterestingMines;
@@ -384,20 +384,18 @@ public class MinesweeperGame {
 		}
 	}
 
-	public void shuffleInterestingMinesAndMakeOneAway(VisibleTile[][] visibleBoard) throws Exception {
+	public void shuffleInterestingMinesAndMakeOneAway() throws Exception {
 		int interestingMines = 0;
-		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
-		ArrayList<Pair<Integer, Integer>> freeAwayCells = new ArrayList<>();
+		ArrayList<Pair<Integer, Integer>>
+				interestingSpots = new ArrayList<>(),
+				freeAwayCells = new ArrayList<>();
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				//if (isInterestingCell(i, j) && !visibleBoard[i][j].isLogicalMine) {
-				if (isInterestingCell(i, j) && AwayCell.isNextToAnAwayCell(visibleBoard, i, j, rows, cols)) {
+				if (isInterestingCell(i, j) && AwayCell.isNextToAnAwayCell(this, i, j)) {
 					if (getCell(i, j).isMine) {
 						++interestingMines;
-						changeMineStatus(i, j, false);
 					}
 					interestingSpots.add(new Pair<>(i, j));
-					resetLogicalStuff(i, j);
 				}
 				if (AwayCell.isAwayCell(this, i, j) &&
 						!getCell(i, j).isMine &&
@@ -412,6 +410,19 @@ public class MinesweeperGame {
 		}
 		if (freeAwayCells.isEmpty()) {
 			throw new NoAwayCellsToMoveAMineToException("no free away cells");
+		}
+		int tempInterestingCount = 0;
+		for (Pair<Integer, Integer> interestingSpot : interestingSpots) {
+			final int i = interestingSpot.first;
+			final int j = interestingSpot.second;
+			if (getCell(i, j).isMine) {
+				++tempInterestingCount;
+				changeMineStatus(i, j, false);
+			}
+			resetLogicalStuff(i, j);
+		}
+		if (tempInterestingCount != interestingMines) {
+			throw new Exception("sanity check that # interesting mines matches");
 		}
 		Collections.shuffle(interestingSpots);
 		for (int pos = 0; pos < interestingMines - 1; ++pos) {
@@ -521,13 +532,17 @@ public class MinesweeperGame {
 		}
 	}
 
-	private void changeMineStatus(int i, int j, boolean isMine) {
+	private void changeMineStatus(int i, int j, boolean isMine) throws Exception {
 		if (getCell(i, j).isMine == isMine) {
 			return;
 		}
+
+		getCell(i, j).resetLogicalStuff();
+
 		getCell(i, j).isMine = isMine;
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
+			getCell(adjI, adjJ).resetLogicalStuff();
 			if (isMine) {
 				getCell(adjI, adjJ).numberSurroundingMines++;
 			} else {
@@ -554,6 +569,61 @@ public class MinesweeperGame {
 			}
 		}
 		return true;
+	}
+
+	//returns true if at least one non-deducible mine was moved
+	public boolean removeGuessMines() throws Exception {
+		ArrayList<Pair<Integer, Integer>>
+				haveToGuessMines = new ArrayList<>(),
+				freeAwayCells = new ArrayList<>();
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				//cell is part of a guess (not-deducible)
+				if (isInterestingCell(i, j) &&
+						!AwayCell.isNextToAnAwayCell(this, i, j) &&
+						getCell(i, j).isMine &&
+						!getCell(i, j).isLogicalMine
+				) {
+					haveToGuessMines.add(new Pair<>(i, j));
+				}
+				if (AwayCell.isAwayCell(this, i, j) &&
+						!getCell(i, j).isMine &&
+						notPartOfThe8(i, j)
+				) {
+					freeAwayCells.add(new Pair<>(i, j));
+				}
+			}
+		}
+		if (haveToGuessMines.size() > freeAwayCells.size()) {
+			throw new Exception("the number of non-deducible mines > number of free away cells");
+		}
+		if (!haveToGuessMines.isEmpty()) {
+			System.out.println("moving at least one non-deducible mine");
+			for (Pair<Integer, Integer> spot : haveToGuessMines) {
+				System.out.println("spot: " + spot.first + " " + spot.second);
+			}
+		}
+		Collections.shuffle(freeAwayCells);
+		for (int pos = 0; pos < haveToGuessMines.size(); ++pos) {
+			int i = haveToGuessMines.get(pos).first;
+			int j = haveToGuessMines.get(pos).second;
+			changeMineStatus(i, j, false);
+
+
+			i = freeAwayCells.get(pos).first;
+			j = freeAwayCells.get(pos).second;
+			changeMineStatus(i, j, true);
+		}
+
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (getCell(i, j).isVisible) {
+					revealCell(i, j);
+				}
+			}
+		}
+
+		return !haveToGuessMines.isEmpty();
 	}
 
 	public static class Tile extends VisibleTile {
@@ -586,6 +656,13 @@ public class MinesweeperGame {
 				isFlagged = false;
 			}
 			return isFlagged;
+		}
+
+		private void resetLogicalStuff() throws Exception {
+			isLogicalMine = false;
+			isLogicalFree = false;
+			numberOfMineConfigs.setValues(0, 1);
+			numberOfTotalConfigs.setValues(1, 1);
 		}
 
 		private void revealTile() throws Exception {
