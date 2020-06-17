@@ -192,7 +192,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			minesMin = 0;
 			minesMax = rows * cols - 10;
 		}
-		minesMax = Math.min(minesMax, 170);
+		minesMax = Math.min(minesMax, 100);
 		SeekBar minesInput = findViewById(R.id.mineInput);
 		minesInput.setMin(minesMin);
 		minesInput.setMax(minesMax);

@@ -10,6 +10,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import java.util.ArrayList;
 import java.util.Arrays;
 
+//TODO: run this independently on each component
 public class GaussianEliminationSolver implements MinesweeperSolver {
 
 	private static final int maxAwayCellsToIncludeThem = 10;

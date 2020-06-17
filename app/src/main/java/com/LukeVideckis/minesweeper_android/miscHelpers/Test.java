@@ -638,7 +638,7 @@ public class Test {
 
 			final int rows = 16;
 			final int cols = 30;
-			final int mines = 170;
+			final int mines = 100;
 
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
 			long startTime = System.currentTimeMillis();
@@ -683,6 +683,44 @@ public class Test {
 		System.out.print("solves:");
 		for (int i = 0; i < numberOfSolvers; ++i) {
 			System.out.println(numberOfSuccessfulSolves[i] + " out of " + numberOfTests);
+		}
+	}
+
+	public static void BestSolverOnlyasdf(int numberOfTests) {
+
+		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.print("test number: " + testID);
+
+			final int rows = 16;
+			final int cols = 30;
+			final int mines = 100;
+
+			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
+			try {
+				boardGen.getSolvableBoard(5, 5, false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static void TryingToFindBug(int numberOfTests) {
+
+		System.out.print("here, start of test");
+		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.println("test number: " + testID);
+
+			final int rows = 16;
+			final int cols = 30;
+			final int mines = 100;
+
+			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
+			try {
+				boardGen.getSolvableBoard(5, 5, false);
+			} catch (Exception e) {
+				e.printStackTrace();
+				break;
+			}
 		}
 	}
 }
