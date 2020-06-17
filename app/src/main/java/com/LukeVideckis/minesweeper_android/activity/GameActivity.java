@@ -155,22 +155,17 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					public void run() {
 						try {
 							minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8);
-							try {
-								runOnUiThread(() -> {
-									finishedBoardGen.set(true);
-									loadingScreenForSolvableBoardGeneration.dismiss();
-								});
-							} catch (Exception ignored) {
-							}
+							finishedBoardGen.set(true);
+							runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.dismiss());
 						} catch (Exception ignored) {
+							finishedBoardGen.set(true);
+							try {
+								minesweeperGame.clickCell(row, col, false);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 							runOnUiThread(() -> {
-								finishedBoardGen.set(true);
 								displayNoGuessBoardPopup();
-								try {
-									minesweeperGame.clickCell(row, col, false);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
 								loadingScreenForSolvableBoardGeneration.dismiss();
 							});
 						}
