@@ -5,8 +5,8 @@ import android.util.Pair;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 
-class CheckAndUpdateBoardForTrivialStuff {
-	static boolean checkAndUpdateBoardForTrivialStuff(MinesweeperSolver.VisibleTile[][] board) throws Exception {
+public class CheckForLocalStuff {
+	public static boolean checkAndUpdateBoardForTrivialStuff(MinesweeperSolver.VisibleTile[][] board) throws Exception {
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		final int rows = dimensions.first, cols = dimensions.second;
 		boolean foundNewStuff = false;

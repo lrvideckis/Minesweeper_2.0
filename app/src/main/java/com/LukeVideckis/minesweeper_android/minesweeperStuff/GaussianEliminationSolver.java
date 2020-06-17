@@ -37,7 +37,7 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 	}
 
 	//returns true if extra stuff is found
-	private boolean runGaussSolverOnce(VisibleTile[][] board, int numberOfMines) throws Exception {
+	public boolean runGaussSolverOnce(VisibleTile[][] board, int numberOfMines) throws Exception {
 		final boolean includeAwayCells = (AwayCell.getNumberOfAwayCells(board) <= maxAwayCellsToIncludeThem);
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -145,7 +145,7 @@ public class GaussianEliminationSolver implements MinesweeperSolver {
 			}
 		}
 
-		return (foundNewStuff || CheckAndUpdateBoardForTrivialStuff.checkAndUpdateBoardForTrivialStuff(board));
+		return (foundNewStuff || CheckForLocalStuff.checkAndUpdateBoardForTrivialStuff(board));
 	}
 
 	private void checkRowForSolvableStuff(double[] currRow, boolean[] isMine, boolean[] isFree) {
