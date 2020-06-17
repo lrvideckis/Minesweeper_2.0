@@ -10,6 +10,7 @@ import android.widget.PopupWindow;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.LukeVideckis.minesweeper_android.R;
@@ -25,6 +26,7 @@ import com.LukeVideckis.minesweeper_android.view.GameCanvas;
 
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
@@ -32,6 +34,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
 			mineEmoji = new String(Character.toChars(0x1F4A3));
 	public static final int cellPixelLength = 150;
+	private static final long millisecondsBeforeDisplayingLoadingScreen = 100;
 
 	private boolean
 			toggleFlagModeOn = false,
@@ -45,6 +48,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private MinesweeperSolver.VisibleTile[][] board;
 	private int lastTapRow, lastTapCol;
 	private Thread updateTimeThread;
+	private AlertDialog loadingScreenForSolvableBoardGeneration;
+	private CreateSolvableBoard createSolvableBoard;
 
 	public void stopTimerThread() {
 		updateTimeThread.interrupt();
@@ -59,6 +64,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		//default game mode is normal mode
 		gameMode = getIntent().getIntExtra(StartScreenActivity.GAME_MODE, R.id.normal_mode);
 		setContentView(R.layout.game);
+
+		createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
 
 		try {
 			minesweeperGame = new MinesweeperGame(numberOfRows, numberOfCols, numberOfMines);
@@ -84,6 +91,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		setUpNoGuessBoardPopup();
 
 		updateTimeThread = new TimeUpdateThread();
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setCancelable(false); // if you want user to wait for some process to finish,
+		builder.setView(R.layout.layout_loading_dialog);
+		loadingScreenForSolvableBoardGeneration = builder.create();
 	}
 
 	@Override
@@ -121,12 +133,51 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
 			updateTimeThread.start();
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
-				CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
-				try {
-					minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8);
-				} catch (Exception ignored) {
-					displayNoGuessBoardPopup();
-				}
+				AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							sleep(millisecondsBeforeDisplayingLoadingScreen);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						if (!finishedBoardGen.get()) {
+							runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.show());
+						} else {
+							findViewById(R.id.gridCanvas).invalidate();
+						}
+					}
+				}.start();
+
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8);
+							try {
+								runOnUiThread(() -> {
+									finishedBoardGen.set(true);
+									loadingScreenForSolvableBoardGeneration.dismiss();
+								});
+							} catch (Exception ignored) {
+							}
+						} catch (Exception ignored) {
+							runOnUiThread(() -> {
+								finishedBoardGen.set(true);
+								displayNoGuessBoardPopup();
+								try {
+									minesweeperGame.clickCell(row, col, false);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								loadingScreenForSolvableBoardGeneration.dismiss();
+							});
+						}
+					}
+				}.start();
+
+				return;
 			}
 		}
 
@@ -149,8 +200,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 
 		updateNumberOfMines(minesweeperGame.getNumberOfMines() - minesweeperGame.getNumberOfFlags());
-		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
-		gameCanvas.invalidate();
+		findViewById(R.id.gridCanvas).invalidate();
 	}
 
 	private void startNewGame() {
