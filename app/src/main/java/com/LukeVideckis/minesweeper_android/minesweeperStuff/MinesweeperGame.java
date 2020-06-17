@@ -501,9 +501,9 @@ public class MinesweeperGame {
 	}
 
 	private void changeMineStatus(int i, int j, boolean isMine) throws Exception {
-		getCell(i, j).resetLogicalStuff();
+		getCell(i, j).resetLogicalStuffAndVisiblity();
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-			getCell(adj[0], adj[1]).resetLogicalStuff();
+			getCell(adj[0], adj[1]).resetLogicalStuffAndVisiblity();
 		}
 
 		if (getCell(i, j).isMine == isMine) {
@@ -622,7 +622,8 @@ public class MinesweeperGame {
 			return isFlagged;
 		}
 
-		private void resetLogicalStuff() throws Exception {
+		private void resetLogicalStuffAndVisiblity() throws Exception {
+			isVisible = false;
 			isLogicalMine = false;
 			isLogicalFree = false;
 			numberOfMineConfigs.setValues(0, 1);

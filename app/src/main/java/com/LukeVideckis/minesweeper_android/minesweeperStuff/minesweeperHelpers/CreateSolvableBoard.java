@@ -118,8 +118,7 @@ public class CreateSolvableBoard {
 		}
 
 		while (true) {
-			MinesweeperGame game;
-			game = new MinesweeperGame(rows, cols, mines);
+			MinesweeperGame game = new MinesweeperGame(rows, cols, mines);
 			if (hasAn8) {
 				game.setHavingAn8();
 			}

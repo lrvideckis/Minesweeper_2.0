@@ -279,7 +279,7 @@ public class Test {
 				}
 			}
 			if (!testPassed) {
-				printBoardDebug(boardBigInt, mines);
+				CreateSolvableBoard.printBoardDebug(boardBigInt);
 				return;
 			}
 		}
@@ -360,7 +360,7 @@ public class Test {
 			}
 		}
 		if (!passedTest) {
-			printBoardDebug(boardFast, mines);
+			CreateSolvableBoard.printBoardDebug(boardFast);
 		}
 		return !passedTest;
 	}
@@ -422,30 +422,10 @@ public class Test {
 			}
 		}
 		if (!passedTest) {
-			printBoardDebug(boardBacktracking, mines);
+			CreateSolvableBoard.printBoardDebug(boardBacktracking);
 			return true;
 		}
 		return false;
-	}
-
-	private static void printBoardDebug(VisibleTile[][] board, int mines) {
-		System.out.println("\nmines: " + mines);
-		System.out.println("board is:");
-		for (VisibleTile[] visibleTiles : board) {
-			for (VisibleTile visibleTile : visibleTiles) {
-				if (visibleTile.getIsVisible()) {
-					if (visibleTile.getNumberSurroundingMines() == 0) {
-						System.out.print('.');
-					} else {
-						System.out.print(visibleTile.getNumberSurroundingMines());
-					}
-				} else {
-					System.out.print('U');
-				}
-			}
-			System.out.println();
-		}
-		System.out.println();
 	}
 
 	public static void performTestsMultipleRunsOfSameBoard(int numberOfTests) throws Exception {
@@ -499,20 +479,16 @@ public class Test {
 	@SuppressLint("DefaultLocale")
 	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
-			System.out.print("test number: " + testID);
+			System.out.println("test number: " + testID);
 
-			final int rows = MyMath.getRand(5, 30);
-			final int cols = MyMath.getRand(5, 30);
-			int mines = MyMath.getRand(2, 300);
-
-			//final int rows = MyMath.getRand(5, 15);
-			//final int cols = MyMath.getRand(5, 15);
-			//final int mines = MyMath.getRand(2, 75);
+			final int rows = MyMath.getRand(8, 30);
+			final int cols = MyMath.getRand(8, 30);
+			int mines = MyMath.getRand(2, 100);
 			mines = Math.min(mines, rows * cols - 9);
-			mines = Math.min(mines, (int) (rows * cols * 0.4f));
+			mines = Math.min(mines, (int) (rows * cols * 0.23f));
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
-			System.out.print(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
+			System.out.println(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
 
 			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
 
