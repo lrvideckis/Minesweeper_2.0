@@ -352,38 +352,6 @@ public class MinesweeperGame {
 		getCell(i, j).numberOfTotalConfigs.setValues(1, 1);
 	}
 
-	//interesting mines are mines which are adjacent to a visible clue
-	public void shuffleInterestingMines() throws Exception {
-		int numberInterestingMines = 0;
-		ArrayList<Pair<Integer, Integer>> interestingSpots = new ArrayList<>();
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (isInterestingCell(i, j) && AwayCell.isNextToAnAwayCell(this, i, j)) {
-					resetLogicalStuff(i, j);
-					if (getCell(i, j).isMine) {
-						++numberInterestingMines;
-						changeMineStatus(i, j, false);
-					}
-					interestingSpots.add(new Pair<>(i, j));
-					resetLogicalStuff(i, j);
-				}
-			}
-		}
-		Collections.shuffle(interestingSpots);
-		for (int pos = 0; pos < numberInterestingMines; ++pos) {
-			final int i = interestingSpots.get(pos).first;
-			final int j = interestingSpots.get(pos).second;
-			changeMineStatus(i, j, true);
-		}
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (getCell(i, j).isVisible) {
-					revealCell(i, j);
-				}
-			}
-		}
-	}
-
 	public void shuffleInterestingMinesAndMakeOneAway() throws Exception {
 		int interestingMines = 0;
 		ArrayList<Pair<Integer, Integer>>

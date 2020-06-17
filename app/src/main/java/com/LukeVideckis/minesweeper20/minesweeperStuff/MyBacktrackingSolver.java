@@ -21,7 +21,7 @@ import java.util.TreeSet;
 //TODO: also break out early the moment we find a (conditioned) solution
 public class MyBacktrackingSolver implements BacktrackingSolver {
 
-	public final static int iterationLimit = 500;
+	public final static int iterationLimit = 10000;
 
 	private final int rows, cols;
 	private final boolean[][] isMine;

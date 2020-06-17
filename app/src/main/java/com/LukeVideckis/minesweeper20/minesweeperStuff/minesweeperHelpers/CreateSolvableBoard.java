@@ -1,6 +1,5 @@
 package com.LukeVideckis.minesweeper20.minesweeperStuff.minesweeperHelpers;
 
-import com.LukeVideckis.minesweeper20.customExceptions.HitIterationLimitException;
 import com.LukeVideckis.minesweeper20.customExceptions.NoAwayCellsToMoveAMineToException;
 import com.LukeVideckis.minesweeper20.customExceptions.NoInterestingMinesException;
 import com.LukeVideckis.minesweeper20.minesweeperStuff.BacktrackingSolver;
@@ -89,274 +88,7 @@ public class CreateSolvableBoard {
 	}
 
 	//TODO: make this as fast as: https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html
-	//TODO: use previously found logical stuff (this can also be used to improve the gauss solver)
-	//TODO: look at average number of iterations
 	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
-		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
-			throw new Exception("first click is out of bounds");
-		}
-		long totalTimeGauss = 0, totalTimeBacktracking = 0;
-		int totalIterationsSoFar = 0;
-
-		MinesweeperGame minesweeperGame;
-		minesweeperGame = new MinesweeperGame(rows, cols, mines);
-		if (hasAn8) {
-			minesweeperGame.setHavingAn8();
-		}
-		minesweeperGame.clickCell(firstClickI, firstClickJ, false);
-
-		int numberOfTriesShufflingInterestingMines = 0;
-		while (!minesweeperGame.getIsGameWon()) {
-			if (minesweeperGame.getIsGameLost()) {
-				throw new Exception("game is lost, but board generator should never lose");
-			}
-
-			System.out.println("trying gauss solver");
-			/*try to deduce free squares with gauss solver first. Gaussian Elimination has the
-			 * possibility of not finding deducible free squares, even if they exist.
-			 */
-			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, true);
-			long startTime = System.currentTimeMillis();
-			gaussSolver.solvePosition(board, mines);
-			minesweeperGame.updateLogicalStuff(board);
-
-			totalTimeGauss += System.currentTimeMillis() - startTime;
-
-			/* if there are any deducible free squares, click them, and continue on
-			 */
-			if (ExistsLogicalFree.isLogicalFree(board)) {
-				System.out.println("gauss solver found logical frees, clicking them");
-				numberOfTriesShufflingInterestingMines = 0;
-				for (int i = 0; i < rows; ++i) {
-					for (int j = 0; j < cols; ++j) {
-						if (board[i][j].getIsLogicalMine() && !minesweeperGame.getCell(i, j).isMine()) {
-							throw new Exception("found a logical mine which is free");
-						}
-						if (board[i][j].getIsLogicalFree()) {
-							if (minesweeperGame.getCell(i, j).isMine()) {
-								throw new Exception("found a logical free which is mine");
-							}
-							minesweeperGame.clickCell(i, j, false);
-						}
-					}
-				}
-				continue;
-			}
-
-			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, true);
-			try {
-				startTime = System.currentTimeMillis();
-				myBacktrackingSolver.solvePosition(board, mines);
-				totalTimeBacktracking += System.currentTimeMillis() - startTime;
-
-				minesweeperGame.updateLogicalStuff(board);
-			} catch (HitIterationLimitException ignored) {
-				totalIterationsSoFar += MyBacktrackingSolver.iterationLimit;
-			}
-
-
-			/* if there are any deducible free squares, click them, and continue on
-			 */
-			if (ExistsLogicalFree.isLogicalFree(board)) {
-				numberOfTriesShufflingInterestingMines = 0;
-				for (int i = 0; i < rows; ++i) {
-					for (int j = 0; j < cols; ++j) {
-						if (board[i][j].getIsLogicalMine() && !minesweeperGame.getCell(i, j).isMine()) {
-							throw new Exception("found a logical mine which is free");
-						}
-						if (board[i][j].getIsLogicalFree()) {
-							if (minesweeperGame.getCell(i, j).isMine()) {
-								throw new Exception("clicking on a logical free which is a mine");
-							}
-							minesweeperGame.clickCell(i, j, false);
-						}
-					}
-				}
-				continue;
-			}
-
-			/* At this point, there are no deducible free squares to click on. Some options are:
-			 *
-			 * 1) start over, and generate a new random board
-			 * 		After trying this approach, I found that for larger grids, and for high mine
-			 * 		percentages, this will rarely find a solvable grid. It's simply too unlikely
-			 * 		that a randomly generated grid will be completely solvable.
-			 *
-			 * 2) keep the existing grid, and rearrange the mines (randomly) in the hope of creating
-			 * new deducible free squares
-			 * 		The question is what mines do you rearrange?
-			 * 		- Mines adjacent to a clue (or visible number) which I'll call "interesting"
-			 * 		- Mines not adjacent to any clue
-			 *  	- Previously deduced mines (this would be moving backwards)
-			 */
-
-			/* First try rearranging mines adjacent to visible clues
-			 */
-
-			if (numberOfTriesShufflingInterestingMines < 3) {
-				System.out.println("shuffling interesting mines");
-				++numberOfTriesShufflingInterestingMines;
-				minesweeperGame.shuffleInterestingMines();
-				continue;
-			}
-
-			/* Shuffling interesting mines failed 3 times in a row, we need to do something more
-			 * extreme. Now we'll try removing 1 interesting mine, and making it an away mine
-			 * (not next to any clue).
-			 */
-
-			System.out.println("shuffling interesting mines and changing one to away");
-			numberOfTriesShufflingInterestingMines = 0;
-			try {
-				minesweeperGame.shuffleInterestingMinesAndMakeOneAway();
-			} catch (NoAwayCellsToMoveAMineToException e) {
-				System.out.println("no away cells");
-				break;
-			} catch (NoInterestingMinesException e) {
-				System.out.println("no interesting mines (a mine next to a clue which isn't a logical mine)");
-				break;
-			}
-		}
-		if (minesweeperGame.getIsGameWon()) {
-			System.out.println(" here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
-			System.out.println("total iterations: " + totalIterationsSoFar);
-			return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
-		}
-		printBoardDebug(board);
-		printBoardDebugMines(minesweeperGame);
-
-		throw new Exception("no solution found");
-	}
-
-
-	public MinesweeperGame getSolvableBoardAlwaysMove1MineAway(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
-		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
-			throw new Exception("first click is out of bounds");
-		}
-		long totalTimeGauss = 0, totalTimeBacktracking = 0;
-		int totalIterationsSoFar = 0;
-
-
-		MinesweeperGame minesweeperGame;
-		minesweeperGame = new MinesweeperGame(rows, cols, mines);
-		if (hasAn8) {
-			minesweeperGame.setHavingAn8();
-		}
-		minesweeperGame.clickCell(firstClickI, firstClickJ, false);
-
-		while (!minesweeperGame.getIsGameWon()) {
-			if (minesweeperGame.getIsGameLost()) {
-				throw new Exception("game is lost, but board generator should never lose");
-			}
-
-			System.out.println("trying gauss solver");
-			/*try to deduce free squares with gauss solver first. Gaussian Elimination has the
-			 * possibility of not finding deducible free squares, even if they exist.
-			 */
-			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, true);
-			long startTime = System.currentTimeMillis();
-			gaussSolver.solvePosition(board, mines);
-			minesweeperGame.updateLogicalStuff(board);
-
-			totalTimeGauss += System.currentTimeMillis() - startTime;
-
-			/* if there are any deducible free squares, click them, and continue on
-			 */
-			if (ExistsLogicalFree.isLogicalFree(board)) {
-				System.out.println("gauss solver found logical frees, clicking them");
-				for (int i = 0; i < rows; ++i) {
-					for (int j = 0; j < cols; ++j) {
-						if (board[i][j].getIsLogicalMine() && !minesweeperGame.getCell(i, j).isMine()) {
-							throw new Exception("found a logical mine which is free");
-						}
-						if (board[i][j].getIsLogicalFree()) {
-							if (minesweeperGame.getCell(i, j).isMine()) {
-								throw new Exception("found a logical free which is mine");
-							}
-							minesweeperGame.clickCell(i, j, false);
-						}
-					}
-				}
-				continue;
-			}
-
-			ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, true);
-			try {
-				startTime = System.currentTimeMillis();
-				myBacktrackingSolver.solvePosition(board, mines);
-				totalTimeBacktracking += System.currentTimeMillis() - startTime;
-
-				minesweeperGame.updateLogicalStuff(board);
-			} catch (HitIterationLimitException ignored) {
-				totalIterationsSoFar += MyBacktrackingSolver.iterationLimit;
-			}
-
-
-			/* if there are any deducible free squares, click them, and continue on
-			 */
-			if (ExistsLogicalFree.isLogicalFree(board)) {
-				for (int i = 0; i < rows; ++i) {
-					for (int j = 0; j < cols; ++j) {
-						if (board[i][j].getIsLogicalMine() && !minesweeperGame.getCell(i, j).isMine()) {
-							throw new Exception("found a logical mine which is free");
-						}
-						if (board[i][j].getIsLogicalFree()) {
-							if (minesweeperGame.getCell(i, j).isMine()) {
-								throw new Exception("clicking on a logical free which is a mine");
-							}
-							minesweeperGame.clickCell(i, j, false);
-						}
-					}
-				}
-				continue;
-			}
-
-			/* At this point, there are no deducible free squares to click on. Some options are:
-			 *
-			 * 1) start over, and generate a new random board
-			 * 		After trying this approach, I found that for larger grids, and for high mine
-			 * 		percentages, this will rarely find a solvable grid. It's simply too unlikely
-			 * 		that a randomly generated grid will be completely solvable.
-			 *
-			 * 2) keep the existing grid, and rearrange the mines (randomly) in the hope of creating
-			 * new deducible free squares
-			 * 		The question is what mines do you rearrange?
-			 * 		- Mines adjacent to a clue (or visible number) which I'll call "interesting"
-			 * 		- Mines not adjacent to any clue
-			 *  	- Previously deduced mines (this would be moving backwards)
-			 */
-
-			/* First try rearranging mines adjacent to visible clues
-			 */
-
-			/* Shuffling interesting mines failed 3 times in a row, we need to do something more
-			 * extreme. Now we'll try removing 1 interesting mine, and making it an away mine
-			 * (not next to any clue).
-			 */
-
-			System.out.println("shuffling interesting mines and changing one to away");
-			try {
-				minesweeperGame.shuffleInterestingMinesAndMakeOneAway();
-			} catch (NoAwayCellsToMoveAMineToException e) {
-				System.out.println("no away cells");
-				break;
-			} catch (NoInterestingMinesException e) {
-				System.out.println("no interesting mines (a mine next to a clue which isn't a logical mine)");
-				break;
-			}
-		}
-		if (minesweeperGame.getIsGameWon()) {
-			System.out.println(" here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
-			System.out.println("total iterations: " + totalIterationsSoFar);
-			return new MinesweeperGame(minesweeperGame, firstClickI, firstClickJ);
-		}
-		printBoardDebug(board);
-		printBoardDebugMines(minesweeperGame);
-
-		throw new Exception("no solution found");
-	}
-
-	public MinesweeperGame getSolvableBoardAlwaysMove1MineAwayNoBacktracking(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
 		}
@@ -372,18 +104,53 @@ public class CreateSolvableBoard {
 
 		states.add(game);
 
+		/* Main board generation loop.
+		 * I'm calling an "interesting" mine a mine which is next to at least 1 clue
+		 *
+		 * In this loop, we try to create a solvable board by this
+		 * algorithm:
+		 *
+		 * 		while(board isn't won yet) {
+		 *	 		while (there exists a deducible non-mine square) {
+		 * 				click all those deducible non-mine squares;
+		 * 				continue;
+		 *  		}
+		 *
+		 * 			//now there aren't any deducible mine-free squares and the game isn't won, so
+		 * 			//we resort to moving positions of mines. Also, we'll change 1 mine to a
+		 * 			//non-"interesting" square (a square not next to any clue).
+		 *
+		 * 			//Doing this has pros:
+		 * 			//		- the entire board generation algorithm runs faster (fast enough to
+		 * 			//		  execute in real time for the user).
+		 * 			//		- this step will always eventually produce a deducible free square as
+		 * 			//		  eventually one border clue will become 0, leading to more clues.
+		 *
+		 * 			//And cons:
+		 * 			//		- many mines will be eventually moved to the outside of the board
+		 * 			//		  effectively making the board smaller
+		 * 			//		- the mine density of the inside of the board will be smaller, which
+		 * 			//		  generally creates easier boards
+		 *
+		 * 			randomly move the positions of non-deducible "interesting" mines, and move 1
+		 * 			"interesting" mine to a square not next to any mines;
+		 *  	}
+		 *
+		 *
+		 * The above algorithm can fail to generate a solvable board when there's a 50/50 at the
+		 * very end (there may be other cases when the alg. fails). This is why there is an outer
+		 * loop. So we can restart completely on a fresh random board.
+		 */
 		while (!game.getIsGameWon()) {
 			if (game.getIsGameLost()) {
 				throw new Exception("game is lost, but board generator should never lose");
 			}
 
-			System.out.println("trying gauss solver");
-			/*try to deduce free squares with gauss solver first. Gaussian Elimination has the
+			/*try to deduce free squares with gauss solver. Gaussian Elimination has the
 			 * possibility of not finding deducible free squares, even if they exist.
 			 */
 			ConvertGameBoardFormat.convertToExistingBoard(game, board, true);
 			gaussSolver.solvePosition(board, mines);
-			//Test.printBoardDebugWithLogicalStuff(board, mines);
 			game.updateLogicalStuff(board);
 
 			states.add(game);
@@ -409,34 +176,16 @@ public class CreateSolvableBoard {
 				continue;
 			}
 
-			System.out.println("before1");
-			System.out.println("before2");
-			System.out.println("before3");
-			printBoardDebug(board);
-
 			if (game.removeGuessMines()) {
-				System.out.println("after1");
-				System.out.println("after2");
-				System.out.println("after3");
-				printBoardDebug(board);
 				continue;
 			}
 
-
-			System.out.println("shuffling interesting mines and changing one to away");
 			try {
 				game.shuffleInterestingMinesAndMakeOneAway();
-			} catch (NoAwayCellsToMoveAMineToException e) {
-				System.out.println("no away cells");
-				break;
-			} catch (NoInterestingMinesException e) {
-				System.out.println("no interesting mines (a mine next to a clue which isn't a logical mine)");
+			} catch (NoAwayCellsToMoveAMineToException | NoInterestingMinesException e) {
 				break;
 			}
 		}
-		ConvertGameBoardFormat.convertToExistingBoard(game, board, true);
-		printBoardDebug(board);
-		printBoardDebugMines(game);
 
 		if (game.getIsGameWon()) {
 			return new MinesweeperGame(game, firstClickI, firstClickJ);

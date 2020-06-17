@@ -649,9 +649,7 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-
 	public static void BestSolverOnly(int numberOfTests) throws Exception {
-
 		long[] times = new long[numberOfTests];
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.print("test number: " + testID);
@@ -663,7 +661,7 @@ public class Test {
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
 			long startTime = System.currentTimeMillis();
 			try {
-				boardGen.getSolvableBoardAlwaysMove1MineAwayNoBacktracking(10, 10, false);
+				boardGen.getSolvableBoard(10, 10, false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -675,39 +673,5 @@ public class Test {
 			totalFirst += time;
 		}
 		System.out.println("average " + totalFirst / numberOfTests);
-	}
-
-	public static void TestNaiveStuff() throws Exception {
-		//noinspection SpellCheckingInspection
-		String[] board = {
-				"UUUU1U12U3UU4UUUU2U113U311111.",
-				"UUUU2223U33U4U5U43112UU3U22U32",
-				"UUU3U22U42234344U2213U322U44UU",
-				"UU2UU43UU21UU2UU4U2U333123UU43",
-				"13U5U4U5U333435U63423UU22U433U",
-				"U4U535U53U2U2U3UUU2U2222U23U53",
-				"U43UU4UU4332322232222112323UUU",
-				"23U335U6UU22U2233211U11U3U34UU",
-				"U4332UUU54U212UUUU211113U5U34U",
-				"3UU3U45UU21113444U312223UU44U3",
-				"U44U4U3331..1UU1112U2UU45UU5U3",
-				"U22U313U2..12322223233UU6UUU4U",
-				"33211.2U4211U222UU3U224UUU55U3",
-				"UU311122UU123U3U6U42U24U53U5U3",
-				"3UU34U322211U24U7U424U4U224UU3",
-				"123UUUU1...1112UUU3U3U3111UUUU",
-
-				"170"
-		};
-		final int rows = 16;
-		final int cols = 30;
-		final int mines = 170;//about 35% mines
-
-		GaussianEliminationSolver gauss = new GaussianEliminationSolver(rows, cols);
-		VisibleTile[][] visibleBoard = convertFormat(board);
-
-		printBoardDebug(visibleBoard, mines);
-		gauss.solvePosition(visibleBoard, mines);
-		printBoardDebugWithLogicalStuff(visibleBoard, mines);
 	}
 }
