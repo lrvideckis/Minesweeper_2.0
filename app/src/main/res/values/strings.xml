@@ -23,6 +23,7 @@
 	<string name="no_guessing_mode">No Guessing Mode</string>
 	<string name="no_guessing_mode_with_an_8">No Guessing Mode With An 8</string>
 	<string name="no_guess_board_not_found">Could not find a no guess board. This board might have guesses.</string>
+	<string name="loading_text">Please wait! This may take a moment.</string>
 
 	<!--
 	TODO: these modes
