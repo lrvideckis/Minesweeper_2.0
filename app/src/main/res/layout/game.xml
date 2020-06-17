@@ -61,7 +61,7 @@
 			tools:ignore="HardcodedText" />
 	</RelativeLayout>
 
-	<com.LukeVideckis.minesweeper20.view.GameCanvas
+	<com.LukeVideckis.minesweeper_android.view.GameCanvas
 		android:id="@+id/gridCanvas"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
