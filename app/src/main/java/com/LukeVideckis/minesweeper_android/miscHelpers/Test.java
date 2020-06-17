@@ -628,28 +628,94 @@ public class Test {
 	}
 
 	public static void BestSolverOnly(int numberOfTests) {
-		long[] times = new long[numberOfTests];
+		final int numberOfSolvers = 4;
+
+		long[][] times = new long[numberOfTests][numberOfSolvers];
+		int[] numberOfSuccessfulSolves = new int[numberOfSolvers];
+
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.print("test number: " + testID);
 
 			final int rows = 16;
 			final int cols = 30;
-			final int mines = 170;//about 35% mines
+			final int mines = 170;
 
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
 			long startTime = System.currentTimeMillis();
+			boolean solved = true;
 			try {
-				boardGen.getSolvableBoard(10, 10, false);
+				boardGen.getSolvableBoard(5, 5, false);
 			} catch (Exception e) {
 				e.printStackTrace();
+				solved = false;
 			}
-			times[testID - 1] = System.currentTimeMillis() - startTime;
+			times[testID - 1][0] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[0]++;
+
+
+			boardGen = new CreateSolvableBoard(rows, cols, mines);
+			startTime = System.currentTimeMillis();
+			solved = true;
+			try {
+				boardGen.getSolvableBoard2(5, 5, false);
+			} catch (Exception e) {
+				solved = false;
+				e.printStackTrace();
+			}
+			times[testID - 1][1] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[1]++;
+
+
+			boardGen = new CreateSolvableBoard(rows, cols, mines);
+			startTime = System.currentTimeMillis();
+			solved = true;
+			try {
+				boardGen.getSolvableBoard3(5, 5, false);
+			} catch (Exception e) {
+				solved = false;
+				e.printStackTrace();
+			}
+			times[testID - 1][2] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[2]++;
+
+
+			boardGen = new CreateSolvableBoard(rows, cols, mines);
+			startTime = System.currentTimeMillis();
+			solved = true;
+			try {
+				boardGen.getSolvableBoardOld(5, 5, false);
+			} catch (Exception e) {
+				solved = false;
+				e.printStackTrace();
+			}
+			times[testID - 1][3] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[3]++;
 		}
-		long totalFirst = 0;
-		for (long time : times) {
-			System.out.println("time " + time);
-			totalFirst += time;
+		long[] total = new long[numberOfSolvers];
+		for (long[] time : times) {
+			System.out.print("time ");
+			for (int i = 0; i < numberOfSolvers; ++i) {
+				System.out.print(time[i] + " ");
+				total[i] += time[i];
+			}
+			System.out.println();
 		}
-		System.out.println("average " + totalFirst / numberOfTests);
+		System.out.print("averages: ");
+		for (int i = 0; i < numberOfSolvers; ++i) {
+			System.out.print(total[i] / numberOfTests + " ");
+		}
+		System.out.println();
+
+		System.out.print("solves:");
+		for (int i = 0; i < numberOfSolvers; ++i) {
+			System.out.println(numberOfSuccessfulSolves[i] + " out of " + numberOfTests);
+		}
+		/*
+			averages: 1826 2076 2008 476
+			solves:10 out of 50
+			4 out of 50
+			13 out of 50
+			0 out of 50
+		 */
 	}
 }
