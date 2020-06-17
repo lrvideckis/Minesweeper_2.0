@@ -115,6 +115,7 @@ public class CreateSolvableBoard {
 	}
 
 	//TODO: make this as fast as: https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html
+	//TODO: now just guarentee that this will always create a new board (instead of sometimes failing
 	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
