@@ -32,7 +32,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			NUMBER_OF_COLS = "numCols",
 			NUMBER_OF_MINES = "numMines",
 			GAME_MODE = "gameMode";
-	private static final float maxMinePercentage = 0.4f, maxMinePercentageWith8 = 0.3f;
+	private static final float maxMinePercentage = 0.25f, maxMinePercentageWith8 = 0.22f;
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup;
 	private int minesMin = 0, minesMax = 8 * 9 - 10, gameMode;
@@ -53,6 +53,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			e.printStackTrace();
 		}
 		 */
+		try {
+			//Test.BestSolverOnlyasdf(100);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);
@@ -185,14 +190,15 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		if (gameMode == R.id.no_guessing_mode) {
 			minesMin = 0;
 			minesMax = (int) (rows * cols * maxMinePercentage);
+			minesMax = Math.min(minesMax, 100);
 		} else if (gameMode == R.id.noGuessingModeWithAn8) {
 			minesMin = 8;
 			minesMax = (int) (rows * cols * maxMinePercentageWith8);
+			minesMax = Math.min(minesMax, 100);
 		} else {
 			minesMin = 0;
 			minesMax = rows * cols - 10;
 		}
-		minesMax = Math.min(minesMax, 100);
 		SeekBar minesInput = findViewById(R.id.mineInput);
 		minesInput.setMin(minesMin);
 		minesInput.setMax(minesMax);

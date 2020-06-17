@@ -686,22 +686,37 @@ public class Test {
 		}
 	}
 
-	public static void BestSolverOnlyasdf(int numberOfTests) {
+	public static void BestSolverOnlyasdf(int numberOfTests) throws Exception {
+
+		int mxRows = -1, mxCols = -1, mxMines = -1;
+		long mx = -1;
 
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
-			System.out.print("test number: " + testID);
+			System.out.println("test number: " + testID);
 
-			final int rows = 16;
-			final int cols = 30;
-			final int mines = 100;
+
+			int rows = MyMath.getRand(8, 30);
+			int cols = MyMath.getRand(8, 30);
+			int mines = Math.min((int) (rows * cols * 0.25), 100);
+			System.out.println("rows,cols,mines: " + rows + " " + cols + " " + mines);
 
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
 			try {
+				long startTime = System.currentTimeMillis();
 				boardGen.getSolvableBoard(5, 5, false);
+				long totalTime = System.currentTimeMillis() - startTime;
+				System.out.println("time: " + totalTime);
+				if (totalTime > mx) {
+					mx = totalTime;
+					mxRows = rows;
+					mxCols = cols;
+					mxMines = mines;
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("max rows,cols,mines: " + mxRows + " " + mxCols + " " + mxMines);
 	}
 
 	public static void TryingToFindBug(int numberOfTests) {
