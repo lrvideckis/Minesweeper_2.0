@@ -565,12 +565,6 @@ public class MinesweeperGame {
 		if (haveToGuessMines.size() > freeAwayCells.size()) {
 			throw new Exception("the number of non-deducible mines > number of free away cells");
 		}
-		if (!haveToGuessMines.isEmpty()) {
-			System.out.println("moving at least one non-deducible mine");
-			for (Pair<Integer, Integer> spot : haveToGuessMines) {
-				System.out.println("spot: " + spot.first + " " + spot.second);
-			}
-		}
 		Collections.shuffle(freeAwayCells);
 		for (int pos = 0; pos < haveToGuessMines.size(); ++pos) {
 			int i = haveToGuessMines.get(pos).first;

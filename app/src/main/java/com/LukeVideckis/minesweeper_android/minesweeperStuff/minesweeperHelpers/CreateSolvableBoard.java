@@ -155,7 +155,6 @@ public class CreateSolvableBoard {
 			/* if there are any deducible free squares, click them, and continue on
 			 */
 			if (ExistsLogicalFree.isLogicalFree(board)) {
-				System.out.println("gauss solver found logical frees, clicking them");
 				for (int i = 0; i < rows; ++i) {
 					for (int j = 0; j < cols; ++j) {
 						if (board[i][j].getIsLogicalMine() && !game.getCell(i, j).isMine()) {
