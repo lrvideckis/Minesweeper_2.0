@@ -20,10 +20,8 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.math.BigInteger;
-import java.text.MessageFormat;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
-import static java.lang.String.format;
 
 public class Test {
 	@SuppressWarnings("SpellCheckingInspection")
@@ -515,7 +513,7 @@ public class Test {
 
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
-			System.out.println(" percentage: " + format("%.2f", mines / (float) (rows * cols)));
+			System.out.print(" percentage: " + mines / (float) (rows * cols));
 
 			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
 
@@ -575,19 +573,14 @@ public class Test {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.print("test number: " + testID);
 
-			//final int rows = MyMath.getRand(5, 30);
-			//final int cols = MyMath.getRand(5, 30);
-			//int mines = MyMath.getRand(2, 300);
-
-			final int rows = MyMath.getRand(8, 15);
-			final int cols = MyMath.getRand(8, 15);
-			int mines = MyMath.getRand(8, 50);
+			final int rows = MyMath.getRand(8, 30);
+			final int cols = MyMath.getRand(8, 30);
+			int mines = MyMath.getRand(8, 100);
 			mines = Math.min(mines, rows * cols - 9);
-			mines = Math.min(mines, (int) (rows * cols * 0.3f));
-			mines = Math.max(mines, 8);
+			mines = Math.min(mines, (int) (rows * cols * 0.23f));
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
-			System.out.print(" percentage: " + MessageFormat.format("%.2f", mines / (float) (rows * cols)));
+			System.out.print(" percentage: " + mines / (float) (rows * cols));
 
 			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
 
@@ -604,9 +597,16 @@ public class Test {
 					visibleBoard[i][j] = new VisibleTile();
 				}
 			}
+			boolean hitIterationLimit = false;
 			while (!game.getIsGameLost() && !game.getIsGameWon()) {
 				ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard, false);
-				solver.solvePosition(visibleBoard, mines);
+				try {
+					solver.solvePosition(visibleBoard, mines);
+				} catch (HitIterationLimitException ignored) {
+					System.out.println("hit iteration limit, void test");
+					hitIterationLimit = true;
+					break;
+				}
 				game.updateLogicalStuff(visibleBoard);
 
 				if (ExistsLogicalFree.noLogicalFrees(visibleBoard)) {
@@ -621,6 +621,9 @@ public class Test {
 						}
 					}
 				}
+			}
+			if (hitIterationLimit) {
+				continue;
 			}
 			if (!game.getIsGameWon()) {
 				System.out.println("game is not won, failed test");

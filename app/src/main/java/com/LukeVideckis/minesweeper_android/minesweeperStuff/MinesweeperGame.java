@@ -578,7 +578,7 @@ public class MinesweeperGame {
 		int mineCount = 0;
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (AwayCell.isAwayCell(this, i, j)) {
+				if (AwayCell.isAwayCell(this, i, j) && notPartOfThe8(i, j)) {
 					awayCells.add(new Pair<>(i, j));
 					if (getCell(i, j).isMine) {
 						++mineCount;
