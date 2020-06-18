@@ -651,7 +651,7 @@ public class Test {
 	}
 
 	public static void BestSolverOnly(int numberOfTests) {
-		final int numberOfSolvers = 2;
+		final int numberOfSolvers = 4;
 
 		long[][] times = new long[numberOfTests][numberOfSolvers];
 		int[] numberOfSuccessfulSolves = new int[numberOfSolvers];
@@ -663,6 +663,22 @@ public class Test {
 			final int cols = 30;
 			final int mines = 100;
 
+
+			/*
+			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
+			long startTime = System.currentTimeMillis();
+			boolean solved = true;
+			try {
+				boardGen.getSolvableBoard(5, 5, false, new AtomicBoolean(false));
+			} catch (Exception e) {
+				e.printStackTrace();
+				solved = false;
+			}
+			times[testID - 1][0] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[0]++;
+			 */
+
+
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
 			long startTime = System.currentTimeMillis();
 			boolean solved = true;
@@ -672,8 +688,21 @@ public class Test {
 				e.printStackTrace();
 				solved = false;
 			}
-			times[testID - 1][0] = System.currentTimeMillis() - startTime;
-			if (solved) numberOfSuccessfulSolves[0]++;
+			times[testID - 1][1] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[1]++;
+
+
+			boardGen = new CreateSolvableBoard(rows, cols, mines);
+			startTime = System.currentTimeMillis();
+			solved = true;
+			try {
+				boardGen.getSolvableBoard3(5, 5, false, new AtomicBoolean(false));
+			} catch (Exception e) {
+				solved = false;
+				e.printStackTrace();
+			}
+			times[testID - 1][2] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[2]++;
 
 
 			boardGen = new CreateSolvableBoard(rows, cols, mines);
@@ -685,8 +714,8 @@ public class Test {
 				solved = false;
 				e.printStackTrace();
 			}
-			times[testID - 1][1] = System.currentTimeMillis() - startTime;
-			if (solved) numberOfSuccessfulSolves[1]++;
+			times[testID - 1][3] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[3]++;
 		}
 		long[] total = new long[numberOfSolvers];
 		for (long[] time : times) {

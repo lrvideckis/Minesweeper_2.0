@@ -538,23 +538,6 @@ public class MinesweeperGame {
 		return true;
 	}
 
-	/*
-	public boolean existsGuessMines() {
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (isInterestingCell(i, j) &&
-						!AwayCell.isNextToAnAwayCell(this, i, j) &&
-						!getCell(i, j).isLogicalMine &&
-						!getCell(i, j).isLogicalFree
-				) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	 */
-
 	public boolean everyComponentHasLogicalFrees() throws Exception {
 		Dsu disjointSet = GetConnectedComponents.getDsuOfComponentsWithKnownMines(grid);
 		boolean[] hasLogicalFree = new boolean[rows * cols];

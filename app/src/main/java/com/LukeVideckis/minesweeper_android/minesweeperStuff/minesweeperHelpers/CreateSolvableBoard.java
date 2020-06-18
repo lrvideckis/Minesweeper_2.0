@@ -289,24 +289,21 @@ public class CreateSolvableBoard {
 				}
 
 				ConvertGameBoardFormat.convertToExistingBoard(game, board, true);
+				System.out.println("start of loop: " + gameStack.size());
+				printBoardDebug(board);
 
 				/*try to deduce free squares with local rules. There is the
 				 * possibility of not finding deducible free squares, even if they exist.
 				 */
-				/*
 				if (CheckForLocalStuff.checkAndUpdateBoardForTrivialStuff(board)) {
 					game.updateLogicalStuff(board);
-
-					System.out.println("here, printing board:");
-					printBoardDebug(board);
 					if (game.everyComponentHasLogicalFrees()) {
 						gameStack.add(new MinesweeperGame(game));
-						System.out.println("here 1, pushing new game: " + gameStack.size());
-						clickedLogicalFrees(game);
+					}
+					if (clickedLogicalFrees(game)) {
 						continue;
 					}
 				}
-				 */
 
 				/*try to deduce free squares with gauss solver. Gaussian Elimination has the
 				 * possibility of not finding deducible free squares, even if they exist.
@@ -315,9 +312,8 @@ public class CreateSolvableBoard {
 				game.updateLogicalStuff(board);
 				if (game.everyComponentHasLogicalFrees()) {
 					gameStack.add(new MinesweeperGame(game));
-					System.out.println("here 1, pushing new game: " + gameStack.size());
-					printBoardDebug(board);
-					clickedLogicalFrees(game);
+				}
+				if (clickedLogicalFrees(game)) {
 					continue;
 				}
 
@@ -326,38 +322,39 @@ public class CreateSolvableBoard {
 					game.updateLogicalStuff(board);
 					if (game.everyComponentHasLogicalFrees()) {
 						gameStack.add(new MinesweeperGame(game));
-						System.out.println("here 2, pushing new game: " + gameStack.size());
-						printBoardDebug(board);
-						clickedLogicalFrees(game);
+					}
+					if (clickedLogicalFrees(game)) {
 						continue;
-					} else {
-						System.out.println("failed on:");
-						printBoardDebug(board);
 					}
 				} catch (HitIterationLimitException ignored) {
 				}
 
-				final int numBack = 3;
+				if (MyMath.getRand(0, 1) == 0) {
+					try {
+						game.shuffleInterestingMinesAndMakeOneAway(firstClickI, firstClickJ);
+						gameStack.clear();
+					} catch (Exception ignored) {
+						break;
+					}
+				} else {
+					final int numBack = 1;
 
-				while (gameStack.size() >= numBack && !game.everyComponentHasLogicalFrees()) {
-					for (int i = 0; i + 1 < numBack; ++i) {
+					while (gameStack.size() >= numBack && !game.everyComponentHasLogicalFrees()) {
+						for (int i = 0; i + 1 < numBack; ++i) {
+							gameStack.remove(gameStack.size() - 1);
+						}
+						game = new MinesweeperGame(gameStack.get(gameStack.size() - 1));
 						gameStack.remove(gameStack.size() - 1);
 					}
-					game = new MinesweeperGame(gameStack.get(gameStack.size() - 1));
-					gameStack.remove(gameStack.size() - 1);
+					if (!game.everyComponentHasLogicalFrees()) {
+						break;
+					}
+					try {
+						game.shuffleAwayMines();
+					} catch (Exception ignored) {
+						break;
+					}
 				}
-				if (!game.everyComponentHasLogicalFrees()) {
-					break;
-				}
-				System.out.println("popped back to:");
-				ConvertGameBoardFormat.convertToExistingBoard(game, board, true);
-				printBoardDebug(board);
-				try {
-					game.shuffleAwayMines();
-				} catch (Exception ignored) {
-					break;
-				}
-				System.out.println("end of loop, size: " + gameStack.size());
 			}
 
 			if (game.getIsGameWon()) {
