@@ -558,7 +558,6 @@ public class MinesweeperGame {
 				if (isInterestingCell(i, j) &&
 						!getCell(i, j).isLogicalMine &&
 						!hasLogicalFree[disjointSet.find(Dsu.getNode(i, j, rows, cols))]) {
-					System.out.println("failed on: " + i + " " + j);
 					return false;
 				}
 			}
