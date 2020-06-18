@@ -34,7 +34,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
 			mineEmoji = new String(Character.toChars(0x1F4A3));
 	public static final int cellPixelLength = 150;
-	private static final long millisecondsBeforeDisplayingLoadingScreen = 100, maxMillisecondsToGenerateSolvableBoardBeforeQuitting = 2000;
+	private static final long millisecondsBeforeDisplayingLoadingScreen = 100;
 
 	private boolean
 			toggleFlagModeOn = false,
