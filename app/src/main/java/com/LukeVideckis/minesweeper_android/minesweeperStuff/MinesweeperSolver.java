@@ -92,5 +92,9 @@ public interface MinesweeperSolver {
 			this.isVisible = isVisible;
 			this.numberSurroundingMines = numberSurroundingMines;
 		}
+
+		public void setIsLogicalMine() {
+			isLogicalMine = true;
+		}
 	}
 }

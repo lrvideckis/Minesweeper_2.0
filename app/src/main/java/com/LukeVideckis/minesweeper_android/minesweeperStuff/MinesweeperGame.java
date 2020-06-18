@@ -7,7 +7,9 @@ import com.LukeVideckis.minesweeper_android.customExceptions.NoInterestingMinesE
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.Dsu;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -352,7 +354,7 @@ public class MinesweeperGame {
 		getCell(i, j).numberOfTotalConfigs.setValues(1, 1);
 	}
 
-	public void shuffleInterestingMinesAndMakeOneAway() throws Exception {
+	public void shuffleInterestingMinesAndMakeOneAway(int firstClickI, int firstClickJ) throws Exception {
 		int interestingMines = 0;
 		ArrayList<Pair<Integer, Integer>>
 				interestingSpots = new ArrayList<>(),
@@ -403,13 +405,8 @@ public class MinesweeperGame {
 		int j = freeAwayCells.get(0).second;
 		changeMineStatus(i, j, true);
 
-		for (i = 0; i < rows; ++i) {
-			for (j = 0; j < cols; ++j) {
-				if (getCell(i, j).isVisible) {
-					revealCell(i, j);
-				}
-			}
-		}
+		resetAllLogicalAndVisibleStuff();
+		revealCell(firstClickI, firstClickJ);
 	}
 
 	//TODO: this doesn't take into account the guaranteed 8
@@ -541,8 +538,36 @@ public class MinesweeperGame {
 		return true;
 	}
 
+	public boolean everyComponentHasLogicalFrees() throws Exception {
+		Dsu disjointSet = GetConnectedComponents.getDsuOfComponentsWithKnownMines(grid);
+		boolean[] hasLogicalFree = new boolean[rows * cols];
+		boolean hasAtLeastOneLogicalFree = false;
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (getCell(i, j).isLogicalFree) {
+					hasAtLeastOneLogicalFree = true;
+					hasLogicalFree[disjointSet.find(Dsu.getNode(i, j, rows, cols))] = true;
+				}
+			}
+		}
+		if (!hasAtLeastOneLogicalFree) {
+			return false;
+		}
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (isInterestingCell(i, j) &&
+						!getCell(i, j).isLogicalMine &&
+						!hasLogicalFree[disjointSet.find(Dsu.getNode(i, j, rows, cols))]) {
+					System.out.println("failed on: " + i + " " + j);
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	//returns true if at least one non-deducible mine was moved
-	public boolean removeGuessMines() throws Exception {
+	public boolean removeGuessMines(int firstClickI, int firstClickJ) throws Exception {
 		ArrayList<Pair<Integer, Integer>>
 				haveToGuessMines = new ArrayList<>(),
 				freeAwayCells = new ArrayList<>();
@@ -579,15 +604,47 @@ public class MinesweeperGame {
 			changeMineStatus(i, j, true);
 		}
 
+		resetAllLogicalAndVisibleStuff();
+		revealCell(firstClickI, firstClickJ);
+
+		return !haveToGuessMines.isEmpty();
+	}
+
+	private void resetAllLogicalAndVisibleStuff() throws Exception {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				if (getCell(i, j).isVisible) {
-					revealCell(i, j);
+				getCell(i, j).resetLogicalStuffAndVisiblity();
+			}
+		}
+	}
+
+	public void shuffleAwayMines() throws Exception {
+		ArrayList<Pair<Integer, Integer>> awayCells = new ArrayList<>();
+		int mineCount = 0;
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (AwayCell.isAwayCell(this, i, j)) {
+					awayCells.add(new Pair<>(i, j));
+					if (getCell(i, j).isMine) {
+						++mineCount;
+					}
 				}
 			}
 		}
-
-		return !haveToGuessMines.isEmpty();
+		if (mineCount == 0 || mineCount == awayCells.size()) {
+			throw new Exception("can't shuffle away mines");
+		}
+		for (Pair<Integer, Integer> cell : awayCells) {
+			if (getCell(cell.first, cell.second).isMine) {
+				changeMineStatus(cell.first, cell.second, false);
+			}
+		}
+		Collections.shuffle(awayCells);
+		for (int pos = 0; pos < mineCount; ++pos) {
+			final int i = awayCells.get(pos).first;
+			final int j = awayCells.get(pos).second;
+			changeMineStatus(i, j, true);
+		}
 	}
 
 	public static class Tile extends VisibleTile {

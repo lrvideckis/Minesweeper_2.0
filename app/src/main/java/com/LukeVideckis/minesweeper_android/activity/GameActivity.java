@@ -34,7 +34,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
 			mineEmoji = new String(Character.toChars(0x1F4A3));
 	public static final int cellPixelLength = 150;
-	private static final long millisecondsBeforeDisplayingLoadingScreen = 100;
+	private static final long millisecondsBeforeDisplayingLoadingScreen = 100, maxMillisecondsToGenerateSolvableBoardBeforeQuitting = 2000;
 
 	private boolean
 			toggleFlagModeOn = false,
@@ -133,7 +133,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
 			updateTimeThread.start();
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
-				AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
+
+				AtomicBoolean displayLoadingScreen = new AtomicBoolean(true);
+
 				new Thread() {
 					@Override
 					public void run() {
@@ -142,24 +144,33 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-						if (!finishedBoardGen.get()) {
+						System.out.println("here, it's been 0.1 seconds, showing loading screen");
+						if (displayLoadingScreen.get()) {
 							runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.show());
-						} else {
-							findViewById(R.id.gridCanvas).invalidate();
 						}
 					}
 				}.start();
 
-				new Thread() {
+				Thread t = new Thread() {
+					private AtomicBoolean isInterrupted = new AtomicBoolean(false);
+
 					@Override
 					public void run() {
 						try {
-							minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8);
-							finishedBoardGen.set(true);
+							long startTime = System.currentTimeMillis();
+							MinesweeperGame solvable = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
+							System.out.println("solvable board gen finished in time: " + (System.currentTimeMillis() - startTime));
+							if (!isInterrupted.get()) {
+								minesweeperGame = solvable;
+								findViewById(R.id.gridCanvas).invalidate();
+							}
+							displayLoadingScreen.set(false);
 							runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.dismiss());
 						} catch (Exception ignored) {
-							finishedBoardGen.set(true);
+							System.out.println("here, board gen threw");
+							displayLoadingScreen.set(false);
 							try {
+								minesweeperGame = new MinesweeperGame(numberOfRows, numberOfCols, numberOfMines);
 								minesweeperGame.clickCell(row, col, false);
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -168,7 +179,47 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 								displayNoGuessBoardPopup();
 								loadingScreenForSolvableBoardGeneration.dismiss();
 							});
+							System.out.println("end of here, board gen threw");
 						}
+					}
+
+					@Override
+					public void interrupt() {
+						super.interrupt();
+						System.out.println("here, inside thread interrupt");
+						isInterrupted.set(true);
+					}
+				};
+				t.start();
+
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							sleep(maxMillisecondsToGenerateSolvableBoardBeforeQuitting);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						System.out.println("here, it's been a second");
+						if (!t.isAlive()) {
+							return;
+						}
+						System.out.println("the thread was still running");
+						t.interrupt();
+						runOnUiThread(() -> {
+
+							if (displayLoadingScreen.get()) {
+								displayNoGuessBoardPopup();
+								try {
+									minesweeperGame.clickCell(row, col, false);
+								} catch (Exception ignored) {
+								}
+								findViewById(R.id.gridCanvas).invalidate();
+							}
+							displayLoadingScreen.set(false);
+							loadingScreenForSolvableBoardGeneration.dismiss();
+						});
+						System.out.println("end of: the thread was still running");
 					}
 				}.start();
 
