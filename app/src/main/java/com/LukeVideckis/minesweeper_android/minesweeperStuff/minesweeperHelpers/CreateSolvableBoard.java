@@ -3,12 +3,14 @@ package com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers
 import com.LukeVideckis.minesweeper_android.customExceptions.HitIterationLimitException;
 import com.LukeVideckis.minesweeper_android.customExceptions.NoAwayCellsToMoveAMineToException;
 import com.LukeVideckis.minesweeper_android.customExceptions.NoInterestingMinesException;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.CheckForLocalStuff;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.GaussianEliminationSolver;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolver;
 
-import java.util.ArrayList;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
@@ -18,6 +20,7 @@ public class CreateSolvableBoard {
 	//TODO: change this back to something smaller
 	//TODO: revert this back to single combined backtracking solver (no holy grail solver) as ***best (fastest) alg only uses gauss***
 	private final GaussianEliminationSolver gaussSolver; //TODO: change this back to type MinesweeperSolver
+	private final BacktrackingSolver holyGrailSolver;
 	private final VisibleTile[][] board;
 	private final int rows;
 	private final int cols;
@@ -29,6 +32,7 @@ public class CreateSolvableBoard {
 		//TODO: find a way to change iteration limit to something smaller
 		//MyBacktrackingSolver.iterationLimit = 500;
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
+		holyGrailSolver = new HolyGrailSolver(rows, cols);
 		board = new VisibleTile[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -237,7 +241,8 @@ public class CreateSolvableBoard {
 			throw new Exception("first click is out of bounds");
 		}
 
-		ArrayList<MinesweeperGame> gameStack = new ArrayList<>();
+		//ArrayList<MinesweeperGame> gameStack = new ArrayList<>();
+		Stack<MinesweeperGame> gameStack = new Stack<>();
 
 		while (!isInterrupted.get()) {
 			MinesweeperGame game = new MinesweeperGame(rows, cols, mines);
@@ -283,6 +288,7 @@ public class CreateSolvableBoard {
 			 * very end (there may be other cases when the alg. fails). This is why there is an outer
 			 * loop. So we can restart completely on a fresh random board.
 			 */
+			int cnt = 0;
 			while (!game.getIsGameWon() && !isInterrupted.get()) {
 				if (game.getIsGameLost()) {
 					throw new Exception("game is lost, but board generator should never lose");
@@ -298,7 +304,7 @@ public class CreateSolvableBoard {
 				if (CheckForLocalStuff.checkAndUpdateBoardForTrivialStuff(board)) {
 					game.updateLogicalStuff(board);
 					if (game.everyComponentHasLogicalFrees()) {
-						gameStack.add(new MinesweeperGame(game));
+						gameStack.push(new MinesweeperGame(game));
 					}
 					if (clickedLogicalFrees(game)) {
 						continue;
@@ -311,7 +317,7 @@ public class CreateSolvableBoard {
 				gaussSolver.solvePosition(board, mines);
 				game.updateLogicalStuff(board);
 				if (game.everyComponentHasLogicalFrees()) {
-					gameStack.add(new MinesweeperGame(game));
+					gameStack.push(new MinesweeperGame(game));
 				}
 				if (clickedLogicalFrees(game)) {
 					continue;
@@ -321,7 +327,7 @@ public class CreateSolvableBoard {
 					myBacktrackingSolver.solvePosition(board, mines);
 					game.updateLogicalStuff(board);
 					if (game.everyComponentHasLogicalFrees()) {
-						gameStack.add(new MinesweeperGame(game));
+						gameStack.push(new MinesweeperGame(game));
 					}
 					if (clickedLogicalFrees(game)) {
 						continue;
@@ -329,7 +335,7 @@ public class CreateSolvableBoard {
 				} catch (HitIterationLimitException ignored) {
 				}
 
-				if (MyMath.getRand(0, 1) == 0) {
+				if ((cnt++) % 15 == 0) {
 					try {
 						game.shuffleInterestingMinesAndMakeOneAway(firstClickI, firstClickJ);
 						gameStack.clear();
@@ -337,14 +343,8 @@ public class CreateSolvableBoard {
 						break;
 					}
 				} else {
-					final int numBack = 1;
-
-					while (gameStack.size() >= numBack && !game.everyComponentHasLogicalFrees()) {
-						for (int i = 0; i + 1 < numBack; ++i) {
-							gameStack.remove(gameStack.size() - 1);
-						}
-						game = new MinesweeperGame(gameStack.get(gameStack.size() - 1));
-						gameStack.remove(gameStack.size() - 1);
+					while (!gameStack.isEmpty() && !game.everyComponentHasLogicalFrees()) {
+						game = new MinesweeperGame(gameStack.pop());
 					}
 					if (!game.everyComponentHasLogicalFrees()) {
 						break;

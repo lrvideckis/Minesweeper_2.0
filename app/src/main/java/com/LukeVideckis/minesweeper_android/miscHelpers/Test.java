@@ -651,7 +651,7 @@ public class Test {
 	}
 
 	public static void BestSolverOnly(int numberOfTests) {
-		final int numberOfSolvers = 4;
+		final int numberOfSolvers = 5;
 
 		long[][] times = new long[numberOfTests][numberOfSolvers];
 		int[] numberOfSuccessfulSolves = new int[numberOfSolvers];
@@ -705,6 +705,21 @@ public class Test {
 			if (solved) numberOfSuccessfulSolves[2]++;
 
 
+			/*
+			boardGen = new CreateSolvableBoard(rows, cols, mines);
+			startTime = System.currentTimeMillis();
+			solved = true;
+			try {
+				boardGen.getSolvableBoard4(5, 5, false, new AtomicBoolean(false));
+			} catch (Exception e) {
+				solved = false;
+				e.printStackTrace();
+			}
+			times[testID - 1][3] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[3]++;
+			 */
+
+
 			boardGen = new CreateSolvableBoard(rows, cols, mines);
 			startTime = System.currentTimeMillis();
 			solved = true;
@@ -714,8 +729,8 @@ public class Test {
 				solved = false;
 				e.printStackTrace();
 			}
-			times[testID - 1][3] = System.currentTimeMillis() - startTime;
-			if (solved) numberOfSuccessfulSolves[3]++;
+			times[testID - 1][4] = System.currentTimeMillis() - startTime;
+			if (solved) numberOfSuccessfulSolves[4]++;
 		}
 		long[] total = new long[numberOfSolvers];
 		for (long[] time : times) {
