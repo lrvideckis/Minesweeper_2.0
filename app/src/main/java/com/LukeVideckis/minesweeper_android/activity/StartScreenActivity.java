@@ -55,7 +55,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		}
 		 */
 		try {
-			Test.TestThatSolvableBoardsAreSolvable(500);
+			//Test.TestThatSolvableBoardsAreSolvable(500);
+			Test.TryingToFindBug(1);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -657,7 +657,7 @@ public class Test {
 		int[] numberOfSuccessfulSolves = new int[numberOfSolvers];
 
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
-			System.out.print("test number: " + testID);
+			System.out.println("test number: " + testID);
 
 			final int rows = 16;
 			final int cols = 30;
@@ -667,7 +667,7 @@ public class Test {
 			long startTime = System.currentTimeMillis();
 			boolean solved = true;
 			try {
-				boardGen.getSolvableBoard(5, 5, false, new AtomicBoolean(false));
+				boardGen.getSolvableBoard2(5, 5, false, new AtomicBoolean(false));
 			} catch (Exception e) {
 				e.printStackTrace();
 				solved = false;
@@ -748,13 +748,22 @@ public class Test {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 
+			/*
 			final int rows = 16;
 			final int cols = 30;
 			final int mines = 100;
+			 */
+
+			final int rows = 12;
+			final int cols = 12;
+			final int mines = 36;
 
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
 			try {
-				boardGen.getSolvableBoard(5, 5, false, new AtomicBoolean(false));
+				long startTime = System.currentTimeMillis();
+				boardGen.getSolvableBoard2(5, 5, false, new AtomicBoolean(false));
+				long totalTime = System.currentTimeMillis() - startTime;
+				System.out.println("totalTime: " + totalTime);
 			} catch (Exception e) {
 				e.printStackTrace();
 				break;
