@@ -209,7 +209,7 @@ public class CreateSolvableBoard {
 				 * locations to remove the forced - guess
 				 */
 				try {
-					if (game.removeGuessMines()) {
+					if (game.removeGuessMines(firstClickI, firstClickJ)) {
 						continue;
 					}
 				} catch (Exception ignored) {
@@ -217,7 +217,7 @@ public class CreateSolvableBoard {
 				}
 
 				try {
-					game.shuffleInterestingMinesAndMakeOneAway();
+					game.shuffleInterestingMinesAndMakeOneAway(firstClickI, firstClickJ);
 				} catch (NoAwayCellsToMoveAMineToException | NoInterestingMinesException ignored) {
 					break;
 				}
