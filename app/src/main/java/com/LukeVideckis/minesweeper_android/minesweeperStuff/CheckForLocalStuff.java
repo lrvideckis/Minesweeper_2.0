@@ -5,6 +5,8 @@ import android.util.Pair;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 
+import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
+
 public class CheckForLocalStuff {
 	public static boolean checkAndUpdateBoardForTrivialStuff(MinesweeperSolver.VisibleTile[][] board) throws Exception {
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
@@ -12,7 +14,7 @@ public class CheckForLocalStuff {
 		boolean foundNewStuff = false;
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				MinesweeperSolver.VisibleTile cell = board[i][j];
+				VisibleTile cell = board[i][j];
 				if (!cell.getIsVisible()) {
 					continue;
 				}

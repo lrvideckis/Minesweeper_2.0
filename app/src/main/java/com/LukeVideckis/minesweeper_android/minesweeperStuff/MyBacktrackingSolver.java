@@ -158,33 +158,33 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 
-
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				VisibleTile curr = board[i][j];
-				if (AwayCell.isAwayCell(board, i, j, rows, cols)) {
-					if (awayMineProbability == null) {
-						throw new Exception("away probability is null, but this was checked above");
-					}
-					curr.numberOfMineConfigs.setValue(awayMineProbability);
-					curr.numberOfTotalConfigs.setValues(1, 1);
-				}
 				if (curr.getIsVisible() && !curr.numberOfMineConfigs.equals(0)) {
-					throw new Exception("found a visible cell with non-zero number of mine configurations");
+					throw new Exception("found a visible cell with non-zero number of mine configurations: " + i + " " + j);
 				}
 				if (curr.getIsLogicalMine()) {
 					if (!curr.numberOfMineConfigs.equals(1) ||
 							!curr.numberOfTotalConfigs.equals(1)
 					) {
-						throw new Exception("found logical mine with mine probability != 1");
+						throw new Exception("found logical mine with mine probability != 1: " + i + " " + j);
 					}
 				}
 				if (curr.getIsLogicalFree()) {
 					if (!curr.numberOfMineConfigs.equals(0) ||
 							!curr.numberOfTotalConfigs.equals(1)
 					) {
-						throw new Exception("found logical free cell with mine probability != 0");
+						throw new Exception("found logical free cell with mine probability != 0: " + i + " " + j);
 					}
+				}
+
+				if (AwayCell.isAwayCell(board, i, j, rows, cols)) {
+					if (awayMineProbability == null) {
+						throw new Exception("away probability is null, but this was checked above");
+					}
+					curr.numberOfMineConfigs.setValue(awayMineProbability);
+					curr.numberOfTotalConfigs.setValues(1, 1);
 				}
 
 				if (curr.getIsVisible()) {

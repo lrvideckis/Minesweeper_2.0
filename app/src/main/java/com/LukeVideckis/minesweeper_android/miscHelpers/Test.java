@@ -20,6 +20,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.math.BigInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
@@ -27,6 +28,27 @@ public class Test {
 	@SuppressWarnings("SpellCheckingInspection")
 
 	private final static String[][] previousFailedBoards = {
+
+			{
+					".112B1...1111UU",
+					".1B2121213B33UU",
+					"2321.1B2B4B4BBB",
+					"BB1..1233B3UUUU",
+					"B31...1B224UUUB",
+					"11.1122212BB5UU",
+					"..12B2B212B4BB2",
+					"..1B222B2212232",
+					"..111.13B2...2B",
+					".111...2B31..2B",
+					"23B1...12B1..11",
+					"BB431..133311..",
+					"U5BB4333BB2B21.",
+					"UUUBBBBB4222B21",
+					"UUUUUUUB2..112B",
+
+					"55"
+			},
+
 			//board where gauss solver determines away cells as mines
 			{
 					"UUUUU",
@@ -208,6 +230,11 @@ public class Test {
 					board[i][j].updateVisibilityAndSurroundingMines(true, 0);
 				} else if (stringBoard[i].charAt(j) == 'U') {
 					board[i][j].updateVisibilityAndSurroundingMines(false, 0);
+				} else if (stringBoard[i].charAt(j) == 'B') {
+
+					board[i][j].updateVisibilityAndSurroundingMines(false, 0);
+					board[i][j].setIsLogicalMine();
+
 				} else {
 					board[i][j].updateVisibilityAndSurroundingMines(true, stringBoard[i].charAt(j) - '0');
 				}
@@ -478,14 +505,21 @@ public class Test {
 
 	@SuppressLint("DefaultLocale")
 	public static void TestThatSolvableBoardsAreSolvable(int numberOfTests) throws Exception {
+		long sumTimes = 0;
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 
+			/*
 			final int rows = MyMath.getRand(8, 30);
 			final int cols = MyMath.getRand(8, 30);
 			int mines = MyMath.getRand(2, 100);
 			mines = Math.min(mines, rows * cols - 9);
 			mines = Math.min(mines, (int) (rows * cols * 0.23f));
+			 */
+
+			final int rows = 16;
+			final int cols = 30;
+			int mines = 100;
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.println(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
@@ -497,21 +531,30 @@ public class Test {
 			final int firstClickJ = MyMath.getRand(0, cols - 1);
 			MinesweeperGame game;
 			long startTime = System.currentTimeMillis();
-			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, false);
+			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, false, new AtomicBoolean(false));
 			System.out.println(" time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
+			sumTimes += System.currentTimeMillis() - startTime;
 			VisibleTile[][] visibleBoard = new VisibleTile[rows][cols];
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {
 					visibleBoard[i][j] = new VisibleTile();
 				}
 			}
+			boolean hitIterationLimit = false;
 			while (!game.getIsGameLost() && !game.getIsGameWon()) {
 				ConvertGameBoardFormat.convertToExistingBoard(game, visibleBoard, false);
-				solver.solvePosition(visibleBoard, mines);
+				try {
+					solver.solvePosition(visibleBoard, mines);
+				} catch (HitIterationLimitException ignored) {
+					System.out.println("hit iteration limit, void test");
+					hitIterationLimit = true;
+					break;
+				}
 				game.updateLogicalStuff(visibleBoard);
 
 				if (!ExistsLogicalFree.isLogicalFree(visibleBoard)) {
 					System.out.println("no logical frees, failed test");
+					CreateSolvableBoard.printBoardDebug(visibleBoard);
 					return;
 				}
 
@@ -523,11 +566,15 @@ public class Test {
 					}
 				}
 			}
+			if (hitIterationLimit) {
+				continue;
+			}
 			if (!game.getIsGameWon()) {
 				System.out.println("game is not won, failed test");
 				return;
 			}
 		}
+		System.out.println("average total time (ms): " + sumTimes / numberOfTests);
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
@@ -556,7 +603,7 @@ public class Test {
 			final int firstClickJ = MyMath.getRand(0, cols - 1);
 			MinesweeperGame game;
 			long startTime = System.currentTimeMillis();
-			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, true);
+			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, true, new AtomicBoolean(false));
 			System.out.println(" time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
 			VisibleTile[][] visibleBoard = new VisibleTile[rows][cols];
 			for (int i = 0; i < rows; ++i) {
@@ -620,7 +667,7 @@ public class Test {
 			long startTime = System.currentTimeMillis();
 			boolean solved = true;
 			try {
-				boardGen.getSolvableBoard(5, 5, false);
+				boardGen.getSolvableBoard(5, 5, false, new AtomicBoolean(false));
 			} catch (Exception e) {
 				e.printStackTrace();
 				solved = false;
@@ -679,7 +726,7 @@ public class Test {
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
 			try {
 				long startTime = System.currentTimeMillis();
-				boardGen.getSolvableBoard(5, 5, false);
+				boardGen.getSolvableBoard(5, 5, false, new AtomicBoolean(false));
 				long totalTime = System.currentTimeMillis() - startTime;
 				System.out.println("time: " + totalTime);
 				if (totalTime > mx) {
@@ -707,7 +754,7 @@ public class Test {
 
 			CreateSolvableBoard boardGen = new CreateSolvableBoard(rows, cols, mines);
 			try {
-				boardGen.getSolvableBoard(5, 5, false);
+				boardGen.getSolvableBoard(5, 5, false, new AtomicBoolean(false));
 			} catch (Exception e) {
 				e.printStackTrace();
 				break;

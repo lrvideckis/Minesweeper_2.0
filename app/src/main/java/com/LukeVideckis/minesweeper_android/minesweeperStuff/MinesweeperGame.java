@@ -352,7 +352,7 @@ public class MinesweeperGame {
 		getCell(i, j).numberOfTotalConfigs.setValues(1, 1);
 	}
 
-	public void shuffleInterestingMinesAndMakeOneAway() throws Exception {
+	public void shuffleInterestingMinesAndMakeOneAway(int firstClickI, int firstClickJ) throws Exception {
 		int interestingMines = 0;
 		ArrayList<Pair<Integer, Integer>>
 				interestingSpots = new ArrayList<>(),
@@ -403,13 +403,8 @@ public class MinesweeperGame {
 		int j = freeAwayCells.get(0).second;
 		changeMineStatus(i, j, true);
 
-		for (i = 0; i < rows; ++i) {
-			for (j = 0; j < cols; ++j) {
-				if (getCell(i, j).isVisible) {
-					revealCell(i, j);
-				}
-			}
-		}
+		resetAllLogicalAndVisibleStuff();
+		revealCell(firstClickI, firstClickJ);
 	}
 
 	//TODO: this doesn't take into account the guaranteed 8
@@ -542,7 +537,7 @@ public class MinesweeperGame {
 	}
 
 	//returns true if at least one non-deducible mine was moved
-	public boolean removeGuessMines() throws Exception {
+	public boolean removeGuessMines(int firstClickI, int firstClickJ) throws Exception {
 		ArrayList<Pair<Integer, Integer>>
 				haveToGuessMines = new ArrayList<>(),
 				freeAwayCells = new ArrayList<>();
@@ -579,15 +574,18 @@ public class MinesweeperGame {
 			changeMineStatus(i, j, true);
 		}
 
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (getCell(i, j).isVisible) {
-					revealCell(i, j);
-				}
-			}
-		}
+		resetAllLogicalAndVisibleStuff();
+		revealCell(firstClickI, firstClickJ);
 
 		return !haveToGuessMines.isEmpty();
+	}
+
+	private void resetAllLogicalAndVisibleStuff() throws Exception {
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				getCell(i, j).resetLogicalStuffAndVisiblity();
+			}
+		}
 	}
 
 	public static class Tile extends VisibleTile {

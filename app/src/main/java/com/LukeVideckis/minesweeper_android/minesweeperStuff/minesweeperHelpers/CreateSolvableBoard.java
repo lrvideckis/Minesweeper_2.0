@@ -8,6 +8,8 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.GaussianElimination
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolver;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 //TODO: investigate probability of board generation failing
@@ -112,12 +114,13 @@ public class CreateSolvableBoard {
 		return clickedFree;
 	}
 
-	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
+	//TODO: think about also guaranteeing that the backtracking solver will never time out - only run backtracking solver, nothing else
+	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8, AtomicBoolean isInterrupted) throws Exception {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
 		}
 
-		while (true) {
+		while (!isInterrupted.get()) {
 			MinesweeperGame game = new MinesweeperGame(rows, cols, mines);
 			if (hasAn8) {
 				game.setHavingAn8();
@@ -161,7 +164,7 @@ public class CreateSolvableBoard {
 			 * very end (there may be other cases when the alg. fails). This is why there is an outer
 			 * loop. So we can restart completely on a fresh random board.
 			 */
-			while (!game.getIsGameWon()) {
+			while (!game.getIsGameWon() && !isInterrupted.get()) {
 				if (game.getIsGameLost()) {
 					throw new Exception("game is lost, but board generator should never lose");
 				}
@@ -224,6 +227,7 @@ public class CreateSolvableBoard {
 				return new MinesweeperGame(game, firstClickI, firstClickJ);
 			}
 		}
+		return null;
 	}
 
 
