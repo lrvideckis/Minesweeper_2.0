@@ -21,7 +21,6 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 
 import java.math.BigInteger;
 import java.text.MessageFormat;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 import static java.lang.String.format;
@@ -525,7 +524,7 @@ public class Test {
 			final int firstClickJ = MyMath.getRand(0, cols - 1);
 			MinesweeperGame game;
 			long startTime = System.currentTimeMillis();
-			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, false, new AtomicBoolean(false));
+			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, false);
 			System.out.println(" time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
 			sumTimes += System.currentTimeMillis() - startTime;
 			VisibleTile[][] visibleBoard = new VisibleTile[rows][cols];
@@ -597,7 +596,7 @@ public class Test {
 			final int firstClickJ = MyMath.getRand(0, cols - 1);
 			MinesweeperGame game;
 			long startTime = System.currentTimeMillis();
-			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, true, new AtomicBoolean(false));
+			game = createSolvableBoard.getSolvableBoard(firstClickI, firstClickJ, true);
 			System.out.println(" time to create solvable board: " + (System.currentTimeMillis() - startTime) + " ms");
 			VisibleTile[][] visibleBoard = new VisibleTile[rows][cols];
 			for (int i = 0; i < rows; ++i) {
@@ -662,7 +661,7 @@ public class Test {
 			long startTime = System.currentTimeMillis();
 			boolean solved = true;
 			try {
-				boardGen.getSolvableBoard(5, 5, false, new AtomicBoolean(false));
+				boardGen.getSolvableBoard(5, 5, false);
 			} catch (Exception e) {
 				e.printStackTrace();
 				solved = false;
