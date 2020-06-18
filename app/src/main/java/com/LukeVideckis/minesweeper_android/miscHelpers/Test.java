@@ -509,17 +509,12 @@ public class Test {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
 
-			/*
 			final int rows = MyMath.getRand(8, 30);
 			final int cols = MyMath.getRand(8, 30);
 			int mines = MyMath.getRand(2, 100);
 			mines = Math.min(mines, rows * cols - 9);
 			mines = Math.min(mines, (int) (rows * cols * 0.23f));
-			 */
 
-			final int rows = 16;
-			final int cols = 30;
-			int mines = 100;
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.println(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));

@@ -133,9 +133,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
 			updateTimeThread.start();
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
-
 				AtomicBoolean displayLoadingScreen = new AtomicBoolean(true);
-
 				new Thread() {
 					@Override
 					public void run() {
@@ -161,6 +159,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 							MinesweeperGame solvable = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
 							System.out.println("solvable board gen finished in time: " + (System.currentTimeMillis() - startTime));
 							if (!isInterrupted.get()) {
+								CreateSolvableBoard.printBoardDebugMines(solvable);
 								minesweeperGame = solvable;
 								findViewById(R.id.gridCanvas).invalidate();
 							}
