@@ -52,14 +52,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		try {
-			Test.TestThatSolvableBoardsWith8AreSolvable(1);
-			//Test.BestSolverOnly(25);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		 */
+		*/
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.start_screen);
