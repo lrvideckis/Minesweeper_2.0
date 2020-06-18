@@ -498,9 +498,9 @@ public class MinesweeperGame {
 	}
 
 	private void changeMineStatus(int i, int j, boolean isMine) throws Exception {
-		getCell(i, j).resetLogicalStuffAndVisiblity();
+		getCell(i, j).resetLogicalStuffAndVisibility();
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-			getCell(adj[0], adj[1]).resetLogicalStuffAndVisiblity();
+			getCell(adj[0], adj[1]).resetLogicalStuffAndVisibility();
 		}
 
 		if (getCell(i, j).isMine == isMine) {
@@ -565,54 +565,10 @@ public class MinesweeperGame {
 		return true;
 	}
 
-	//returns true if at least one non-deducible mine was moved
-	public boolean removeGuessMines(int firstClickI, int firstClickJ) throws Exception {
-		ArrayList<Pair<Integer, Integer>>
-				haveToGuessMines = new ArrayList<>(),
-				freeAwayCells = new ArrayList<>();
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				//cell is part of a guess (not-deducible)
-				if (isInterestingCell(i, j) &&
-						!AwayCell.isNextToAnAwayCell(this, i, j) &&
-						getCell(i, j).isMine &&
-						!getCell(i, j).isLogicalMine
-				) {
-					haveToGuessMines.add(new Pair<>(i, j));
-				}
-				if (AwayCell.isAwayCell(this, i, j) &&
-						!getCell(i, j).isMine &&
-						notPartOfThe8(i, j)
-				) {
-					freeAwayCells.add(new Pair<>(i, j));
-				}
-			}
-		}
-		if (haveToGuessMines.size() > freeAwayCells.size()) {
-			throw new Exception("the number of non-deducible mines > number of free away cells");
-		}
-		Collections.shuffle(freeAwayCells);
-		for (int pos = 0; pos < haveToGuessMines.size(); ++pos) {
-			int i = haveToGuessMines.get(pos).first;
-			int j = haveToGuessMines.get(pos).second;
-			changeMineStatus(i, j, false);
-
-
-			i = freeAwayCells.get(pos).first;
-			j = freeAwayCells.get(pos).second;
-			changeMineStatus(i, j, true);
-		}
-
-		resetAllLogicalAndVisibleStuff();
-		revealCell(firstClickI, firstClickJ);
-
-		return !haveToGuessMines.isEmpty();
-	}
-
 	private void resetAllLogicalAndVisibleStuff() throws Exception {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				getCell(i, j).resetLogicalStuffAndVisiblity();
+				getCell(i, j).resetLogicalStuffAndVisibility();
 			}
 		}
 	}
@@ -678,7 +634,7 @@ public class MinesweeperGame {
 			return isFlagged;
 		}
 
-		private void resetLogicalStuffAndVisiblity() throws Exception {
+		private void resetLogicalStuffAndVisibility() throws Exception {
 			isVisible = false;
 			isLogicalMine = false;
 			isLogicalFree = false;

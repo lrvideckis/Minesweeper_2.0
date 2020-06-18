@@ -93,6 +93,7 @@ public interface MinesweeperSolver {
 			this.numberSurroundingMines = numberSurroundingMines;
 		}
 
+		//TODO: remove this eventually
 		public void setIsLogicalMine() {
 			isLogicalMine = true;
 		}

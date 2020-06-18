@@ -150,7 +150,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				}.start();
 
 				Thread t = new Thread() {
-					private AtomicBoolean isInterrupted = new AtomicBoolean(false);
+					private final AtomicBoolean isInterrupted = new AtomicBoolean(false);
 
 					@Override
 					public void run() {

@@ -40,7 +40,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
-		/*
 		try {
 			Test.testPreviouslyFailedBoards();
 			Test.performTestsForMineProbability(20);
@@ -53,7 +52,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		 */
+
 		try {
 			Test.TestThatSolvableBoardsWith8AreSolvable(1);
 			//Test.BestSolverOnly(25);

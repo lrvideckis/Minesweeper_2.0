@@ -1,10 +1,8 @@
 package com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers;
 
 import com.LukeVideckis.minesweeper_android.customExceptions.HitIterationLimitException;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.CheckForLocalStuff;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.GaussianEliminationSolver;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolver;
 
@@ -18,19 +16,17 @@ public class CreateSolvableBoard {
 	//TODO: change this back to something smaller
 	//TODO: revert this back to single combined backtracking solver (no holy grail solver) as ***best (fastest) alg only uses gauss***
 	private final GaussianEliminationSolver gaussSolver; //TODO: change this back to type MinesweeperSolver
-	private final BacktrackingSolver holyGrailSolver;
 	private final VisibleTile[][] board;
 	private final int rows;
 	private final int cols;
 	private final int mines;
-	private MyBacktrackingSolver myBacktrackingSolver;
+	private final MyBacktrackingSolver myBacktrackingSolver;
 
 	public CreateSolvableBoard(int rows, int cols, int mines) {
 		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
 		//TODO: find a way to change iteration limit to something smaller
 		//MyBacktrackingSolver.iterationLimit = 500;
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
-		holyGrailSolver = new HolyGrailSolver(rows, cols);
 		board = new VisibleTile[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -118,7 +114,7 @@ public class CreateSolvableBoard {
 	}
 
 	//TODO: think about also guaranteeing that the backtracking solver will never time out - only run backtracking solver, nothing else
-	//TODO: test this with guarenteed 8
+	//TODO: test this with guaranteed 8
 	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8, AtomicBoolean isInterrupted) throws Exception {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
@@ -245,72 +241,5 @@ public class CreateSolvableBoard {
 			}
 		}
 		return null;
-	}
-
-
-	//TODO: remove after testing
-	public MinesweeperGame getSolvableBoardOld(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
-		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
-			throw new Exception("first click is out of bounds");
-		}
-		long totalTimeGauss = 0, totalTimeBacktracking = 0;
-		int totalIterationsSoFar = 0;
-		final int maxIterationsToFindBoard = 20000;
-		while (totalIterationsSoFar < maxIterationsToFindBoard) {
-			MinesweeperGame minesweeperGame;
-			minesweeperGame = new MinesweeperGame(rows, cols, mines);
-			if (hasAn8) {
-				minesweeperGame.setHavingAn8();
-			}
-			minesweeperGame.clickCell(firstClickI, firstClickJ, false);
-			MinesweeperGame saveGame = new MinesweeperGame(minesweeperGame);
-			while (!minesweeperGame.getIsGameLost() && !minesweeperGame.getIsGameWon()) {
-				//try to solve with gauss solver first
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, false);
-				long startTime = System.currentTimeMillis();
-				gaussSolver.solvePosition(board, mines);
-				totalTimeGauss += System.currentTimeMillis() - startTime;
-				boolean foundLogicalFree = false;
-				for (int i = 0; i < rows; ++i) {
-					for (int j = 0; j < cols; ++j) {
-						if (board[i][j].getIsLogicalFree()) {
-							foundLogicalFree = true;
-							minesweeperGame.clickCell(i, j, false);
-						}
-					}
-				}
-				if (foundLogicalFree) {
-					continue;
-				}
-
-				//then try to solve with backtracking solver
-				ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, false);
-				try {
-					startTime = System.currentTimeMillis();
-					myBacktrackingSolver.solvePosition(board, mines);
-					totalTimeBacktracking += System.currentTimeMillis() - startTime;
-				} catch (HitIterationLimitException ignored) {
-					totalIterationsSoFar += MyBacktrackingSolver.iterationLimit;
-					break;
-				}
-				totalIterationsSoFar += myBacktrackingSolver.getNumberOfIterations();
-				for (int i = 0; i < rows; ++i) {
-					for (int j = 0; j < cols; ++j) {
-						if (board[i][j].getIsLogicalFree()) {
-							foundLogicalFree = true;
-							minesweeperGame.clickCell(i, j, false);
-						}
-					}
-				}
-				if (!foundLogicalFree) {
-					break;
-				}
-			}
-			System.out.println("here, gauss, backtracking total time: " + totalTimeGauss + " " + totalTimeBacktracking);
-			if (minesweeperGame.getIsGameWon()) {
-				return saveGame;
-			}
-		}
-		throw new Exception("took too many tries (>= 1000) to find a solvable board");
 	}
 }

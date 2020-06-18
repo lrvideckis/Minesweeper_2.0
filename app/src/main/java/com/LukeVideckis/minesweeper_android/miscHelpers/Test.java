@@ -20,9 +20,11 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
+import static java.lang.String.format;
 
 public class Test {
 	@SuppressWarnings("SpellCheckingInspection")
@@ -211,7 +213,7 @@ public class Test {
 				System.out.println("SLOW solver hit iteration limit, void test");
 				continue;
 			}
-			if (areBoardsDifferent(boardFast, boardSlow, mines)) {
+			if (areBoardsDifferent(boardFast, boardSlow)) {
 				return;
 			}
 		}
@@ -231,10 +233,8 @@ public class Test {
 				} else if (stringBoard[i].charAt(j) == 'U') {
 					board[i][j].updateVisibilityAndSurroundingMines(false, 0);
 				} else if (stringBoard[i].charAt(j) == 'B') {
-
 					board[i][j].updateVisibilityAndSurroundingMines(false, 0);
 					board[i][j].setIsLogicalMine();
-
 				} else {
 					board[i][j].updateVisibilityAndSurroundingMines(true, stringBoard[i].charAt(j) - '0');
 				}
@@ -345,7 +345,7 @@ public class Test {
 				System.out.println("slow solver hit iteration limit, void test");
 				continue;
 			}
-			if (areBoardsDifferent(boardFast, boardSlow, mines)) {
+			if (areBoardsDifferent(boardFast, boardSlow)) {
 				return;
 			}
 		}
@@ -354,8 +354,7 @@ public class Test {
 
 	private static boolean areBoardsDifferent(
 			VisibleTile[][] boardFast,
-			VisibleTile[][] boardSlow,
-			int mines
+			VisibleTile[][] boardSlow
 	) throws Exception {
 		int rows = boardFast.length, cols = boardFast[0].length;
 		boolean passedTest = true;
@@ -426,7 +425,7 @@ public class Test {
 				continue;
 			}
 			gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
-			if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardBacktracking, boardGauss)) {
+			if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, boardBacktracking, boardGauss)) {
 				return;
 			}
 		}
@@ -434,7 +433,7 @@ public class Test {
 	}
 
 	//returns true if test failed
-	private static boolean isFailed_compareGaussBoardToBacktrackingBoard(int rows, int cols, int mines, VisibleTile[][] boardBacktracking, VisibleTile[][] boardGauss) {
+	private static boolean isFailed_compareGaussBoardToBacktrackingBoard(int rows, int cols, VisibleTile[][] boardBacktracking, VisibleTile[][] boardGauss) {
 		boolean passedTest = true;
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -489,13 +488,13 @@ public class Test {
 			for (int i = 0; i < 3; ++i) {
 				VisibleTile[][] boardFast = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 				holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
-				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
+				if (areBoardsDifferent(boardFast, boardSlow)) {
 					return;
 				}
 
 				VisibleTile[][] boardGauss = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
 				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
-				if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardFast, boardGauss)) {
+				if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, boardFast, boardGauss)) {
 					return;
 				}
 			}
@@ -517,7 +516,7 @@ public class Test {
 
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
-			System.out.println(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
+			System.out.println(" percentage: " + format("%.2f", mines / (float) (rows * cols)));
 
 			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
 
@@ -547,7 +546,7 @@ public class Test {
 				}
 				game.updateLogicalStuff(visibleBoard);
 
-				if (!ExistsLogicalFree.isLogicalFree(visibleBoard)) {
+				if (ExistsLogicalFree.noLogicalFrees(visibleBoard)) {
 					System.out.println("no logical frees, failed test");
 					CreateSolvableBoard.printBoardDebug(visibleBoard);
 					return;
@@ -589,7 +588,7 @@ public class Test {
 			mines = Math.max(mines, 8);
 
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
-			System.out.print(" percentage: " + String.format("%.2f", mines / (float) (rows * cols)));
+			System.out.print(" percentage: " + MessageFormat.format("%.2f", mines / (float) (rows * cols)));
 
 			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
 
@@ -611,7 +610,7 @@ public class Test {
 				solver.solvePosition(visibleBoard, mines);
 				game.updateLogicalStuff(visibleBoard);
 
-				if (!ExistsLogicalFree.isLogicalFree(visibleBoard)) {
+				if (ExistsLogicalFree.noLogicalFrees(visibleBoard)) {
 					System.out.println("no logical frees, failed test");
 					return;
 				}
@@ -713,19 +712,6 @@ public class Test {
 			times[testID - 1][3] = System.currentTimeMillis() - startTime;
 			if (solved) numberOfSuccessfulSolves[3]++;
 			 */
-
-
-			boardGen = new CreateSolvableBoard(rows, cols, mines);
-			startTime = System.currentTimeMillis();
-			solved = true;
-			try {
-				boardGen.getSolvableBoardOld(5, 5, false);
-			} catch (Exception e) {
-				solved = false;
-				e.printStackTrace();
-			}
-			times[testID - 1][4] = System.currentTimeMillis() - startTime;
-			if (solved) numberOfSuccessfulSolves[4]++;
 		}
 		long[] total = new long[numberOfSolvers];
 		for (long[] time : times) {
