@@ -241,7 +241,6 @@ public class CreateSolvableBoard {
 			throw new Exception("first click is out of bounds");
 		}
 
-		//ArrayList<MinesweeperGame> gameStack = new ArrayList<>();
 		Stack<MinesweeperGame> gameStack = new Stack<>();
 
 		while (!isInterrupted.get()) {
@@ -295,8 +294,6 @@ public class CreateSolvableBoard {
 				}
 
 				ConvertGameBoardFormat.convertToExistingBoard(game, board, true);
-				System.out.println("start of loop: " + gameStack.size());
-				printBoardDebug(board);
 
 				/*try to deduce free squares with local rules. There is the
 				 * possibility of not finding deducible free squares, even if they exist.
@@ -335,7 +332,7 @@ public class CreateSolvableBoard {
 				} catch (HitIterationLimitException ignored) {
 				}
 
-				if ((cnt++) % 15 == 0) {
+				if ((cnt++) % 12 == 0) {
 					try {
 						game.shuffleInterestingMinesAndMakeOneAway(firstClickI, firstClickJ);
 						gameStack.clear();
@@ -343,7 +340,10 @@ public class CreateSolvableBoard {
 						break;
 					}
 				} else {
-					while (!gameStack.isEmpty() && !game.everyComponentHasLogicalFrees()) {
+					if (!gameStack.empty()) {
+						gameStack.pop();
+					}
+					while (!gameStack.empty() && !game.everyComponentHasLogicalFrees()) {
 						game = new MinesweeperGame(gameStack.pop());
 					}
 					if (!game.everyComponentHasLogicalFrees()) {
