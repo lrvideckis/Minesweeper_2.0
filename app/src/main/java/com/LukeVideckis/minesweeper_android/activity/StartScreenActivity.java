@@ -48,7 +48,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			Test.performTestsMultipleRunsOfSameBoard(10);
 			Test.TestThatSolvableBoardsAreSolvable(20);
 			Test.TestThatSolvableBoardsWith8AreSolvable(10);
-			Test.BestSolverOnly(1);
+			//Test.BestSolverOnly(1);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
