@@ -30,6 +30,8 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.Thread.sleep;
+
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 	public final static String
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
@@ -52,6 +54,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private AlertDialog loadingScreenForSolvableBoardGeneration;
 	private CreateSolvableBoard createSolvableBoard;
 	private Thread createSolvableBoardThread;
+	private DelayLoadingScreenRunnable delayLoadingScreenRunnable;
+	private AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
 
 	public void stopTimerThread() {
 		updateTimeThread.interrupt();
@@ -111,28 +115,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		builder.setCancelable(false);
 		builder.setView(R.layout.layout_loading_dialog);
 		loadingScreenForSolvableBoardGeneration = builder.create();
-	}
 
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-			case R.id.newGameButton:
-				ImageButton newGameButton = findViewById(R.id.newGameButton);
-				newGameButton.setImageResource(R.drawable.smiley_face);
-				startNewGame();
-				GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
-				gameCanvas.invalidate();
-				break;
-			case R.id.toggleFlagMode:
-				toggleFlagModeOn = !toggleFlagModeOn;
-				Button toggleFlagMode = findViewById(R.id.toggleFlagMode);
-				if (toggleFlagModeOn) {
-					toggleFlagMode.setText(flagEmoji);
-				} else {
-					toggleFlagMode.setText(mineEmoji);
-				}
-				break;
-		}
+		delayLoadingScreenRunnable = new DelayLoadingScreenRunnable();
 	}
 
 	public void handleTap(float tapX, float tapY) {
@@ -149,22 +133,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			//TODO: start timer after board generation is complete
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
 				//TODO: either break out of board gen (after like 2 seconds), or improve board gen to not take forever sometimes
-				AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
-				new Thread() {
-					@Override
-					public void run() {
-						try {
-							sleep(millisecondsBeforeDisplayingLoadingScreen);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						if (!finishedBoardGen.get()) {
-							runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.show());
-						} else {
-							findViewById(R.id.gridCanvas).invalidate();
-						}
-					}
-				}.start();
+				finishedBoardGen.set(false);
+
+				new Thread(delayLoadingScreenRunnable).start();
+
 				createSolvableBoardThread = new Thread() {
 					private AtomicBoolean isInterrupted = new AtomicBoolean(false);
 
@@ -228,6 +200,43 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		updateNumberOfMines(minesweeperGame.getNumberOfMines() - minesweeperGame.getNumberOfFlags());
 		findViewById(R.id.gridCanvas).invalidate();
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+			case R.id.newGameButton:
+				ImageButton newGameButton = findViewById(R.id.newGameButton);
+				newGameButton.setImageResource(R.drawable.smiley_face);
+				startNewGame();
+				GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
+				gameCanvas.invalidate();
+				break;
+			case R.id.toggleFlagMode:
+				toggleFlagModeOn = !toggleFlagModeOn;
+				Button toggleFlagMode = findViewById(R.id.toggleFlagMode);
+				if (toggleFlagModeOn) {
+					toggleFlagMode.setText(flagEmoji);
+				} else {
+					toggleFlagMode.setText(mineEmoji);
+				}
+				break;
+		}
+	}
+
+	private class DelayLoadingScreenRunnable implements Runnable {
+		public void run() {
+			try {
+				sleep(millisecondsBeforeDisplayingLoadingScreen);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (!finishedBoardGen.get()) {
+				runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.show());
+			} else {
+				findViewById(R.id.gridCanvas).invalidate();
+			}
+		}
 	}
 
 	private void startNewGame() {
