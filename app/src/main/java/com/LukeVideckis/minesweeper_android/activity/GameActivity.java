@@ -133,41 +133,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 				new Thread(new DelayLoadingScreenRunnable(finishedBoardGen)).start();
 
-				createSolvableBoardThread = new Thread() {
-					private AtomicBoolean isInterrupted = new AtomicBoolean(false);
-
-					@Override
-					public void run() {
-						try {
-							minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
-							if (isInterrupted.get()) {
-								return;
-							}
-							finishedBoardGen.set(true);
-							updateTimeThread.start();
-							runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.dismiss());
-						} catch (Exception ignored) {
-							if (isInterrupted.get()) {
-								return;
-							}
-							finishedBoardGen.set(true);
-							updateTimeThread.start();
-							try {
-								minesweeperGame.clickCell(row, col, false);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-							runOnUiThread(() -> {
-								displayNoGuessBoardPopup();
-								loadingScreenForSolvableBoardGeneration.dismiss();
-							});
-						}
-					}
-
+				SolvableBoardRunnable solvableBoardRunnable = new SolvableBoardRunnable(row, col, finishedBoardGen);
+				createSolvableBoardThread = new Thread(solvableBoardRunnable) {
 					@Override
 					public void interrupt() {
 						super.interrupt();
-						isInterrupted.set(true);
+						solvableBoardRunnable.interrupt();
 					}
 				};
 				createSolvableBoardThread.start();
@@ -238,6 +209,48 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			} else {
 				findViewById(R.id.gridCanvas).invalidate();
 			}
+		}
+	}
+
+	private class SolvableBoardRunnable implements Runnable {
+		private AtomicBoolean isInterrupted = new AtomicBoolean(false), finishedBoardGen;
+		private int row, col;
+
+		public SolvableBoardRunnable(int row, int col, AtomicBoolean finishedBoardGen) {
+			this.row = row;
+			this.col = col;
+			this.finishedBoardGen = finishedBoardGen;
+		}
+
+		public void run() {
+			try {
+				minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
+				if (isInterrupted.get()) {
+					return;
+				}
+				finishedBoardGen.set(true);
+				updateTimeThread.start();
+				runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.dismiss());
+			} catch (Exception ignored) {
+				if (isInterrupted.get()) {
+					return;
+				}
+				finishedBoardGen.set(true);
+				updateTimeThread.start();
+				try {
+					minesweeperGame.clickCell(row, col, false);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				runOnUiThread(() -> {
+					displayNoGuessBoardPopup();
+					loadingScreenForSolvableBoardGeneration.dismiss();
+				});
+			}
+		}
+
+		public void interrupt() {
+			isInterrupted.set(true);
 		}
 	}
 
