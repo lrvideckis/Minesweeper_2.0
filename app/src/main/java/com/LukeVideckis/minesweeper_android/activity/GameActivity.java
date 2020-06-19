@@ -131,6 +131,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		final int col = (int) (tapX / cellPixelLength);
 
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
+			//TODO: start timer after board generation is complete
 			updateTimeThread.start();
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
 				//TODO: either break out of board gen (after like 2 seconds), or improve board gen to not take forever sometimes
