@@ -54,8 +54,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private AlertDialog loadingScreenForSolvableBoardGeneration;
 	private CreateSolvableBoard createSolvableBoard;
 	private Thread createSolvableBoardThread;
-	private DelayLoadingScreenRunnable delayLoadingScreenRunnable;
-	private AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
 
 	public void stopTimerThread() {
 		updateTimeThread.interrupt();
@@ -115,8 +113,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		builder.setCancelable(false);
 		builder.setView(R.layout.layout_loading_dialog);
 		loadingScreenForSolvableBoardGeneration = builder.create();
-
-		delayLoadingScreenRunnable = new DelayLoadingScreenRunnable();
 	}
 
 	public void handleTap(float tapX, float tapY) {
@@ -133,9 +129,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			//TODO: start timer after board generation is complete
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
 				//TODO: either break out of board gen (after like 2 seconds), or improve board gen to not take forever sometimes
-				finishedBoardGen.set(false);
+				AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
 
-				new Thread(delayLoadingScreenRunnable).start();
+				new Thread(new DelayLoadingScreenRunnable(finishedBoardGen)).start();
 
 				createSolvableBoardThread = new Thread() {
 					private AtomicBoolean isInterrupted = new AtomicBoolean(false);
@@ -225,6 +221,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private class DelayLoadingScreenRunnable implements Runnable {
+		private AtomicBoolean finishedBoardGen;
+
+		public DelayLoadingScreenRunnable(AtomicBoolean finishedBoardGen) {
+			this.finishedBoardGen = finishedBoardGen;
+		}
+
 		public void run() {
 			try {
 				sleep(millisecondsBeforeDisplayingLoadingScreen);
