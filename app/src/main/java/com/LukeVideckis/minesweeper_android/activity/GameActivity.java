@@ -2,6 +2,7 @@ package com.LukeVideckis.minesweeper_android.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -50,6 +51,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private Thread updateTimeThread;
 	private AlertDialog loadingScreenForSolvableBoardGeneration;
 	private CreateSolvableBoard createSolvableBoard;
+	private Thread createSolvableBoardThread;
 
 	public void stopTimerThread() {
 		updateTimeThread.interrupt();
@@ -92,8 +94,21 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		updateTimeThread = new TimeUpdateThread();
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setCancelable(false); // if you want user to wait for some process to finish,
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this)
+				.setOnKeyListener((dialog, keyCode, event) -> {
+					if (keyCode == KeyEvent.KEYCODE_BACK &&
+							event.getAction() == KeyEvent.ACTION_UP &&
+							!event.isCanceled()) {
+						dialog.cancel();
+						createSolvableBoardThread.interrupt();
+						onBackPressed();
+						return true;
+					}
+					return false;
+				});
+
+		builder.setCancelable(false);
 		builder.setView(R.layout.layout_loading_dialog);
 		loadingScreenForSolvableBoardGeneration = builder.create();
 	}
@@ -151,14 +166,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 						}
 					}
 				}.start();
-				new Thread() {
+				createSolvableBoardThread = new Thread() {
+					private AtomicBoolean isInterrupted = new AtomicBoolean(false);
+
 					@Override
 					public void run() {
 						try {
-							minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8);
+							minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
+							if (isInterrupted.get()) {
+								return;
+							}
 							finishedBoardGen.set(true);
 							runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.dismiss());
 						} catch (Exception ignored) {
+							if (isInterrupted.get()) {
+								return;
+							}
 							finishedBoardGen.set(true);
 							try {
 								minesweeperGame.clickCell(row, col, false);
@@ -171,7 +194,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 							});
 						}
 					}
-				}.start();
+
+					@Override
+					public void interrupt() {
+						super.interrupt();
+						isInterrupted.set(true);
+					}
+				};
+				createSolvableBoardThread.start();
 				return;
 			}
 		}

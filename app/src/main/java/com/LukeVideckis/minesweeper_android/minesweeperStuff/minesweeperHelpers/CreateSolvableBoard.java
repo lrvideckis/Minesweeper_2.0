@@ -7,6 +7,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolver;
 
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
@@ -114,14 +115,14 @@ public class CreateSolvableBoard {
 
 	//TODO: think about also guaranteeing that the backtracking solver will never time out - only run backtracking solver, nothing else
 	//TODO: test this with guaranteed 8
-	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8) throws Exception {
+	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8, AtomicBoolean isInterrupted) throws Exception {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");
 		}
 
 		Stack<MinesweeperGame> gameStack = new Stack<>();
 
-		while (true) {
+		while (!isInterrupted.get()) {
 			MinesweeperGame game = new MinesweeperGame(rows, cols, mines);
 			if (hasAn8) {
 				game.setHavingAn8();
@@ -166,7 +167,7 @@ public class CreateSolvableBoard {
 			 * loop. So we can restart completely on a fresh random board.
 			 */
 			int cnt = 0;
-			while (!game.getIsGameWon()) {
+			while (!game.getIsGameWon() && !isInterrupted.get()) {
 				if (game.getIsGameLost()) {
 					throw new Exception("game is lost, but board generator should never lose");
 				}
@@ -239,5 +240,6 @@ public class CreateSolvableBoard {
 				return new MinesweeperGame(game, firstClickI, firstClickJ);
 			}
 		}
+		return new MinesweeperGame(rows, cols, mines);
 	}
 }
