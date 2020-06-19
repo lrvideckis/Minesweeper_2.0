@@ -37,7 +37,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		halfScreenHeight = (int) (screenHeight / 2f);
 
 		minScaleVal = screenWidth / (float) (GameActivity.cellPixelLength * cols);
-		minScaleVal = Math.max(minScaleVal, screenHeight / (float) (GameActivity.cellPixelLength * rows));
+		minScaleVal = Math.min(minScaleVal, screenHeight / (float) (GameActivity.cellPixelLength * rows));
 
 		makeSureGridIsOnScreen();
 		matrix.setTranslate(absoluteX, absoluteY);
@@ -120,11 +120,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						newY += halfScreenHeight;
 						newY -= absoluteY;
 
-						try {
-							((GameActivity) context).handleTap(newX, newY);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						((GameActivity) context).handleTap(newX, newY);
 					}
 					break;
 			}
@@ -146,20 +142,23 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		final float newX = (absoluteX - halfScreenWidth) * scale + halfScreenWidth;
 		final float newY = (absoluteY - halfScreenHeight) * scale + halfScreenHeight;
 
-		if (newX > 0) {
+		final boolean boardLessThanWidth = (2 * halfScreenWidth > GameActivity.cellPixelLength * scale * cols);
+		final boolean boardLessThanHeight = (2 * halfScreenHeight > GameActivity.cellPixelLength * scale * rows);
+
+		if ((newX > 0) ^ boardLessThanWidth) {
 			absoluteX = (-halfScreenWidth) / scale + halfScreenWidth;
 		} else {
 			final float boundX = GameActivity.cellPixelLength * scale * cols - (2 * halfScreenWidth);
-			if (newX < -boundX) {
+			if ((newX < -boundX) ^ boardLessThanWidth) {
 				absoluteX = (-boundX - halfScreenWidth) / scale + halfScreenWidth;
 			}
 		}
 
-		if (newY > 0) {
+		if ((newY > 0) ^ boardLessThanHeight) {
 			absoluteY = (-halfScreenHeight) / scale + halfScreenHeight;
 		} else {
 			final float boundY = GameActivity.cellPixelLength * scale * rows - (2 * halfScreenHeight);
-			if (newY < -boundY) {
+			if ((newY < -boundY) ^ boardLessThanHeight) {
 				absoluteY = (-boundY - halfScreenHeight) / scale + halfScreenHeight;
 			}
 		}

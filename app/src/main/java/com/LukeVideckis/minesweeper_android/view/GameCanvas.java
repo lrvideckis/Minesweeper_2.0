@@ -149,6 +149,7 @@ public class GameCanvas extends View {
 				break;
 			}
 		}
+		//TODO: make outer border of grid thicker
 		for (int j = 0; j <= numberOfCols; ++j) {
 			canvas.drawLine(j * GameActivity.cellPixelLength, 0, j * GameActivity.cellPixelLength, numberOfRows * GameActivity.cellPixelLength, black);
 		}
