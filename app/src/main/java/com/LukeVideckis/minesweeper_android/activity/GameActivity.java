@@ -147,7 +147,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
 			//TODO: start timer after board generation is complete
-			updateTimeThread.start();
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
 				//TODO: either break out of board gen (after like 2 seconds), or improve board gen to not take forever sometimes
 				AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
@@ -177,12 +176,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 								return;
 							}
 							finishedBoardGen.set(true);
+							updateTimeThread.start();
 							runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.dismiss());
 						} catch (Exception ignored) {
 							if (isInterrupted.get()) {
 								return;
 							}
 							finishedBoardGen.set(true);
+							updateTimeThread.start();
 							try {
 								minesweeperGame.clickCell(row, col, false);
 							} catch (Exception e) {
@@ -204,6 +205,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				createSolvableBoardThread.start();
 				return;
 			}
+			updateTimeThread.start();
 		}
 
 		if (!minesweeperGame.getIsGameLost()) {
