@@ -56,7 +56,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private volatile Thread updateTimeThread;
 	private volatile AlertDialog loadingScreenForSolvableBoardGeneration;
 	private CreateSolvableBoard createSolvableBoard;
-	private Thread createSolvableBoardThread;
+	private Thread createSolvableBoardThread, timerToBreakBoardGen = new Thread();
 	private volatile SolvableBoardRunnable solvableBoardRunnable;
 	private volatile MaxTimeToCreateSolvableBoard maxTimeToCreateSolvableBoard = new MaxTimeToCreateSolvableBoard();
 	private volatile AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
@@ -151,7 +151,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				};
 				createSolvableBoardThread.start();
 
-				new Thread(maxTimeToCreateSolvableBoard).start();
+				timerToBreakBoardGen = new Thread(maxTimeToCreateSolvableBoard);
+				timerToBreakBoardGen.start();
 				return;
 			}
 			updateTimeThread.start();
@@ -297,6 +298,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			e.printStackTrace();
 		}
 		enableButtonsAndSwitchesAndSetToFalse();
+
+		if (timerToBreakBoardGen.isAlive()) {
+			timerToBreakBoardGen.interrupt();
+		}
 
 		if (toggleFlagModeOn) {
 			toggleFlagModeOn = false;

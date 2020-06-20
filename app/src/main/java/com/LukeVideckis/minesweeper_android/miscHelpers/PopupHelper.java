@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -31,6 +32,16 @@ public class PopupHelper {
 		return popup;
 	}
 
+	public static void dimBehind(PopupWindow popupWindow) {
+		View container = popupWindow.getContentView().getRootView();
+		Context context = popupWindow.getContentView().getContext();
+		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		WindowManager.LayoutParams p = (WindowManager.LayoutParams) container.getLayoutParams();
+		p.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+		p.dimAmount = 0.5f;
+		wm.updateViewLayout(container, p);
+	}
+
 	public static void displayPopup(PopupWindow popup, View parentView, Resources resources) {
 		if (parentView.getTag().equals(resources.getString(R.string.is_linear_layout))) {
 			LinearLayout linearLayout = (LinearLayout) parentView;
@@ -42,5 +53,6 @@ public class PopupHelper {
 			RelativeLayout relativeLayout = (RelativeLayout) parentView;
 			popup.showAtLocation(relativeLayout, Gravity.CENTER, 0, 0);
 		}
+		dimBehind(popup);
 	}
 }
