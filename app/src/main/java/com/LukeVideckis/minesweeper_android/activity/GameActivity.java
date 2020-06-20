@@ -115,7 +115,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		loadingScreenForSolvableBoardGeneration = builder.create();
 	}
 
-	public void handleTap(float tapX, float tapY, boolean isLongTap) {
+	public void handleTap(float tapX, float tapY) {
 		if (tapX < 0f ||
 				tapY < 0f ||
 				tapX > numberOfCols * cellPixelLength ||
@@ -125,9 +125,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		final int row = (int) (tapY / cellPixelLength);
 		final int col = (int) (tapX / cellPixelLength);
 
-		final boolean toggleFlag = (toggleFlagModeOn ^ isLongTap);
-
-		if (minesweeperGame.isBeforeFirstClick() && !toggleFlag) {
+		if (minesweeperGame.isBeforeFirstClick() && !toggleFlagModeOn) {
 			//TODO: start timer after board generation is complete
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
 				//TODO: either break out of board gen (after like 2 seconds), or improve board gen to not take forever sometimes
@@ -157,8 +155,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		try {
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
 			//TODO: don't change mine configuration when the current config matches what you want
-			minesweeperGame.clickCell(row, col, toggleFlag);
-			if (!minesweeperGame.getIsGameLost() && !(toggleFlag && !minesweeperGame.getCell(row, col).getIsVisible())) {
+			minesweeperGame.clickCell(row, col, toggleFlagModeOn);
+			if (!minesweeperGame.getIsGameLost() && !(toggleFlagModeOn && !minesweeperGame.getCell(row, col).getIsVisible())) {
 				if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
 					updateSolvedBoardWithBacktrackingSolver();
 				}
@@ -460,10 +458,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public int getLastTapCol() {
 		return lastTapCol;
-	}
-
-	public void runHandleTapOnUIThread(float tapX, float tapY, boolean isLongTap) {
-		runOnUiThread(() -> handleTap(tapX, tapY, isLongTap));
 	}
 
 	private class TimeUpdateThread extends Thread {
