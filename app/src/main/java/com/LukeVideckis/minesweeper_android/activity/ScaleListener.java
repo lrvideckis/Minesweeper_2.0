@@ -24,13 +24,14 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private int prevPointerCount = 0;
 	//variables to handle a tap
 	private boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
+	@SuppressWarnings("CanBeFinal")
 	private Context context;
 	private volatile float startOfTapX, startOfTapY;
 	private float minScaleVal;
 	private float startAbsoluteX, startAbsoluteY;
 	//variables to handle long tap
 	private volatile boolean longTapOccurred;
-	private Runnable mLongPressed = () -> {
+	private final Runnable mLongPressed = () -> {
 		synchronized (this) {
 			longTapOccurred = true;
 			((GameActivity) context).handleTap(

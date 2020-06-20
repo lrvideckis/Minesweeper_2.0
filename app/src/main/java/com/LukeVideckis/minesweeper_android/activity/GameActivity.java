@@ -40,7 +40,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private static final long
 			millisecondsBeforeDisplayingLoadingScreen = 100,
 			maxTimeToGenerateSolvableBoardMilliseconds = 2000;
-
+	private final MaxTimeToCreateSolvableBoard maxTimeToCreateSolvableBoard = new MaxTimeToCreateSolvableBoard();
+	private final AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
 	private boolean
 			toggleFlagModeOn = false,
 			toggleBacktrackingHintsOn = false,
@@ -48,7 +49,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
 	private PopupWindow solverHitLimitPopup;
 	private volatile PopupWindow couldNotFindNoGuessBoardPopup;
-
 	private volatile MinesweeperGame minesweeperGame;
 	private MinesweeperSolver holyGrailSolver;
 	private MinesweeperSolver.VisibleTile[][] board;
@@ -58,8 +58,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private CreateSolvableBoard createSolvableBoard;
 	private Thread createSolvableBoardThread, timerToBreakBoardGen = new Thread();
 	private volatile SolvableBoardRunnable solvableBoardRunnable;
-	private volatile MaxTimeToCreateSolvableBoard maxTimeToCreateSolvableBoard = new MaxTimeToCreateSolvableBoard();
-	private volatile AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
 
 	public void stopTimerThread() {
 		updateTimeThread.interrupt();
@@ -199,95 +197,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					toggleFlagMode.setText(mineEmoji);
 				}
 				break;
-		}
-	}
-
-	private class DelayLoadingScreenRunnable implements Runnable {
-		private AtomicBoolean finishedBoardGen;
-
-		public DelayLoadingScreenRunnable(AtomicBoolean finishedBoardGen) {
-			this.finishedBoardGen = finishedBoardGen;
-		}
-
-		public void run() {
-			try {
-				sleep(millisecondsBeforeDisplayingLoadingScreen);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (!finishedBoardGen.get()) {
-				runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.show());
-			} else {
-				findViewById(R.id.gridCanvas).invalidate();
-			}
-		}
-	}
-
-	private class MaxTimeToCreateSolvableBoard implements Runnable {
-		public void run() {
-			try {
-				sleep(maxTimeToGenerateSolvableBoardMilliseconds);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (createSolvableBoardThread.isAlive()) {
-				createSolvableBoardThread.interrupt();
-			}
-		}
-	}
-
-	private class SolvableBoardRunnable implements Runnable {
-		private volatile AtomicBoolean
-				isInterrupted = new AtomicBoolean(false),
-				backButtonWasPressed = new AtomicBoolean(false);
-		private int row, col;
-
-		public SolvableBoardRunnable(int row, int col) {
-			this.row = row;
-			this.col = col;
-		}
-
-		public void run() {
-			try {
-				MinesweeperGame solvableBoard = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
-				if (isInterrupted.get()) {
-					if (backButtonWasPressed.get()) {
-						return;
-					}
-					//act as though solvable board generation failed to create normal board
-					throw new Exception();
-				}
-				synchronized (this) {
-					minesweeperGame = solvableBoard;
-				}
-				finishedBoardGen.set(true);
-				updateTimeThread.start();
-				runOnUiThread(() -> {
-					loadingScreenForSolvableBoardGeneration.dismiss();
-					findViewById(R.id.gridCanvas).invalidate();
-				});
-			} catch (Exception ignored) {
-				finishedBoardGen.set(true);
-				updateTimeThread.start();
-				try {
-					minesweeperGame.clickCell(row, col, false);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				runOnUiThread(() -> {
-					displayNoGuessBoardPopup();
-					loadingScreenForSolvableBoardGeneration.dismiss();
-					findViewById(R.id.gridCanvas).invalidate();
-				});
-			}
-		}
-
-		public void setBackButtonPressed() {
-			backButtonWasPressed.set(true);
-		}
-
-		public void interrupt() {
-			isInterrupted.set(true);
 		}
 	}
 
@@ -499,6 +408,96 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	public int getLastTapCol() {
 		return lastTapCol;
+	}
+
+	private class DelayLoadingScreenRunnable implements Runnable {
+		private final AtomicBoolean finishedBoardGen;
+
+		public DelayLoadingScreenRunnable(AtomicBoolean finishedBoardGen) {
+			this.finishedBoardGen = finishedBoardGen;
+		}
+
+		public void run() {
+			try {
+				sleep(millisecondsBeforeDisplayingLoadingScreen);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (!finishedBoardGen.get()) {
+				runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.show());
+			} else {
+				findViewById(R.id.gridCanvas).invalidate();
+			}
+		}
+	}
+
+	private class MaxTimeToCreateSolvableBoard implements Runnable {
+		public void run() {
+			try {
+				sleep(maxTimeToGenerateSolvableBoardMilliseconds);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (createSolvableBoardThread.isAlive()) {
+				createSolvableBoardThread.interrupt();
+			}
+		}
+	}
+
+	private class SolvableBoardRunnable implements Runnable {
+		private final AtomicBoolean
+				isInterrupted = new AtomicBoolean(false);
+		private final AtomicBoolean backButtonWasPressed = new AtomicBoolean(false);
+		private final int row;
+		private final int col;
+
+		public SolvableBoardRunnable(int row, int col) {
+			this.row = row;
+			this.col = col;
+		}
+
+		public void run() {
+			try {
+				MinesweeperGame solvableBoard = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
+				if (isInterrupted.get()) {
+					if (backButtonWasPressed.get()) {
+						return;
+					}
+					//act as though solvable board generation failed to create normal board
+					throw new Exception();
+				}
+				synchronized (this) {
+					minesweeperGame = solvableBoard;
+				}
+				finishedBoardGen.set(true);
+				updateTimeThread.start();
+				runOnUiThread(() -> {
+					loadingScreenForSolvableBoardGeneration.dismiss();
+					findViewById(R.id.gridCanvas).invalidate();
+				});
+			} catch (Exception ignored) {
+				finishedBoardGen.set(true);
+				updateTimeThread.start();
+				try {
+					minesweeperGame.clickCell(row, col, false);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				runOnUiThread(() -> {
+					displayNoGuessBoardPopup();
+					loadingScreenForSolvableBoardGeneration.dismiss();
+					findViewById(R.id.gridCanvas).invalidate();
+				});
+			}
+		}
+
+		public void setBackButtonPressed() {
+			backButtonWasPressed.set(true);
+		}
+
+		public void interrupt() {
+			isInterrupted.set(true);
+		}
 	}
 
 	private class TimeUpdateThread extends Thread {
