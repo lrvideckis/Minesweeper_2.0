@@ -21,7 +21,7 @@ public class GameCanvas extends View {
 	private final DrawCellHelpers drawCellHelpers;
 	private final BigFraction mineProbability = new BigFraction(0);
 	private final RectF tempCellRect = new RectF();
-	private final ScaleListener scaleListener;
+	private volatile ScaleListener scaleListener;
 	private VisibleTile[][] visibleBoard;
 
 	public GameCanvas(Context context, AttributeSet attrs) {

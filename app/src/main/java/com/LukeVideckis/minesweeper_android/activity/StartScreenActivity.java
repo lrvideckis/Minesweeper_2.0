@@ -25,7 +25,7 @@ import com.LukeVideckis.minesweeper_android.miscHelpers.PopupHelper;
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-	public static final int rowsColsMax = 30, rowsColsMin = 9;
+	public static final int rowsColsMax = 30, rowsColsMin = 10;
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
 			NUMBER_OF_ROWS = "numRows",
@@ -116,8 +116,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 		Button beginner = findViewById(R.id.beginner);
 		beginner.setOnClickListener(view -> {
-			rowsInput.setProgress(9);
-			colsInput.setProgress(9);
+			rowsInput.setProgress(10);
+			colsInput.setProgress(10);
 			minesInput.setProgress(10);
 		});
 
