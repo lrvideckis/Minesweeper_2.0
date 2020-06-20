@@ -10,8 +10,6 @@ import android.view.ViewConfiguration;
 
 import com.LukeVideckis.minesweeper_android.view.GameCanvas;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
 
 	//variables to hand a swipe (translate) and pinch (scale)
@@ -30,14 +28,16 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private float minScaleVal;
 	private float startAbsoluteX, startAbsoluteY;
 	//variables to handle long tap
-	private AtomicBoolean longTapOccurred = new AtomicBoolean();
+	private volatile boolean longTapOccurred;
 	private Runnable mLongPressed = () -> {
-		longTapOccurred.set(true);
-		((GameActivity) context).handleTap(
-				convertScreenToGridX(startOfTapX),
-				convertScreenToGridY(startOfTapY),
-				true
-		);
+		synchronized (this) {
+			longTapOccurred = true;
+			((GameActivity) context).handleTap(
+					convertScreenToGridX(startOfTapX),
+					convertScreenToGridY(startOfTapY),
+					true
+			);
+		}
 	};
 
 	public ScaleListener(Context context, GameCanvas gameCanvas, int rows, int cols) {
@@ -89,13 +89,13 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private boolean checkIfTap(MotionEvent event) {
 		boolean returnVal = (!seenMoreThanOnePointer &&
 				!hasBeenTooFar &&
-				!longTapOccurred.get() &&
+				!longTapOccurred &&
 				Math.abs(event.getX() - startOfTapX) <= 50f &&
 				Math.abs(event.getY() - startOfTapY) <= 50f);
 		if (!returnVal) {
 			hasBeenTooFar = true;
 		}
-		return returnVal && !longTapOccurred.get();
+		return returnVal;
 	}
 
 	@Override
@@ -110,10 +110,16 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		if (event.getPointerCount() == 1) {
 			switch (event.getAction() & MotionEvent.ACTION_MASK) {
 				case MotionEvent.ACTION_DOWN:
-					longTapOccurred.set(false);
+					synchronized (this) {
+						longTapOccurred = false;
+					}
 					handler.postDelayed(mLongPressed, ViewConfiguration.getLongPressTimeout());
-					startOfTapX = prevFocusX = event.getX();
-					startOfTapY = prevFocusY = event.getY();
+					prevFocusX = event.getX();
+					prevFocusY = event.getY();
+					synchronized (this) {
+						startOfTapX = event.getX();
+						startOfTapY = event.getY();
+					}
 					hasBeenTooFar = seenMoreThanOnePointer = false;
 					startAbsoluteX = absoluteX;
 					startAbsoluteY = absoluteY;

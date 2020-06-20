@@ -50,7 +50,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private MinesweeperSolver holyGrailSolver;
 	private MinesweeperSolver.VisibleTile[][] board;
 	private int lastTapRow, lastTapCol;
-	private Thread updateTimeThread;
+	private volatile Thread updateTimeThread;
 	private AlertDialog loadingScreenForSolvableBoardGeneration;
 	private CreateSolvableBoard createSolvableBoard;
 	private Thread createSolvableBoardThread;
@@ -95,7 +95,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		setUpNoGuessBoardPopup();
 
 		updateTimeThread = new TimeUpdateThread();
-
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this)
 				.setOnKeyListener((dialog, keyCode, event) -> {
@@ -215,7 +214,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private class SolvableBoardRunnable implements Runnable {
-		private AtomicBoolean isInterrupted = new AtomicBoolean(false), finishedBoardGen;
+		private volatile AtomicBoolean isInterrupted = new AtomicBoolean(false), finishedBoardGen;
 		private int row, col;
 
 		public SolvableBoardRunnable(int row, int col, AtomicBoolean finishedBoardGen) {
