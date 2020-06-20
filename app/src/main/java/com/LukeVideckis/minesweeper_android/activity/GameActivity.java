@@ -44,16 +44,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleBacktrackingHintsOn = false,
 			toggleMineProbabilityOn = false;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
-	private PopupWindow solverHitLimitPopup, couldNotFindNoGuessBoardPopup;
+	private PopupWindow solverHitLimitPopup;
+	private volatile PopupWindow couldNotFindNoGuessBoardPopup;
 
-	private MinesweeperGame minesweeperGame;
+	private volatile MinesweeperGame minesweeperGame;
 	private MinesweeperSolver holyGrailSolver;
 	private MinesweeperSolver.VisibleTile[][] board;
 	private int lastTapRow, lastTapCol;
 	private volatile Thread updateTimeThread;
-	private AlertDialog loadingScreenForSolvableBoardGeneration;
+	private volatile AlertDialog loadingScreenForSolvableBoardGeneration;
 	private CreateSolvableBoard createSolvableBoard;
 	private Thread createSolvableBoardThread;
+	private volatile AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
 
 	public void stopTimerThread() {
 		updateTimeThread.interrupt();
@@ -130,11 +132,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			//TODO: start timer after board generation is complete
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
 				//TODO: either break out of board gen (after like 2 seconds), or improve board gen to not take forever sometimes
-				AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
+				finishedBoardGen.set(false);
 
 				new Thread(new DelayLoadingScreenRunnable(finishedBoardGen)).start();
 
-				SolvableBoardRunnable solvableBoardRunnable = new SolvableBoardRunnable(row, col, finishedBoardGen);
+				SolvableBoardRunnable solvableBoardRunnable = new SolvableBoardRunnable(row, col);
 				createSolvableBoardThread = new Thread(solvableBoardRunnable) {
 					@Override
 					public void interrupt() {
@@ -214,24 +216,29 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private class SolvableBoardRunnable implements Runnable {
-		private volatile AtomicBoolean isInterrupted = new AtomicBoolean(false), finishedBoardGen;
+		private volatile AtomicBoolean isInterrupted = new AtomicBoolean(false);
 		private int row, col;
 
-		public SolvableBoardRunnable(int row, int col, AtomicBoolean finishedBoardGen) {
+		public SolvableBoardRunnable(int row, int col) {
 			this.row = row;
 			this.col = col;
-			this.finishedBoardGen = finishedBoardGen;
 		}
 
 		public void run() {
 			try {
-				minesweeperGame = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
+				MinesweeperGame solvableBoard = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
+				synchronized (this) {
+					minesweeperGame = solvableBoard;
+				}
 				if (isInterrupted.get()) {
 					return;
 				}
 				finishedBoardGen.set(true);
 				updateTimeThread.start();
-				runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.dismiss());
+				runOnUiThread(() -> {
+					loadingScreenForSolvableBoardGeneration.dismiss();
+					findViewById(R.id.gridCanvas).invalidate();
+				});
 			} catch (Exception ignored) {
 				if (isInterrupted.get()) {
 					return;
@@ -246,6 +253,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				runOnUiThread(() -> {
 					displayNoGuessBoardPopup();
 					loadingScreenForSolvableBoardGeneration.dismiss();
+					findViewById(R.id.gridCanvas).invalidate();
 				});
 			}
 		}

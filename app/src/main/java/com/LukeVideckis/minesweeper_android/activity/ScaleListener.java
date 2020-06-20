@@ -8,6 +8,7 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
 import com.LukeVideckis.minesweeper_android.view.GameCanvas;
 
 public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
@@ -49,6 +50,11 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	}
 
 	public void setScreenWidthAndHeight(float screenWidth, float screenHeight) {
+		//don't reset scale and translation if screen width, height are already set
+		if (Math.abs(screenWidth - 2 * halfScreenWidth) < MyMath.EPSILON &&
+				Math.abs(screenHeight - 2 * halfScreenHeight) < MyMath.EPSILON) {
+			return;
+		}
 		halfScreenWidth = (int) (screenWidth / 2f);
 		halfScreenHeight = (int) (screenHeight / 2f);
 
