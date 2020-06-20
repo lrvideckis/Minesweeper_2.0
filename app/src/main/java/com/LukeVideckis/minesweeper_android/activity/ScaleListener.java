@@ -41,6 +41,7 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 		scale = minScaleVal = Math.min(minScaleX, minScaleY);
 
+		//it's important to set scale first, getMinAbsoluteX, and getMaxAbsoluteX use scale in their calculations
 		absoluteX = (getMinAbsoluteX() + getMaxAbsoluteX(getBoundX())) / 2f;
 		absoluteY = (getMinAbsoluteY() + getMaxAbsoluteY(getBoundY())) / 2f;
 
