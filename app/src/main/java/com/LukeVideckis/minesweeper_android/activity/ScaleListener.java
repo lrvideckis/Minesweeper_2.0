@@ -8,7 +8,13 @@ import android.view.View;
 
 import com.LukeVideckis.minesweeper_android.view.GameCanvas;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.lang.Thread.sleep;
+
 public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener implements View.OnTouchListener {
+
+	private static final long longTapDurationMilliseconds = 500;
 
 	//variables to hand a swipe (translate) and pinch (scale)
 	private final ScaleGestureDetector SGD;
@@ -20,9 +26,14 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 	private float scale = 1f, absoluteX = 0f, absoluteY = 0f, prevFocusX, prevFocusY;
 	private int prevPointerCount = 0;
 	//variables to handle a tap
-	private boolean seenMoreThanOnePointer = false, hasBeenTooFar = false;
+	private AtomicBoolean
+			hasBeenTooFar = new AtomicBoolean(false),
+			singleTapHasEnded = new AtomicBoolean(false),
+			isLongTap = new AtomicBoolean(false);
+	private boolean seenMoreThanOnePointer = false;
 	private float startOfTapX, startOfTapY, startAbsoluteX, startAbsoluteY;
 	private float minScaleVal;
+	private LongTapRunnable longTapRunnable = new LongTapRunnable();
 
 	public ScaleListener(Context context, GameCanvas gameCanvas, int rows, int cols) {
 		this.rows = rows;
@@ -66,11 +77,12 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 	private boolean checkIfTap(MotionEvent event) {
 		boolean returnVal = (!seenMoreThanOnePointer &&
-				!hasBeenTooFar &&
+				!isLongTap.get() &&
+				!hasBeenTooFar.get() &&
 				Math.abs(event.getX() - startOfTapX) <= 50f &&
 				Math.abs(event.getY() - startOfTapY) <= 50f);
 		if (!returnVal) {
-			hasBeenTooFar = true;
+			hasBeenTooFar.set(true);
 		}
 		return returnVal;
 	}
@@ -89,9 +101,13 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 				case MotionEvent.ACTION_DOWN:
 					startOfTapX = prevFocusX = event.getX();
 					startOfTapY = prevFocusY = event.getY();
-					hasBeenTooFar = seenMoreThanOnePointer = false;
+					seenMoreThanOnePointer = false;
+					hasBeenTooFar.set(false);
+					singleTapHasEnded.set(false);
 					startAbsoluteX = absoluteX;
 					startAbsoluteY = absoluteY;
+					isLongTap.set(false);
+					new Thread(longTapRunnable).start();
 					break;
 				case MotionEvent.ACTION_MOVE:
 					absoluteX += (event.getX() - prevFocusX) / scale;
@@ -101,30 +117,23 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 					makeSureGridIsOnScreen();
 					break;
 				case MotionEvent.ACTION_UP:
+					singleTapHasEnded.set(true);
 					absoluteX += (event.getX() - prevFocusX) / scale;
 					absoluteY += (event.getY() - prevFocusY) / scale;
 					makeSureGridIsOnScreen();
 					if (checkIfTap(event)) {
 						absoluteX = startAbsoluteX;
 						absoluteY = startAbsoluteY;
-
-						float newX = startOfTapX;
-						newX -= halfScreenWidth;
-						newX /= scale;
-						newX += halfScreenWidth;
-						newX -= absoluteX;
-
-						float newY = startOfTapY;
-						newY -= halfScreenHeight;
-						newY /= scale;
-						newY += halfScreenHeight;
-						newY -= absoluteY;
-
-						((GameActivity) context).handleTap(newX, newY);
+						((GameActivity) context).handleTap(
+								convertScreenToGridX(startOfTapX),
+								convertScreenToGridY(startOfTapY),
+								false
+						);
 					}
 					break;
 			}
 		} else {
+			singleTapHasEnded.set(true);
 			seenMoreThanOnePointer = true;
 			SGD.onTouchEvent(event);
 		}
@@ -134,6 +143,14 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 			gameCanvas.invalidate();
 		}
 		return true;
+	}
+
+	public float convertScreenToGridX(float startOfTapX) {
+		return (startOfTapX - halfScreenWidth) / scale + halfScreenWidth - absoluteX;
+	}
+
+	public float convertScreenToGridY(float startOfTapY) {
+		return (startOfTapY - halfScreenHeight) / scale + halfScreenHeight - absoluteY;
 	}
 
 	private void makeSureGridIsOnScreen() {
@@ -166,5 +183,23 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 
 	public Matrix getMatrix() {
 		return matrix;
+	}
+
+	public class LongTapRunnable implements Runnable {
+		public void run() {
+			try {
+				sleep(longTapDurationMilliseconds);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (!hasBeenTooFar.get() && !singleTapHasEnded.get()) {
+				isLongTap.set(true);
+				((GameActivity) context).runHandleTapOnUIThread(
+						convertScreenToGridX(startOfTapX),
+						convertScreenToGridY(startOfTapY),
+						true
+				);
+			}
+		}
 	}
 }
