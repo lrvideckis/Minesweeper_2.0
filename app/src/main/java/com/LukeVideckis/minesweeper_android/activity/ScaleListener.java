@@ -36,8 +36,13 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		halfScreenWidth = (int) (screenWidth / 2f);
 		halfScreenHeight = (int) (screenHeight / 2f);
 
-		minScaleVal = screenWidth / (float) (GameActivity.cellPixelLength * cols);
-		minScaleVal = Math.min(minScaleVal, screenHeight / (float) (GameActivity.cellPixelLength * rows));
+		final float minScaleX = screenWidth / (float) (GameActivity.cellPixelLength * cols);
+		final float minScaleY = screenHeight / (float) (GameActivity.cellPixelLength * rows);
+
+		scale = minScaleVal = Math.min(minScaleX, minScaleY);
+
+		absoluteX = (getMinAbsoluteX() + getMaxAbsoluteX(getBoundX())) / 2f;
+		absoluteY = (getMinAbsoluteY() + getMaxAbsoluteY(getBoundY())) / 2f;
 
 		makeSureGridIsOnScreen();
 		matrix.setTranslate(absoluteX, absoluteY);
@@ -108,19 +113,10 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 						absoluteX = startAbsoluteX;
 						absoluteY = startAbsoluteY;
 
-						float newX = startOfTapX;
-						newX -= halfScreenWidth;
-						newX /= scale;
-						newX += halfScreenWidth;
-						newX -= absoluteX;
-
-						float newY = startOfTapY;
-						newY -= halfScreenHeight;
-						newY /= scale;
-						newY += halfScreenHeight;
-						newY -= absoluteY;
-
-						((GameActivity) context).handleTap(newX, newY);
+						((GameActivity) context).handleTap(
+								convertScreenToGridX(startOfTapX),
+								convertScreenToGridY(startOfTapY)
+						);
 					}
 					break;
 			}
@@ -136,6 +132,38 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		return true;
 	}
 
+	private float convertScreenToGridX(float startOfTapX) {
+		return (startOfTapX - halfScreenWidth) / scale + halfScreenWidth - absoluteX;
+	}
+
+	private float convertScreenToGridY(float startOfTapY) {
+		return (startOfTapY - halfScreenHeight) / scale + halfScreenHeight - absoluteY;
+	}
+
+	private float getBoundX() {
+		return GameActivity.cellPixelLength * scale * cols - (2 * halfScreenWidth);
+	}
+
+	private float getBoundY() {
+		return GameActivity.cellPixelLength * scale * rows - (2 * halfScreenHeight);
+	}
+
+	private float getMinAbsoluteX() {
+		return (-halfScreenWidth) / scale + halfScreenWidth;
+	}
+
+	private float getMaxAbsoluteX(float boundX) {
+		return (-boundX - halfScreenWidth) / scale + halfScreenWidth;
+	}
+
+	private float getMinAbsoluteY() {
+		return (-halfScreenHeight) / scale + halfScreenHeight;
+	}
+
+	private float getMaxAbsoluteY(float boundY) {
+		return (-boundY - halfScreenHeight) / scale + halfScreenHeight;
+	}
+
 	private void makeSureGridIsOnScreen() {
 		scale = Math.max(scale, minScaleVal);
 
@@ -146,20 +174,20 @@ public class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureList
 		final boolean boardLessThanHeight = (2 * halfScreenHeight > GameActivity.cellPixelLength * scale * rows);
 
 		if ((newX > 0) ^ boardLessThanWidth) {
-			absoluteX = (-halfScreenWidth) / scale + halfScreenWidth;
+			absoluteX = getMinAbsoluteX();
 		} else {
-			final float boundX = GameActivity.cellPixelLength * scale * cols - (2 * halfScreenWidth);
+			final float boundX = getBoundX();
 			if ((newX < -boundX) ^ boardLessThanWidth) {
-				absoluteX = (-boundX - halfScreenWidth) / scale + halfScreenWidth;
+				absoluteX = getMaxAbsoluteX(boundX);
 			}
 		}
 
 		if ((newY > 0) ^ boardLessThanHeight) {
-			absoluteY = (-halfScreenHeight) / scale + halfScreenHeight;
+			absoluteY = getMinAbsoluteY();
 		} else {
-			final float boundY = GameActivity.cellPixelLength * scale * rows - (2 * halfScreenHeight);
+			final float boundY = getBoundY();
 			if ((newY < -boundY) ^ boardLessThanHeight) {
-				absoluteY = (-boundY - halfScreenHeight) / scale + halfScreenHeight;
+				absoluteY = getMaxAbsoluteY(boundY);
 			}
 		}
 	}
