@@ -37,7 +37,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			flagEmoji = new String(Character.toChars(0x1F6A9)),
 			mineEmoji = new String(Character.toChars(0x1F4A3));
 	public static final int cellPixelLength = 150;
-	private static final long millisecondsBeforeDisplayingLoadingScreen = 100;
+	private static final long
+			millisecondsBeforeDisplayingLoadingScreen = 100,
+			maxTimeToGenerateSolvableBoardMilliseconds = 2000;
 
 	private boolean
 			toggleFlagModeOn = false,
@@ -55,6 +57,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private volatile AlertDialog loadingScreenForSolvableBoardGeneration;
 	private CreateSolvableBoard createSolvableBoard;
 	private Thread createSolvableBoardThread;
+	private volatile SolvableBoardRunnable solvableBoardRunnable;
+	private volatile MaxTimeToCreateSolvableBoard maxTimeToCreateSolvableBoard = new MaxTimeToCreateSolvableBoard();
 	private volatile AtomicBoolean finishedBoardGen = new AtomicBoolean(false);
 
 	public void stopTimerThread() {
@@ -104,6 +108,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 							event.getAction() == KeyEvent.ACTION_UP &&
 							!event.isCanceled()) {
 						dialog.cancel();
+						solvableBoardRunnable.setBackButtonPressed();
 						createSolvableBoardThread.interrupt();
 						onBackPressed();
 						return true;
@@ -136,7 +141,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 				new Thread(new DelayLoadingScreenRunnable(finishedBoardGen)).start();
 
-				SolvableBoardRunnable solvableBoardRunnable = new SolvableBoardRunnable(row, col);
+				solvableBoardRunnable = new SolvableBoardRunnable(row, col);
 				createSolvableBoardThread = new Thread(solvableBoardRunnable) {
 					@Override
 					public void interrupt() {
@@ -145,6 +150,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					}
 				};
 				createSolvableBoardThread.start();
+
+				new Thread(maxTimeToCreateSolvableBoard).start();
 				return;
 			}
 			updateTimeThread.start();
@@ -215,8 +222,23 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 	}
 
+	private class MaxTimeToCreateSolvableBoard implements Runnable {
+		public void run() {
+			try {
+				sleep(maxTimeToGenerateSolvableBoardMilliseconds);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (createSolvableBoardThread.isAlive()) {
+				createSolvableBoardThread.interrupt();
+			}
+		}
+	}
+
 	private class SolvableBoardRunnable implements Runnable {
-		private volatile AtomicBoolean isInterrupted = new AtomicBoolean(false);
+		private volatile AtomicBoolean
+				isInterrupted = new AtomicBoolean(false),
+				backButtonWasPressed = new AtomicBoolean(false);
 		private int row, col;
 
 		public SolvableBoardRunnable(int row, int col) {
@@ -227,11 +249,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		public void run() {
 			try {
 				MinesweeperGame solvableBoard = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
+				if (isInterrupted.get()) {
+					if (backButtonWasPressed.get()) {
+						return;
+					}
+					//act as though solvable board generation failed to create normal board
+					throw new Exception();
+				}
 				synchronized (this) {
 					minesweeperGame = solvableBoard;
-				}
-				if (isInterrupted.get()) {
-					return;
 				}
 				finishedBoardGen.set(true);
 				updateTimeThread.start();
@@ -240,9 +266,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					findViewById(R.id.gridCanvas).invalidate();
 				});
 			} catch (Exception ignored) {
-				if (isInterrupted.get()) {
-					return;
-				}
 				finishedBoardGen.set(true);
 				updateTimeThread.start();
 				try {
@@ -256,6 +279,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					findViewById(R.id.gridCanvas).invalidate();
 				});
 			}
+		}
+
+		public void setBackButtonPressed() {
+			backButtonWasPressed.set(true);
 		}
 
 		public void interrupt() {
