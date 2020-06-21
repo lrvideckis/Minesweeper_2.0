@@ -28,8 +28,4 @@ public class HolyGrailSolver implements BacktrackingSolver {
 		myBacktrackingSolver.solvePosition(board, numberOfMines);
 		numberOfIterations = myBacktrackingSolver.getNumberOfIterations();
 	}
-
-	public void doPerformCheckPositionValidity() {
-		myBacktrackingSolver.doPerformCheckPositionValidity();
-	}
 }

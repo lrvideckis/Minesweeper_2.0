@@ -86,16 +86,5 @@ public interface MinesweeperSolver {
 			numberOfMineConfigs.setValue(tile.numberOfMineConfigs);
 			numberOfTotalConfigs.setValue(tile.numberOfTotalConfigs);
 		}
-
-		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) {
-			reset();
-			this.isVisible = isVisible;
-			this.numberSurroundingMines = numberSurroundingMines;
-		}
-
-		//TODO: remove this eventually
-		public void setIsLogicalMine() {
-			isLogicalMine = true;
-		}
 	}
 }
