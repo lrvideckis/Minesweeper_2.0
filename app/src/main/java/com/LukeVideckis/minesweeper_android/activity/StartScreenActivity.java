@@ -25,7 +25,7 @@ import com.LukeVideckis.minesweeper_android.miscHelpers.PopupHelper;
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-	public static final int rowsColsMax = 30, rowsColsMin = 10;
+	public static final int rowsColsMin = 10, rowsColsMax = 30;
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
 			NUMBER_OF_ROWS = "numRows",
@@ -35,7 +35,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	private static final float maxMinePercentage = 0.23f, maxMinePercentageWith8 = 0.22f;
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup;
-	private int minesMin = 0, minesMax = 8 * 9 - 10, gameMode;
+	private int minesMin = 0, minesMax = 10 * 10 - 10, gameMode;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -94,8 +94,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		RadioButton noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
 		noGuessingModeWith8.setOnClickListener(this);
 
-		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 9);
-		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 9);
+		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 10);
+		final int previousCols = sharedPreferences.getInt(NUMBER_OF_COLS, 10);
 		final int previousMines = sharedPreferences.getInt(NUMBER_OF_MINES, 10);
 		gameMode = sharedPreferences.getInt(GAME_MODE, R.id.normal_mode);
 
@@ -116,6 +116,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 		Button beginner = findViewById(R.id.beginner);
 		beginner.setOnClickListener(view -> {
+			/*
+			 * beginner is 10 x 10 because solvable boards with an 8 aren't possible on 9x9 boards
+			 * with start click in the center. It was easier to just make 10x10 the default for
+			 * beginner boards
+			 */
 			rowsInput.setProgress(10);
 			colsInput.setProgress(10);
 			minesInput.setProgress(10);
