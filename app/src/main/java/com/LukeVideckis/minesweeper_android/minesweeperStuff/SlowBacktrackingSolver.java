@@ -18,7 +18,7 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 	private final int[][][] lastUnvisitedSpot;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines;
-	private BigFraction[][] numberOfTotalConfigs;
+	private final BigFraction[][] numberOfTotalConfigs;
 	private int rows, cols;
 	private VisibleTile[][] board;
 	private int numberOfMines;
