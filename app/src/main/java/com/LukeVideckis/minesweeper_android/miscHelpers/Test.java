@@ -292,7 +292,7 @@ public class Test {
 				VisibleTile fastTile = boardFast[i][j];
 				VisibleTile slowTile = boardSlow[i][j];
 
-				if (fastTile.getMineProbability().equals(slowTile.getMineProbability()) ||
+				if (!fastTile.getMineProbability().equals(slowTile.getMineProbability()) ||
 						fastTile.getIsLogicalFree() != slowTile.getIsLogicalFree() ||
 						fastTile.getIsLogicalMine() != slowTile.getIsLogicalMine()
 				) {

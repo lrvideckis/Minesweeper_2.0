@@ -68,12 +68,14 @@ public interface MinesweeperSolver {
 					throw new Exception("visible tiles can't be logical stuff");
 				}
 			}
+			/*
 			if (tile.isLogicalFree && !tile.mineProbability.equals(0)) {
 				throw new Exception("logical free tile with non-zero probability");
 			}
 			if (tile.isLogicalMine && !tile.mineProbability.equals(1)) {
 				throw new Exception("logical mine tile with non-1 probability");
 			}
+			 */
 			reset();
 			isVisible = tile.isVisible;
 			numberSurroundingMines = tile.numberSurroundingMines;
