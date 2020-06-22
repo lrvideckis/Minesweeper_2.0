@@ -6,6 +6,7 @@ import com.LukeVideckis.minesweeper_android.customExceptions.HitIterationLimitEx
 import com.LukeVideckis.minesweeper_android.customExceptions.NoSolutionFoundException;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AllCellsAreHidden;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MutableInt;
 
@@ -17,6 +18,7 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 	private final int[][][] lastUnvisitedSpot;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines;
+	private BigFraction[][] numberOfTotalConfigs;
 	private int rows, cols;
 	private VisibleTile[][] board;
 	private int numberOfMines;
@@ -25,6 +27,12 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 		isMine = new boolean[rows][cols];
 		cntSurroundingMines = new int[rows][cols];
 		lastUnvisitedSpot = new int[rows][cols][2];
+		numberOfTotalConfigs = new BigFraction[rows][cols];
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				numberOfTotalConfigs[i][j] = new BigFraction(0);
+			}
+		}
 	}
 
 	@Override
@@ -34,8 +42,7 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {
-					board[i][j].numberOfMineConfigs.setValues(numberOfMines, 1);
-					board[i][j].numberOfTotalConfigs.setValues(rows * cols, 1);
+					board[i][j].mineProbability.setValues(numberOfMines, rows * cols);
 				}
 			}
 			return;
@@ -61,12 +68,13 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 				if (curr.getIsVisible()) {
 					continue;
 				}
-				if (curr.numberOfTotalConfigs.equals(0)) {
+				if (numberOfTotalConfigs[i][j].equals(0)) {
 					throw new NoSolutionFoundException("There should be at least one mine configuration for non-visible cells");
 				}
-				if (curr.numberOfMineConfigs.equals(0)) {
+				curr.mineProbability.divideWith(numberOfTotalConfigs[i][j]);
+				if (curr.mineProbability.equals(0)) {
 					curr.isLogicalFree = true;
-				} else if (curr.numberOfMineConfigs.equals(curr.numberOfTotalConfigs)) {
+				} else if (curr.mineProbability.equals(1)) {
 					curr.isLogicalMine = true;
 				}
 			}
@@ -178,9 +186,9 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 					continue;
 				}
 				if (isMine[i][j]) {
-					board[i][j].numberOfMineConfigs.addWith(1);
+					board[i][j].mineProbability.addWith(1);
 				}
-				board[i][j].numberOfTotalConfigs.addWith(1);
+				numberOfTotalConfigs[i][j].addWith(1);
 			}
 		}
 	}

@@ -5,7 +5,6 @@ import android.util.Pair;
 
 import com.LukeVideckis.minesweeper_android.customExceptions.HitIterationLimitException;
 import com.LukeVideckis.minesweeper_android.customExceptions.NoSolutionFoundException;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolverWithBigint;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.GaussianEliminationSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
@@ -13,13 +12,11 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolve
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.SlowBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ExistsLogicalFree;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
 
-import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
@@ -241,76 +238,6 @@ public class Test {
 		return board;
 	}
 
-	public static void performTestsWithBigIntSolverForLargerGrids(int numberOfTests) throws Exception {
-		for (int testID = 1; testID <= numberOfTests; ++testID) {
-			System.out.println("test number: " + testID);
-			final int rows = MyMath.getRand(10, 30);
-			final int cols = MyMath.getRand(10, 30);
-			int mines = MyMath.getRand(2, 50);
-			mines = Math.min(mines, rows * cols - 9);
-
-			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
-			holyGrailSolver.doPerformCheckPositionValidity();
-			BacktrackingSolverWithBigint backtrackingSolverWithBigint = new BacktrackingSolverWithBigint(rows, cols);
-
-			MinesweeperGame minesweeperGame;
-			minesweeperGame = new MinesweeperGame(rows, cols, mines);
-			int numberOfClicks = MyMath.getRand(3, 7);
-			while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
-				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
-			}
-			if (minesweeperGame.getIsGameLost()) {
-				System.out.println("game over, void test");
-				continue;
-			}
-			VisibleTile[][] boardFraction = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
-			VisibleTile[][] boardBigInt = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
-
-			try {
-				holyGrailSolver.solvePosition(boardFraction, minesweeperGame.getNumberOfMines());
-				backtrackingSolverWithBigint.solvePosition(boardBigInt, minesweeperGame.getNumberOfMines());
-			} catch (HitIterationLimitException ignored) {
-				System.out.println("hit iteration limit, void test");
-				continue;
-			}
-
-			boolean testPassed = true;
-			for (int i = 0; i < rows; ++i) {
-				for (int j = 0; j < cols; ++j) {
-					if (boardBigInt[i][j].getIsVisible()) {
-						continue;
-					}
-					BigFraction curr = boardFraction[i][j].getNumberOfMineConfigs();
-					curr.divideWith(boardFraction[i][j].getNumberOfTotalConfigs());
-
-					BigInteger top = backtrackingSolverWithBigint.getNumberOfMineConfigs(i, j);
-					BigInteger bottom = backtrackingSolverWithBigint.getNumberOfTotalConfigs(i, j);
-					BigInteger gcd = top.gcd(bottom);
-					top = top.divide(gcd);
-					bottom = bottom.divide(gcd);
-
-					//noinspection SuspiciousNameCombination
-					if (!curr.getNumerator().equals(top) ||
-							!curr.getDenominator().equals(bottom) ||
-							boardFraction[i][j].getIsLogicalMine() != boardBigInt[i][j].getIsLogicalMine() ||
-							boardFraction[i][j].getIsLogicalFree() != boardBigInt[i][j].getIsLogicalFree()
-					) {
-						testPassed = false;
-						System.out.println("here, solver outputs don't match");
-						System.out.println("i,j: " + i + " " + j);
-						System.out.println("fraction solver " + curr.getNumerator() + '/' + curr.getDenominator());
-						System.out.println("big int solver " + top + '/' + bottom);
-					}
-				}
-			}
-			if (!testPassed) {
-				CreateSolvableBoard.printBoardDebug(boardBigInt);
-				return;
-			}
-		}
-		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
-	}
-
 	public static void performTestsForMineProbability(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
@@ -363,22 +290,17 @@ public class Test {
 				}
 
 				VisibleTile fastTile = boardFast[i][j];
-				BigFraction fast = new BigFraction(fastTile.getNumberOfMineConfigs());
-				fast.divideWith(fastTile.getNumberOfTotalConfigs());
-
 				VisibleTile slowTile = boardSlow[i][j];
-				BigFraction slow = new BigFraction(slowTile.getNumberOfMineConfigs());
-				slow.divideWith(slowTile.getNumberOfTotalConfigs());
-				if (!fast.getNumerator().equals(slow.getNumerator()) ||
-						!fast.getDenominator().equals(slow.getDenominator()) ||
+
+				if (fastTile.getMineProbability().equals(slowTile.getMineProbability()) ||
 						fastTile.getIsLogicalFree() != slowTile.getIsLogicalFree() ||
 						fastTile.getIsLogicalMine() != slowTile.getIsLogicalMine()
 				) {
 					passedTest = false;
 					System.out.println("here, solver outputs don't match");
 					System.out.println("i,j: " + i + " " + j);
-					System.out.println("fast solver " + fast.getNumerator() + '/' + fast.getDenominator());
-					System.out.println("slow solver " + slow.getNumerator() + '/' + slow.getDenominator());
+					System.out.println("fast solver " + fastTile.getMineProbability().getNumerator() + '/' + fastTile.getMineProbability().getDenominator());
+					System.out.println("slow solver " + slowTile.getMineProbability().getNumerator() + '/' + slowTile.getMineProbability().getDenominator());
 					System.out.println("number of away cells: " + AwayCell.getNumberOfAwayCells(boardFast));
 				}
 			}
@@ -647,7 +569,7 @@ public class Test {
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
 	}
 
-	public static void BestSolverOnly(int numberOfTests) {
+	public static void BestSolverOnly(int numberOfTests) throws Exception {
 		final int numberOfSolvers = 5;
 
 		long[][] times = new long[numberOfTests][numberOfSolvers];

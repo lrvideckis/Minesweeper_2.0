@@ -30,8 +30,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<Integer, Integer>>>> savePositionsOfMinesPerCompPerCountMines = new ArrayList<>();
 	private final TreeMap<Integer, ArrayList<Pair<Integer, Integer>>> saveGoodMineConfigurations = new TreeMap<>();
 	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig = new ArrayList<>();
-	//TODO: remove mineProbPerCompPerNumMines denominator, and use mineConfig instead
-	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines = new ArrayList<>();
+	private final ArrayList<TreeMap<Integer, ArrayList<MutableInt>>> mineProbPerCompPerNumMines = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
 	private int numberOfMines;
 	private VisibleTile[][] board;
@@ -65,8 +64,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {
-					board[i][j].numberOfMineConfigs.setValues(numberOfMines, 1);
-					board[i][j].numberOfTotalConfigs.setValues(rows * cols, 1);
+					board[i][j].mineProbability.setValues(numberOfMines, rows * cols);
 				}
 			}
 			return;
@@ -84,14 +82,11 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					if (!AwayCell.isAwayCell(board, i, j, rows, cols)) {
 						--numberOfMines;
 					}
-					board[i][j].numberOfMineConfigs.setValues(1, 1);
-					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+					board[i][j].mineProbability.setValues(1, 1);
 				} else if (board[i][j].getIsLogicalFree()) {
-					board[i][j].numberOfMineConfigs.setValues(0, 1);
-					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+					board[i][j].mineProbability.setValues(0, 1);
 				} else {
-					board[i][j].numberOfMineConfigs.setValues(0, 1);
-					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+					board[i][j].mineProbability.setValues(0, 1);
 				}
 				if (board[i][j].getIsVisible()) {
 					updatedNumberSurroundingMines[i][j] = board[i][j].getNumberSurroundingMines();
@@ -124,9 +119,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		TreeMap<Integer, BigFraction> configsPerMineCount = calculateNumberOfMineConfigs();
 
 		for (int i = 0; i < components.size(); ++i) {
-			for (TreeMap.Entry<Integer, ArrayList<Pair<MutableInt, MutableInt>>> entry : mineProbPerCompPerNumMines.get(i).entrySet()) {
+			for (TreeMap.Entry<Integer, ArrayList<MutableInt>> entry : mineProbPerCompPerNumMines.get(i).entrySet()) {
 				final int mines = entry.getKey();
-				final ArrayList<Pair<MutableInt, MutableInt>> mineProbPerSpot = entry.getValue();
+				final ArrayList<MutableInt> mineProbPerSpot = entry.getValue();
 
 				TreeMap<Integer, BigFraction> configsPerMine = numberOfConfigsForCurrent.get(i).get(mines);
 				BigFraction currWeight = new BigFraction(0);
@@ -146,13 +141,13 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				}
 
 				for (int j = 0; j < components.get(i).size(); ++j) {
-					final int numerator = mineProbPerSpot.get(j).first.get();
+					final int numerator = mineProbPerSpot.get(j).get();
 					final int row = components.get(i).get(j).first;
 					final int col = components.get(i).get(j).second;
 
 					BigFraction delta = new BigFraction(numerator);
 					delta.multiplyWith(currWeight);
-					board[row][col].numberOfMineConfigs.addWith(delta);
+					board[row][col].mineProbability.addWith(delta);
 				}
 			}
 		}
@@ -160,20 +155,16 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				VisibleTile curr = board[i][j];
-				if (curr.getIsVisible() && !curr.numberOfMineConfigs.equals(0)) {
-					throw new Exception("found a visible cell with non-zero number of mine configurations: " + i + " " + j);
+				if (curr.getIsVisible() && !curr.mineProbability.equals(0)) {
+					throw new Exception("found a visible cell with non-zero mine probability: " + i + " " + j);
 				}
 				if (curr.getIsLogicalMine()) {
-					if (!curr.numberOfMineConfigs.equals(1) ||
-							!curr.numberOfTotalConfigs.equals(1)
-					) {
+					if (!curr.mineProbability.equals(1)) {
 						throw new Exception("found logical mine with mine probability != 1: " + i + " " + j);
 					}
 				}
 				if (curr.getIsLogicalFree()) {
-					if (!curr.numberOfMineConfigs.equals(0) ||
-							!curr.numberOfTotalConfigs.equals(1)
-					) {
+					if (!curr.mineProbability.equals(0)) {
 						throw new Exception("found logical free cell with mine probability != 0: " + i + " " + j);
 					}
 				}
@@ -182,21 +173,15 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					if (awayMineProbability == null) {
 						throw new Exception("away probability is null, but this was checked above");
 					}
-					curr.numberOfMineConfigs.setValue(awayMineProbability);
-					curr.numberOfTotalConfigs.setValues(1, 1);
+					curr.mineProbability.setValue(awayMineProbability);
 				}
 
-				if (curr.getIsVisible()) {
-					curr.numberOfTotalConfigs.setValues(1, 1);
-				}
 				if (curr.getIsVisible() || curr.getIsLogicalMine() || curr.getIsLogicalFree()) {
 					continue;
 				}
-				//TODO: remove total configs, and just have a single BigFraction
-				curr.numberOfTotalConfigs.setValues(1, 1);
-				if (curr.numberOfMineConfigs.equals(0)) {
+				if (curr.mineProbability.equals(0)) {
 					curr.isLogicalFree = true;
-				} else if (curr.numberOfMineConfigs.equals(curr.numberOfTotalConfigs)) {
+				} else if (curr.mineProbability.equals(1)) {
 					curr.isLogicalMine = true;
 				}
 			}
@@ -464,22 +449,21 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 
 		if (!mineProbPerCompPerNumMines.get(componentPos).containsKey(currNumberOfMines)) {
-			ArrayList<Pair<MutableInt, MutableInt>> currSpotsArray = new ArrayList<>(component.size());
+			ArrayList<MutableInt> currSpotsArray = new ArrayList<>(component.size());
 			for (int i = 0; i < component.size(); ++i) {
-				currSpotsArray.add(new Pair<>(new MutableInt(0), new MutableInt(0)));
+				currSpotsArray.add(new MutableInt(0));
 			}
 			mineProbPerCompPerNumMines.get(componentPos).put(currNumberOfMines, currSpotsArray);
 		}
-		ArrayList<Pair<MutableInt, MutableInt>> currArrayList = Objects.requireNonNull(mineProbPerCompPerNumMines.get(componentPos).get(currNumberOfMines));
+		ArrayList<MutableInt> currArrayList = Objects.requireNonNull(mineProbPerCompPerNumMines.get(componentPos).get(currNumberOfMines));
 		for (int pos = 0; pos < component.size(); ++pos) {
 			final int i = component.get(pos).first;
 			final int j = component.get(pos).second;
-			Pair<MutableInt, MutableInt> curr = currArrayList.get(pos);
+			MutableInt curr = currArrayList.get(pos);
 
 			if (isMine[i][j]) {
-				curr.first.addWith(1);
+				curr.addWith(1);
 			}
-			curr.second.addWith(1);
 		}
 
 		if (interestingCell != null) {
@@ -581,8 +565,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 						throw new GameLostException("logical mine in spot where free was requested");
 					}
 					--numberOfMines;
-					board[i][j].numberOfMineConfigs.setValues(1, 1);
-					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+					board[i][j].mineProbability.setValues(1, 1);
 				} else if (board[i][j].getIsLogicalFree()) {
 					if (i == spotI && j == spotJ) {
 						if (wantMine) {
@@ -591,8 +574,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 						System.out.println("return 2");
 						return null;
 					}
-					board[i][j].numberOfMineConfigs.setValues(0, 1);
-					board[i][j].numberOfTotalConfigs.setValues(1, 1);
+					board[i][j].mineProbability.setValues(0, 1);
 				}
 				if (board[i][j].getIsVisible()) {
 					if (i == spotI && j == spotJ) {

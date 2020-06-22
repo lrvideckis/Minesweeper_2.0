@@ -73,7 +73,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		gameMode = getIntent().getIntExtra(StartScreenActivity.GAME_MODE, R.id.normal_mode);
 		setContentView(R.layout.game);
 
-		createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
+		try {
+			createSolvableBoard = new CreateSolvableBoard(numberOfRows, numberOfCols, numberOfMines);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		try {
 			minesweeperGame = new MinesweeperGame(numberOfRows, numberOfCols, numberOfMines);
@@ -81,7 +85,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			e.printStackTrace();
 		}
 		holyGrailSolver = new HolyGrailSolver(numberOfRows, numberOfCols);
-		board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+		try {
+			board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
 		newGameButton.setOnClickListener(this);

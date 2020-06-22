@@ -6,11 +6,11 @@ public interface MinesweeperSolver {
 	void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception;
 
 	class VisibleTile {
-		BigFraction numberOfMineConfigs = new BigFraction(0), numberOfTotalConfigs = new BigFraction(0);
+		BigFraction mineProbability = new BigFraction(0);
 		boolean isVisible, isLogicalMine, isLogicalFree;
 		int numberSurroundingMines;
 
-		public VisibleTile() {
+		public VisibleTile() throws Exception {
 			reset();
 		}
 
@@ -24,19 +24,13 @@ public interface MinesweeperSolver {
 					isLogicalMine == other.isLogicalMine &&
 					isLogicalFree == other.isLogicalFree &&
 					numberSurroundingMines == other.numberSurroundingMines &&
-					numberOfMineConfigs.equals(other.numberOfMineConfigs) &&
-					numberOfTotalConfigs.equals(other.numberOfTotalConfigs);
+					mineProbability.equals(other.mineProbability);
 		}
 
-		private void reset() {
+		private void reset() throws Exception {
 			isLogicalFree = isLogicalMine = isVisible = false;
 			numberSurroundingMines = 0;
-			try {
-				numberOfMineConfigs.setValues(0, 1);
-				numberOfTotalConfigs.setValues(0, 1);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			mineProbability.setValues(0, 1);
 		}
 
 		public boolean getIsVisible() {
@@ -51,19 +45,15 @@ public interface MinesweeperSolver {
 			return isLogicalFree;
 		}
 
-		public BigFraction getNumberOfMineConfigs() {
-			return numberOfMineConfigs;
-		}
-
-		public BigFraction getNumberOfTotalConfigs() {
-			return numberOfTotalConfigs;
+		public BigFraction getMineProbability() {
+			return mineProbability;
 		}
 
 		public int getNumberSurroundingMines() {
 			return numberSurroundingMines;
 		}
 
-		public void updateVisibilityAndSurroundingMines(MinesweeperGame.Tile tile) {
+		public void updateVisibilityAndSurroundingMines(MinesweeperGame.Tile tile) throws Exception {
 			reset();
 			isVisible = tile.isVisible;
 			numberSurroundingMines = tile.numberSurroundingMines;
@@ -78,16 +68,21 @@ public interface MinesweeperSolver {
 					throw new Exception("visible tiles can't be logical stuff");
 				}
 			}
+			if (tile.isLogicalFree && !tile.mineProbability.equals(0)) {
+				throw new Exception("logical free tile with non-zero probability");
+			}
+			if (tile.isLogicalMine && !tile.mineProbability.equals(1)) {
+				throw new Exception("logical mine tile with non-1 probability");
+			}
 			reset();
 			isVisible = tile.isVisible;
 			numberSurroundingMines = tile.numberSurroundingMines;
 			isLogicalMine = tile.isLogicalMine;
 			isLogicalFree = tile.isLogicalFree;
-			numberOfMineConfigs.setValue(tile.numberOfMineConfigs);
-			numberOfTotalConfigs.setValue(tile.numberOfTotalConfigs);
+			mineProbability.setValue(tile.mineProbability);
 		}
 
-		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) {
+		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) throws Exception {
 			reset();
 			this.isVisible = isVisible;
 			this.numberSurroundingMines = numberSurroundingMines;

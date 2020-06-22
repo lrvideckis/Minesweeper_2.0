@@ -5,7 +5,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class ConvertGameBoardFormat {
-	public static VisibleTile[][] convertToNewBoard(MinesweeperGame minesweeperGame) {
+	public static VisibleTile[][] convertToNewBoard(MinesweeperGame minesweeperGame) throws Exception {
 		final int rows = minesweeperGame.getRows();
 		final int cols = minesweeperGame.getCols();
 		VisibleTile[][] board = new VisibleTile[rows][cols];

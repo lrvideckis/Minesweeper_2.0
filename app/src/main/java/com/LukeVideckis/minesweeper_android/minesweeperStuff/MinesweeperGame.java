@@ -350,8 +350,7 @@ public class MinesweeperGame {
 	private void resetLogicalStuff(int i, int j) throws Exception {
 		getCell(i, j).isLogicalFree = false;
 		getCell(i, j).isLogicalMine = false;
-		getCell(i, j).numberOfMineConfigs.setValues(0, 1);
-		getCell(i, j).numberOfTotalConfigs.setValues(1, 1);
+		getCell(i, j).mineProbability.setValues(0, 1);
 	}
 
 	public void shuffleInterestingMinesAndMakeOneAway(int firstClickI, int firstClickJ) throws Exception {
@@ -491,8 +490,7 @@ public class MinesweeperGame {
 				}
 				getCell(i, j).isLogicalFree = visibleBoard[i][j].isLogicalFree;
 				getCell(i, j).isLogicalMine = visibleBoard[i][j].isLogicalMine;
-				getCell(i, j).numberOfMineConfigs.setValue(visibleBoard[i][j].numberOfMineConfigs);
-				getCell(i, j).numberOfTotalConfigs.setValue(visibleBoard[i][j].numberOfTotalConfigs);
+				getCell(i, j).mineProbability.setValue(visibleBoard[i][j].mineProbability);
 			}
 		}
 	}
@@ -605,13 +603,13 @@ public class MinesweeperGame {
 	public static class Tile extends VisibleTile {
 		private boolean isFlagged, isMine;
 
-		private Tile() {
+		private Tile() throws Exception {
 			isFlagged = isMine = false;
 			numberSurroundingMines = 0;
 		}
 
 		//copy constructor
-		private Tile(Tile other) {
+		private Tile(Tile other) throws Exception {
 			isMine = other.isMine;
 			isFlagged = other.isFlagged;
 
@@ -619,8 +617,7 @@ public class MinesweeperGame {
 			isLogicalMine = other.isLogicalMine;
 			isLogicalFree = other.isLogicalFree;
 			numberSurroundingMines = other.numberSurroundingMines;
-			numberOfMineConfigs = new BigFraction(other.numberOfMineConfigs);
-			numberOfTotalConfigs = new BigFraction(other.numberOfTotalConfigs);
+			mineProbability = new BigFraction(other.mineProbability);
 		}
 
 		public boolean isMine() {
@@ -638,16 +635,14 @@ public class MinesweeperGame {
 			isVisible = false;
 			isLogicalMine = false;
 			isLogicalFree = false;
-			numberOfMineConfigs.setValues(0, 1);
-			numberOfTotalConfigs.setValues(1, 1);
+			mineProbability.setValues(0, 1);
 		}
 
 		private void revealTile() throws Exception {
 			isVisible = true;
 			isFlagged = false;
 			isLogicalFree = false;
-			numberOfMineConfigs.setValues(0, 1);
-			numberOfTotalConfigs.setValues(1, 1);
+			mineProbability.setValues(0, 1);
 			if (isMine) {
 				throw new Exception("can't reveal a mine");
 			}

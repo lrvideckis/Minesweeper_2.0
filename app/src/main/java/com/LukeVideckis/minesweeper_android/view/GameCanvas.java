@@ -19,7 +19,6 @@ public class GameCanvas extends View {
 
 	private final Paint black = new Paint();
 	private final DrawCellHelpers drawCellHelpers;
-	private final BigFraction mineProbability = new BigFraction(0);
 	private final RectF tempCellRect = new RectF();
 	private final ScaleListener scaleListener;
 	private VisibleTile[][] visibleBoard;
@@ -84,9 +83,7 @@ public class GameCanvas extends View {
 		}
 
 		if (gameActivity.getToggleMineProbabilityOn() && !solverCell.getIsVisible() && !displayedLogicalStuff && !gameCell.isFlagged()) {
-			mineProbability.setValue(solverCell.getNumberOfMineConfigs());
-			mineProbability.divideWith(solverCell.getNumberOfTotalConfigs());
-			drawCellHelpers.drawMineProbability(canvas, startX, startY, mineProbability, getResources());
+			drawCellHelpers.drawMineProbability(canvas, startX, startY, solverCell.getMineProbability(), getResources());
 		}
 
 		if (gameCell.isFlagged()) {
