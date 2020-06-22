@@ -2,16 +2,15 @@ package com.LukeVideckis.minesweeper_android.minesweeperStuff;
 
 public class HolyGrailSolver implements BacktrackingSolver {
 
-	//TODO: try to change MyBacktrackingSolver back to BacktrackingSolver interface
-	private final MyBacktrackingSolver myBacktrackingSolver;
+	private final BacktrackingSolver myBacktrackingSolver;
 	private final MinesweeperSolver gaussSolver;
 	private final VisibleTileWithProbability[][] tempBoardWithProbability;
 	private final int rows, cols;
 
-	public HolyGrailSolver(int rows, int cols) {
+	public HolyGrailSolver(int rows, int cols, boolean performCheckPositionValidity) {
 		this.rows = rows;
 		this.cols = cols;
-		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
+		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols, performCheckPositionValidity);
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
 		tempBoardWithProbability = new VisibleTileWithProbability[rows][cols];
 	}
@@ -40,9 +39,5 @@ public class HolyGrailSolver implements BacktrackingSolver {
 	public void solvePosition(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception {
 		gaussSolver.solvePosition(board, numberOfMines);
 		myBacktrackingSolver.solvePosition(board, numberOfMines);
-	}
-
-	public void doPerformCheckPositionValidity() {
-		myBacktrackingSolver.doPerformCheckPositionValidity();
 	}
 }

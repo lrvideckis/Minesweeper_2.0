@@ -190,8 +190,7 @@ public class Test {
 				continue;
 			}
 
-			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
-			holyGrailSolver.doPerformCheckPositionValidity();
+			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			try {
@@ -237,8 +236,7 @@ public class Test {
 			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
-			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
-			holyGrailSolver.doPerformCheckPositionValidity();
+			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -310,8 +308,7 @@ public class Test {
 			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
-			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
-			myBacktrackingSolver.doPerformCheckPositionValidity();
+			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols, true);
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
@@ -373,8 +370,7 @@ public class Test {
 			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
-			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
-			holyGrailSolver.doPerformCheckPositionValidity();
+			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
 			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
@@ -429,7 +425,7 @@ public class Test {
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.print(" percentage: " + mines / (float) (rows * cols));
 
-			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
+			HolyGrailSolver solver = new HolyGrailSolver(rows, cols, true);
 
 			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
 			final int firstClickI = MyMath.getRand(0, rows - 1);
@@ -496,7 +492,7 @@ public class Test {
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.print(" percentage: " + mines / (float) (rows * cols));
 
-			HolyGrailSolver solver = new HolyGrailSolver(rows, cols);
+			HolyGrailSolver solver = new HolyGrailSolver(rows, cols, true);
 
 			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
 			final int firstClickI = MyMath.getRand(0, rows - 1);

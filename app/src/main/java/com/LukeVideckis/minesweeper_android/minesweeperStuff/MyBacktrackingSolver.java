@@ -36,9 +36,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 	private int numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
-	private boolean performCheckPositionValidity = false;
+	private boolean performCheckPositionValidity;
 
-	public MyBacktrackingSolver(int rows, int cols) {
+	public MyBacktrackingSolver(int rows, int cols, boolean performCheckPositionValidity) {
 		this.rows = rows;
 		this.cols = cols;
 		isMine = new boolean[rows][cols];
@@ -54,12 +54,8 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			lastUnvisitedSpot.add(currRow);
 		}
+		this.performCheckPositionValidity = performCheckPositionValidity;
 	}
-
-	public void doPerformCheckPositionValidity() {
-		performCheckPositionValidity = true;
-	}
-
 
 	@Override
 	public void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception {
