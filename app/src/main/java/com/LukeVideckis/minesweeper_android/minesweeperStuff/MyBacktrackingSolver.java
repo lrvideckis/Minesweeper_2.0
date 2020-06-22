@@ -32,6 +32,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 	private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, ArrayList<MutableInt>>> mineProbPerCompPerNumMines = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
+	private final VisibleTileWithProbability[][] tempBoardWithProbability;
 	private int numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
@@ -44,6 +45,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		cntSurroundingMines = new int[rows][cols];
 		updatedNumberSurroundingMines = new int[rows][cols];
 		lastUnvisitedSpot = new ArrayList<>(rows);
+		tempBoardWithProbability = new VisibleTileWithProbability[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			ArrayList<ArrayList<Pair<Integer, Integer>>> currRow = new ArrayList<>(cols);
 			for (int j = 0; j < cols; ++j) {
@@ -58,8 +60,25 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		performCheckPositionValidity = true;
 	}
 
+
 	@Override
 	public void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception {
+		//TODO: this can be optimized: have the option to not calculate probability, this option can be used for getMineConfiguration
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				tempBoardWithProbability[i][j] = new VisibleTileWithProbability(board[i][j]);
+			}
+		}
+		solvePosition(tempBoardWithProbability, numberOfMines);
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				board[i][j].set(tempBoardWithProbability[i][j]);
+			}
+		}
+	}
+
+	@Override
+	public void solvePosition(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception {
 
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
 			for (int i = 0; i < rows; ++i) {
@@ -154,7 +173,10 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				VisibleTile curr = board[i][j];
+				VisibleTileWithProbability curr = board[i][j];
+				if (curr.getIsVisible() && (curr.isLogicalMine || curr.isLogicalFree)) {
+					throw new Exception("visible cells shouldn't be logical");
+				}
 				if (curr.getIsVisible() && !curr.mineProbability.equals(0)) {
 					throw new Exception("found a visible cell with non-zero mine probability: " + i + " " + j);
 				}
@@ -565,7 +587,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 						throw new GameLostException("logical mine in spot where free was requested");
 					}
 					--numberOfMines;
-					board[i][j].mineProbability.setValues(1, 1);
 				} else if (board[i][j].getIsLogicalFree()) {
 					if (i == spotI && j == spotJ) {
 						if (wantMine) {
@@ -574,7 +595,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 						System.out.println("return 2");
 						return null;
 					}
-					board[i][j].mineProbability.setValues(0, 1);
 				}
 				if (board[i][j].getIsVisible()) {
 					if (i == spotI && j == spotJ) {

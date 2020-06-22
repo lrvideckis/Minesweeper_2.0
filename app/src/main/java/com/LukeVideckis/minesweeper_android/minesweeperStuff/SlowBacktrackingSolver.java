@@ -19,8 +19,9 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines;
 	private final BigFraction[][] numberOfTotalConfigs;
+	private final VisibleTileWithProbability[][] tempBoardWithProbability;
 	private int rows, cols;
-	private VisibleTile[][] board;
+	private VisibleTileWithProbability[][] board;
 	private int numberOfMines;
 
 	public SlowBacktrackingSolver(int rows, int cols) {
@@ -33,10 +34,26 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 				numberOfTotalConfigs[i][j] = new BigFraction(0);
 			}
 		}
+		tempBoardWithProbability = new VisibleTileWithProbability[rows][cols];
 	}
 
 	@Override
 	public void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception {
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				tempBoardWithProbability[i][j] = new VisibleTileWithProbability(board[i][j]);
+			}
+		}
+		solvePosition(tempBoardWithProbability, numberOfMines);
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				board[i][j] = new VisibleTile(tempBoardWithProbability[i][j]);
+			}
+		}
+	}
+
+	@Override
+	public void solvePosition(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception {
 		initialize(board, numberOfMines);
 
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
@@ -64,7 +81,7 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				VisibleTile curr = board[i][j];
+				VisibleTileWithProbability curr = board[i][j];
 				if (curr.getIsVisible()) {
 					continue;
 				}
@@ -97,7 +114,7 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 		throw new Exception("to make warning go away");
 	}
 
-	private void initialize(VisibleTile[][] board, int numberOfMines) throws Exception {
+	private void initialize(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception {
 		this.board = board;
 		this.numberOfMines = numberOfMines;
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);

@@ -5,18 +5,6 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class ConvertGameBoardFormat {
-	public static VisibleTile[][] convertToNewBoard(MinesweeperGame minesweeperGame) throws Exception {
-		final int rows = minesweeperGame.getRows();
-		final int cols = minesweeperGame.getCols();
-		VisibleTile[][] board = new VisibleTile[rows][cols];
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				board[i][j] = new VisibleTile();
-				board[i][j].updateVisibilityAndSurroundingMines(minesweeperGame.getCell(i, j));
-			}
-		}
-		return board;
-	}
 
 	public static void convertToExistingBoard(MinesweeperGame minesweeperGame, VisibleTile[][] board, boolean convertLogicalStuff) throws Exception {
 		final int rows = minesweeperGame.getRows();

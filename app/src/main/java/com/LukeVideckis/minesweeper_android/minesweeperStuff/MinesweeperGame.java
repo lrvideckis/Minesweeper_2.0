@@ -6,7 +6,6 @@ import com.LukeVideckis.minesweeper_android.customExceptions.NoAwayCellsToMoveAM
 import com.LukeVideckis.minesweeper_android.customExceptions.NoInterestingMinesException;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.Dsu;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
@@ -14,6 +13,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolver.VisibleTileWithProbability;
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class MinesweeperGame {
@@ -490,6 +490,20 @@ public class MinesweeperGame {
 				}
 				getCell(i, j).isLogicalFree = visibleBoard[i][j].isLogicalFree;
 				getCell(i, j).isLogicalMine = visibleBoard[i][j].isLogicalMine;
+			}
+		}
+	}
+
+	public void updateLogicalStuff(VisibleTileWithProbability[][] visibleBoard) throws Exception {
+		updateLogicalStuff((VisibleTile[][]) visibleBoard);
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (visibleBoard[i][j].isLogicalMine && !visibleBoard[i][j].mineProbability.equals(1)) {
+					throw new Exception("logical mine with non-1 mine probability " + i + " " + j);
+				}
+				if (visibleBoard[i][j].isLogicalFree && !visibleBoard[i][j].mineProbability.equals(0)) {
+					throw new Exception("logical free with non-zero mine probability " + i + " " + j);
+				}
 				getCell(i, j).mineProbability.setValue(visibleBoard[i][j].mineProbability);
 			}
 		}
@@ -600,24 +614,19 @@ public class MinesweeperGame {
 		}
 	}
 
-	public static class Tile extends VisibleTile {
+	public static class Tile extends BacktrackingSolver.VisibleTileWithProbability {
 		private boolean isFlagged, isMine;
 
-		private Tile() throws Exception {
+		private Tile() {
+			super();
 			isFlagged = isMine = false;
-			numberSurroundingMines = 0;
 		}
 
 		//copy constructor
-		private Tile(Tile other) throws Exception {
+		private Tile(Tile other) {
+			super(other);
 			isMine = other.isMine;
 			isFlagged = other.isFlagged;
-
-			isVisible = other.isVisible;
-			isLogicalMine = other.isLogicalMine;
-			isLogicalFree = other.isLogicalFree;
-			numberSurroundingMines = other.numberSurroundingMines;
-			mineProbability = new BigFraction(other.mineProbability);
 		}
 
 		public boolean isMine() {
@@ -632,16 +641,13 @@ public class MinesweeperGame {
 		}
 
 		private void resetLogicalStuffAndVisibility() throws Exception {
-			isVisible = false;
-			isLogicalMine = false;
-			isLogicalFree = false;
+			isVisible = isLogicalMine = isLogicalFree = false;
 			mineProbability.setValues(0, 1);
 		}
 
 		private void revealTile() throws Exception {
 			isVisible = true;
-			isFlagged = false;
-			isLogicalFree = false;
+			isFlagged = isLogicalFree = false;
 			mineProbability.setValues(0, 1);
 			if (isMine) {
 				throw new Exception("can't reveal a mine");

@@ -22,7 +22,7 @@ public class CreateSolvableBoard {
 	private final int mines;
 	private final MyBacktrackingSolver myBacktrackingSolver;
 
-	public CreateSolvableBoard(int rows, int cols, int mines) throws Exception {
+	public CreateSolvableBoard(int rows, int cols, int mines) {
 		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
 		board = new VisibleTile[rows][cols];
@@ -111,8 +111,6 @@ public class CreateSolvableBoard {
 		return clickedFree;
 	}
 
-	//TODO: think about also guaranteeing that the backtracking solver will never time out - only run backtracking solver, nothing else
-	//TODO: test this with guaranteed 8
 	public MinesweeperGame getSolvableBoard(int firstClickI, int firstClickJ, boolean hasAn8, AtomicBoolean isInterrupted) throws Exception {
 		if (ArrayBounds.outOfBounds(firstClickI, firstClickJ, rows, cols)) {
 			throw new Exception("first click is out of bounds");

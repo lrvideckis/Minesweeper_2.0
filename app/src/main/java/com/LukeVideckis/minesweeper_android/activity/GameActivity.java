@@ -16,9 +16,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.LukeVideckis.minesweeper_android.R;
 import com.LukeVideckis.minesweeper_android.customExceptions.HitIterationLimitException;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
@@ -30,7 +30,7 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
+import static com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolver.VisibleTileWithProbability;
 import static java.lang.Thread.sleep;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
@@ -51,8 +51,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private PopupWindow solverHitLimitPopup;
 	private volatile PopupWindow couldNotFindNoGuessBoardPopup;
 	private volatile MinesweeperGame minesweeperGame;
-	private MinesweeperSolver holyGrailSolver;
-	private VisibleTile[][] board;
+	private BacktrackingSolver holyGrailSolver;
+	private VisibleTileWithProbability[][] board;
 	private int lastTapRow, lastTapCol;
 	private volatile Thread updateTimeThread;
 	private volatile AlertDialog loadingScreenForSolvableBoardGeneration;
@@ -86,12 +86,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			e.printStackTrace();
 		}
 		holyGrailSolver = new HolyGrailSolver(numberOfRows, numberOfCols);
-		try {
-			board = ConvertGameBoardFormat.convertToNewBoard(minesweeperGame);
-		} catch (Exception e) {
-			e.printStackTrace();
+		board = new VisibleTileWithProbability[numberOfRows][numberOfCols];
+		for (int i = 0; i < numberOfRows; ++i) {
+			for (int j = 0; j < numberOfCols; ++j) {
+				board[i][j] = new VisibleTileWithProbability();
+			}
 		}
-
 		ImageButton newGameButton = findViewById(R.id.newGameButton);
 		newGameButton.setOnClickListener(this);
 		Button toggleFlagMode = findViewById(R.id.toggleFlagMode);
@@ -143,7 +143,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlag) {
 			//TODO: start timer after board generation is complete
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
-				//TODO: either break out of board gen (after like 2 seconds), or improve board gen to not take forever sometimes
 				finishedBoardGen.set(false);
 
 				new Thread(new DelayLoadingScreenRunnable(finishedBoardGen)).start();
@@ -262,8 +261,20 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, false);
 		try {
 			holyGrailSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
+
 		} catch (HitIterationLimitException e) {
 			solverHitIterationLimit();
+		}
+
+		for (int i = 0; i < minesweeperGame.getRows(); ++i) {
+			for (int j = 0; j < minesweeperGame.getCols(); ++j) {
+				if (board[i][j].getIsLogicalMine() && !board[i][j].getMineProbability().equals(1)) {
+					throw new Exception("logical mine with non-1 mine probability " + i + " " + j);
+				}
+				if (board[i][j].getIsLogicalFree() && !board[i][j].getMineProbability().equals(0)) {
+					throw new Exception("logical free with non-zero mine probability " + i + " " + j);
+				}
+			}
 		}
 		minesweeperGame.updateLogicalStuff(board);
 	}
@@ -406,7 +417,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		return toggleMineProbabilityOn;
 	}
 
-	public VisibleTile[][] getBoard() throws Exception {
+	public VisibleTileWithProbability[][] getBoard() throws Exception {
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, (toggleBacktrackingHintsOn || toggleMineProbabilityOn));
 		return board;
 	}
