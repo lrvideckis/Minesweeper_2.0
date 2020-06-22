@@ -222,17 +222,7 @@ public class Test {
 				if (stringBoard[i].length() != stringBoard[0].length()) {
 					throw new Exception("jagged array - not all rows are the same length");
 				}
-				board[i][j] = new VisibleTile();
-				if (stringBoard[i].charAt(j) == '.') {
-					board[i][j].updateVisibilityAndSurroundingMines(true, 0);
-				} else if (stringBoard[i].charAt(j) == 'U') {
-					board[i][j].updateVisibilityAndSurroundingMines(false, 0);
-				} else if (stringBoard[i].charAt(j) == 'B') {
-					board[i][j].updateVisibilityAndSurroundingMines(false, 0);
-					board[i][j].setIsLogicalMine();
-				} else {
-					board[i][j].updateVisibilityAndSurroundingMines(true, stringBoard[i].charAt(j) - '0');
-				}
+				board[i][j] = new VisibleTile(stringBoard[i].charAt(j));
 			}
 		}
 		return board;
