@@ -24,8 +24,6 @@ public class CreateSolvableBoard {
 
 	public CreateSolvableBoard(int rows, int cols, int mines) {
 		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
-		//TODO: find a way to change iteration limit to something smaller
-		//MyBacktrackingSolver.iterationLimit = 500;
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
 		board = new VisibleTile[rows][cols];
 		for (int i = 0; i < rows; ++i) {

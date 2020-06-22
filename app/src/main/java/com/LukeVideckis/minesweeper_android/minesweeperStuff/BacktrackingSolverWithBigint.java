@@ -30,7 +30,7 @@ public class BacktrackingSolverWithBigint implements BacktrackingSolver {
 	private int rows, cols;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
-	private int numberOfMines, numberOfIterations;
+	private int numberOfMines;
 
 	public BacktrackingSolverWithBigint(int rows, int cols) {
 		isMine = new boolean[rows][cols];
@@ -91,12 +91,10 @@ public class BacktrackingSolverWithBigint implements BacktrackingSolver {
 		}
 		updateNumberOfConfigsForCurrent(AwayCell.getNumberOfAwayCells(board));
 
-		numberOfIterations = 0;
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfMines, true);
-			numberOfIterations += currIterations.get();
 		}
 
 		for (int i = 0; i < rows; ++i) {
@@ -127,11 +125,6 @@ public class BacktrackingSolverWithBigint implements BacktrackingSolver {
 	@Override
 	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
 		throw new Exception("not implemented yet");
-	}
-
-	@Override
-	public int getNumberOfIterations() {
-		return numberOfIterations;
 	}
 
 	private void updateNumberOfConfigsForCurrent(int numberOfAwayCells) throws Exception {

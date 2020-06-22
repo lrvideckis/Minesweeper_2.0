@@ -17,7 +17,7 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 	private final int[][][] lastUnvisitedSpot;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines;
-	private int rows, cols, numberOfIterations;
+	private int rows, cols;
 	private VisibleTile[][] board;
 	private int numberOfMines;
 
@@ -54,7 +54,6 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 		MutableInt currIterations = new MutableInt(0);
 		MutableInt currNumberOfMines = new MutableInt(0);
 		solveComponent(0, component, currIterations, currNumberOfMines);
-		numberOfIterations = currIterations.get();
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -88,11 +87,6 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 
 	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
 		throw new Exception("to make warning go away");
-	}
-
-	@Override
-	public int getNumberOfIterations() {
-		return numberOfIterations;
 	}
 
 	private void initialize(VisibleTile[][] board, int numberOfMines) throws Exception {

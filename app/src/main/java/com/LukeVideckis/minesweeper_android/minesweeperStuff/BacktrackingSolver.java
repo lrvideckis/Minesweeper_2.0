@@ -8,6 +8,4 @@ public interface BacktrackingSolver extends MinesweeperSolver {
 			int spotJ,
 			boolean wantMine
 	) throws Exception;
-
-	int getNumberOfIterations();
 }

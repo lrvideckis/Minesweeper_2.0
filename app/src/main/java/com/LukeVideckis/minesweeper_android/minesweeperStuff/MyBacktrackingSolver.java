@@ -33,7 +33,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 	//TODO: remove mineProbPerCompPerNumMines denominator, and use mineConfig instead
 	private final ArrayList<TreeMap<Integer, ArrayList<Pair<MutableInt, MutableInt>>>> mineProbPerCompPerNumMines = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
-	private int totalIterations, numberOfMines;
+	private int numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
 	private boolean performCheckPositionValidity = false;
@@ -69,7 +69,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					board[i][j].numberOfTotalConfigs.setValues(rows * cols, 1);
 				}
 			}
-			totalIterations = 0;
 			return;
 		}
 
@@ -554,17 +553,11 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 	}
 
-	public int getNumberOfIterations() {
-		return totalIterations;
-	}
-
 	private void performBacktrackingSequentially(InterestingCell interestingCell) throws Exception {
-		totalIterations = 0;
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfMines, interestingCell);
-			totalIterations += currIterations.get();
 		}
 	}
 
