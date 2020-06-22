@@ -3,10 +3,11 @@ package com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers
 import android.util.Pair;
 
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver;
+
+import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class AwayCell {
-	public static int getNumberOfAwayCells(MinesweeperSolver.VisibleTile[][] board) throws Exception {
+	public static int getNumberOfAwayCells(VisibleTile[][] board) throws Exception {
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		final int rows = dimensions.first;
 		final int cols = dimensions.second;
@@ -22,7 +23,7 @@ public class AwayCell {
 	}
 
 	//returns true if cell has no visible neighbors
-	public static boolean isAwayCell(MinesweeperSolver.VisibleTile[][] board, int row, int col, int rows, int cols) {
+	public static boolean isAwayCell(VisibleTile[][] board, int row, int col, int rows, int cols) {
 		if (board[row][col].getIsVisible()) {
 			return false;
 		}

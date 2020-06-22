@@ -2,10 +2,10 @@ package com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers
 
 import android.util.Pair;
 
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver;
+import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class AllCellsAreHidden {
-	public static boolean allCellsAreHidden(MinesweeperSolver.VisibleTile[][] board) throws Exception {
+	public static boolean allCellsAreHidden(VisibleTile[][] board) throws Exception {
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		final int rows = dimensions.first;
 		final int cols = dimensions.second;

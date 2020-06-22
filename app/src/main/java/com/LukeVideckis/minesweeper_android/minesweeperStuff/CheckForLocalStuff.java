@@ -8,7 +8,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class CheckForLocalStuff {
-	public static boolean checkAndUpdateBoardForTrivialStuff(MinesweeperSolver.VisibleTile[][] board) throws Exception {
+	public static boolean checkAndUpdateBoardForTrivialStuff(VisibleTile[][] board) throws Exception {
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		final int rows = dimensions.first, cols = dimensions.second;
 		boolean foundNewStuff = false;

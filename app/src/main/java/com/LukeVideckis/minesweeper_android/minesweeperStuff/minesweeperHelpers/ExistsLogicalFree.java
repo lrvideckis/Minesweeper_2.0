@@ -1,11 +1,11 @@
 package com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers;
 
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver;
+import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
 public class ExistsLogicalFree {
-	public static boolean noLogicalFrees(MinesweeperSolver.VisibleTile[][] board) {
-		for (MinesweeperSolver.VisibleTile[] row : board) {
-			for (MinesweeperSolver.VisibleTile cell : row) {
+	public static boolean noLogicalFrees(VisibleTile[][] board) {
+		for (VisibleTile[] row : board) {
+			for (VisibleTile cell : row) {
 				if (cell.getIsLogicalFree()) {
 					return false;
 				}

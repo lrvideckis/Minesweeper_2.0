@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 import static java.lang.Thread.sleep;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
@@ -51,7 +52,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private volatile PopupWindow couldNotFindNoGuessBoardPopup;
 	private volatile MinesweeperGame minesweeperGame;
 	private MinesweeperSolver holyGrailSolver;
-	private MinesweeperSolver.VisibleTile[][] board;
+	private VisibleTile[][] board;
 	private int lastTapRow, lastTapCol;
 	private volatile Thread updateTimeThread;
 	private volatile AlertDialog loadingScreenForSolvableBoardGeneration;
@@ -405,7 +406,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		return toggleMineProbabilityOn;
 	}
 
-	public MinesweeperSolver.VisibleTile[][] getBoard() throws Exception {
+	public VisibleTile[][] getBoard() throws Exception {
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, (toggleBacktrackingHintsOn || toggleMineProbabilityOn));
 		return board;
 	}
