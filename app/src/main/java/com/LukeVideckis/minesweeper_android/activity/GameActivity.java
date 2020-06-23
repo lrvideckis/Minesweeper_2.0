@@ -141,7 +141,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		final boolean toggleFlag = (toggleFlagModeOn ^ isLongTap);
 
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlag) {
-			//TODO: start timer after board generation is complete
 			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
 				finishedBoardGen.set(false);
 

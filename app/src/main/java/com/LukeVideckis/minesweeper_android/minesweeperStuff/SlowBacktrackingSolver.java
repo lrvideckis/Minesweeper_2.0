@@ -110,10 +110,6 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 		}
 	}
 
-	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
-		throw new Exception("to make warning go away");
-	}
-
 	private void initialize(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception {
 		this.board = board;
 		this.numberOfMines = numberOfMines;

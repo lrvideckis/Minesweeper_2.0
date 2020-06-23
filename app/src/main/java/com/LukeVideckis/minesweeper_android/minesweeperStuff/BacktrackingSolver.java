@@ -8,14 +8,6 @@ public interface BacktrackingSolver extends MinesweeperSolver {
 
 	void solvePosition(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception;
 
-	boolean[][] getMineConfiguration(
-			VisibleTile[][] board,
-			int numberOfMines,
-			int spotI,
-			int spotJ,
-			boolean wantMine
-	) throws Exception;
-
 	class VisibleTileWithProbability extends MinesweeperSolver.VisibleTile {
 
 		BigFraction mineProbability;

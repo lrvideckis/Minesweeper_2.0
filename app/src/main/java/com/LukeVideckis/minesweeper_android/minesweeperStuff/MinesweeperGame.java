@@ -292,20 +292,12 @@ public class MinesweeperGame {
 		for (int pos = 0; pos < numberOfMines - 8; ++pos) {
 			final int i = spots.get(pos).first;
 			final int j = spots.get(pos).second;
-			getCell(i, j).isMine = true;
-			incrementSurroundingMineCounts(i, j);
+			changeMineStatus(i, j, true);
 		}
 		if (getCell(row, col).isMine) {
 			throw new Exception("starting click shouldn't be a mine");
 		}
 		revealCell(row, col);
-	}
-
-	//TODO: replace this with update mine status function
-	private void incrementSurroundingMineCounts(int mineRow, int mineCol) {
-		for (int[] adj : GetAdjacentCells.getAdjacentCells(mineRow, mineCol, rows, cols)) {
-			getCell(adj[0], adj[1]).numberSurroundingMines++;
-		}
 	}
 
 	private void revealCell(int row, int col) throws Exception {
@@ -406,63 +398,6 @@ public class MinesweeperGame {
 
 		resetAllLogicalAndVisibleStuff();
 		revealCell(firstClickI, firstClickJ);
-	}
-
-	//TODO: this doesn't take into account the guaranteed 8
-	public void changeMineLocationsWithoutChangingVisibleClues(boolean[][] newMineLocations) throws Exception {
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (newMineLocations[i][j]) {
-					System.out.print('1');
-				} else {
-					System.out.print('0');
-				}
-			}
-			System.out.println();
-		}
-		System.out.println();
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				Tile curr = getCell(i, j);
-				if (!curr.getIsVisible()) {
-					continue;
-				}
-				int cntSurroundingMines = 0;
-				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-					if (newMineLocations[adj[0]][adj[1]]) {
-						++cntSurroundingMines;
-					}
-				}
-				if (cntSurroundingMines != getCell(i, j).numberSurroundingMines) {
-					System.out.println("i,j: " + i + " " + j);
-					throw new Exception("bad mine configuration: surrounding mine count doesn't match");
-				}
-			}
-		}
-		int numberOfNewMines = 0;
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				getCell(i, j).numberSurroundingMines = 0;
-				if (newMineLocations[i][j]) {
-					++numberOfNewMines;
-				}
-			}
-		}
-		if (numberOfNewMines != numberOfMines) {
-			System.out.println("number of mines should be: " + numberOfMines + " but it is: " + numberOfNewMines);
-			throw new Exception("bad mine configuration: wrong # of mines");
-		}
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (newMineLocations[i][j] && getCell(i, j).getIsVisible()) {
-					throw new Exception("bad mine configuration: mine is in revealed cell");
-				}
-				getCell(i, j).isMine = newMineLocations[i][j];
-				if (getCell(i, j).isMine) {
-					incrementSurroundingMineCounts(i, j);
-				}
-			}
-		}
 	}
 
 	public void updateLogicalStuff(VisibleTile[][] visibleBoard) throws Exception {

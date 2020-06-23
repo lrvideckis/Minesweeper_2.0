@@ -16,11 +16,6 @@ public class HolyGrailSolver implements BacktrackingSolver {
 	}
 
 	@Override
-	public boolean[][] getMineConfiguration(VisibleTile[][] board, int numberOfMines, int spotI, int spotJ, boolean wantMine) throws Exception {
-		throw new Exception("not implemented");
-	}
-
-	@Override
 	public void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {

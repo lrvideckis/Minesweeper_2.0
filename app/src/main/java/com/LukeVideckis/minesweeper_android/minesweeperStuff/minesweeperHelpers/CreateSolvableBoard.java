@@ -1,9 +1,11 @@
 package com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers;
 
 import com.LukeVideckis.minesweeper_android.customExceptions.HitIterationLimitException;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.CheckForLocalStuff;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.GaussianEliminationSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolver;
 
 import java.util.Stack;
@@ -11,16 +13,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
 
-//TODO: investigate probability of board generation failing
 public class CreateSolvableBoard {
-	//TODO: change this back to something smaller
-	//TODO: revert this back to single combined backtracking solver (no holy grail solver) as ***best (fastest) alg only uses gauss***
-	private final GaussianEliminationSolver gaussSolver; //TODO: change this back to type MinesweeperSolver
+	private final MinesweeperSolver gaussSolver;
 	private final VisibleTile[][] board;
 	private final int rows;
 	private final int cols;
 	private final int mines;
-	private final MyBacktrackingSolver myBacktrackingSolver;
+	private final BacktrackingSolver myBacktrackingSolver;
 
 	public CreateSolvableBoard(int rows, int cols, int mines) {
 		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols, false);
