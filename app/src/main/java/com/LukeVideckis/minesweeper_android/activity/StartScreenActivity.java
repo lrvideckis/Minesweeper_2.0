@@ -26,6 +26,7 @@ import com.LukeVideckis.minesweeper_android.miscHelpers.Test;
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
+	//TODO: change grid max to 50 only for normal mode
 	public static final int rowsColsMin = 10, rowsColsMax = 30;
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
