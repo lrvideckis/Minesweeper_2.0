@@ -5,9 +5,11 @@ import android.util.Pair;
 
 import com.LukeVideckis.minesweeper_android.customExceptions.HitIterationLimitException;
 import com.LukeVideckis.minesweeper_android.customExceptions.NoSolutionFoundException;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.GaussianEliminationSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.SlowBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
@@ -190,8 +192,8 @@ public class Test {
 				continue;
 			}
 
-			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
-			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
+			BacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			try {
 				holyGrailSolver.solvePosition(boardFast, mines);
@@ -236,8 +238,8 @@ public class Test {
 			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
-			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
-			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
+			BacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
@@ -249,17 +251,45 @@ public class Test {
 				System.out.println("game over, void test");
 				continue;
 			}
-			VisibleTileWithProbability[][] boardFast = convertToNewBoard(minesweeperGame);
-			VisibleTileWithProbability[][] boardSlow = convertToNewBoard(minesweeperGame);
 
-			holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
-			try {
-				slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
-			} catch (HitIterationLimitException ignored) {
-				System.out.println("slow solver hit iteration limit, void test");
-				continue;
+			while (!minesweeperGame.getIsGameWon()) {
+				if (minesweeperGame.getIsGameLost()) {
+					System.out.println("here 1: game is lost, but this shouldn't happen, failed test");
+					return;
+				}
+				VisibleTileWithProbability[][] boardFast = convertToNewBoard(minesweeperGame);
+				VisibleTileWithProbability[][] boardSlow = convertToNewBoard(minesweeperGame);
+
+				try {
+					holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
+				} catch (HitIterationLimitException ignored) {
+					System.out.println("fast solver hit iteration limit, void test");
+					break;
+				}
+				try {
+					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
+				} catch (HitIterationLimitException ignored) {
+					System.out.println("slow solver hit iteration limit, void test");
+					break;
+				}
+				if (areBoardsDifferent(boardFast, boardSlow)) {
+					return;
+				}
+				boolean clickedFree = false;
+				for (int i = 0; i < rows; ++i) {
+					for (int j = 0; j < cols; ++j) {
+						if (boardFast[i][j].getIsLogicalFree()) {
+							clickedFree = true;
+							minesweeperGame.clickCell(i, j, false);
+						}
+					}
+				}
+				if (!clickedFree) {
+					break;
+				}
 			}
-			if (areBoardsDifferent(boardFast, boardSlow)) {
+			if (minesweeperGame.getIsGameLost()) {
+				System.out.println("here 2: game is lost, but this shouldn't happen, failed test");
 				return;
 			}
 		}
@@ -308,8 +338,8 @@ public class Test {
 			int mines = MyMath.getRand(2, 50);
 			mines = Math.min(mines, rows * cols - 9);
 
-			MyBacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols, true);
-			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
+			BacktrackingSolver myBacktrackingSolver = new MyBacktrackingSolver(rows, cols, true);
+			MinesweeperSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
@@ -370,9 +400,9 @@ public class Test {
 			int mines = MyMath.getRand(2, 9);
 			mines = Math.min(mines, rows * cols - 9);
 
-			HolyGrailSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
-			SlowBacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
-			GaussianEliminationSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
+			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols, true);
+			BacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+			MinesweeperSolver gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
@@ -425,7 +455,7 @@ public class Test {
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.print(" percentage: " + mines / (float) (rows * cols));
 
-			HolyGrailSolver solver = new HolyGrailSolver(rows, cols, true);
+			BacktrackingSolver solver = new HolyGrailSolver(rows, cols, true);
 
 			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
 			final int firstClickI = MyMath.getRand(0, rows - 1);
@@ -492,7 +522,7 @@ public class Test {
 			System.out.print(" rows, cols, mines: " + rows + " " + cols + " " + mines);
 			System.out.print(" percentage: " + mines / (float) (rows * cols));
 
-			HolyGrailSolver solver = new HolyGrailSolver(rows, cols, true);
+			BacktrackingSolver solver = new HolyGrailSolver(rows, cols, true);
 
 			CreateSolvableBoard createSolvableBoard = new CreateSolvableBoard(rows, cols, mines);
 			final int firstClickI = MyMath.getRand(0, rows - 1);

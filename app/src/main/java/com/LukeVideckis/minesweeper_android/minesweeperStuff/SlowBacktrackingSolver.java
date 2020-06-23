@@ -120,6 +120,9 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 			for (int j = 0; j < cols; ++j) {
 				isMine[i][j] = false;
 				cntSurroundingMines[i][j] = 0;
+				lastUnvisitedSpot[i][j][0] = 0;
+				lastUnvisitedSpot[i][j][1] = 0;
+				numberOfTotalConfigs[i][j].setValues(0, 1);
 			}
 		}
 	}
