@@ -26,8 +26,6 @@ import com.LukeVideckis.minesweeper_android.miscHelpers.Test;
 
 public class StartScreenActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-	//TODO: change grid max to 50 only for normal mode, and change min to 1
-	public static final int rowsColsMin = 10, rowsColsMax = 30;
 	public static final String
 			MY_PREFERENCES = "MyPrefs",
 			NUMBER_OF_ROWS = "numRows",
@@ -37,7 +35,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	private static final float maxMinePercentage = 0.23f, maxMinePercentageWith8 = 0.22f;
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup;
-	private int minesMin = 0, minesMax = 10 * 10 - 10, gameMode;
+	private int gameMode;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -79,18 +77,13 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		colsInput.setOnSeekBarChangeListener(this);
 		minesInput.setOnSeekBarChangeListener(this);
 
-		rowsInput.setMin(rowsColsMin);
-		colsInput.setMin(rowsColsMin);
-		rowsInput.setMax(rowsColsMax);
-		colsInput.setMax(rowsColsMax);
-
 		RadioButton normalMode = findViewById(R.id.normal_mode);
 		normalMode.setOnClickListener(this);
 
 		RadioButton noGuessingMode = findViewById(R.id.no_guessing_mode);
 		noGuessingMode.setOnClickListener(this);
 
-		RadioButton noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
+		RadioButton noGuessingModeWith8 = findViewById(R.id.no_guessing_mode_with_an_8);
 		noGuessingModeWith8.setOnClickListener(this);
 
 		final int previousRows = sharedPreferences.getInt(NUMBER_OF_ROWS, 10);
@@ -103,12 +96,16 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		minesInput.setProgress(previousMines);
 		if (gameMode == R.id.no_guessing_mode) {
 			noGuessingMode.setChecked(true);
-		} else if (gameMode == R.id.noGuessingModeWithAn8) {
+		} else if (gameMode == R.id.no_guessing_mode_with_an_8) {
 			noGuessingModeWith8.setChecked(true);
 		} else {//default is normal mode
 			normalMode.setChecked(true);
 		}
-		setMinesMinMaxAndText(previousRows, previousCols);
+		try {
+			setMinMaxText(previousRows, previousCols, previousMines);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		Button startNewGameButton = findViewById(R.id.startNewGameButton);
 		startNewGameButton.setOnClickListener(new startNewGameButtonListener(rowsInput, colsInput, minesInput));
@@ -157,56 +154,74 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 		final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress();
 		final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress();
-
-		switch (seekBar.getId()) {
-			case R.id.rowsInput:
-				setRowsText(seekBar.getProgress());
-				setMinesMinMaxAndText(seekBar.getProgress(), cols);
-				break;
-			case R.id.colsInput:
-				setColsText(seekBar.getProgress());
-				setMinesMinMaxAndText(rows, seekBar.getProgress());
-				break;
-			case R.id.mineInput:
-				setMinesMinMaxAndText(rows, cols);
-				break;
+		final int mines = ((SeekBar) findViewById(R.id.mineInput)).getProgress();
+		try {
+			setMinMaxText(rows, cols, mines);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-	private void setRowsText(int val) {
-		TextView rowsText = findViewById(R.id.rowsText);
-		String text = "Height: " + val;
-		rowsText.setText(text);
-	}
+	private void setMinMaxText(int rows, int cols, int mines) throws Exception {
+		int rowsColsMin, rowsColsMax;
+		if (gameMode == R.id.no_guessing_mode || gameMode == R.id.no_guessing_mode_with_an_8) {
+			rowsColsMin = 10;
+			rowsColsMax = 30;
+		} else {
+			rowsColsMin = 3;
+			rowsColsMax = 40;
+		}
 
-	private void setColsText(int val) {
-		TextView colsText = findViewById(R.id.colsText);
-		String text = "Width: " + val;
-		colsText.setText(text);
-	}
+		rows = Math.min(rowsColsMax, Math.max(rowsColsMin, rows));
+		cols = Math.min(rowsColsMax, Math.max(rowsColsMin, cols));
 
-	private void setMinesMinMaxAndText(int rows, int cols) {
+		int minesMin, minesMax;
 		if (gameMode == R.id.no_guessing_mode) {
 			minesMin = 0;
 			minesMax = (int) (rows * cols * maxMinePercentage);
 			minesMax = Math.min(minesMax, 100);
-		} else if (gameMode == R.id.noGuessingModeWithAn8) {
+		} else if (gameMode == R.id.no_guessing_mode_with_an_8) {
 			minesMin = 8;
 			minesMax = (int) (rows * cols * maxMinePercentageWith8);
 			minesMax = Math.min(minesMax, 100);
 		} else {
 			minesMin = 0;
-			minesMax = rows * cols - 10;
+			minesMax = rows * cols - 9;
+			minesMax = Math.min(minesMax, 999);
 		}
+		if (minesMin > minesMax) {
+			throw new Exception("minesMin > minesMax");
+		}
+		mines = Math.max(minesMin, Math.min(minesMax, mines));
+
+		SeekBar rowsInput = findViewById(R.id.rowsInput);
+		rowsInput.setMin(rowsColsMin);
+		rowsInput.setMax(rowsColsMax);
+		rowsInput.setProgress(rows);
+
+		SeekBar colsInput = findViewById(R.id.colsInput);
+		colsInput.setMin(rowsColsMin);
+		colsInput.setMax(rowsColsMax);
+		colsInput.setProgress(cols);
+
 		SeekBar minesInput = findViewById(R.id.mineInput);
 		minesInput.setMin(minesMin);
 		minesInput.setMax(minesMax);
+		minesInput.setProgress(mines);
 
-		final int mines = minesInput.getProgress();
+		//update rows text
+		TextView rowsText = findViewById(R.id.rowsText);
+		String text = "Height: " + rows;
+		rowsText.setText(text);
 
-		//update text
+		//update cols text
+		TextView colsText = findViewById(R.id.colsText);
+		text = "Width: " + cols;
+		colsText.setText(text);
+
+		//update cols text
 		TextView minesText = findViewById(R.id.mineText);
-		String text = "Mines: " + mines + '\n';
+		text = "Mines: " + mines + '\n';
 		double minePercentage = 100 * mines / (double) (rows * cols);
 		text += String.format(getResources().getString(R.string.two_decimal_places), minePercentage);
 		text += '%';
@@ -235,26 +250,38 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			case R.id.normal_mode:
 				RadioButton noGuessingMode = findViewById(R.id.no_guessing_mode);
 				noGuessingMode.setChecked(false);
-				RadioButton noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
+				RadioButton noGuessingModeWith8 = findViewById(R.id.no_guessing_mode_with_an_8);
 				noGuessingModeWith8.setChecked(false);
 				gameMode = R.id.normal_mode;
-				setMinesMinMaxAndText(rows, cols);
+				try {
+					setMinMaxText(rows, cols, mines);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			case R.id.no_guessing_mode:
 				RadioButton normalMode = findViewById(R.id.normal_mode);
 				normalMode.setChecked(false);
-				noGuessingModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
+				noGuessingModeWith8 = findViewById(R.id.no_guessing_mode_with_an_8);
 				noGuessingModeWith8.setChecked(false);
 				gameMode = R.id.no_guessing_mode;
-				setMinesMinMaxAndText(rows, cols);
+				try {
+					setMinMaxText(rows, cols, mines);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
-			case R.id.noGuessingModeWithAn8:
+			case R.id.no_guessing_mode_with_an_8:
 				normalMode = findViewById(R.id.normal_mode);
 				normalMode.setChecked(false);
 				noGuessingMode = findViewById(R.id.no_guessing_mode);
 				noGuessingMode.setChecked(false);
-				gameMode = R.id.noGuessingModeWithAn8;
-				setMinesMinMaxAndText(rows, cols);
+				gameMode = R.id.no_guessing_mode_with_an_8;
+				try {
+					setMinMaxText(rows, cols, mines);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 
 			case R.id.normal_mode_info:
@@ -268,36 +295,46 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				break;
 
 			case R.id.rowsDecrement:
-				rows = Math.max(rowsColsMin, rows - 1);
-				rowsInput.setProgress(rows);
-				setRowsText(rows);
-				setMinesMinMaxAndText(rows, cols);
+				try {
+					setMinMaxText(rows - 1, cols, mines);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			case R.id.rowsIncrement:
-				rows = Math.min(rowsColsMax, rows + 1);
-				rowsInput.setProgress(rows);
-				setRowsText(rows);
-				setMinesMinMaxAndText(rows, cols);
+				try {
+					setMinMaxText(rows + 1, cols, mines);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			case R.id.colsDecrement:
-				cols = Math.max(rowsColsMin, cols - 1);
-				colsInput.setProgress(cols);
-				setColsText(cols);
-				setMinesMinMaxAndText(rows, cols);
+				try {
+					setMinMaxText(rows, cols - 1, mines);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			case R.id.colsIncrement:
-				cols = Math.min(rowsColsMax, cols + 1);
-				colsInput.setProgress(cols);
-				setColsText(cols);
-				setMinesMinMaxAndText(rows, cols);
+				try {
+					setMinMaxText(rows, cols + 1, mines);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			case R.id.minesDecrement:
-				mines = Math.max(minesMin, mines - 1);
-				minesInput.setProgress(mines);
+				try {
+					setMinMaxText(rows, cols, mines - 1);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			case R.id.minesIncrement:
-				mines = Math.min(minesMax, mines + 1);
-				minesInput.setProgress(mines);
+				try {
+					setMinMaxText(rows, cols, mines + 1);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 		}
 	}
@@ -351,13 +388,13 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 		@Override
 		public void onClick(View v) {
-			final int numberOfRows = this.rowInput.getProgress();
-			final int numberOfCols = this.colInput.getProgress();
-			final int numberOfMines = this.mineInput.getProgress();
+			final int numberOfRows = rowInput.getProgress();
+			final int numberOfCols = colInput.getProgress();
+			final int numberOfMines = mineInput.getProgress();
 
 			final RadioButton normalMode = findViewById(R.id.normal_mode);
 			final RadioButton noGuessMode = findViewById(R.id.no_guessing_mode);
-			final RadioButton noGuessModeWith8 = findViewById(R.id.noGuessingModeWithAn8);
+			final RadioButton noGuessModeWith8 = findViewById(R.id.no_guessing_mode_with_an_8);
 
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putInt(NUMBER_OF_ROWS, numberOfRows);
@@ -368,7 +405,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			} else if (noGuessMode.isChecked()) {
 				editor.putInt(GAME_MODE, R.id.no_guessing_mode);
 			} else if (noGuessModeWith8.isChecked()) {
-				editor.putInt(GAME_MODE, R.id.noGuessingModeWithAn8);
+				editor.putInt(GAME_MODE, R.id.no_guessing_mode_with_an_8);
 			}
 			editor.apply();
 
@@ -381,7 +418,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			} else if (noGuessMode.isChecked()) {
 				intent.putExtra(GAME_MODE, R.id.no_guessing_mode);
 			} else if (noGuessModeWith8.isChecked()) {
-				intent.putExtra(GAME_MODE, R.id.noGuessingModeWithAn8);
+				intent.putExtra(GAME_MODE, R.id.no_guessing_mode_with_an_8);
 			}
 			startActivity(intent);
 		}
