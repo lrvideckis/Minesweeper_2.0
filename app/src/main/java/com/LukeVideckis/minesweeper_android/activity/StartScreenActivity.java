@@ -156,7 +156,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			rowsColsMax = 30;
 		} else {
 			rowsColsMin = 3;
-			rowsColsMax = 50;
+			rowsColsMax = 40;
 		}
 
 		rows = Math.min(rowsColsMax, Math.max(rowsColsMin, rows));
@@ -173,6 +173,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		} else {
 			minesMin = 0;
 			minesMax = rows * cols - 9;
+			minesMax = Math.min(minesMax, 999);
 		}
 		if (minesMin > minesMax) {
 			throw new Exception("minesMin > minesMax");
