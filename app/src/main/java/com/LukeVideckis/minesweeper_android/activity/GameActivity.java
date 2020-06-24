@@ -328,6 +328,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	public void updateNumberOfMines(int numberOfMinesLeft) {
+		numberOfMinesLeft = Math.max(numberOfMinesLeft, 0);
 		String minesLeft;
 		if (numberOfMinesLeft < 10) {
 			minesLeft = "00" + numberOfMinesLeft;
