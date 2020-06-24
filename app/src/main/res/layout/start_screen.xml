@@ -261,7 +261,7 @@
 				android:orientation="horizontal">
 
 				<RadioButton
-					android:id="@+id/noGuessingModeWithAn8"
+					android:id="@+id/no_guessing_mode_with_an_8"
 					android:layout_width="wrap_content"
 					android:layout_height="match_parent"
 					android:text="@string/no_guessing_mode_with_an_8" />

@@ -141,7 +141,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		final boolean toggleFlag = (toggleFlagModeOn ^ isLongTap);
 
 		if (minesweeperGame.isBeforeFirstClick() && !toggleFlag) {
-			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.noGuessingModeWithAn8) {
+			if (gameMode == R.id.no_guessing_mode || gameMode == R.id.no_guessing_mode_with_an_8) {
 				finishedBoardGen.set(false);
 
 				new Thread(new DelayLoadingScreenRunnable(finishedBoardGen)).start();
@@ -478,7 +478,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		public void run() {
 			try {
-				MinesweeperGame solvableBoard = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.noGuessingModeWithAn8, isInterrupted);
+				MinesweeperGame solvableBoard = createSolvableBoard.getSolvableBoard(row, col, gameMode == R.id.no_guessing_mode_with_an_8, isInterrupted);
 				if (isInterrupted.get()) {
 					if (backButtonWasPressed.get()) {
 						return;

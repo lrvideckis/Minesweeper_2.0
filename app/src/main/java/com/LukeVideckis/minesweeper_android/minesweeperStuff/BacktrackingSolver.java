@@ -28,11 +28,6 @@ public interface BacktrackingSolver extends MinesweeperSolver {
 			mineProbability = new BigFraction(other.mineProbability);
 		}
 
-		public VisibleTileWithProbability(char c) throws Exception {
-			super(c);
-			mineProbability = new BigFraction(0);
-		}
-
 		public boolean isEverythingEqual(VisibleTileWithProbability other) {
 			return super.isEverythingEqual(other) && other.mineProbability.equals(mineProbability);
 		}
