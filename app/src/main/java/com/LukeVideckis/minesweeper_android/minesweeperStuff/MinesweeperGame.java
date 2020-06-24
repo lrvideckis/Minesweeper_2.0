@@ -204,31 +204,23 @@ public class MinesweeperGame {
 	}
 
 	private void firstClickedCell(int row, int col) throws Exception {
-		ArrayList<Pair<Integer, Integer>> spots = new ArrayList<>();
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (Math.abs(row - i) <= 1 && Math.abs(col - j) <= 1) {
-					continue;
-				}
-				spots.add(new Pair<>(i, j));
-			}
-		}
+		changeMineStatus(0, 2, true);
+		changeMineStatus(0, 1, true);
+		changeMineStatus(0, 3, true);
+		changeMineStatus(1, 4, true);
+		changeMineStatus(2, 0, true);
+		changeMineStatus(2, 4, true);
+		changeMineStatus(4, 1, true);
+		changeMineStatus(4, 2, true);
 
-		if (spots.size() < numberOfMines) {
-			throw new Exception("too many mines to have a zero start");
-		}
 
-		Collections.shuffle(spots);
+		changeMineStatus(5, 6, true);
+		changeMineStatus(5, 3, true);
+		changeMineStatus(9, 4, true);
+		changeMineStatus(9, 5, true);
 
-		for (int pos = 0; pos < numberOfMines; ++pos) {
-			final int mineRow = spots.get(pos).first;
-			final int mineCol = spots.get(pos).second;
-			changeMineStatus(mineRow, mineCol, true);
-		}
-		if (getCell(row, col).isMine) {
-			throw new Exception("starting click shouldn't be a mine");
-		}
-		revealCell(row, col);
+
+		revealCell(2, 2);
 	}
 
 	private void firstClickedCellWith8(int row, int col) throws Exception {

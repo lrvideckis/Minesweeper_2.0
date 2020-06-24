@@ -456,6 +456,18 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			checkPositionValidity(component, currNumberOfMines);
 		}
 
+		System.out.println("here, found solution:");
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (isMine[i][j]) {
+					System.out.print('*');
+				} else {
+					System.out.print('.');
+				}
+			}
+			System.out.println();
+		}
+
 		MutableInt count = mineConfig.get(componentPos).get(currNumberOfMines);
 		if (count == null) {
 			mineConfig.get(componentPos).put(currNumberOfMines, new MutableInt(1));
@@ -515,6 +527,53 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfMines);
+		}
+
+		/*
+		MutableInt count = mineConfig.get(componentPos).get(currNumberOfMines);
+		if (count == null) {
+			mineConfig.get(componentPos).put(currNumberOfMines, new MutableInt(1));
+		} else {
+			count.addWith(1);
+		}
+		 */
+
+		//private final ArrayList<TreeMap<Integer, MutableInt>> mineConfig = new ArrayList<>();
+		System.out.println("mine config: " + mineConfig);
+		for (TreeMap.Entry<Integer, MutableInt> curr : mineConfig.get(0).entrySet()) {
+			System.out.println(curr.getKey() + " " + curr.getValue().get());
+		}
+		int[][] mineCnt = new int[rows][cols];
+
+		//private final ArrayList<TreeMap<Integer, ArrayList<MutableInt>>> mineProbPerCompPerNumMines = new ArrayList<>();
+		/*
+		ArrayList<MutableInt> currArrayList = Objects.requireNonNull(mineProbPerCompPerNumMines.get(componentPos).get(currNumberOfMines));
+
+		for (int pos = 0; pos < component.size(); ++pos) {
+			final int i = component.get(pos).first;
+			final int j = component.get(pos).second;
+			MutableInt curr = currArrayList.get(pos);
+
+			if (isMine[i][j]) {
+				curr.addWith(1);
+			}
+		}
+		 */
+		for (TreeMap.Entry<Integer, ArrayList<MutableInt>> curr : mineProbPerCompPerNumMines.get(0).entrySet()) {
+			System.out.println("mines: " + curr.getKey());
+			for (int pos = 0; pos < curr.getValue().size(); ++pos) {
+				int i = components.get(0).get(pos).first;
+				int j = components.get(0).get(pos).second;
+				System.out.println("i,j: " + i + " " + j);
+
+				mineCnt[i][j] += curr.getValue().get(pos).get();
+			}
+		}
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				System.out.print(mineCnt[i][j] + " ");
+			}
+			System.out.println();
 		}
 	}
 }
