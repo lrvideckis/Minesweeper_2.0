@@ -34,8 +34,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	private static final float maxMinePercentage = 0.23f, maxMinePercentageWith8 = 0.22f;
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup;
-	private int minesMin = 0, minesMax = 10 * 10 - 9, gameMode;
-	private int rowsColsMin = 1, rowsColsMax = 50;
+	private int gameMode;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -151,6 +150,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	}
 
 	private void setMinMaxText(int rows, int cols, int mines) throws Exception {
+		int rowsColsMin, rowsColsMax;
 		if (gameMode == R.id.no_guessing_mode || gameMode == R.id.no_guessing_mode_with_an_8) {
 			rowsColsMin = 10;
 			rowsColsMax = 30;
@@ -162,6 +162,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		rows = Math.min(rowsColsMax, Math.max(rowsColsMin, rows));
 		cols = Math.min(rowsColsMax, Math.max(rowsColsMin, cols));
 
+		int minesMin, minesMax;
 		if (gameMode == R.id.no_guessing_mode) {
 			minesMin = 0;
 			minesMax = (int) (rows * cols * maxMinePercentage);
