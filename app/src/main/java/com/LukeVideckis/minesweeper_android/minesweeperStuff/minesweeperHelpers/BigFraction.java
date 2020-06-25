@@ -55,11 +55,11 @@ public class BigFraction {
 		reduceAndSet(this.numerator, this.denominator);
 	}
 
-	public void multiplyWith(BigFraction quotient) {
+	public void multiplyWith(BigFraction other) {
 		try {
 			BigInteger newNumerator, newDenominator;
-			newNumerator = numerator.multiply(quotient.getNumerator());
-			newDenominator = denominator.multiply(quotient.getDenominator());
+			newNumerator = numerator.multiply(other.getNumerator());
+			newDenominator = denominator.multiply(other.getDenominator());
 			reduceAndSet(newNumerator, newDenominator);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -203,21 +203,76 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 	}
 
-	//TODO: this can be optimized a dimension by storing prefixes and suffixes of the dp table
-	//for each component, and for each # mines: this calculates the number of mine configurations, and saves it in numberOfConfigsForCurrent
+	//for each component, and for each # mines for that component: this calculates the number of mine configurations, and saves it in numberOfConfigsForCurrent
 	private void updateNumberOfConfigsForCurrent() throws Exception {
+
+		ArrayList<TreeMap<Integer, BigFraction>> prefix = new ArrayList<>(components.size() + 1);
+		for (int i = 0; i <= components.size(); ++i) {
+			prefix.add(new TreeMap<>());
+		}
+		prefix.get(0).put(0, new BigFraction(1));
 		for (int i = 0; i < components.size(); ++i) {
-			TreeMap<Integer, MutableInt> saveMineConfigs = new TreeMap<>(mineConfig.get(i));
+			for (TreeMap.Entry<Integer, MutableInt> mineVal : mineConfig.get(i).entrySet()) {
+				for (TreeMap.Entry<Integer, BigFraction> waysVal : prefix.get(i).entrySet()) {
+					final int nextKey = mineVal.getKey() + waysVal.getKey();
+					BigFraction nextValueDiff = new BigFraction(mineVal.getValue().get());
+					nextValueDiff.multiplyWith(waysVal.getValue());
+					BigFraction nextVal = prefix.get(i + 1).get(nextKey);
+					if (nextVal == null) {
+						prefix.get(i + 1).put(nextKey, nextValueDiff);
+					} else {
+						nextVal.addWith(nextValueDiff);
+					}
+				}
+			}
+		}
+
+		ArrayList<TreeMap<Integer, BigFraction>> suffix = new ArrayList<>(components.size() + 1);
+		for (int i = 0; i <= components.size(); ++i) {
+			suffix.add(new TreeMap<>());
+		}
+		suffix.get(components.size()).put(0, new BigFraction(1));
+		for (int i = components.size() - 1; i >= 0; --i) {
+			for (TreeMap.Entry<Integer, MutableInt> mineVal : mineConfig.get(i).entrySet()) {
+				for (TreeMap.Entry<Integer, BigFraction> waysVal : suffix.get(i + 1).entrySet()) {
+					final int nextKey = mineVal.getKey() + waysVal.getKey();
+					BigFraction nextValueDiff = new BigFraction(mineVal.getValue().get());
+					nextValueDiff.multiplyWith(waysVal.getValue());
+					BigFraction nextVal = suffix.get(i).get(nextKey);
+					if (nextVal == null) {
+						suffix.get(i).put(nextKey, nextValueDiff);
+					} else {
+						nextVal.addWith(nextValueDiff);
+					}
+				}
+			}
+		}
+
+		final int numberAwayCells = AwayCell.getNumberOfAwayCells(board);
+		for (int i = 0; i < components.size(); ++i) {
 			if (!numberOfConfigsForCurrent.get(i).isEmpty()) {
 				throw new Exception("numberOfConfigsForCurrent should be cleared from previous run, but isn't");
 			}
-			for (TreeMap.Entry<Integer, MutableInt> entry : saveMineConfigs.entrySet()) {
-				mineConfig.get(i).clear();
-				mineConfig.get(i).put(entry.getKey(), new MutableInt(1));
-				numberOfConfigsForCurrent.get(i).put(entry.getKey(), calculateNumberOfMineConfigs());
+			for (TreeMap.Entry<Integer, MutableInt> waysCurr : mineConfig.get(i).entrySet()) {
+				numberOfConfigsForCurrent.get(i).put(waysCurr.getKey(), new TreeMap<>());
+				for (TreeMap.Entry<Integer, BigFraction> waysPrefix : prefix.get(i).entrySet()) {
+					for (TreeMap.Entry<Integer, BigFraction> waysSuffix : suffix.get(i + 1).entrySet()) {
+						final int currKey = waysCurr.getKey() + waysPrefix.getKey() + waysSuffix.getKey();
+						if (currKey > numberOfMines || currKey < numberOfMines - numberAwayCells) {
+							continue;
+						}
+						BigFraction currVal = new BigFraction(1);
+						currVal.multiplyWith(waysPrefix.getValue());
+						currVal.multiplyWith(waysSuffix.getValue());
+						BigFraction curr = Objects.requireNonNull(numberOfConfigsForCurrent.get(i).get(waysCurr.getKey())).get(currKey);
+						if (curr == null) {
+							Objects.requireNonNull(numberOfConfigsForCurrent.get(i).get(waysCurr.getKey())).put(currKey, currVal);
+						} else {
+							curr.addWith(currVal);
+						}
+					}
+				}
 			}
-			mineConfig.get(i).clear();
-			mineConfig.set(i, saveMineConfigs);
 		}
 	}
 
