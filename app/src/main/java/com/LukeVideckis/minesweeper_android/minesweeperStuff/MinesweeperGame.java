@@ -213,11 +213,13 @@ public class MinesweeperGame {
 		changeMineStatus(4, 1, true);
 		changeMineStatus(4, 2, true);
 
-
-		changeMineStatus(5, 6, true);
-		changeMineStatus(5, 3, true);
-		changeMineStatus(9, 4, true);
-		changeMineStatus(9, 5, true);
+		changeMineStatus(5, 7, true);
+		changeMineStatus(5, 8, true);
+		changeMineStatus(7, 5, true);
+		changeMineStatus(7, 9, true);
+		changeMineStatus(8, 9, true);
+		changeMineStatus(9, 6, true);
+		changeMineStatus(9, 7, true);
 
 
 		revealCell(2, 2);
