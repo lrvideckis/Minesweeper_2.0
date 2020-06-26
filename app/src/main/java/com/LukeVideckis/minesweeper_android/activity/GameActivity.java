@@ -487,6 +487,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					throw new Exception();
 				}
 				synchronized (this) {
+					solvableBoard.setFlagsForHiddenCells(minesweeperGame);
 					minesweeperGame = solvableBoard;
 				}
 				finishedBoardGen.set(true);

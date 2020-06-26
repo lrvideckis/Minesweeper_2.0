@@ -549,6 +549,20 @@ public class MinesweeperGame {
 		}
 	}
 
+	public void setFlagsForHiddenCells(MinesweeperGame game) throws Exception {
+		if (game.getRows() != rows || game.getCols() != cols) {
+			throw new Exception("board dimensions don't match");
+		}
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (getCell(i, j).isVisible) {
+					continue;
+				}
+				getCell(i, j).isFlagged = game.getCell(i, j).isFlagged;
+			}
+		}
+	}
+
 	public static class Tile extends BacktrackingSolver.VisibleTileWithProbability {
 		private boolean isFlagged, isMine;
 
