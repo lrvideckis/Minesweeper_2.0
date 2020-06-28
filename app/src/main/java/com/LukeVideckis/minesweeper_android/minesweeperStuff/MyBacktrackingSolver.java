@@ -432,20 +432,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 	}
 
-
-	private void updateSurroundingMineCnt(int i, int j, int delta) throws Exception {
-		boolean foundAdjVis = false;
-		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-			if (board[adj[0]][adj[1]].isVisible) {
-				foundAdjVis = true;
-				cntSurroundingMines[adj[0]][adj[1]] += delta;
-			}
-		}
-		if (!foundAdjVis) {
-			throw new Exception("hidden cell with no adjacent visible cell");
-		}
-	}
-
 	private void performBacktrackingSequentially() throws Exception {
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
@@ -482,6 +468,19 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		isMine[i][j] = false;
 		if (checkSurroundingConditions(i, j, component.get(pos), 0)) {
 			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines);
+		}
+	}
+
+	private void updateSurroundingMineCnt(int i, int j, int delta) throws Exception {
+		boolean foundAdjVis = false;
+		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+			if (board[adj[0]][adj[1]].isVisible) {
+				foundAdjVis = true;
+				cntSurroundingMines[adj[0]][adj[1]] += delta;
+			}
+		}
+		if (!foundAdjVis) {
+			throw new Exception("hidden cell with no adjacent visible cell");
 		}
 	}
 
