@@ -140,7 +140,6 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 		final int j = component.get(pos).second;
 
 		//try mine
-		//isMine.get(i).set(j, true);
 		isMine[i][j] = true;
 		if (checkSurroundingConditions(i, j, component.get(pos), 1)) {
 			currNumberOfMines.addWith(1);

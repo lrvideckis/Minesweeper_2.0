@@ -7,13 +7,19 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CutNodes;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetSubComponentByRemovedNodes;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MutableInt;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.RowColToIndex;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -21,7 +27,8 @@ import java.util.TreeSet;
 public class MyBacktrackingSolver implements BacktrackingSolver {
 
 	public final static int iterationLimit = 10000;
-
+	//TODO: play around with this number
+	private static final int maxNumberOfRemovedCells = 5;
 	private final int rows, cols;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
@@ -30,10 +37,10 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 	private final ArrayList<TreeMap<Integer, ArrayList<MutableInt>>> mineProbPerCompPerNumMines = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
 	private final VisibleTileWithProbability[][] tempBoardWithProbability;
-	private final boolean performCheckPositionValidity;
 	private int numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
+	private ArrayList<ArrayList<SortedSet<Integer>>> adjList;
 
 	public MyBacktrackingSolver(int rows, int cols, boolean performCheckPositionValidity) {
 		this.rows = rows;
@@ -51,7 +58,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			lastUnvisitedSpot.add(currRow);
 		}
-		this.performCheckPositionValidity = performCheckPositionValidity;
 	}
 
 	@Override
@@ -66,139 +72,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				board[i][j].set(tempBoardWithProbability[i][j]);
-			}
-		}
-	}
-
-	@Override
-	public void solvePosition(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception {
-
-		if (AllCellsAreHidden.allCellsAreHidden(board)) {
-			for (int i = 0; i < rows; ++i) {
-				for (int j = 0; j < cols; ++j) {
-					board[i][j].mineProbability.setValues(numberOfMines, rows * cols);
-				}
-			}
-			return;
-		}
-
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (board[i][j].getIsVisible() && (board[i][j].getIsLogicalMine() || board[i][j].getIsLogicalFree())) {
-					throw new Exception("visible cells can't be logical frees/mines");
-				}
-				if (board[i][j].getIsLogicalMine() && board[i][j].getIsLogicalFree()) {
-					throw new Exception("cell can't be both logical free and logical mine");
-				}
-				if (board[i][j].getIsLogicalMine()) {
-					if (!AwayCell.isAwayCell(board, i, j, rows, cols)) {
-						--numberOfMines;
-					}
-					board[i][j].mineProbability.setValues(1, 1);
-				} else if (board[i][j].getIsLogicalFree()) {
-					board[i][j].mineProbability.setValues(0, 1);
-				} else {
-					board[i][j].mineProbability.setValues(0, 1);
-				}
-				if (board[i][j].getIsVisible()) {
-					updatedNumberSurroundingMines[i][j] = board[i][j].getNumberSurroundingMines();
-					for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-						VisibleTile adjCell = board[adj[0]][adj[1]];
-						if (adjCell.getIsLogicalMine()) {
-							--updatedNumberSurroundingMines[i][j];
-						}
-					}
-				}
-			}
-		}
-
-		initialize(board, numberOfMines);
-		components = GetConnectedComponents.getComponentsWithKnownCells(board);
-		initializeLastUnvisitedSpot(components);
-
-		performBacktrackingSequentially();
-
-		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
-
-		removeMineNumbersFromComponent();
-		BigFraction awayMineProbability = null;
-		if (numberOfAwayCells > 0) {
-			awayMineProbability = calculateAwayMineProbability();
-		}
-		updateNumberOfConfigsForCurrent();
-
-
-		TreeMap<Integer, BigFraction> configsPerMineCount = calculateNumberOfMineConfigs();
-
-		for (int i = 0; i < components.size(); ++i) {
-			for (TreeMap.Entry<Integer, ArrayList<MutableInt>> entry : mineProbPerCompPerNumMines.get(i).entrySet()) {
-				final int mines = entry.getKey();
-				final ArrayList<MutableInt> mineProbPerSpot = entry.getValue();
-
-				TreeMap<Integer, BigFraction> configsPerMine = numberOfConfigsForCurrent.get(i).get(mines);
-				BigFraction currWeight = new BigFraction(0);
-				for (TreeMap.Entry<Integer, BigFraction> currEntry : Objects.requireNonNull(configsPerMine).entrySet()) {
-					BigFraction currTerm = new BigFraction(0);
-					for (TreeMap.Entry<Integer, BigFraction> total : configsPerMineCount.entrySet()) {
-						BigFraction delta = MyMath.BinomialCoefficientFraction(numberOfAwayCells, numberOfMines - total.getKey(), numberOfMines - currEntry.getKey());
-						delta.multiplyWith(total.getValue());
-
-						currTerm.addWith(delta);
-					}
-
-					currTerm.invert();
-					currTerm.multiplyWith(currEntry.getValue());
-
-					currWeight.addWith(currTerm);
-				}
-
-				for (int j = 0; j < components.get(i).size(); ++j) {
-					final int numerator = mineProbPerSpot.get(j).get();
-					final int row = components.get(i).get(j).first;
-					final int col = components.get(i).get(j).second;
-
-					BigFraction delta = new BigFraction(numerator);
-					delta.multiplyWith(currWeight);
-					board[row][col].mineProbability.addWith(delta);
-				}
-			}
-		}
-
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				VisibleTileWithProbability curr = board[i][j];
-				if (curr.getIsVisible() && (curr.isLogicalMine || curr.isLogicalFree)) {
-					throw new Exception("visible cells shouldn't be logical");
-				}
-				if (curr.getIsVisible() && !curr.mineProbability.equals(0)) {
-					throw new Exception("found a visible cell with non-zero mine probability: " + i + " " + j);
-				}
-				if (curr.getIsLogicalMine()) {
-					if (!curr.mineProbability.equals(1)) {
-						throw new Exception("found logical mine with mine probability != 1: " + i + " " + j);
-					}
-				}
-				if (curr.getIsLogicalFree()) {
-					if (!curr.mineProbability.equals(0)) {
-						throw new Exception("found logical free cell with mine probability != 0: " + i + " " + j);
-					}
-				}
-
-				if (AwayCell.isAwayCell(board, i, j, rows, cols)) {
-					if (awayMineProbability == null) {
-						throw new Exception("away probability is null, but this was checked above");
-					}
-					curr.mineProbability.setValue(awayMineProbability);
-				}
-
-				if (curr.getIsVisible() || curr.getIsLogicalMine() || curr.getIsLogicalFree()) {
-					continue;
-				}
-				if (curr.mineProbability.equals(0)) {
-					curr.isLogicalFree = true;
-				} else if (curr.mineProbability.equals(1)) {
-					curr.isLogicalMine = true;
-				}
 			}
 		}
 	}
@@ -432,42 +305,612 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 	}
 
-	private void performBacktrackingSequentially() throws Exception {
+	@Override
+	public void solvePosition(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception {
+
+		if (AllCellsAreHidden.allCellsAreHidden(board)) {
+			for (int i = 0; i < rows; ++i) {
+				for (int j = 0; j < cols; ++j) {
+					board[i][j].mineProbability.setValues(numberOfMines, rows * cols);
+				}
+			}
+			return;
+		}
+
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (board[i][j].getIsVisible() && (board[i][j].getIsLogicalMine() || board[i][j].getIsLogicalFree())) {
+					throw new Exception("visible cells can't be logical frees/mines");
+				}
+				if (board[i][j].getIsLogicalMine() && board[i][j].getIsLogicalFree()) {
+					throw new Exception("cell can't be both logical free and logical mine");
+				}
+				if (board[i][j].getIsLogicalMine()) {
+					if (!AwayCell.isAwayCell(board, i, j, rows, cols)) {
+						--numberOfMines;
+					}
+					board[i][j].mineProbability.setValues(1, 1);
+				} else if (board[i][j].getIsLogicalFree()) {
+					board[i][j].mineProbability.setValues(0, 1);
+				} else {
+					board[i][j].mineProbability.setValues(0, 1);
+				}
+				if (board[i][j].getIsVisible()) {
+					updatedNumberSurroundingMines[i][j] = board[i][j].getNumberSurroundingMines();
+					for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+						VisibleTile adjCell = board[adj[0]][adj[1]];
+						if (adjCell.getIsLogicalMine()) {
+							--updatedNumberSurroundingMines[i][j];
+						}
+					}
+				}
+			}
+		}
+
+		initialize(board, numberOfMines);
+		//components = GetConnectedComponents.getComponentsWithKnownCells(board);
+		Pair<ArrayList<ArrayList<Pair<Integer, Integer>>>, ArrayList<ArrayList<SortedSet<Integer>>>> result = GetConnectedComponents.getComponentsWithKnownCells(board);
+		components = result.first;
+		adjList = result.second;
+		if (components.size() != adjList.size()) {
+			throw new Exception("components size doesn't match adjList size");
+		}
 		for (int i = 0; i < components.size(); ++i) {
-			MutableInt currIterations = new MutableInt(0);
-			MutableInt currNumberOfMines = new MutableInt(0);
-			solveComponent(0, i, currIterations, currNumberOfMines);
+			if (components.get(i).size() != adjList.get(i).size()) {
+				throw new Exception("components[i] size doesn't match adjList[i] size");
+			}
+		}
+		initializeLastUnvisitedSpot(components);
+
+		performBacktrackingSequentially();
+
+		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
+
+		removeMineNumbersFromComponent();
+		BigFraction awayMineProbability = null;
+		if (numberOfAwayCells > 0) {
+			awayMineProbability = calculateAwayMineProbability();
+		}
+		updateNumberOfConfigsForCurrent();
+
+
+		TreeMap<Integer, BigFraction> configsPerMineCount = calculateNumberOfMineConfigs();
+
+		for (int i = 0; i < components.size(); ++i) {
+			for (TreeMap.Entry<Integer, ArrayList<MutableInt>> entry : mineProbPerCompPerNumMines.get(i).entrySet()) {
+				final int mines = entry.getKey();
+				final ArrayList<MutableInt> mineProbPerSpot = entry.getValue();
+
+				TreeMap<Integer, BigFraction> configsPerMine = numberOfConfigsForCurrent.get(i).get(mines);
+				BigFraction currWeight = new BigFraction(0);
+				for (TreeMap.Entry<Integer, BigFraction> currEntry : Objects.requireNonNull(configsPerMine).entrySet()) {
+					BigFraction currTerm = new BigFraction(0);
+					for (TreeMap.Entry<Integer, BigFraction> total : configsPerMineCount.entrySet()) {
+						BigFraction delta = MyMath.BinomialCoefficientFraction(numberOfAwayCells, numberOfMines - total.getKey(), numberOfMines - currEntry.getKey());
+						delta.multiplyWith(total.getValue());
+
+						currTerm.addWith(delta);
+					}
+
+					currTerm.invert();
+					currTerm.multiplyWith(currEntry.getValue());
+
+					currWeight.addWith(currTerm);
+				}
+
+				for (int j = 0; j < components.get(i).size(); ++j) {
+					final int numerator = mineProbPerSpot.get(j).get();
+					final int row = components.get(i).get(j).first;
+					final int col = components.get(i).get(j).second;
+
+					BigFraction delta = new BigFraction(numerator);
+					delta.multiplyWith(currWeight);
+					board[row][col].mineProbability.addWith(delta);
+				}
+			}
+		}
+
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				VisibleTileWithProbability curr = board[i][j];
+				if (curr.getIsVisible() && (curr.isLogicalMine || curr.isLogicalFree)) {
+					throw new Exception("visible cells shouldn't be logical");
+				}
+				if (curr.getIsVisible() && !curr.mineProbability.equals(0)) {
+					throw new Exception("found a visible cell with non-zero mine probability: " + i + " " + j);
+				}
+				if (curr.getIsLogicalMine()) {
+					if (!curr.mineProbability.equals(1)) {
+						throw new Exception("found logical mine with mine probability != 1: " + i + " " + j);
+					}
+				}
+				if (curr.getIsLogicalFree()) {
+					if (!curr.mineProbability.equals(0)) {
+						throw new Exception("found logical free cell with mine probability != 0: " + i + " " + j);
+					}
+				}
+
+				if (AwayCell.isAwayCell(board, i, j, rows, cols)) {
+					if (awayMineProbability == null) {
+						throw new Exception("away probability is null, but this was checked above");
+					}
+					curr.mineProbability.setValue(awayMineProbability);
+				}
+
+				if (curr.getIsVisible() || curr.getIsLogicalMine() || curr.getIsLogicalFree()) {
+					continue;
+				}
+				if (curr.mineProbability.equals(0)) {
+					curr.isLogicalFree = true;
+				} else if (curr.mineProbability.equals(1)) {
+					curr.isLogicalMine = true;
+				}
+			}
 		}
 	}
 
+	//TODO: find a more accurate name for this
+	private void performBacktrackingSequentially() throws Exception {
+		for (int i = 0; i < components.size(); ++i) {
+			MutableInt currIterations = new MutableInt(0);
+
+			TreeSet<Integer> subComponent = new TreeSet<>();
+			for (int j = 0; j < components.get(i).size(); ++j) {
+				subComponent.add(j);
+			}
+			boolean[] isRemoved = new boolean[components.get(i).size()];
+			ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result =
+					solveComponent(i, currIterations, Collections.unmodifiableSortedSet(subComponent), isRemoved);
+
+			if (Objects.requireNonNull(result).size() != 1) {
+				throw new Exception("result has size != 1, but it should be 1, size is: " + Objects.requireNonNull(result).size());
+			}
+			if (!mineConfig.get(i).isEmpty()) {
+				throw new Exception("mine config isn't empty, but it should be, component: " + i);
+			}
+			if (!mineProbPerCompPerNumMines.get(i).isEmpty()) {
+				throw new Exception("mine probabilities isn't empty, but it should be, component: " + i);
+			}
+			mineConfig.get(i).putAll(result.get(0).first);
+			mineProbPerCompPerNumMines.get(i).putAll(result.get(0).second);
+		}
+	}
+
+	//TODO: split up this function into smaller functions
+	private ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> solveComponent(
+			final int componentPos,
+			MutableInt currIterations, //running total of iterations of both this function and backtracking
+			final SortedSet<Integer> subComponent, //list of indexes into components[componentPos]
+			boolean[] isRemoved //also list of indexes into components[componentPos]
+	) throws Exception {
+		currIterations.addWith(1);
+		if (currIterations.get() >= iterationLimit) {
+			throw new HitIterationLimitException("too many iterations");
+		}
+		ArrayList<Integer> removedCellsList = new ArrayList<>();
+		TreeMap<Integer, Integer> toIndexOriginal = new TreeMap<>();
+		int pos = 0;
+		for (int node : subComponent) {
+			if (isRemoved[node]) {
+				removedCellsList.add(node);
+				toIndexOriginal.put(node, pos);
+				++pos;
+			}
+		}
+		final int startNumRemoved = removedCellsList.size();
+		if (startNumRemoved > maxNumberOfRemovedCells) {
+			throw new Exception("starting with too many removed cells " + startNumRemoved);
+		}
+		if (subComponent.size() <= 5) {//TODO: play around with this number
+			//do backtracking
+			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
+		}
+
+		System.out.println("here, trying to split by cut nodes");
+
+		//find split cells
+		//1st try: find articulation nodes
+		CutNodes cutNodes = new CutNodes(subComponent, adjList.get(componentPos), isRemoved);
+		TreeSet<Integer> allCutNodes = new TreeSet<>();
+		for (int node : subComponent) {
+			if (isRemoved[node]) {
+				continue;
+			}
+			for (int currCutNode : cutNodes.getCutNodes(node)) {
+				if (allCutNodes.contains(currCutNode)) {
+					throw new Exception("duplicate cut node");
+				}
+				allCutNodes.add(currCutNode);
+			}
+		}
+
+		//TODO: these
+		//2nd try: find pairs of articulation nodes
+		//3rd try: find pairs of edges
+		//4th try: approximation algorithm
+
+		CreateSolvableBoard.printBoardDebug(board);
+
+		for (int node : allCutNodes) {
+			System.out.println("cut node: " + components.get(componentPos).get(node).first + " " + components.get(componentPos).get(node).second);
+			if (removedCellsList.size() < maxNumberOfRemovedCells) {
+				removedCellsList.add(node);
+				if (isRemoved[node]) {
+					throw new Exception("node is already removed, but this shouldn't happen");
+				}
+				isRemoved[node] = true;
+			}
+		}
+
+		GetSubComponentByRemovedNodes getSubComponentByRemovedNodes = new GetSubComponentByRemovedNodes(subComponent, adjList.get(componentPos), isRemoved);
+		ArrayList<SortedSet<Integer>> newSubComponents = new ArrayList<>();
+		for (int node : subComponent) {
+			if (isRemoved[node]) {
+				continue;
+			}
+			SortedSet<Integer> currSubComponent = getSubComponentByRemovedNodes.getSubComponent(node);
+			if (currSubComponent.isEmpty()) {
+				continue;
+			}
+			System.out.println("here, new sub component: ");
+			for (int i : currSubComponent) {
+				System.out.println(components.get(componentPos).get(i).first + " " + components.get(componentPos).get(i).second);
+			}
+			System.out.println("and removed nodes are:");
+			for (int i : currSubComponent) {
+				if (isRemoved[i]) {
+					System.out.println(components.get(componentPos).get(i).first + " " + components.get(componentPos).get(i).second);
+				}
+			}
+			newSubComponents.add(currSubComponent);
+		}
+
+		if (newSubComponents.isEmpty()) {
+			throw new Exception("there should be at least 1 sub component");
+		}
+		if (newSubComponents.size() == 1) {
+			for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
+				isRemoved[removedCellsList.get(i)] = false;
+			}
+			removedCellsList.subList(startNumRemoved, removedCellsList.size()).clear();
+
+			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
+		}
+
+		TreeMap<Integer, Integer> toIndexOriginalAfterAddingNewRemoved = new TreeMap<>();
+		pos = 0;
+		for (int node : subComponent) {
+			if (isRemoved[node]) {
+				toIndexOriginalAfterAddingNewRemoved.put(node, pos);
+				++pos;
+			}
+		}
+		TreeMap<Integer, Integer> gridToIndex = new TreeMap<>();
+		TreeMap<Integer, Integer> nodeToIndex = new TreeMap<>();
+		pos = 0;
+		for (int node : subComponent) {
+			nodeToIndex.put(node, pos);
+			final int i = components.get(componentPos).get(node).first;
+			final int j = components.get(componentPos).get(node).second;
+			gridToIndex.put(RowColToIndex.rowColToIndex(i, j, rows, cols), pos);
+			++pos;
+		}
+		TreeSet<Integer> cluesWithAllRemovedNeighbors = new TreeSet<>();
+		for (int node : subComponent) {
+			if (!isRemoved[node]) {
+				continue;
+			}
+			final int i = components.get(componentPos).get(node).first;
+			final int j = components.get(componentPos).get(node).second;
+			for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+				if (!board[adj[0]][adj[1]].isVisible) {
+					continue;
+				}
+				boolean allNeighborsAreRemoved = true;
+				for (int[] adj2 : GetAdjacentCells.getAdjacentCells(adj[0], adj[1], rows, cols)) {
+					final int adjI = adj2[0], adjJ = adj2[1];
+					final int currKey = RowColToIndex.rowColToIndex(adjI, adjJ, rows, cols);
+					if (!gridToIndex.containsKey(currKey)) {
+						continue;
+					}
+					if (board[adjI][adjJ].isVisible) {
+						throw new Exception("every node in subComponent should be non-visible, but this node is visible");
+					}
+					if (!isRemoved[gridToIndex.get(currKey)]) {
+						allNeighborsAreRemoved = false;
+						break;
+					}
+				}
+				if (allNeighborsAreRemoved) {
+					System.out.println("here, clue with all removed neighbors: " + adj[0] + " " + adj[1]);
+					cluesWithAllRemovedNeighbors.add(RowColToIndex.rowColToIndex(adj[0], adj[1], rows, cols));
+				}
+			}
+		}
+
+		System.out.println("here, actually splitting by cut nodes");
+
+		//recursing on new sub components
+		ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub = new ArrayList<>();
+		pos = 0;
+		for (SortedSet<Integer> currSubComponent : newSubComponents) {
+			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved));
+			System.out.println("sub component: " + pos);
+			++pos;
+			for (int mask = 0; mask < resultsSub.get(resultsSub.size() - 1).size(); ++mask) {
+				System.out.println("mask: " + mask);
+				for (TreeMap.Entry<Integer, MutableInt> entry : resultsSub.get(resultsSub.size() - 1).get(mask).first.entrySet()) {
+					System.out.println("# mines, ways: " + entry.getKey() + " " + entry.getValue().get());
+				}
+			}
+		}
+
+		ArrayList<TreeMap<Integer, Integer>> toIndex = new ArrayList<>(newSubComponents.size());
+		for (int subC = 0; subC < newSubComponents.size(); ++subC) {
+			TreeMap<Integer, Integer> currIndex = new TreeMap<>();
+			pos = 0;
+			for (int node : newSubComponents.get(subC)) {
+				if (isRemoved[node]) {
+					currIndex.put(node, pos);
+					++pos;
+				}
+			}
+			toIndex.add(currIndex);
+		}
+
+		ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result = new ArrayList<>(1 << startNumRemoved);
+		for (int i = 0; i < (1 << startNumRemoved); ++i) {
+			result.add(new Pair<>(new TreeMap<>(), new TreeMap<>()));
+		}
+
+		//combine results
+		final int pow2 = (1 << removedCellsList.size());
+		for (int mask = 0; mask < pow2; ++mask) {//<512
+			/*
+			 * there could be some clues which are next to **only** removed cells
+			 * for these clues, we need to check that they are satisfied
+			 */
+			boolean allCluesMatch = true;
+			for (int cluesWithAllRemoved : cluesWithAllRemovedNeighbors) {
+				final int i = RowColToIndex.indexToRowCol(cluesWithAllRemoved, rows, cols).first;
+				final int j = RowColToIndex.indexToRowCol(cluesWithAllRemoved, rows, cols).second;
+				int surroundingMineCount = 0;
+				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+					final int adjI = adj[0], adjJ = adj[1];
+					if (board[adjI][adjJ].isVisible || board[adjI][adjJ].isLogicalMine || board[adjI][adjJ].isLogicalFree) {
+						continue;
+					}
+					final int currNode = Objects.requireNonNull(gridToIndex.get(RowColToIndex.rowColToIndex(adjI, adjJ, rows, cols)));
+					if ((mask & (1 << toIndexOriginalAfterAddingNewRemoved.get(currNode))) > 0) {
+						++surroundingMineCount;
+					}
+				}
+				if (surroundingMineCount != updatedNumberSurroundingMines[i][j]) {
+					allCluesMatch = false;
+					break;
+				}
+			}
+			if (!allCluesMatch) {
+				continue;
+			}
+
+			ArrayList<TreeMap<Integer, MutableInt>> prefixMineConfigs = new ArrayList<>(newSubComponents.size() + 1);
+			for (int i = 0; i <= newSubComponents.size(); ++i) {
+				prefixMineConfigs.add(new TreeMap<>());
+			}
+			prefixMineConfigs.get(0).put(0, new MutableInt(1));
+
+			for (int subC = 0; subC < newSubComponents.size(); ++subC) {//<7
+				int maskSubC = 0;
+				for (int bit = 0; bit < removedCellsList.size(); ++bit) {//<7
+					if ((mask & (1 << bit)) == 0) {
+						continue;
+					}
+					if (!toIndex.get(subC).containsKey(removedCellsList.get(bit))) {
+						continue;
+					}
+					final int currIndex = Objects.requireNonNull(toIndex.get(subC).get(removedCellsList.get(bit)));
+					maskSubC = (maskSubC | (1 << currIndex));
+				}
+				final TreeMap<Integer, MutableInt> currSubMineConfig = resultsSub.get(subC).get(maskSubC).first;
+
+				//update new mine configs
+				for (TreeMap.Entry<Integer, MutableInt> prevMineConfigs : prefixMineConfigs.get(subC).entrySet()) {//< ~4 ish
+					for (TreeMap.Entry<Integer, MutableInt> currMineConfigs : currSubMineConfig.entrySet()) {//< ~4 ish
+						final int newKey = prevMineConfigs.getKey() + currMineConfigs.getKey();
+						if (!prefixMineConfigs.get(subC + 1).containsKey(newKey)) {
+							prefixMineConfigs.get(subC + 1).put(newKey, new MutableInt(0));
+						}
+						MutableInt curr = Objects.requireNonNull(prefixMineConfigs.get(subC + 1).get(newKey));
+						curr.addWith(prevMineConfigs.getValue().get() * currMineConfigs.getValue().get());
+					}
+				}
+			}
+
+			int currMask = 0;
+			for (int bit = 0; bit < removedCellsList.size(); ++bit) {//<7
+				if ((mask & (1 << bit)) == 0) {
+					continue;
+				}
+				if (!toIndexOriginal.containsKey(removedCellsList.get(bit))) {
+					continue;
+				}
+				final int currIndex = Objects.requireNonNull(toIndexOriginal.get(removedCellsList.get(bit)));
+				currMask = (currMask | (1 << currIndex));
+			}
+
+			TreeMap<Integer, MutableInt> resultMineConfigs = result.get(currMask).first;
+			TreeMap<Integer, ArrayList<MutableInt>> resultMineProbs = result.get(currMask).second;
+			for (TreeMap.Entry<Integer, MutableInt> mineConfigs : prefixMineConfigs.get(newSubComponents.size()).entrySet()) {//< ~4 ish
+				if (!resultMineConfigs.containsKey(mineConfigs.getKey())) {
+					resultMineConfigs.put(mineConfigs.getKey(), new MutableInt(0));
+				}
+				Objects.requireNonNull(resultMineConfigs.get(mineConfigs.getKey())).addWith(mineConfigs.getValue().get());
+			}
+
+
+			TreeMap<Integer, MutableInt> suffixMineConfigs = new TreeMap<>();
+			suffixMineConfigs.put(0, new MutableInt(1));
+
+			for (int subC = newSubComponents.size() - 1; subC >= 0; --subC) {//<7
+				//TODO this is duplicate code, put it in a function
+				int maskSubC = 0;
+				for (int bit = 0; bit < removedCellsList.size(); ++bit) {//<7
+					if ((mask & (1 << bit)) == 0) {
+						continue;
+					}
+					if (!toIndex.get(subC).containsKey(removedCellsList.get(bit))) {
+						continue;
+					}
+					final int currIndex = Objects.requireNonNull(toIndex.get(subC).get(removedCellsList.get(bit)));
+					maskSubC = (maskSubC | (1 << currIndex));
+				}
+
+				final TreeMap<Integer, MutableInt> currSubMineConfig = resultsSub.get(subC).get(maskSubC).first;
+				final TreeMap<Integer, ArrayList<MutableInt>> currSubProb = resultsSub.get(subC).get(maskSubC).second;
+
+				//update mine probabilities
+				//TODO: not sure if it's correct, but try to optimize this with the trick: total ways / curr ways
+				for (TreeMap.Entry<Integer, MutableInt> currPrefixMineConfigs : prefixMineConfigs.get(subC).entrySet()) {
+					for (TreeMap.Entry<Integer, MutableInt> currSuffixMineConfigs : suffixMineConfigs.entrySet()) {
+						for (TreeMap.Entry<Integer, ArrayList<MutableInt>> currMineConfigs : currSubProb.entrySet()) {
+							final int totalMines = currPrefixMineConfigs.getKey() + currSuffixMineConfigs.getKey() + currMineConfigs.getKey();
+							final int waysPrefixAndSuffix = currPrefixMineConfigs.getValue().get() * currSuffixMineConfigs.getValue().get();
+							pos = 0;
+							for (int node : newSubComponents.get(subC)) {
+
+
+								final int posOrig = nodeToIndex.get(node);
+
+								if (isRemoved[node]) {
+									final int removedNodeIndex = Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(node));
+									if ((mask & (1 << removedNodeIndex)) > 0) {
+										if (!resultMineProbs.containsKey(totalMines)) {
+											ArrayList<MutableInt> currArray = new ArrayList<>(subComponent.size());
+											for (int i = 0; i < subComponent.size(); ++i) {
+												currArray.add(new MutableInt(0));
+											}
+											resultMineProbs.put(totalMines, currArray);
+										}
+										MutableInt curr = Objects.requireNonNull(resultMineProbs.get(totalMines)).get(posOrig);
+										curr.addWith(waysPrefixAndSuffix * Objects.requireNonNull(currSubMineConfig.get(currMineConfigs.getKey())).get());
+									}
+								} else {
+									final int currWays = waysPrefixAndSuffix * currMineConfigs.getValue().get(pos).get();
+									if (!resultMineProbs.containsKey(totalMines)) {
+										ArrayList<MutableInt> currArray = new ArrayList<>(subComponent.size());
+										for (int i = 0; i < subComponent.size(); ++i) {
+											currArray.add(new MutableInt(0));
+										}
+										resultMineProbs.put(totalMines, currArray);
+									}
+									MutableInt curr = Objects.requireNonNull(resultMineProbs.get(totalMines)).get(posOrig);
+									curr.addWith(currWays);
+								}
+								++pos;
+							}
+						}
+					}
+				}
+
+				//update prevMineConfigs
+				TreeMap<Integer, MutableInt> tempMineConfigs = new TreeMap<>();
+				for (TreeMap.Entry<Integer, MutableInt> currSuffixMineConfigs : suffixMineConfigs.entrySet()) {//< ~4 ish
+					for (TreeMap.Entry<Integer, MutableInt> currMineConfigs : currSubMineConfig.entrySet()) {//< ~4 ish
+						final int currKey = currSuffixMineConfigs.getKey() + currMineConfigs.getKey();
+						if (!tempMineConfigs.containsKey(currKey)) {
+							tempMineConfigs.put(currKey, new MutableInt(0));
+						}
+						MutableInt curr = Objects.requireNonNull(tempMineConfigs.get(currKey));
+						curr.addWith(currSuffixMineConfigs.getValue().get() * currMineConfigs.getValue().get());
+					}
+				}
+				suffixMineConfigs.clear();
+				suffixMineConfigs.putAll(tempMineConfigs);
+			}
+		}
+
+		//restore isRemoved to was it was at the beginning of the recursive call
+		for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
+			isRemoved[removedCellsList.get(i)] = false;
+		}
+
+		System.out.println("here, returning first: " + result.size());
+
+		//ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result = new ArrayList<>(1 << startNumRemoved);
+		for (TreeMap.Entry<Integer, MutableInt> entry : result.get(0).first.entrySet()) {
+			System.out.println("# mines: " + entry.getKey() + " # configs: " + entry.getValue().get());
+		}
+
+		return result;
+	}
+
+	private ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> solveComponentWithBacktracking(
+			int componentPos,
+			SortedSet<Integer> nodes,
+			TreeMap<Integer, Integer> toIndexOriginal,
+			MutableInt currIterations
+	) throws Exception {
+		ArrayList<Integer> allNodes = new ArrayList<>(nodes.size());
+		allNodes.addAll(nodes);
+		MutableInt currNumberOfMines = new MutableInt(0);
+
+		final int pow2 = (1 << toIndexOriginal.size());
+		ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result = new ArrayList<>(pow2);
+		for (int i = 0; i < pow2; ++i) {
+			result.add(new Pair<>(new TreeMap<>(), new TreeMap<>()));
+		}
+
+		solveComponentWithBacktracking(0, allNodes, toIndexOriginal, result, componentPos, currIterations, currNumberOfMines);
+
+		/*
+		System.out.println("here555555, returning first: " + result.size());
+		for(TreeMap.Entry<Integer, MutableInt> entry : result.get(0).first.entrySet()) {
+			System.out.println("# mines: " + entry.getKey() + " # configs: " + entry.getValue().get());
+		}
+		 */
+
+
+		return result;
+	}
+
+
 	//TODO: only re-run component solve if the component has changed
-	private void solveComponent(int pos, int componentPos, MutableInt currIterations, MutableInt currNumberOfMines) throws Exception {
+	private void solveComponentWithBacktracking(
+			int pos,
+			ArrayList<Integer> allNodes,
+			TreeMap<Integer, Integer> toIndexOriginal,
+			ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result,
+			int componentPos,
+			MutableInt currIterations,
+			MutableInt currNumberOfMines
+	) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
-		if (pos == component.size()) {
-			handleSolution(componentPos, currNumberOfMines.get());
+		if (pos == allNodes.size()) {
+			handleSolution(componentPos, currNumberOfMines.get(), allNodes, toIndexOriginal, result);
 			return;
 		}
 		currIterations.addWith(1);
 		if (currIterations.get() >= iterationLimit) {
 			throw new HitIterationLimitException("too many iterations");
 		}
-		final int i = component.get(pos).first;
-		final int j = component.get(pos).second;
+		final int i = component.get(allNodes.get(pos)).first;
+		final int j = component.get(allNodes.get(pos)).second;
 
 		//try mine
 		isMine[i][j] = true;
-		if (checkSurroundingConditions(i, j, component.get(pos), 1)) {
+		if (checkSurroundingConditions(i, j, component.get(allNodes.get(pos)), 1, allNodes, componentPos)) {
 			currNumberOfMines.addWith(1);
 			updateSurroundingMineCnt(i, j, 1);
-			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines);
+			solveComponentWithBacktracking(pos + 1, allNodes, toIndexOriginal, result, componentPos, currIterations, currNumberOfMines);
 			updateSurroundingMineCnt(i, j, -1);
 			currNumberOfMines.addWith(-1);
 		}
 
 		//try free
 		isMine[i][j] = false;
-		if (checkSurroundingConditions(i, j, component.get(pos), 0)) {
-			solveComponent(pos + 1, componentPos, currIterations, currNumberOfMines);
+		if (checkSurroundingConditions(i, j, component.get(allNodes.get(pos)), 0, allNodes, componentPos)) {
+			solveComponentWithBacktracking(pos + 1, allNodes, toIndexOriginal, result, componentPos, currIterations, currNumberOfMines);
 		}
 	}
 
@@ -484,13 +927,43 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 	}
 
-	private boolean checkSurroundingConditions(int i, int j, Pair<Integer, Integer> currSpot, int arePlacingAMine) throws Exception {
+	private boolean checkSurroundingConditions(
+			int i,
+			int j,
+			Pair<Integer, Integer> currSpot,
+			int arePlacingAMine,
+			ArrayList<Integer> allNodes,
+			final int componentPos
+	) throws Exception {
 		for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 			final int adjI = adj[0], adjJ = adj[1];
 			VisibleTile adjTile = board[adjI][adjJ];
 			if (!adjTile.isVisible) {
 				continue;
 			}
+			boolean foundAll = true;
+			for (int[] adj2 : GetAdjacentCells.getAdjacentCells(adjI, adjJ, rows, cols)) {
+				VisibleTile currTile = board[adj2[0]][adj2[1]];
+				if (currTile.isVisible || currTile.isLogicalMine || currTile.isLogicalFree) {
+					continue;
+				}
+				boolean found = false;
+				for (int node : allNodes) {
+					if (adj2[0] == components.get(componentPos).get(node).first && adj2[1] == components.get(componentPos).get(node).second) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					foundAll = false;
+					break;
+				}
+			}
+			if (!foundAll) {
+				System.out.println("skipping component: " + componentPos + " clue: " + adjI + " " + adjJ);
+				continue;
+			}
+
 			final int currBacktrackingCount = cntSurroundingMines[adjI][adjJ];
 			if (currBacktrackingCount + arePlacingAMine > updatedNumberSurroundingMines[adjI][adjJ]) {
 				return false;
@@ -513,63 +986,59 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		return true;
 	}
 
-	private void handleSolution(int componentPos, int currNumberOfMines) throws Exception {
+	private void handleSolution(
+			int componentPos,
+			int currNumberOfMines,
+			ArrayList<Integer> allNodes,
+			TreeMap<Integer, Integer> toIndexOriginal,
+			ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result
+	) {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
-		if (performCheckPositionValidity) {
-			checkPositionValidity(component, currNumberOfMines);
+		/*
+		System.out.println("hi1");
+		System.out.println("hi2");
+		System.out.println("hi3");
+		System.out.println("found solution, component: " + componentPos);
+		 */
+
+		int mask = 0;
+		for (int node : allNodes) {
+			if (!toIndexOriginal.containsKey(node)) {
+				continue;
+			}
+			final int i = components.get(componentPos).get(node).first;
+			final int j = components.get(componentPos).get(node).second;
+			if (isMine[i][j]) {
+				final int currIndex = Objects.requireNonNull(toIndexOriginal.get(node));
+				mask = (mask | (1 << currIndex));
+			}
 		}
 
-		MutableInt count = mineConfig.get(componentPos).get(currNumberOfMines);
+		MutableInt count = result.get(mask).first.get(currNumberOfMines);
 		if (count == null) {
-			mineConfig.get(componentPos).put(currNumberOfMines, new MutableInt(1));
+			result.get(mask).first.put(currNumberOfMines, new MutableInt(1));
 		} else {
 			count.addWith(1);
 		}
 
-		if (!mineProbPerCompPerNumMines.get(componentPos).containsKey(currNumberOfMines)) {
-			ArrayList<MutableInt> currSpotsArray = new ArrayList<>(component.size());
-			for (int i = 0; i < component.size(); ++i) {
+		if (!result.get(mask).second.containsKey(currNumberOfMines)) {
+			ArrayList<MutableInt> currSpotsArray = new ArrayList<>(allNodes.size());
+			for (int i = 0; i < allNodes.size(); ++i) {
 				currSpotsArray.add(new MutableInt(0));
 			}
-			mineProbPerCompPerNumMines.get(componentPos).put(currNumberOfMines, currSpotsArray);
+			result.get(mask).second.put(currNumberOfMines, currSpotsArray);
 		}
-		ArrayList<MutableInt> currArrayList = Objects.requireNonNull(mineProbPerCompPerNumMines.get(componentPos).get(currNumberOfMines));
-		for (int pos = 0; pos < component.size(); ++pos) {
-			final int i = component.get(pos).first;
-			final int j = component.get(pos).second;
+		ArrayList<MutableInt> currArrayList = Objects.requireNonNull(result.get(mask).second.get(currNumberOfMines));
+		//System.out.println("number of mines: " + currNumberOfMines);
+		for (int pos = 0; pos < allNodes.size(); ++pos) {
+			final int i = component.get(allNodes.get(pos)).first;
+			final int j = component.get(allNodes.get(pos)).second;
 			MutableInt curr = currArrayList.get(pos);
 
 			if (isMine[i][j]) {
+				//System.out.println(i + " " + j);
 				curr.addWith(1);
 			}
-		}
-	}
-
-	private void checkPositionValidity(ArrayList<Pair<Integer, Integer>> component, int currNumberOfMines) throws Exception {
-		for (int pos = 0; pos < component.size(); ++pos) {
-			final int i = component.get(pos).first;
-			final int j = component.get(pos).second;
-			for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-				final int adjI = adj[0], adjJ = adj[1];
-				VisibleTile adjTile = board[adjI][adjJ];
-				if (!adjTile.isVisible) {
-					continue;
-				}
-				if (cntSurroundingMines[adjI][adjJ] != updatedNumberSurroundingMines[adjI][adjJ]) {
-					throw new Exception("found bad solution - # mines doesn't match, but this should be pruned out");
-				}
-			}
-		}
-		int prevNumberOfMines = 0;
-		for (int pos = 0; pos < component.size(); ++pos) {
-			final int i = component.get(pos).first;
-			final int j = component.get(pos).second;
-			if (isMine[i][j]) {
-				++prevNumberOfMines;
-			}
-		}
-		if (prevNumberOfMines != currNumberOfMines) {
-			throw new Exception("number of mines doesn't match");
 		}
 	}
 }

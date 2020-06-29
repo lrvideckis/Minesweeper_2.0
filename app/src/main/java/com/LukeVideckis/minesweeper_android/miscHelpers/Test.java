@@ -16,7 +16,6 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ExistsLogicalFree;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,6 +27,17 @@ public class Test {
 	@SuppressWarnings("SpellCheckingInspection")
 
 	private final static String[][] previousFailedBoards = {
+
+
+			//testing new backtracking algorithm
+			{
+					"UUUUUU",
+					"UU3221",
+					"UU21..",
+					"UUU1..",
+
+					"7",
+			},
 
 			{
 					".112B1...1111UU",
@@ -260,6 +270,9 @@ public class Test {
 				VisibleTileWithProbability[][] boardFast = convertToNewBoard(minesweeperGame);
 				VisibleTileWithProbability[][] boardSlow = convertToNewBoard(minesweeperGame);
 
+				System.out.println("mines: " + mines);
+				CreateSolvableBoard.printBoardDebug(boardFast);
+
 				try {
 					holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
 				} catch (HitIterationLimitException ignored) {
@@ -483,7 +496,7 @@ public class Test {
 				}
 				game.updateLogicalStuff(visibleBoard);
 
-				if (ExistsLogicalFree.noLogicalFrees(visibleBoard)) {
+				if (noLogicalFrees(visibleBoard)) {
 					System.out.println("no logical frees, failed test");
 					CreateSolvableBoard.printBoardDebug(visibleBoard);
 					return;
@@ -549,7 +562,7 @@ public class Test {
 				}
 				game.updateLogicalStuff(visibleBoard);
 
-				if (ExistsLogicalFree.noLogicalFrees(visibleBoard)) {
+				if (noLogicalFrees(visibleBoard)) {
 					System.out.println("no logical frees, failed test");
 					return;
 				}
@@ -688,5 +701,17 @@ public class Test {
 			}
 		}
 		return board;
+	}
+
+
+	private static boolean noLogicalFrees(VisibleTile[][] board) {
+		for (VisibleTile[] row : board) {
+			for (VisibleTile cell : row) {
+				if (cell.getIsLogicalFree()) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }
