@@ -7,7 +7,6 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CutNodes;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
@@ -473,12 +472,12 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			mineConfig.get(i).putAll(result.get(0).first);
 			mineProbPerCompPerNumMines.get(i).putAll(result.get(0).second);
+			/*
 			System.out.println("here, component: " + i + "# mines, # configs");
 			for (TreeMap.Entry<Integer, MutableInt> entry : mineConfig.get(i).entrySet()) {
 				System.out.println(entry.getKey() + " " + entry.getValue().get());
 			}
 
-			/*
 			System.out.println("here, end, second is:");
 			for(TreeMap.Entry<Integer,ArrayList<MutableInt>> entry : result.get(0).second.entrySet()) {
 				System.out.println("# mines is: " + entry.getKey());
@@ -540,10 +539,12 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 
+		/*
 		System.out.println("cut nodes:");
 		for (int node : allCutNodes) {
 			System.out.println(components.get(componentPos).get(node).first + " " + components.get(componentPos).get(node).second);
 		}
+		 */
 
 		/*
 				..1UU
@@ -560,7 +561,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		//3rd try: find pairs of edges
 		//4th try: approximation algorithm
 
-		CreateSolvableBoard.printBoardDebug(board);
+		//CreateSolvableBoard.printBoardDebug(board);
 
 		for (int node : allCutNodes) {
 			if (removedCellsList.size() < maxNumberOfRemovedCells) {
@@ -709,6 +710,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			 * For mines in removed cells, we only want to count then once in the total # of mines
 			 */
 			int cntDuplicate = 0;
+			int cntAlone = 0;
 			for (int bit = 0; bit < removedCellsList.size(); ++bit) {
 				if ((mask & (1 << bit)) == 0) {
 					continue;
@@ -719,6 +721,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					if (currSubComponent.contains(node)) {
 						++cntSubContains;
 					}
+				}
+				if (cntSubContains == 0) {
+					++cntAlone;
 				}
 				cntDuplicate += Math.max(0, cntSubContains - 1);
 			}
@@ -772,7 +777,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			TreeMap<Integer, ArrayList<MutableInt>> resultMineProbs = result.get(currMask).second;
 
 			for (TreeMap.Entry<Integer, MutableInt> mineConfigs : prefixMineConfigs.get(newSubComponents.size()).entrySet()) {//< ~4 ish
-				final int currKey = mineConfigs.getKey() - cntDuplicate;
+				final int currKey = mineConfigs.getKey() - cntDuplicate + cntAlone;
 				if (!resultMineConfigs.containsKey(currKey)) {
 					resultMineConfigs.put(currKey, new MutableInt(0));
 				}
@@ -826,7 +831,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 							if (newSubComponents.get(subC).size() != currMineProbs.getValue().size()) {
 								throw new Exception("new sub component size doesn't match currMineProb size");
 							}
-							final int totalMines = currPrefixMineConfigs.getKey() + currSuffixMineConfigs.getKey() + currMineProbs.getKey() - cntDuplicate;
+							final int totalMines = currPrefixMineConfigs.getKey() + currSuffixMineConfigs.getKey() + currMineProbs.getKey() - cntDuplicate + cntAlone;
 							final int waysPrefixAndSuffix = currPrefixMineConfigs.getValue().get() * currSuffixMineConfigs.getValue().get();
 							pos = 0;
 							for (int node : newSubComponents.get(subC)) {
