@@ -42,7 +42,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
 	private ArrayList<ArrayList<SortedSet<Integer>>> adjList;
 
-	public MyBacktrackingSolver(int rows, int cols, boolean performCheckPositionValidity) {
+	public MyBacktrackingSolver(int rows, int cols) {
 		this.rows = rows;
 		this.cols = cols;
 		isMine = new boolean[rows][cols];
@@ -473,6 +473,25 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			mineConfig.get(i).putAll(result.get(0).first);
 			mineProbPerCompPerNumMines.get(i).putAll(result.get(0).second);
+			/*
+			for (int j = 0; j < mineProbPerCompPerNumMines.get(i).size(); ++j) {
+				System.out.println("here, cell is: " + components.get(i).get(j).first + " " + components.get(i).get(j).second);
+				if (components.get(i).get(j).first == 3 && components.get(i).get(j).second == 3) {
+					for (int mines = 2; mines <= 3; ++mines) {
+						System.out.println("here 666666, mine prob: " + mineProbPerCompPerNumMines.get(i).get(mines).get(j).get());
+					}
+				}
+			}
+			System.out.println("here, end, second is:");
+			for(TreeMap.Entry<Integer,ArrayList<MutableInt>> entry : result.get(0).second.entrySet()) {
+				System.out.println("# mines is: " + entry.getKey());
+				for(int pos = 0; pos < entry.getValue().size(); ++pos) {
+					final int I = components.get(i).get(pos).first;
+					final int J = components.get(i).get(pos).second;
+					System.out.println("i,j, value: " + I + " " + J + " " + entry.getValue().get(pos).get());
+				}
+			}
+			 */
 		}
 	}
 
@@ -524,6 +543,13 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 
+		/*
+		System.out.println("cut nodes:");
+		for(int node : allCutNodes) {
+			System.out.println(components.get(componentPos).get(node).first + " " + components.get(componentPos).get(node).second);
+		}
+		 */
+
 		//TODO: these
 		//2nd try: find pairs of articulation nodes
 		//3rd try: find pairs of edges
@@ -552,6 +578,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			if (currSubComponent.isEmpty()) {
 				continue;
 			}
+			/*
 			System.out.println("here, new sub component: ");
 			for (int i : currSubComponent) {
 				System.out.println(components.get(componentPos).get(i).first + " " + components.get(componentPos).get(i).second);
@@ -562,6 +589,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					System.out.println(components.get(componentPos).get(i).first + " " + components.get(componentPos).get(i).second);
 				}
 			}
+			 */
 			newSubComponents.add(currSubComponent);
 		}
 
@@ -632,9 +660,10 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 		//recursing on new sub components
 		ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub = new ArrayList<>();
-		pos = 0;
+		//pos = 0;
 		for (SortedSet<Integer> currSubComponent : newSubComponents) {
 			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved));
+			/*
 			System.out.println("sub component: " + pos);
 			++pos;
 			for (int mask = 0; mask < resultsSub.get(resultsSub.size() - 1).size(); ++mask) {
@@ -643,6 +672,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					System.out.println("# mines, ways: " + entry.getKey() + " " + entry.getValue().get());
 				}
 			}
+			 */
 		}
 
 		ArrayList<TreeMap<Integer, Integer>> toIndex = new ArrayList<>(newSubComponents.size());
@@ -681,7 +711,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 						continue;
 					}
 					final int currNode = Objects.requireNonNull(gridToIndex.get(RowColToIndex.rowColToIndex(adjI, adjJ, rows, cols)));
-					if ((mask & (1 << toIndexOriginalAfterAddingNewRemoved.get(currNode))) > 0) {
+					if ((mask & (1 << Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(currNode)))) > 0) {
 						++surroundingMineCount;
 					}
 				}
@@ -692,6 +722,27 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			if (!allCluesMatch) {
 				continue;
+			}
+
+			/*
+			 * For mines in removed cells, we only want to count then once in the total # of mines
+			 */
+			int cntDuplicate = 0;
+			for (int bit = 0; bit < removedCellsList.size(); ++bit) {
+				if ((mask & (1 << bit)) == 0) {
+					continue;
+				}
+				final int node = removedCellsList.get(bit);
+				int cntSubContains = 0;
+				for (SortedSet<Integer> currSubComponent : newSubComponents) {
+					if (currSubComponent.contains(node)) {
+						++cntSubContains;
+					}
+				}
+				if (cntSubContains == 0) {
+					throw new Exception("no component contains removed node");
+				}
+				cntDuplicate += cntSubContains - 1;
 			}
 
 			ArrayList<TreeMap<Integer, MutableInt>> prefixMineConfigs = new ArrayList<>(newSubComponents.size() + 1);
@@ -741,12 +792,40 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 			TreeMap<Integer, MutableInt> resultMineConfigs = result.get(currMask).first;
 			TreeMap<Integer, ArrayList<MutableInt>> resultMineProbs = result.get(currMask).second;
+
+			System.out.println("before");
 			for (TreeMap.Entry<Integer, MutableInt> mineConfigs : prefixMineConfigs.get(newSubComponents.size()).entrySet()) {//< ~4 ish
-				if (!resultMineConfigs.containsKey(mineConfigs.getKey())) {
-					resultMineConfigs.put(mineConfigs.getKey(), new MutableInt(0));
+				final int currKey = mineConfigs.getKey() - cntDuplicate;
+				if (!resultMineConfigs.containsKey(currKey)) {
+					resultMineConfigs.put(currKey, new MutableInt(0));
 				}
-				Objects.requireNonNull(resultMineConfigs.get(mineConfigs.getKey())).addWith(mineConfigs.getValue().get());
+				Objects.requireNonNull(resultMineConfigs.get(currKey)).addWith(mineConfigs.getValue().get());
+
+				System.out.println("here, mineConfigs, curr number of mines: " + currKey + " val: " + mineConfigs.getValue().get());
+				for (int subC = 0; subC < newSubComponents.size(); ++subC) {
+					for (int node : newSubComponents.get(subC)) {
+						final int posOrig = Objects.requireNonNull(nodeToIndex.get(node));
+						if (isRemoved[node]) {
+							final int removedNodeIndex = Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(node));
+							if ((mask & (1 << removedNodeIndex)) > 0) {
+								if (!resultMineProbs.containsKey(currKey)) {
+									ArrayList<MutableInt> currArray = new ArrayList<>(subComponent.size());
+									for (int i = 0; i < subComponent.size(); ++i) {
+										currArray.add(new MutableInt(0));
+									}
+									resultMineProbs.put(currKey, currArray);
+								}
+								MutableInt curr = Objects.requireNonNull(resultMineProbs.get(currKey)).get(posOrig);
+								final int I = components.get(componentPos).get(node).first;
+								final int J = components.get(componentPos).get(node).second;
+								System.out.println("adding " + mineConfigs.getValue().get() + " to " + I + " " + J + " subC: " + subC + " ");
+								curr.addWith(mineConfigs.getValue().get());
+							}
+						}
+					}
+				}
 			}
+			System.out.println("after");
 
 
 			TreeMap<Integer, MutableInt> suffixMineConfigs = new TreeMap<>();
@@ -773,16 +852,17 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				//TODO: not sure if it's correct, but try to optimize this with the trick: total ways / curr ways
 				for (TreeMap.Entry<Integer, MutableInt> currPrefixMineConfigs : prefixMineConfigs.get(subC).entrySet()) {
 					for (TreeMap.Entry<Integer, MutableInt> currSuffixMineConfigs : suffixMineConfigs.entrySet()) {
-						for (TreeMap.Entry<Integer, ArrayList<MutableInt>> currMineConfigs : currSubProb.entrySet()) {
-							final int totalMines = currPrefixMineConfigs.getKey() + currSuffixMineConfigs.getKey() + currMineConfigs.getKey();
+						for (TreeMap.Entry<Integer, ArrayList<MutableInt>> currMineProbs : currSubProb.entrySet()) {
+							if (newSubComponents.get(subC).size() != currMineProbs.getValue().size()) {
+								throw new Exception("new sub component size doesn't match currMineProb size");
+							}
+							final int totalMines = currPrefixMineConfigs.getKey() + currSuffixMineConfigs.getKey() + currMineProbs.getKey() - cntDuplicate;
 							final int waysPrefixAndSuffix = currPrefixMineConfigs.getValue().get() * currSuffixMineConfigs.getValue().get();
 							pos = 0;
 							for (int node : newSubComponents.get(subC)) {
-
-
-								final int posOrig = nodeToIndex.get(node);
-
+								final int posOrig = Objects.requireNonNull(nodeToIndex.get(node));
 								if (isRemoved[node]) {
+									/*
 									final int removedNodeIndex = Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(node));
 									if ((mask & (1 << removedNodeIndex)) > 0) {
 										if (!resultMineProbs.containsKey(totalMines)) {
@@ -792,11 +872,14 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 											}
 											resultMineProbs.put(totalMines, currArray);
 										}
+										if(components.get(componentPos).get(node).first == 3 && components.get(componentPos).get(node).second == 3) {
+											System.out.println("here, adding: " + waysPrefixAndSuffix * Objects.requireNonNull(currSubMineConfig.get(currMineProbs.getKey())).get() + " node " + node + " mines: " + totalMines + " subC: " + subC);
+										}
 										MutableInt curr = Objects.requireNonNull(resultMineProbs.get(totalMines)).get(posOrig);
-										curr.addWith(waysPrefixAndSuffix * Objects.requireNonNull(currSubMineConfig.get(currMineConfigs.getKey())).get());
+										curr.addWith(waysPrefixAndSuffix * Objects.requireNonNull(currSubMineConfig.get(currMineProbs.getKey())).get());
 									}
+									 */
 								} else {
-									final int currWays = waysPrefixAndSuffix * currMineConfigs.getValue().get(pos).get();
 									if (!resultMineProbs.containsKey(totalMines)) {
 										ArrayList<MutableInt> currArray = new ArrayList<>(subComponent.size());
 										for (int i = 0; i < subComponent.size(); ++i) {
@@ -804,8 +887,8 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 										}
 										resultMineProbs.put(totalMines, currArray);
 									}
-									MutableInt curr = Objects.requireNonNull(resultMineProbs.get(totalMines)).get(posOrig);
-									curr.addWith(currWays);
+									final int currWays = waysPrefixAndSuffix * currMineProbs.getValue().get(pos).get();
+									Objects.requireNonNull(resultMineProbs.get(totalMines)).get(posOrig).addWith(currWays);
 								}
 								++pos;
 							}
@@ -835,12 +918,12 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			isRemoved[removedCellsList.get(i)] = false;
 		}
 
+		/*
 		System.out.println("here, returning first: " + result.size());
-
-		//ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result = new ArrayList<>(1 << startNumRemoved);
 		for (TreeMap.Entry<Integer, MutableInt> entry : result.get(0).first.entrySet()) {
 			System.out.println("# mines: " + entry.getKey() + " # configs: " + entry.getValue().get());
 		}
+		 */
 
 		return result;
 	}
@@ -863,14 +946,17 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 		solveComponentWithBacktracking(0, allNodes, toIndexOriginal, result, componentPos, currIterations, currNumberOfMines);
 
-		/*
-		System.out.println("here555555, returning first: " + result.size());
-		for(TreeMap.Entry<Integer, MutableInt> entry : result.get(0).first.entrySet()) {
-			System.out.println("# mines: " + entry.getKey() + " # configs: " + entry.getValue().get());
+		System.out.println("here555555, returning second: " + result.size() + " " + componentPos);
+		for (int mask = 0; mask < result.size(); ++mask) {
+			System.out.println("mask: " + mask);
+			for (TreeMap.Entry<Integer, ArrayList<MutableInt>> entry : result.get(mask).second.entrySet()) {
+				System.out.println("# mines: " + entry.getKey());
+				for (MutableInt val : entry.getValue()) {
+					System.out.print(val.get() + " ");
+				}
+				System.out.println();
+			}
 		}
-		 */
-
-
 		return result;
 	}
 
@@ -960,7 +1046,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				}
 			}
 			if (!foundAll) {
-				System.out.println("skipping component: " + componentPos + " clue: " + adjI + " " + adjJ);
 				continue;
 			}
 

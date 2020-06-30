@@ -7,10 +7,10 @@ public class HolyGrailSolver implements BacktrackingSolver {
 	private final VisibleTileWithProbability[][] tempBoardWithProbability;
 	private final int rows, cols;
 
-	public HolyGrailSolver(int rows, int cols, boolean performCheckPositionValidity) {
+	public HolyGrailSolver(int rows, int cols) {
 		this.rows = rows;
 		this.cols = cols;
-		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols, performCheckPositionValidity);
+		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
 		tempBoardWithProbability = new VisibleTileWithProbability[rows][cols];
 	}

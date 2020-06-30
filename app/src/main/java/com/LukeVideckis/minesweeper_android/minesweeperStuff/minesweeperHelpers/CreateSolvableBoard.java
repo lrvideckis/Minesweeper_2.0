@@ -22,7 +22,7 @@ public class CreateSolvableBoard {
 	private final BacktrackingSolver myBacktrackingSolver;
 
 	public CreateSolvableBoard(int rows, int cols, int mines) {
-		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols, false);
+		myBacktrackingSolver = new MyBacktrackingSolver(rows, cols);
 		gaussSolver = new GaussianEliminationSolver(rows, cols);
 		board = new VisibleTile[rows][cols];
 		for (int i = 0; i < rows; ++i) {

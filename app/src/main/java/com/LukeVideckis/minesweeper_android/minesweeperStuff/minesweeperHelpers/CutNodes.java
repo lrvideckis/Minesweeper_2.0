@@ -17,11 +17,11 @@ public class CutNodes {
 		this.isRemoved = isRemoved;
 
 		//initialize variables for finding cut nodes
-		minTime = new int[nodes.size()];
-		timeIn = new int[nodes.size()];
-		visited = new boolean[nodes.size()];
-		for (int i = 0; i < nodes.size(); ++i) {
-			minTime[i] = timeIn[i] = nodes.size() + 10;
+		minTime = new int[isRemoved.length];
+		timeIn = new int[isRemoved.length];
+		visited = new boolean[isRemoved.length];
+		for (int i = 0; i < isRemoved.length; ++i) {
+			minTime[i] = timeIn[i] = isRemoved.length + 10;
 			visited[i] = false;
 		}
 		currTime = new MutableInt(0);

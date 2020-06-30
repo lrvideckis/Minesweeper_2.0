@@ -85,7 +85,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		holyGrailSolver = new HolyGrailSolver(numberOfRows, numberOfCols, false);
+		holyGrailSolver = new HolyGrailSolver(numberOfRows, numberOfCols);
 		board = new VisibleTileWithProbability[numberOfRows][numberOfCols];
 		for (int i = 0; i < numberOfRows; ++i) {
 			for (int j = 0; j < numberOfCols; ++j) {

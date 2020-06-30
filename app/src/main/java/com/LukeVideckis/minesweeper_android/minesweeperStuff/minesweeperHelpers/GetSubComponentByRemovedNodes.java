@@ -16,8 +16,8 @@ public class GetSubComponentByRemovedNodes {
 		this.nodes = nodes;
 		this.adjList = adjList;
 		this.isRemoved = isRemoved;
-		visited = new boolean[nodes.size()];
-		for (int i = 0; i < nodes.size(); ++i) {
+		visited = new boolean[isRemoved.length];
+		for (int i = 0; i < isRemoved.length; ++i) {
 			visited[i] = false;
 		}
 	}
@@ -34,7 +34,7 @@ public class GetSubComponentByRemovedNodes {
 		if (visited[startNode]) {
 			return Collections.unmodifiableSortedSet(component);
 		}
-		dfs(startNode, component);
+		dfs(startNode, component, nodes);
 		for (int node : component) {
 			if (isRemoved[node]) {
 				visited[node] = false;
@@ -43,15 +43,15 @@ public class GetSubComponentByRemovedNodes {
 		return Collections.unmodifiableSortedSet(component);
 	}
 
-	private void dfs(final int node, TreeSet<Integer> component) {
+	private void dfs(final int node, TreeSet<Integer> component, SortedSet<Integer> nodes) {
 		component.add(node);
 		visited[node] = true;
 		if (isRemoved[node]) {
 			return;
 		}
 		for (int to : adjList.get(node)) {
-			if (!visited[to]) {
-				dfs(to, component);
+			if (nodes.contains(to) && !visited[to]) {
+				dfs(to, component, nodes);
 			}
 		}
 	}
