@@ -28,6 +28,18 @@ public class Test {
 
 	private final static String[][] previousFailedBoards = {
 
+			//grid which causes cut nodes dfs to add multiple cut nodes to the list of cut nodes
+			{
+					"UU1..1U",
+					"2U1112U",
+					"1111U21",
+					"1U123UU",
+					"U11UUUU",
+
+					"8",
+			},
+
+			//cut node not next to any sub component
 			{
 					"..1UU",
 					"..1U1",
@@ -41,6 +53,7 @@ public class Test {
 					"6"
 			},
 
+			//cut node next to >1 sub components
 			{
 					"UU1..",
 					"UU1..",
@@ -51,6 +64,7 @@ public class Test {
 					"6"
 			},
 
+			//initial failing case for new recursive alg with cut nodes
 			{
 					"U1......",
 					"U211111.",

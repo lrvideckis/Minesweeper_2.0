@@ -2,6 +2,7 @@ package com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers
 
 import java.util.ArrayList;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class CutNodes {
 	final MutableInt currTime;
@@ -31,14 +32,14 @@ public class CutNodes {
 	//when calling this multiple times on the same component, this will only give correct results the first time
 	//this is because I don't re-initialize the member variables for finding cut nodes
 	//this returns an empty ArrayList when called more than once on the same component
-	public ArrayList<Integer> getCutNodes(int startNode) throws Exception {
+	public TreeSet<Integer> getCutNodes(int startNode) throws Exception {
 		if (isRemoved[startNode]) {
 			throw new Exception("start node is removed");
 		}
 		if (!nodes.contains(startNode)) {
 			throw new Exception("start node isn't in list of nodes");
 		}
-		ArrayList<Integer> allCutNodes = new ArrayList<>();
+		TreeSet<Integer> allCutNodes = new TreeSet<>();
 		if (visited[startNode]) {
 			return allCutNodes;
 		}
@@ -52,7 +53,7 @@ public class CutNodes {
 		return allCutNodes;
 	}
 
-	private void dfsCutNodes(final int node, final int prev, ArrayList<Integer> allCutNodes, SortedSet<Integer> component) throws Exception {
+	private void dfsCutNodes(final int node, final int prev, TreeSet<Integer> allCutNodes, SortedSet<Integer> component) throws Exception {
 		if (!component.contains(node)) {
 			throw new Exception("component doesn't contain node");
 		}
