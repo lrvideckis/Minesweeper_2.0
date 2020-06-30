@@ -525,7 +525,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
 		}
 
-		System.out.println("here, trying to split by cut nodes");
+		//System.out.println("here, trying to split by cut nodes");
 
 		//find split cells
 		//1st try: find articulation nodes
@@ -555,10 +555,10 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		//3rd try: find pairs of edges
 		//4th try: approximation algorithm
 
-		CreateSolvableBoard.printBoardDebug(board);
+		//CreateSolvableBoard.printBoardDebug(board);
 
 		for (int node : allCutNodes) {
-			System.out.println("cut node: " + components.get(componentPos).get(node).first + " " + components.get(componentPos).get(node).second);
+			//System.out.println("cut node: " + components.get(componentPos).get(node).first + " " + components.get(componentPos).get(node).second);
 			if (removedCellsList.size() < maxNumberOfRemovedCells) {
 				removedCellsList.add(node);
 				if (isRemoved[node]) {
@@ -650,7 +650,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					}
 				}
 				if (allNeighborsAreRemoved) {
-					System.out.println("here, clue with all removed neighbors: " + adj[0] + " " + adj[1]);
+					//System.out.println("here, clue with all removed neighbors: " + adj[0] + " " + adj[1]);
 					cluesWithAllRemovedNeighbors.add(RowColToIndex.rowColToIndex(adj[0], adj[1], rows, cols));
 				}
 			}
@@ -793,7 +793,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			TreeMap<Integer, MutableInt> resultMineConfigs = result.get(currMask).first;
 			TreeMap<Integer, ArrayList<MutableInt>> resultMineProbs = result.get(currMask).second;
 
-			System.out.println("before");
+			//System.out.println("before");
 			for (TreeMap.Entry<Integer, MutableInt> mineConfigs : prefixMineConfigs.get(newSubComponents.size()).entrySet()) {//< ~4 ish
 				final int currKey = mineConfigs.getKey() - cntDuplicate;
 				if (!resultMineConfigs.containsKey(currKey)) {
@@ -801,9 +801,13 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				}
 				Objects.requireNonNull(resultMineConfigs.get(currKey)).addWith(mineConfigs.getValue().get());
 
-				System.out.println("here, mineConfigs, curr number of mines: " + currKey + " val: " + mineConfigs.getValue().get());
+				//System.out.println("here, mineConfigs, curr number of mines: " + currKey + " val: " + mineConfigs.getValue().get());
+				TreeSet<Integer> alreadyAddedToNode = new TreeSet<>();
 				for (int subC = 0; subC < newSubComponents.size(); ++subC) {
 					for (int node : newSubComponents.get(subC)) {
+						if (alreadyAddedToNode.contains(node)) {
+							continue;
+						}
 						final int posOrig = Objects.requireNonNull(nodeToIndex.get(node));
 						if (isRemoved[node]) {
 							final int removedNodeIndex = Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(node));
@@ -818,14 +822,15 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 								MutableInt curr = Objects.requireNonNull(resultMineProbs.get(currKey)).get(posOrig);
 								final int I = components.get(componentPos).get(node).first;
 								final int J = components.get(componentPos).get(node).second;
-								System.out.println("adding " + mineConfigs.getValue().get() + " to " + I + " " + J + " subC: " + subC + " ");
+								//System.out.println("adding " + mineConfigs.getValue().get() + " to " + I + " " + J + " subC: " + subC + " ");
 								curr.addWith(mineConfigs.getValue().get());
+								alreadyAddedToNode.add(node);
 							}
 						}
 					}
 				}
 			}
-			System.out.println("after");
+			//System.out.println("after");
 
 
 			TreeMap<Integer, MutableInt> suffixMineConfigs = new TreeMap<>();
@@ -946,6 +951,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 		solveComponentWithBacktracking(0, allNodes, toIndexOriginal, result, componentPos, currIterations, currNumberOfMines);
 
+		/*
 		System.out.println("here555555, returning second: " + result.size() + " " + componentPos);
 		for (int mask = 0; mask < result.size(); ++mask) {
 			System.out.println("mask: " + mask);
@@ -957,6 +963,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				System.out.println();
 			}
 		}
+		 */
 		return result;
 	}
 
