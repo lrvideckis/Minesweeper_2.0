@@ -473,15 +473,12 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			mineConfig.get(i).putAll(result.get(0).first);
 			mineProbPerCompPerNumMines.get(i).putAll(result.get(0).second);
-			/*
-			for (int j = 0; j < mineProbPerCompPerNumMines.get(i).size(); ++j) {
-				System.out.println("here, cell is: " + components.get(i).get(j).first + " " + components.get(i).get(j).second);
-				if (components.get(i).get(j).first == 3 && components.get(i).get(j).second == 3) {
-					for (int mines = 2; mines <= 3; ++mines) {
-						System.out.println("here 666666, mine prob: " + mineProbPerCompPerNumMines.get(i).get(mines).get(j).get());
-					}
-				}
+			System.out.println("here, component: " + i + "# mines, # configs");
+			for (TreeMap.Entry<Integer, MutableInt> entry : mineConfig.get(i).entrySet()) {
+				System.out.println(entry.getKey() + " " + entry.getValue().get());
 			}
+
+			/*
 			System.out.println("here, end, second is:");
 			for(TreeMap.Entry<Integer,ArrayList<MutableInt>> entry : result.get(0).second.entrySet()) {
 				System.out.println("# mines is: " + entry.getKey());
@@ -543,22 +540,29 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 
-		/*
 		System.out.println("cut nodes:");
-		for(int node : allCutNodes) {
+		for (int node : allCutNodes) {
 			System.out.println(components.get(componentPos).get(node).first + " " + components.get(componentPos).get(node).second);
 		}
-		 */
 
+		/*
+				..1UU
+				..1C1
+				..111
+				..1C2
+				..1CB
+				..13U
+				111CU
+				UC1UU
+		 */
 		//TODO: these
 		//2nd try: find pairs of articulation nodes
 		//3rd try: find pairs of edges
 		//4th try: approximation algorithm
 
-		//CreateSolvableBoard.printBoardDebug(board);
+		CreateSolvableBoard.printBoardDebug(board);
 
 		for (int node : allCutNodes) {
-			//System.out.println("cut node: " + components.get(componentPos).get(node).first + " " + components.get(componentPos).get(node).second);
 			if (removedCellsList.size() < maxNumberOfRemovedCells) {
 				removedCellsList.add(node);
 				if (isRemoved[node]) {
@@ -578,18 +582,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			if (currSubComponent.isEmpty()) {
 				continue;
 			}
-			/*
-			System.out.println("here, new sub component: ");
-			for (int i : currSubComponent) {
-				System.out.println(components.get(componentPos).get(i).first + " " + components.get(componentPos).get(i).second);
-			}
-			System.out.println("and removed nodes are:");
-			for (int i : currSubComponent) {
-				if (isRemoved[i]) {
-					System.out.println(components.get(componentPos).get(i).first + " " + components.get(componentPos).get(i).second);
-				}
-			}
-			 */
 			newSubComponents.add(currSubComponent);
 		}
 
@@ -644,7 +636,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					if (board[adjI][adjJ].isVisible) {
 						throw new Exception("every node in subComponent should be non-visible, but this node is visible");
 					}
-					if (!isRemoved[gridToIndex.get(currKey)]) {
+					if (!isRemoved[Objects.requireNonNull(gridToIndex.get(currKey))]) {
 						allNeighborsAreRemoved = false;
 						break;
 					}
@@ -660,19 +652,8 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 		//recursing on new sub components
 		ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub = new ArrayList<>();
-		//pos = 0;
 		for (SortedSet<Integer> currSubComponent : newSubComponents) {
 			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved));
-			/*
-			System.out.println("sub component: " + pos);
-			++pos;
-			for (int mask = 0; mask < resultsSub.get(resultsSub.size() - 1).size(); ++mask) {
-				System.out.println("mask: " + mask);
-				for (TreeMap.Entry<Integer, MutableInt> entry : resultsSub.get(resultsSub.size() - 1).get(mask).first.entrySet()) {
-					System.out.println("# mines, ways: " + entry.getKey() + " " + entry.getValue().get());
-				}
-			}
-			 */
 		}
 
 		ArrayList<TreeMap<Integer, Integer>> toIndex = new ArrayList<>(newSubComponents.size());
@@ -739,10 +720,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 						++cntSubContains;
 					}
 				}
-				if (cntSubContains == 0) {
-					throw new Exception("no component contains removed node");
-				}
-				cntDuplicate += cntSubContains - 1;
+				cntDuplicate += Math.max(0, cntSubContains - 1);
 			}
 
 			ArrayList<TreeMap<Integer, MutableInt>> prefixMineConfigs = new ArrayList<>(newSubComponents.size() + 1);
@@ -793,7 +771,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			TreeMap<Integer, MutableInt> resultMineConfigs = result.get(currMask).first;
 			TreeMap<Integer, ArrayList<MutableInt>> resultMineProbs = result.get(currMask).second;
 
-			//System.out.println("before");
 			for (TreeMap.Entry<Integer, MutableInt> mineConfigs : prefixMineConfigs.get(newSubComponents.size()).entrySet()) {//< ~4 ish
 				final int currKey = mineConfigs.getKey() - cntDuplicate;
 				if (!resultMineConfigs.containsKey(currKey)) {
@@ -801,37 +778,25 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				}
 				Objects.requireNonNull(resultMineConfigs.get(currKey)).addWith(mineConfigs.getValue().get());
 
-				//System.out.println("here, mineConfigs, curr number of mines: " + currKey + " val: " + mineConfigs.getValue().get());
-				TreeSet<Integer> alreadyAddedToNode = new TreeSet<>();
-				for (int subC = 0; subC < newSubComponents.size(); ++subC) {
-					for (int node : newSubComponents.get(subC)) {
-						if (alreadyAddedToNode.contains(node)) {
-							continue;
-						}
-						final int posOrig = Objects.requireNonNull(nodeToIndex.get(node));
-						if (isRemoved[node]) {
-							final int removedNodeIndex = Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(node));
-							if ((mask & (1 << removedNodeIndex)) > 0) {
-								if (!resultMineProbs.containsKey(currKey)) {
-									ArrayList<MutableInt> currArray = new ArrayList<>(subComponent.size());
-									for (int i = 0; i < subComponent.size(); ++i) {
-										currArray.add(new MutableInt(0));
-									}
-									resultMineProbs.put(currKey, currArray);
+				pos = 0;
+				for (int node : subComponent) {
+					if (isRemoved[node]) {
+						final int removedNodeIndex = Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(node));
+						if ((mask & (1 << removedNodeIndex)) > 0) {
+							if (!resultMineProbs.containsKey(currKey)) {
+								ArrayList<MutableInt> currArray = new ArrayList<>(subComponent.size());
+								for (int i = 0; i < subComponent.size(); ++i) {
+									currArray.add(new MutableInt(0));
 								}
-								MutableInt curr = Objects.requireNonNull(resultMineProbs.get(currKey)).get(posOrig);
-								final int I = components.get(componentPos).get(node).first;
-								final int J = components.get(componentPos).get(node).second;
-								//System.out.println("adding " + mineConfigs.getValue().get() + " to " + I + " " + J + " subC: " + subC + " ");
-								curr.addWith(mineConfigs.getValue().get());
-								alreadyAddedToNode.add(node);
+								resultMineProbs.put(currKey, currArray);
 							}
+							MutableInt curr = Objects.requireNonNull(resultMineProbs.get(currKey)).get(pos);
+							curr.addWith(mineConfigs.getValue().get());
 						}
 					}
+					++pos;
 				}
 			}
-			//System.out.println("after");
-
 
 			TreeMap<Integer, MutableInt> suffixMineConfigs = new TreeMap<>();
 			suffixMineConfigs.put(0, new MutableInt(1));
@@ -866,25 +831,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 							pos = 0;
 							for (int node : newSubComponents.get(subC)) {
 								final int posOrig = Objects.requireNonNull(nodeToIndex.get(node));
-								if (isRemoved[node]) {
-									/*
-									final int removedNodeIndex = Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(node));
-									if ((mask & (1 << removedNodeIndex)) > 0) {
-										if (!resultMineProbs.containsKey(totalMines)) {
-											ArrayList<MutableInt> currArray = new ArrayList<>(subComponent.size());
-											for (int i = 0; i < subComponent.size(); ++i) {
-												currArray.add(new MutableInt(0));
-											}
-											resultMineProbs.put(totalMines, currArray);
-										}
-										if(components.get(componentPos).get(node).first == 3 && components.get(componentPos).get(node).second == 3) {
-											System.out.println("here, adding: " + waysPrefixAndSuffix * Objects.requireNonNull(currSubMineConfig.get(currMineProbs.getKey())).get() + " node " + node + " mines: " + totalMines + " subC: " + subC);
-										}
-										MutableInt curr = Objects.requireNonNull(resultMineProbs.get(totalMines)).get(posOrig);
-										curr.addWith(waysPrefixAndSuffix * Objects.requireNonNull(currSubMineConfig.get(currMineProbs.getKey())).get());
-									}
-									 */
-								} else {
+								if (!isRemoved[node]) {
 									if (!resultMineProbs.containsKey(totalMines)) {
 										ArrayList<MutableInt> currArray = new ArrayList<>(subComponent.size());
 										for (int i = 0; i < subComponent.size(); ++i) {
@@ -952,15 +899,12 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		solveComponentWithBacktracking(0, allNodes, toIndexOriginal, result, componentPos, currIterations, currNumberOfMines);
 
 		/*
-		System.out.println("here555555, returning second: " + result.size() + " " + componentPos);
+		System.out.println("here555555, returning first: " + result.size() + " " + componentPos);
 		for (int mask = 0; mask < result.size(); ++mask) {
 			System.out.println("mask: " + mask);
-			for (TreeMap.Entry<Integer, ArrayList<MutableInt>> entry : result.get(mask).second.entrySet()) {
-				System.out.println("# mines: " + entry.getKey());
-				for (MutableInt val : entry.getValue()) {
-					System.out.print(val.get() + " ");
-				}
-				System.out.println();
+			System.out.println("# mines, # configs");
+			for (TreeMap.Entry<Integer, MutableInt> entry : result.get(mask).first.entrySet()) {
+				System.out.println(entry.getKey() + " " + entry.getValue().get());
 			}
 		}
 		 */

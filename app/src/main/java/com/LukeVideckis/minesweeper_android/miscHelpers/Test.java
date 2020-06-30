@@ -29,6 +29,19 @@ public class Test {
 	private final static String[][] previousFailedBoards = {
 
 			{
+					"..1UU",
+					"..1U1",
+					"..111",
+					"..1U2",
+					"..1UU",
+					"..13U",
+					"111UU",
+					"UU1UU",
+
+					"6"
+			},
+
+			{
 					"UU1..",
 					"UU1..",
 					"UU321",
