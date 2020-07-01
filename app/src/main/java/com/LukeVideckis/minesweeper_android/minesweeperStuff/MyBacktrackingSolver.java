@@ -581,8 +581,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			ArrayList<Integer> removedCellsList,
 			ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub
 	) throws Exception {
-
-
 		TreeMap<Integer, Integer> toIndexOriginalAfterAddingNewRemoved = new TreeMap<>();
 		int pos = 0;
 		for (int node : subComponent) {
@@ -602,7 +600,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			gridToNode.put(RowColToIndex.rowColToIndex(i, j, rows, cols), node);
 			++pos;
 		}
-
 
 		TreeSet<Integer> cluesWithAllRemovedNeighbors = new TreeSet<>();
 		for (int node : subComponent) {
@@ -653,7 +650,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 		//combine results
 		final int pow2 = (1 << removedCellsList.size());
-		for (int mask = 0; mask < pow2; ++mask) {//<512
+		for (int mask = 0; mask < pow2; ++mask) {//<32
 			/*
 			 * there could be some clues which are next to **only** removed cells
 			 * for these clues, we need to check that they are satisfied
