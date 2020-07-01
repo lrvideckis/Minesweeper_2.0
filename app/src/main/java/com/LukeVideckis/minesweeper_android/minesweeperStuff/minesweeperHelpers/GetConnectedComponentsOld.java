@@ -2,8 +2,6 @@ package com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers
 
 import android.util.Pair;
 
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver;
-
 import java.util.ArrayList;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver.VisibleTile;
@@ -13,7 +11,7 @@ public class GetConnectedComponentsOld {
 
 	private static int rows, cols;
 
-	public static ArrayList<ArrayList<Pair<Integer, Integer>>> getComponentsWithKnownCellsOld(MinesweeperSolver.VisibleTile[][] board) throws Exception {
+	public static ArrayList<ArrayList<Pair<Integer, Integer>>> getComponentsWithKnownCellsOld(VisibleTile[][] board) throws Exception {
 		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
 		rows = dimensions.first;
 		cols = dimensions.second;
@@ -26,7 +24,7 @@ public class GetConnectedComponentsOld {
 				}
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];
-					MinesweeperSolver.VisibleTile adjTile = board[adjI][adjJ];
+					VisibleTile adjTile = board[adjI][adjJ];
 					if (adjTile.getIsVisible() || adjTile.getIsLogicalMine() || adjTile.getIsLogicalFree()) {
 						continue;
 					}
@@ -48,29 +46,6 @@ public class GetConnectedComponentsOld {
 			}
 		}
 		return components;
-	}
-
-	public static Dsu getDsuOfComponentsWithKnownMines(VisibleTile[][] board) throws Exception {
-		Pair<Integer, Integer> dimensions = ArrayBounds.getArrayBounds(board);
-		rows = dimensions.first;
-		cols = dimensions.second;
-		Dsu disjointSet = new Dsu(rows * cols);
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (!board[i][j].getIsVisible()) {
-					continue;
-				}
-				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
-					final int adjI = adj[0], adjJ = adj[1];
-					VisibleTile adjTile = board[adjI][adjJ];
-					if (adjTile.getIsVisible() || adjTile.getIsLogicalMine()) {
-						continue;
-					}
-					disjointSet.merge(RowColToIndex.rowColToIndex(i, j, rows, cols), RowColToIndex.rowColToIndex(adjI, adjJ, rows, cols));
-				}
-			}
-		}
-		return disjointSet;
 	}
 
 	private static void dfs(
@@ -108,6 +83,4 @@ public class GetConnectedComponentsOld {
 			}
 		}
 	}
-
-
 }

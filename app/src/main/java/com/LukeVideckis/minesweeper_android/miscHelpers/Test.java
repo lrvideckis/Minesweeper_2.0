@@ -11,6 +11,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.HolyGrailSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolver;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.OldBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.SlowBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
@@ -27,6 +28,20 @@ public class Test {
 	@SuppressWarnings("SpellCheckingInspection")
 
 	private final static String[][] previousFailedBoards = {
+
+			//first failing test: new recursive solver thingy compared to old fast backtracking solver
+			{
+					"U1.1UU",
+					"U1.1UU",
+					"11.13U",
+					"U1.1UU",
+					"U112UU",
+					"233U4U",
+					"UUUUUU",
+					"UUUUUU",
+
+					"18"
+			},
 
 			{
 					"B1112B112B2BB21..12B22UUUU",
@@ -274,10 +289,9 @@ public class Test {
 			final int rows = stringBoard.length - 1;
 			final int cols = stringBoard[0].length();
 			final int mines = Integer.parseInt(stringBoard[stringBoard.length - 1]);
-			VisibleTileWithProbability[][] boardFast;
-			VisibleTileWithProbability[][] boardSlow;
-			boardFast = convertFormat(stringBoard);
-			boardSlow = convertFormat(stringBoard);
+			VisibleTileWithProbability[][] boardFast = convertFormat(stringBoard);
+			VisibleTileWithProbability[][] boardOld = convertFormat(stringBoard);
+			VisibleTileWithProbability[][] boardSlow = convertFormat(stringBoard);
 			Pair<Integer, Integer> dimensions;
 			dimensions = ArrayBounds.getArrayBounds(boardFast);
 			if (rows != dimensions.first || cols != dimensions.second) {
@@ -286,6 +300,7 @@ public class Test {
 			}
 
 			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
+			OldBacktrackingSolver oldBacktrackingSolver = new OldBacktrackingSolver(rows, cols);
 			BacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
 
 			try {
@@ -294,6 +309,18 @@ public class Test {
 				System.out.println("no solution found, void test");
 				continue;
 			}
+
+			try {
+				oldBacktrackingSolver.solvePosition(boardOld, mines);
+				if (areBoardsDifferent(boardFast, boardOld, mines)) {
+					return;
+				}
+			} catch (HitIterationLimitException ignored) {
+				System.out.println("OLD backtracking solver hit iteration limit, void test");
+				continue;
+			}
+
+
 			try {
 				slowBacktrackingSolver.solvePosition(boardSlow, mines);
 			} catch (NoSolutionFoundException ignored) {
@@ -305,6 +332,11 @@ public class Test {
 			}
 			if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 				return;
+			}
+
+			//sanity check
+			if (areBoardsDifferent(boardSlow, boardOld, mines)) {
+				throw new Exception("boardFast == boardOld && boardFast == boardSlow && boardSlow != boardOld");
 			}
 		}
 		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
@@ -337,7 +369,7 @@ public class Test {
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			int numberOfClicks = MyMath.getRand(0, 4);
-			while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
+			while ((numberOfClicks--) > 0 && !minesweeperGame.getIsGameLost()) {
 				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 			}
 			if (minesweeperGame.getIsGameLost()) {
@@ -394,18 +426,17 @@ public class Test {
 	public static void performTestsForMineProbabilityLargeBoards(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			final int rows = MyMath.getRand(10, 40);
-			final int cols = MyMath.getRand(10, 40);
-			int mines = (int) (rows * cols * 0.30);
-			mines = Math.min(mines, rows * cols - 9);
+			final int rows = MyMath.getRand(10, 10);
+			final int cols = MyMath.getRand(10, 10);
+			int mines = Math.min((int) (rows * cols * 0.30), rows * cols - 9);
 
 			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
-			BacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+			OldBacktrackingSolver oldBacktrackingSolver = new OldBacktrackingSolver(rows, cols);
 
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
 			int numberOfClicks = MyMath.getRand(0, 4);
-			while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
+			while ((numberOfClicks--) > 0 && !minesweeperGame.getIsGameLost()) {
 				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 			}
 			if (minesweeperGame.getIsGameLost()) {
@@ -419,7 +450,7 @@ public class Test {
 					return;
 				}
 				VisibleTileWithProbability[][] boardFast = convertToNewBoard(minesweeperGame);
-				VisibleTileWithProbability[][] boardSlow = convertToNewBoard(minesweeperGame);
+				VisibleTileWithProbability[][] boardOld = convertToNewBoard(minesweeperGame);
 
 				CreateSolvableBoard.printBoardDebug(boardFast, mines);
 
@@ -430,12 +461,12 @@ public class Test {
 					break;
 				}
 				try {
-					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
+					oldBacktrackingSolver.solvePosition(boardOld, minesweeperGame.getNumberOfMines());
 				} catch (HitIterationLimitException ignored) {
-					System.out.println("slow solver hit iteration limit, void test");
+					System.out.println("old solver hit iteration limit, void test");
 					break;
 				}
-				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
+				if (areBoardsDifferent(boardFast, boardOld, mines)) {
 					return;
 				}
 				boolean clickedFree = false;

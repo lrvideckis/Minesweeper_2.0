@@ -30,12 +30,11 @@ public class OldBacktrackingSolver implements BacktrackingSolver {
 	private final ArrayList<TreeMap<Integer, ArrayList<MutableInt>>> mineProbPerCompPerNumMines = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
 	private final VisibleTileWithProbability[][] tempBoardWithProbability;
-	private final boolean performCheckPositionValidity;
 	private int numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
 
-	public OldBacktrackingSolver(int rows, int cols, boolean performCheckPositionValidity) {
+	public OldBacktrackingSolver(int rows, int cols) {
 		this.rows = rows;
 		this.cols = cols;
 		isMine = new boolean[rows][cols];
@@ -51,7 +50,6 @@ public class OldBacktrackingSolver implements BacktrackingSolver {
 			}
 			lastUnvisitedSpot.add(currRow);
 		}
-		this.performCheckPositionValidity = performCheckPositionValidity;
 	}
 
 	@Override
@@ -515,9 +513,7 @@ public class OldBacktrackingSolver implements BacktrackingSolver {
 
 	private void handleSolution(int componentPos, int currNumberOfMines) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
-		if (performCheckPositionValidity) {
-			checkPositionValidity(component, currNumberOfMines);
-		}
+		checkPositionValidity(component, currNumberOfMines);
 
 		MutableInt count = mineConfig.get(componentPos).get(currNumberOfMines);
 		if (count == null) {

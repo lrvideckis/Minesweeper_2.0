@@ -40,9 +40,9 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		try {
-			//Test.testPreviouslyFailedBoards();
+			Test.testPreviouslyFailedBoards();
 			//Test.performTestsForMineProbability(20);
-			Test.performTestsForMineProbabilityLargeBoards(20);
+			//Test.performTestsForMineProbabilityLargeBoards(20);
 			/*
 			Test.performTestsForGaussSolver(20);
 			Test.performTestsMultipleRunsOfSameBoard(10);
