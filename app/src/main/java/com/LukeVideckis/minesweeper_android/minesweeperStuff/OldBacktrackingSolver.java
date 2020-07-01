@@ -30,6 +30,7 @@ public class OldBacktrackingSolver implements BacktrackingSolver {
 	private final ArrayList<TreeMap<Integer, ArrayList<MutableInt>>> mineProbPerCompPerNumMines = new ArrayList<>();
 	private final ArrayList<TreeMap<Integer, TreeMap<Integer, BigFraction>>> numberOfConfigsForCurrent = new ArrayList<>();
 	private final VisibleTileWithProbability[][] tempBoardWithProbability;
+	private final GaussianEliminationSolver gaussianEliminationSolver;
 	private int numberOfMines;
 	private VisibleTile[][] board;
 	private ArrayList<ArrayList<Pair<Integer, Integer>>> components;
@@ -50,6 +51,7 @@ public class OldBacktrackingSolver implements BacktrackingSolver {
 			}
 			lastUnvisitedSpot.add(currRow);
 		}
+		gaussianEliminationSolver = new GaussianEliminationSolver(rows, cols);
 	}
 
 	@Override
@@ -79,6 +81,8 @@ public class OldBacktrackingSolver implements BacktrackingSolver {
 			}
 			return;
 		}
+
+		gaussianEliminationSolver.solvePosition(board, numberOfMines);
 
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -435,6 +439,11 @@ public class OldBacktrackingSolver implements BacktrackingSolver {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfMines);
+
+			System.out.println("component " + i);
+			for (TreeMap.Entry<Integer, MutableInt> entry : mineConfig.get(i).entrySet()) {
+				System.out.println("# mines, # configs: " + entry.getKey() + " " + entry.getValue().get());
+			}
 		}
 	}
 

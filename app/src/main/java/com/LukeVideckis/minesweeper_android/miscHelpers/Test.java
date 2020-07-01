@@ -14,7 +14,6 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolve
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.OldBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.SlowBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
