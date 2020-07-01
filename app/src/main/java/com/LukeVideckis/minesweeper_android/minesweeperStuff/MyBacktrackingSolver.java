@@ -519,18 +519,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 
-		GetSubComponentByRemovedNodes getSubComponentByRemovedNodes = new GetSubComponentByRemovedNodes(subComponent, adjList.get(componentPos), isRemoved);
-		ArrayList<SortedSet<Integer>> newSubComponents = new ArrayList<>();
-		for (int node : subComponent) {
-			if (isRemoved[node]) {
-				continue;
-			}
-			SortedSet<Integer> currSubComponent = getSubComponentByRemovedNodes.getSubComponent(node);
-			if (currSubComponent.isEmpty()) {
-				continue;
-			}
-			newSubComponents.add(currSubComponent);
-		}
+		ArrayList<SortedSet<Integer>> newSubComponents = GetSubComponentByRemovedNodes.getSubComponentByRemovedNodes(subComponent, adjList.get(componentPos), isRemoved);
 
 		if (newSubComponents.isEmpty()) {
 			throw new Exception("there should be at least 1 sub component");

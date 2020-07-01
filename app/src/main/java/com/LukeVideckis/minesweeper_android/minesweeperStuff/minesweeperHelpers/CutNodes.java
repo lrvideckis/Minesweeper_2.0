@@ -15,20 +15,25 @@ public class CutNodes {
 			visited[i] = false;
 		}
 		final MutableInt currTime = new MutableInt(0);
-		final GetSubComponentByRemovedNodes getSubComponentByRemovedNodes = new GetSubComponentByRemovedNodes(nodes, adjList, isRemoved);
 		TreeSet<Integer> allCutNodes = new TreeSet<>();
-		for (int node : nodes) {
-			if (isRemoved[node]) {
-				continue;
+		for (SortedSet<Integer> component : GetSubComponentByRemovedNodes.getSubComponentByRemovedNodes(nodes, adjList, isRemoved)) {
+			Integer startNode = null;
+			for(int node : component) {
+				if(!isRemoved[node]) {
+					startNode = node;
+					break;
+				}
 			}
-			for (int currCutNode : getCutNodesForASingleComponent(node, nodes, adjList, isRemoved, visited, timeIn, minTime, currTime, getSubComponentByRemovedNodes)) {
+			if(startNode == null) {
+				throw new Exception("each component should have at least 1 non-removed node");
+			}
+			for (int currCutNode : getCutNodesForASingleComponent(startNode, nodes, adjList, isRemoved, visited, timeIn, minTime, currTime, component)) {
 				if (allCutNodes.contains(currCutNode)) {
 					throw new Exception("duplicate cut node");
 				}
 				allCutNodes.add(currCutNode);
 			}
 		}
-
 		return allCutNodes;
 	}
 
@@ -44,7 +49,7 @@ public class CutNodes {
 			int[] timeIn,
 			int[] minTime,
 			MutableInt currTime,
-			GetSubComponentByRemovedNodes getSubComponentByRemovedNodes
+			SortedSet<Integer> component
 	) throws Exception {
 		if (isRemoved[startNode]) {
 			throw new Exception("start node is removed");
@@ -56,7 +61,6 @@ public class CutNodes {
 		if (visited[startNode]) {
 			return allCutNodes;
 		}
-		SortedSet<Integer> component = getSubComponentByRemovedNodes.getSubComponent(startNode);
 		dfsCutNodes(startNode, startNode, allCutNodes, component, adjList, visited, timeIn, minTime, currTime);
 		for (int node : component) {
 			if (isRemoved[node]) {
