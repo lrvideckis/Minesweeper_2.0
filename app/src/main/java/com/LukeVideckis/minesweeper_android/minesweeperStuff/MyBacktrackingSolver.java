@@ -7,6 +7,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CutNodes;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
@@ -450,6 +451,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 	//TODO: find a more accurate name for this
 	private void performBacktrackingSequentially() throws Exception {
+		CreateSolvableBoard.printBoardDebug(board, numberOfMines);
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 
@@ -478,13 +480,13 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				System.out.println(entry.getKey() + " " + entry.getValue().get());
 			}
 
-			System.out.println("here, end, second is:");
-			for(TreeMap.Entry<Integer,ArrayList<MutableInt>> entry : result.get(0).second.entrySet()) {
+			System.out.println("here, component: " + i + " second:");
+			for (TreeMap.Entry<Integer, ArrayList<MutableInt>> entry : mineProbPerCompPerNumMines.get(i).entrySet()) {
 				System.out.println("# mines is: " + entry.getKey());
-				for(int pos = 0; pos < entry.getValue().size(); ++pos) {
+				for (int pos = 0; pos < entry.getValue().size(); ++pos) {
 					final int I = components.get(i).get(pos).first;
 					final int J = components.get(i).get(pos).second;
-					System.out.println("i,j, value: " + I + " " + J + " " + entry.getValue().get(pos).get());
+					System.out.println("i,j, value: " + I + " " + J + "       " + entry.getValue().get(pos).get());
 				}
 			}
 			 */
@@ -606,14 +608,14 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				++pos;
 			}
 		}
-		TreeMap<Integer, Integer> gridToIndex = new TreeMap<>();
+		TreeMap<Integer, Integer> gridToNode = new TreeMap<>();
 		TreeMap<Integer, Integer> nodeToIndex = new TreeMap<>();
 		pos = 0;
 		for (int node : subComponent) {
 			nodeToIndex.put(node, pos);
 			final int i = components.get(componentPos).get(node).first;
 			final int j = components.get(componentPos).get(node).second;
-			gridToIndex.put(RowColToIndex.rowColToIndex(i, j, rows, cols), pos);
+			gridToNode.put(RowColToIndex.rowColToIndex(i, j, rows, cols), node);
 			++pos;
 		}
 		TreeSet<Integer> cluesWithAllRemovedNeighbors = new TreeSet<>();
@@ -631,13 +633,13 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				for (int[] adj2 : GetAdjacentCells.getAdjacentCells(adj[0], adj[1], rows, cols)) {
 					final int adjI = adj2[0], adjJ = adj2[1];
 					final int currKey = RowColToIndex.rowColToIndex(adjI, adjJ, rows, cols);
-					if (!gridToIndex.containsKey(currKey)) {
+					if (!gridToNode.containsKey(currKey)) {
 						continue;
 					}
-					if (board[adjI][adjJ].isVisible) {
-						throw new Exception("every node in subComponent should be non-visible, but this node is visible");
+					if (board[adjI][adjJ].isVisible || board[adjI][adjJ].isLogicalMine || board[adjI][adjJ].isLogicalFree) {
+						throw new Exception("every node in subComponent should be non-visible and non-logical, but this node either visible, or logical");
 					}
-					if (!isRemoved[Objects.requireNonNull(gridToIndex.get(currKey))]) {
+					if (!isRemoved[Objects.requireNonNull(gridToNode.get(currKey))]) {
 						allNeighborsAreRemoved = false;
 						break;
 					}
@@ -686,13 +688,22 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			for (int cluesWithAllRemoved : cluesWithAllRemovedNeighbors) {
 				final int i = RowColToIndex.indexToRowCol(cluesWithAllRemoved, rows, cols).first;
 				final int j = RowColToIndex.indexToRowCol(cluesWithAllRemoved, rows, cols).second;
+				if (!board[i][j].isVisible) {
+					throw new Exception("clue which is not visible");
+				}
 				int surroundingMineCount = 0;
 				for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
 					final int adjI = adj[0], adjJ = adj[1];
-					if (board[adjI][adjJ].isVisible || board[adjI][adjJ].isLogicalMine || board[adjI][adjJ].isLogicalFree) {
+					if (!gridToNode.containsKey(RowColToIndex.rowColToIndex(adjI, adjJ, rows, cols))) {
 						continue;
 					}
-					final int currNode = Objects.requireNonNull(gridToIndex.get(RowColToIndex.rowColToIndex(adjI, adjJ, rows, cols)));
+					if (board[adjI][adjJ].isVisible || board[adjI][adjJ].isLogicalMine || board[adjI][adjJ].isLogicalFree) {
+						throw new Exception("node in component which is either visible, or logical");
+					}
+					final int currNode = Objects.requireNonNull(gridToNode.get(RowColToIndex.rowColToIndex(adjI, adjJ, rows, cols)));
+					if (!isRemoved[currNode]) {
+						throw new Exception("node should be removed, but it isn't");
+					}
 					if ((mask & (1 << Objects.requireNonNull(toIndexOriginalAfterAddingNewRemoved.get(currNode)))) > 0) {
 						++surroundingMineCount;
 					}
@@ -709,6 +720,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			/*
 			 * For mines in removed cells, we only want to count then once in the total # of mines
 			 */
+			//TODO: change these to a single count
 			int cntDuplicate = 0;
 			int cntAlone = 0;
 			for (int bit = 0; bit < removedCellsList.size(); ++bit) {

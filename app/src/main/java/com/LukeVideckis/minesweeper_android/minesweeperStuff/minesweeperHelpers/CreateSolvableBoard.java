@@ -35,8 +35,8 @@ public class CreateSolvableBoard {
 		this.mines = mines;
 	}
 
-	public static void printBoardDebug(VisibleTile[][] board) {
-		System.out.println("visible board is:");
+	public static void printBoardDebug(VisibleTile[][] board, int mines) {
+		System.out.println("mines: " + mines + " visible board is:");
 		for (VisibleTile[] visibleTiles : board) {
 			for (VisibleTile visibleTile : visibleTiles) {
 				if (visibleTile.getIsVisible()) {

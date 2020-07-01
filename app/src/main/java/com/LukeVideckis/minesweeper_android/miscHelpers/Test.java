@@ -28,6 +28,28 @@ public class Test {
 
 	private final static String[][] previousFailedBoards = {
 
+			//big board where null pointer exception happens
+			{
+					"...12BB11111UUUUUUUUUUUUUUUUUU",
+					"11.1B4432B22UUUUUUUUUUUUUUUUUU",
+					"B21212BB322B33UUUUUUUUUUUUUUUU",
+					"12B1.123B2213BUUUUUUUUUUUUUUUU",
+					"1211..123B1.3BU3UUBUUUUUUUUUUU",
+					"B1..113B311.2BBB223UUUUUUUUUUU",
+					"221.1B4B3...12321.2UUUUUUUUUUU",
+					"1B1.113B2..11211113BUUUUUUUUUU",
+					"111112332112B2B11B3UUUUUUUB311",
+					"...1B2BB22B33321234UU3B3B4B2..",
+					"..133324B33B3B112BB22B332322..",
+					"..1BB1.2B23B4111B432113B21B21.",
+					"..1221.1112B212322B3212B223B1.",
+					"12321...112112BB123BB11111B21.",
+					"2BBB1...1B2223B422B3332212221.",
+					"B3321...112BB212B2111BB2B11B1.",
+
+					"100"
+			},
+
 			//grid which causes cut nodes dfs to add multiple cut nodes to the list of cut nodes
 			{
 					"UU1..1U",
@@ -265,7 +287,7 @@ public class Test {
 				System.out.println("SLOW solver hit iteration limit, void test");
 				continue;
 			}
-			if (areBoardsDifferent(boardFast, boardSlow)) {
+			if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 				return;
 			}
 		}
@@ -315,8 +337,7 @@ public class Test {
 				VisibleTileWithProbability[][] boardFast = convertToNewBoard(minesweeperGame);
 				VisibleTileWithProbability[][] boardSlow = convertToNewBoard(minesweeperGame);
 
-				System.out.println("mines: " + mines);
-				CreateSolvableBoard.printBoardDebug(boardFast);
+				CreateSolvableBoard.printBoardDebug(boardFast, mines);
 
 				try {
 					holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
@@ -330,7 +351,7 @@ public class Test {
 					System.out.println("slow solver hit iteration limit, void test");
 					break;
 				}
-				if (areBoardsDifferent(boardFast, boardSlow)) {
+				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 					return;
 				}
 				boolean clickedFree = false;
@@ -356,7 +377,8 @@ public class Test {
 
 	private static boolean areBoardsDifferent(
 			VisibleTileWithProbability[][] boardFast,
-			VisibleTileWithProbability[][] boardSlow
+			VisibleTileWithProbability[][] boardSlow,
+			int mines
 	) throws Exception {
 		int rows = boardFast.length, cols = boardFast[0].length;
 		boolean passedTest = true;
@@ -383,7 +405,7 @@ public class Test {
 			}
 		}
 		if (!passedTest) {
-			CreateSolvableBoard.printBoardDebug(boardFast);
+			CreateSolvableBoard.printBoardDebug(boardFast, mines);
 		}
 		return !passedTest;
 	}
@@ -421,7 +443,7 @@ public class Test {
 				continue;
 			}
 			gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
-			if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, boardBacktracking, boardGauss)) {
+			if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardBacktracking, boardGauss)) {
 				return;
 			}
 		}
@@ -429,7 +451,7 @@ public class Test {
 	}
 
 	//returns true if test failed
-	private static boolean isFailed_compareGaussBoardToBacktrackingBoard(int rows, int cols, VisibleTile[][] boardBacktracking, VisibleTile[][] boardGauss) {
+	private static boolean isFailed_compareGaussBoardToBacktrackingBoard(int rows, int cols, int mines, VisibleTile[][] boardBacktracking, VisibleTile[][] boardGauss) {
 		boolean passedTest = true;
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
@@ -444,7 +466,7 @@ public class Test {
 			}
 		}
 		if (!passedTest) {
-			CreateSolvableBoard.printBoardDebug(boardBacktracking);
+			CreateSolvableBoard.printBoardDebug(boardBacktracking, mines);
 			return true;
 		}
 		return false;
@@ -483,13 +505,13 @@ public class Test {
 			for (int i = 0; i < 3; ++i) {
 				VisibleTileWithProbability[][] boardFast = convertToNewBoard(minesweeperGame);
 				holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
-				if (areBoardsDifferent(boardFast, boardSlow)) {
+				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
 					return;
 				}
 
 				VisibleTile[][] boardGauss = convertToNewBoard(minesweeperGame);
 				gaussianEliminationSolver.solvePosition(boardGauss, minesweeperGame.getNumberOfMines());
-				if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, boardFast, boardGauss)) {
+				if (isFailed_compareGaussBoardToBacktrackingBoard(rows, cols, mines, boardFast, boardGauss)) {
 					return;
 				}
 			}
@@ -543,7 +565,7 @@ public class Test {
 
 				if (noLogicalFrees(visibleBoard)) {
 					System.out.println("no logical frees, failed test");
-					CreateSolvableBoard.printBoardDebug(visibleBoard);
+					CreateSolvableBoard.printBoardDebug(visibleBoard, mines);
 					return;
 				}
 
