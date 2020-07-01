@@ -10,13 +10,6 @@ public class Dsu {
 		Arrays.fill(parent, -1);
 	}
 
-	public static int getNode(int i, int j, int rows, int cols) {
-		if (ArrayBounds.outOfBounds(i, j, rows, cols)) {
-			throw new ArrayIndexOutOfBoundsException("throwing from getConnectedComponents.getNode()");
-		}
-		return i * cols + j;
-	}
-
 	public int find(int node) {
 		if (parent[node] < 0) {
 			return node;

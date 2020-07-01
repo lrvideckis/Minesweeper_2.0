@@ -9,6 +9,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.Dsu;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.RowColToIndex;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -493,7 +494,7 @@ public class MinesweeperGame {
 			for (int j = 0; j < cols; ++j) {
 				if (getCell(i, j).isLogicalFree) {
 					hasAtLeastOneLogicalFree = true;
-					hasLogicalFree[disjointSet.find(Dsu.getNode(i, j, rows, cols))] = true;
+					hasLogicalFree[disjointSet.find(RowColToIndex.rowColToIndex(i, j, rows, cols))] = true;
 				}
 			}
 		}
@@ -504,7 +505,7 @@ public class MinesweeperGame {
 			for (int j = 0; j < cols; ++j) {
 				if (isInterestingCell(i, j) &&
 						!getCell(i, j).isLogicalMine &&
-						!hasLogicalFree[disjointSet.find(Dsu.getNode(i, j, rows, cols))]) {
+						!hasLogicalFree[disjointSet.find(RowColToIndex.rowColToIndex(i, j, rows, cols))]) {
 					return false;
 				}
 			}

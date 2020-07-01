@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class SlowBacktrackingSolver implements BacktrackingSolver {
 
-	private final static int iterationLimit = 100000;
+	private final static int iterationLimit = 50000;
 	private final int[][][] lastUnvisitedSpot;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines;
@@ -140,7 +140,6 @@ public class SlowBacktrackingSolver implements BacktrackingSolver {
 		final int j = component.get(pos).second;
 
 		//try mine
-		//isMine.get(i).set(j, true);
 		isMine[i][j] = true;
 		if (checkSurroundingConditions(i, j, component.get(pos), 1)) {
 			currNumberOfMines.addWith(1);
