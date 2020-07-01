@@ -5,34 +5,47 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class CutNodes {
-	final MutableInt currTime;
-	final GetSubComponentByRemovedNodes getSubComponentByRemovedNodes;
-	private final SortedSet<Integer> nodes;
-	private final ArrayList<SortedSet<Integer>> adjList;
-	private final int[] minTime, timeIn;
-	private final boolean[] visited, isRemoved;
-
-	public CutNodes(SortedSet<Integer> nodes, ArrayList<SortedSet<Integer>> adjList, boolean[] isRemoved) {
-		this.nodes = nodes;
-		this.adjList = adjList;
-		this.isRemoved = isRemoved;
-
+	public static TreeSet<Integer> getCutNodes(SortedSet<Integer> nodes, ArrayList<SortedSet<Integer>> adjList, boolean[] isRemoved) throws Exception {
 		//initialize variables for finding cut nodes
-		minTime = new int[isRemoved.length];
-		timeIn = new int[isRemoved.length];
-		visited = new boolean[isRemoved.length];
+		final int[] minTime = new int[isRemoved.length];
+		final int[] timeIn = new int[isRemoved.length];
+		final boolean[] visited = new boolean[isRemoved.length];
 		for (int i = 0; i < isRemoved.length; ++i) {
 			minTime[i] = timeIn[i] = isRemoved.length + 10;
 			visited[i] = false;
 		}
-		currTime = new MutableInt(0);
-		getSubComponentByRemovedNodes = new GetSubComponentByRemovedNodes(nodes, adjList, isRemoved);
+		final MutableInt currTime = new MutableInt(0);
+		final GetSubComponentByRemovedNodes getSubComponentByRemovedNodes = new GetSubComponentByRemovedNodes(nodes, adjList, isRemoved);
+		TreeSet<Integer> allCutNodes = new TreeSet<>();
+		for (int node : nodes) {
+			if (isRemoved[node]) {
+				continue;
+			}
+			for (int currCutNode : getCutNodesForASingleComponent(node, nodes, adjList, isRemoved, visited, timeIn, minTime, currTime, getSubComponentByRemovedNodes)) {
+				if (allCutNodes.contains(currCutNode)) {
+					throw new Exception("duplicate cut node");
+				}
+				allCutNodes.add(currCutNode);
+			}
+		}
+
+		return allCutNodes;
 	}
 
 	//when calling this multiple times on the same component, this will only give correct results the first time
 	//this is because I don't re-initialize the member variables for finding cut nodes
 	//this returns an empty ArrayList when called more than once on the same component
-	public TreeSet<Integer> getCutNodes(int startNode) throws Exception {
+	private static TreeSet<Integer> getCutNodesForASingleComponent(
+			int startNode,
+			SortedSet<Integer> nodes,
+			ArrayList<SortedSet<Integer>> adjList,
+			boolean[] isRemoved,
+			boolean[] visited,
+			int[] timeIn,
+			int[] minTime,
+			MutableInt currTime,
+			GetSubComponentByRemovedNodes getSubComponentByRemovedNodes
+	) throws Exception {
 		if (isRemoved[startNode]) {
 			throw new Exception("start node is removed");
 		}
@@ -44,7 +57,7 @@ public class CutNodes {
 			return allCutNodes;
 		}
 		SortedSet<Integer> component = getSubComponentByRemovedNodes.getSubComponent(startNode);
-		dfsCutNodes(startNode, startNode, allCutNodes, component);
+		dfsCutNodes(startNode, startNode, allCutNodes, component, adjList, visited, timeIn, minTime, currTime);
 		for (int node : component) {
 			if (isRemoved[node]) {
 				visited[node] = false;
@@ -53,7 +66,17 @@ public class CutNodes {
 		return allCutNodes;
 	}
 
-	private void dfsCutNodes(final int node, final int prev, TreeSet<Integer> allCutNodes, SortedSet<Integer> component) throws Exception {
+	private static void dfsCutNodes(
+			final int node,
+			final int prev,
+			TreeSet<Integer> allCutNodes,
+			SortedSet<Integer> component,
+			ArrayList<SortedSet<Integer>> adjList,
+			boolean[] visited,
+			int[] timeIn,
+			int[] minTime,
+			MutableInt currTime
+	) throws Exception {
 		if (!component.contains(node)) {
 			throw new Exception("component doesn't contain node");
 		}
@@ -73,7 +96,7 @@ public class CutNodes {
 			if (node == prev && numChildren > 1) {
 				allCutNodes.add(node);
 			}
-			dfsCutNodes(to, node, allCutNodes, component);
+			dfsCutNodes(to, node, allCutNodes, component, adjList, visited, timeIn, minTime, currTime);
 			minTime[node] = Math.min(minTime[node], minTime[to]);
 			if (node != prev && minTime[to] >= timeIn[node]) {
 				allCutNodes.add(node);

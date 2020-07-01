@@ -503,19 +503,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 		//find split cells
 		//1st try: find articulation nodes
-		CutNodes cutNodes = new CutNodes(subComponent, adjList.get(componentPos), isRemoved);
-		TreeSet<Integer> allCutNodes = new TreeSet<>();
-		for (int node : subComponent) {
-			if (isRemoved[node]) {
-				continue;
-			}
-			for (int currCutNode : cutNodes.getCutNodes(node)) {
-				if (allCutNodes.contains(currCutNode)) {
-					throw new Exception("duplicate cut node");
-				}
-				allCutNodes.add(currCutNode);
-			}
-		}
+		TreeSet<Integer> allCutNodes = CutNodes.getCutNodes(subComponent, adjList.get(componentPos), isRemoved);
 		//TODO: these
 		//2nd try: find pairs of articulation nodes
 		//3rd try: find pairs of edges
