@@ -28,6 +28,22 @@ public class Test {
 
 	private final static String[][] previousFailedBoards = {
 
+			{
+					"B1112B112B2BB21..12B22UUUU",
+					"221B2111B2234B1..1B22BUUUU",
+					"B1222..11212B21..111122UUU",
+					"111B21...1B2221111.112UUUU",
+					".124B2...1111B12B2.1B2UUUU",
+					"12B4B3.111..2333B312122UUU",
+					"B213B423B2..1BB212B212UUUU",
+					"12233BB3B21233221224B3UUUU",
+					"13BB2222122BB1.2B32BB31UUU",
+					"UUB4111212B432.2B3B322UUUU",
+					"UUB2.1B2B212B1.11211.1UUUU",
+
+					"60",
+			},
+
 			//big board where null pointer exception happens
 			{
 					"...12BB11111UUUUUUUUUUUUUUUUUU",
@@ -313,6 +329,74 @@ public class Test {
 			final int rows = MyMath.getRand(3, 8);
 			final int cols = MyMath.getRand(3, 40 / rows);
 			int mines = MyMath.getRand(2, 9);
+			mines = Math.min(mines, rows * cols - 9);
+
+			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
+			BacktrackingSolver slowBacktrackingSolver = new SlowBacktrackingSolver(rows, cols);
+
+			MinesweeperGame minesweeperGame;
+			minesweeperGame = new MinesweeperGame(rows, cols, mines);
+			int numberOfClicks = MyMath.getRand(0, 4);
+			while (numberOfClicks-- > 0 && !minesweeperGame.getIsGameLost()) {
+				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
+			}
+			if (minesweeperGame.getIsGameLost()) {
+				System.out.println("game over, void test");
+				continue;
+			}
+
+			while (!minesweeperGame.getIsGameWon()) {
+				if (minesweeperGame.getIsGameLost()) {
+					System.out.println("here 1: game is lost, but this shouldn't happen, failed test");
+					return;
+				}
+				VisibleTileWithProbability[][] boardFast = convertToNewBoard(minesweeperGame);
+				VisibleTileWithProbability[][] boardSlow = convertToNewBoard(minesweeperGame);
+
+				CreateSolvableBoard.printBoardDebug(boardFast, mines);
+
+				try {
+					holyGrailSolver.solvePosition(boardFast, minesweeperGame.getNumberOfMines());
+				} catch (HitIterationLimitException ignored) {
+					System.out.println("fast solver hit iteration limit, void test");
+					break;
+				}
+				try {
+					slowBacktrackingSolver.solvePosition(boardSlow, minesweeperGame.getNumberOfMines());
+				} catch (HitIterationLimitException ignored) {
+					System.out.println("slow solver hit iteration limit, void test");
+					break;
+				}
+				if (areBoardsDifferent(boardFast, boardSlow, mines)) {
+					return;
+				}
+				boolean clickedFree = false;
+				for (int i = 0; i < rows; ++i) {
+					for (int j = 0; j < cols; ++j) {
+						if (boardFast[i][j].getIsLogicalFree()) {
+							clickedFree = true;
+							minesweeperGame.clickCell(i, j, false);
+						}
+					}
+				}
+				if (!clickedFree) {
+					break;
+				}
+			}
+			if (minesweeperGame.getIsGameLost()) {
+				System.out.println("here 2: game is lost, but this shouldn't happen, failed test");
+				return;
+			}
+		}
+		System.out.println("passed all tests!!!!!!!!!!!!!!!!!!!");
+	}
+
+	public static void performTestsForMineProbabilityLargeBoards(int numberOfTests) throws Exception {
+		for (int testID = 1; testID <= numberOfTests; ++testID) {
+			System.out.println("test number: " + testID);
+			final int rows = MyMath.getRand(10, 40);
+			final int cols = MyMath.getRand(10, 40);
+			int mines = (int) (rows * cols * 0.30);
 			mines = Math.min(mines, rows * cols - 9);
 
 			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
