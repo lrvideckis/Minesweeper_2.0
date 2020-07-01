@@ -360,7 +360,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 		initializeLastUnvisitedSpot(components);
 
-		performBacktrackingSequentially();
+		findMineProbAndNumConfigsForEachComponent();
 
 		final int numberOfAwayCells = AwayCell.getNumberOfAwayCells(board);
 
@@ -447,8 +447,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 	}
 
-	//TODO: find a more accurate name for this
-	private void performBacktrackingSequentially() throws Exception {
+	private void findMineProbAndNumConfigsForEachComponent() throws Exception {
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 
@@ -474,7 +473,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 	}
 
-	//TODO: split up this function into smaller functions
 	private ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> solveComponent(
 			final int componentPos,
 			MutableInt currIterations, //running total of iterations of both this function and backtracking
@@ -556,14 +554,44 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
 		}
 
+		//recursing on new sub components
+		ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub = new ArrayList<>();
+		for (SortedSet<Integer> currSubComponent : newSubComponents) {
+			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved));
+		}
+
+		ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result =
+				combineResultsFromRecursing(subComponent, componentPos, newSubComponents, toIndexOriginal, isRemoved, startNumRemoved, removedCellsList, resultsSub);
+
+		//restore isRemoved to was it was at the beginning of the recursive call
+		for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
+			isRemoved[removedCellsList.get(i)] = false;
+		}
+
+		return result;
+	}
+
+	private ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> combineResultsFromRecursing(
+			SortedSet<Integer> subComponent,
+			final int componentPos,
+			ArrayList<SortedSet<Integer>> newSubComponents,
+			TreeMap<Integer, Integer> toIndexOriginal,
+			boolean[] isRemoved,
+			final int startNumRemoved,
+			ArrayList<Integer> removedCellsList,
+			ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub
+	) throws Exception {
+
+
 		TreeMap<Integer, Integer> toIndexOriginalAfterAddingNewRemoved = new TreeMap<>();
-		pos = 0;
+		int pos = 0;
 		for (int node : subComponent) {
 			if (isRemoved[node]) {
 				toIndexOriginalAfterAddingNewRemoved.put(node, pos);
 				++pos;
 			}
 		}
+
 		TreeMap<Integer, Integer> gridToNode = new TreeMap<>();
 		TreeMap<Integer, Integer> nodeToIndex = new TreeMap<>();
 		pos = 0;
@@ -574,6 +602,8 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			gridToNode.put(RowColToIndex.rowColToIndex(i, j, rows, cols), node);
 			++pos;
 		}
+
+
 		TreeSet<Integer> cluesWithAllRemovedNeighbors = new TreeSet<>();
 		for (int node : subComponent) {
 			if (!isRemoved[node]) {
@@ -601,12 +631,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					cluesWithAllRemovedNeighbors.add(RowColToIndex.rowColToIndex(adj[0], adj[1], rows, cols));
 				}
 			}
-		}
-
-		//recursing on new sub components
-		ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub = new ArrayList<>();
-		for (SortedSet<Integer> currSubComponent : newSubComponents) {
-			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved));
 		}
 
 		ArrayList<TreeMap<Integer, Integer>> toIndex = new ArrayList<>(newSubComponents.size());
@@ -819,10 +843,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 
-		//restore isRemoved to was it was at the beginning of the recursive call
-		for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
-			isRemoved[removedCellsList.get(i)] = false;
-		}
 		return result;
 	}
 
