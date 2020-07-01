@@ -7,7 +7,6 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CutNodes;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
@@ -460,7 +459,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			boolean[] isRemoved = new boolean[components.get(i).size()];
 			ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result =
-					solveComponent(i, currIterations, Collections.unmodifiableSortedSet(subComponent), isRemoved, 0);
+					solveComponent(i, currIterations, Collections.unmodifiableSortedSet(subComponent), isRemoved);
 
 			if (Objects.requireNonNull(result).size() != 1) {
 				throw new Exception("result has size != 1, but it should be 1, size is: " + Objects.requireNonNull(result).size());
@@ -473,22 +472,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			mineConfig.get(i).putAll(result.get(0).first);
 			mineProbPerCompPerNumMines.get(i).putAll(result.get(0).second);
-			/*
-			System.out.println("here, component: " + i + "# mines, # configs");
-			for (TreeMap.Entry<Integer, MutableInt> entry : mineConfig.get(i).entrySet()) {
-				System.out.println(entry.getKey() + " " + entry.getValue().get());
-			}
-
-			System.out.println("here, component: " + i + " second:");
-			for (TreeMap.Entry<Integer, ArrayList<MutableInt>> entry : mineProbPerCompPerNumMines.get(i).entrySet()) {
-				System.out.println("# mines is: " + entry.getKey());
-				for (int pos = 0; pos < entry.getValue().size(); ++pos) {
-					final int I = components.get(i).get(pos).first;
-					final int J = components.get(i).get(pos).second;
-					System.out.println("i,j, value: " + I + " " + J + "       " + entry.getValue().get(pos).get());
-				}
-			}
-			 */
 		}
 	}
 
@@ -497,9 +480,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			final int componentPos,
 			MutableInt currIterations, //running total of iterations of both this function and backtracking
 			final SortedSet<Integer> subComponent, //list of indexes into components[componentPos]
-			boolean[] isRemoved, //also list of indexes into components[componentPos]
-			//TODO: remove depth once done with debugging
-			int depth
+			boolean[] isRemoved //also list of indexes into components[componentPos]
 	) throws Exception {
 		currIterations.addWith(1);
 		if (currIterations.get() >= iterationLimit) {
@@ -520,15 +501,8 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			throw new Exception("starting with too many removed cells " + startNumRemoved);
 		}
 		if (subComponent.size() <= 5) {//TODO: play around with this number
-
-			final ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> temp =
-					solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
-
-			//do backtracking
-			return temp;
+			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
 		}
-
-		//System.out.println("here, trying to split by cut nodes");
 
 		//find split cells
 		//1st try: find articulation nodes
@@ -545,30 +519,10 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 				allCutNodes.add(currCutNode);
 			}
 		}
-
-		/*
-		System.out.println("cut nodes:");
-		for (int node : allCutNodes) {
-			System.out.println(components.get(componentPos).get(node).first + " " + components.get(componentPos).get(node).second);
-		}
-		 */
-
-		/*
-				..1UU
-				..1C1
-				..111
-				..1C2
-				..1CB
-				..13U
-				111CU
-				UC1UU
-		 */
 		//TODO: these
 		//2nd try: find pairs of articulation nodes
 		//3rd try: find pairs of edges
 		//4th try: approximation algorithm
-
-		//CreateSolvableBoard.printBoardDebug(board);
 
 		for (int node : allCutNodes) {
 			if (removedCellsList.size() < maxNumberOfRemovedCells) {
@@ -600,13 +554,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
 				isRemoved[removedCellsList.get(i)] = false;
 			}
+			//TODO: look into removing this
 			removedCellsList.subList(startNumRemoved, removedCellsList.size()).clear();
-
-
-
-			final ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> temp =
-					solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
-			return temp;
+			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
 		}
 
 		TreeMap<Integer, Integer> toIndexOriginalAfterAddingNewRemoved = new TreeMap<>();
@@ -656,12 +606,10 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 
-		System.out.println("here, actually splitting by cut nodes");
-
 		//recursing on new sub components
 		ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub = new ArrayList<>();
 		for (SortedSet<Integer> currSubComponent : newSubComponents) {
-			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved, depth + 1));
+			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved));
 		}
 
 		ArrayList<TreeMap<Integer, Integer>> toIndex = new ArrayList<>(newSubComponents.size());
