@@ -451,7 +451,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 	//TODO: find a more accurate name for this
 	private void performBacktrackingSequentially() throws Exception {
-		CreateSolvableBoard.printBoardDebug(board, numberOfMines);
 		for (int i = 0; i < components.size(); ++i) {
 			MutableInt currIterations = new MutableInt(0);
 
@@ -522,23 +521,8 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 		if (subComponent.size() <= 5) {//TODO: play around with this number
 
-
-			System.out.println("depth is: " + depth + " subComponent is:");
-			for (int node : subComponent) {
-				final int i = components.get(componentPos).get(node).first;
-				final int j = components.get(componentPos).get(node).second;
-				System.out.println(i + " " + j + "     ");
-			}
-
 			final ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> temp =
 					solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
-			System.out.println("1 returning first:");
-			for (int mask = 0; mask < temp.size(); ++mask) {
-				System.out.println("mask: " + mask);
-				for (TreeMap.Entry<Integer, MutableInt> entry : temp.get(mask).first.entrySet()) {
-					System.out.println("# bombs, # configs: " + entry.getKey() + " " + entry.getValue().get());
-				}
-			}
 
 			//do backtracking
 			return temp;
@@ -619,22 +603,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			removedCellsList.subList(startNumRemoved, removedCellsList.size()).clear();
 
 
-			System.out.println("depth is: " + depth + " subComponent is:");
-			for (int node : subComponent) {
-				final int i = components.get(componentPos).get(node).first;
-				final int j = components.get(componentPos).get(node).second;
-				System.out.println(i + " " + j + "     ");
-			}
 
 			final ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> temp =
 					solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
-			System.out.println("2 returning first:");
-			for (int mask = 0; mask < temp.size(); ++mask) {
-				System.out.println("mask: " + mask);
-				for (TreeMap.Entry<Integer, MutableInt> entry : temp.get(mask).first.entrySet()) {
-					System.out.println("# bombs, # configs: " + entry.getKey() + " " + entry.getValue().get());
-				}
-			}
 			return temp;
 		}
 
@@ -693,12 +664,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved, depth + 1));
 		}
 
-		for (int spot : cluesWithAllRemovedNeighbors) {
-			final int i = RowColToIndex.indexToRowCol(spot, rows, cols).first;
-			final int j = RowColToIndex.indexToRowCol(spot, rows, cols).second;
-			System.out.println("here, clue with all removed neighbors: " + i + " " + j);
-		}
-
 		ArrayList<TreeMap<Integer, Integer>> toIndex = new ArrayList<>(newSubComponents.size());
 		for (int subC = 0; subC < newSubComponents.size(); ++subC) {
 			TreeMap<Integer, Integer> currIndex = new TreeMap<>();
@@ -719,12 +684,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 		//combine results
 		final int pow2 = (1 << removedCellsList.size());
-		System.out.println("here, depth: " + depth + " removedCellsList.size: " + removedCellsList.size() + " " + pow2);
-		for (int node : removedCellsList) {
-			final int i = components.get(componentPos).get(node).first;
-			final int j = components.get(componentPos).get(node).second;
-			System.out.println("i,j: " + i + " " + j);
-		}
 		for (int mask = 0; mask < pow2; ++mask) {//<512
 			/*
 			 * there could be some clues which are next to **only** removed cells
@@ -755,13 +714,11 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					}
 				}
 				if (surroundingMineCount != updatedNumberSurroundingMines[i][j]) {
-					System.out.println("failed on: " + i + " " + j);
 					allCluesMatch = false;
 					break;
 				}
 			}
 			if (!allCluesMatch) {
-				System.out.println("depth: " + depth + " skipping mask: " + mask);
 				continue;
 			}
 
@@ -934,31 +891,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
 			isRemoved[removedCellsList.get(i)] = false;
 		}
-
-		/*
-		System.out.println("here, returning first: " + result.size());
-		for (TreeMap.Entry<Integer, MutableInt> entry : result.get(0).first.entrySet()) {
-			System.out.println("# mines: " + entry.getKey() + " # configs: " + entry.getValue().get());
-		}
-		 */
-
-
-		System.out.println("depth is: " + depth + " subComponent is:");
-		for (int node : subComponent) {
-			final int i = components.get(componentPos).get(node).first;
-			final int j = components.get(componentPos).get(node).second;
-			System.out.println(i + " " + j + "     ");
-		}
-
-		System.out.println("3 returning first:");
-		for (int mask = 0; mask < result.size(); ++mask) {
-			System.out.println("mask: " + mask);
-			for (TreeMap.Entry<Integer, MutableInt> entry : result.get(mask).first.entrySet()) {
-				System.out.println("# bombs, # configs: " + entry.getKey() + " " + entry.getValue().get());
-			}
-		}
-
-
 		return result;
 	}
 

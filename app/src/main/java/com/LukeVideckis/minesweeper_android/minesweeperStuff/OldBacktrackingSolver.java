@@ -439,11 +439,6 @@ public class OldBacktrackingSolver implements BacktrackingSolver {
 			MutableInt currIterations = new MutableInt(0);
 			MutableInt currNumberOfMines = new MutableInt(0);
 			solveComponent(0, i, currIterations, currNumberOfMines);
-
-			System.out.println("component " + i);
-			for (TreeMap.Entry<Integer, MutableInt> entry : mineConfig.get(i).entrySet()) {
-				System.out.println("# mines, # configs: " + entry.getKey() + " " + entry.getValue().get());
-			}
 		}
 	}
 

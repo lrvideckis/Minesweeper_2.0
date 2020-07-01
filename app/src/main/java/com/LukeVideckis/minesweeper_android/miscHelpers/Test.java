@@ -426,8 +426,8 @@ public class Test {
 	public static void performTestsForMineProbabilityLargeBoards(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			final int rows = MyMath.getRand(10, 10);
-			final int cols = MyMath.getRand(10, 10);
+			final int rows = MyMath.getRand(10, 40);
+			final int cols = MyMath.getRand(10, 40);
 			int mines = Math.min((int) (rows * cols * 0.30), rows * cols - 9);
 
 			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
