@@ -347,7 +347,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 
 		initialize(board, numberOfMines);
-		//components = GetConnectedComponents.getComponentsWithKnownCells(board);
 		Pair<ArrayList<ArrayList<Pair<Integer, Integer>>>, ArrayList<ArrayList<SortedSet<Integer>>>> result = GetConnectedComponents.getComponentsWithKnownCells(board);
 		components = result.first;
 		adjList = result.second;
@@ -554,8 +553,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
 				isRemoved[removedCellsList.get(i)] = false;
 			}
-			//TODO: look into removing this
-			removedCellsList.subList(startNumRemoved, removedCellsList.size()).clear();
 			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
 		}
 
@@ -673,9 +670,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			/*
 			 * For mines in removed cells, we only want to count then once in the total # of mines
 			 */
-			//TODO: change these to a single count
-			int cntDuplicate = 0;
-			int cntAlone = 0;
+			int cntToAdjustForDuplicates = 0;
 			for (int bit = 0; bit < removedCellsList.size(); ++bit) {
 				if ((mask & (1 << bit)) == 0) {
 					continue;
@@ -688,9 +683,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 					}
 				}
 				if (cntSubContains == 0) {
-					++cntAlone;
+					++cntToAdjustForDuplicates;
 				}
-				cntDuplicate += Math.max(0, cntSubContains - 1);
+				cntToAdjustForDuplicates -= Math.max(0, cntSubContains - 1);
 			}
 
 			ArrayList<TreeMap<Integer, MutableInt>> prefixMineConfigs = new ArrayList<>(newSubComponents.size() + 1);
@@ -699,8 +694,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			prefixMineConfigs.get(0).put(0, new MutableInt(1));
 
+			ArrayList<Integer> maskSubC = new ArrayList<>(newSubComponents.size());
 			for (int subC = 0; subC < newSubComponents.size(); ++subC) {//<7
-				int maskSubC = 0;
+				int currMaskSubC = 0;
 				for (int bit = 0; bit < removedCellsList.size(); ++bit) {//<7
 					if ((mask & (1 << bit)) == 0) {
 						continue;
@@ -709,9 +705,10 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 						continue;
 					}
 					final int currIndex = Objects.requireNonNull(toIndex.get(subC).get(removedCellsList.get(bit)));
-					maskSubC = (maskSubC | (1 << currIndex));
+					currMaskSubC = (currMaskSubC | (1 << currIndex));
 				}
-				final TreeMap<Integer, MutableInt> currSubMineConfig = resultsSub.get(subC).get(maskSubC).first;
+				maskSubC.add(currMaskSubC);
+				final TreeMap<Integer, MutableInt> currSubMineConfig = resultsSub.get(subC).get(maskSubC.get(subC)).first;
 
 				//update new mine configs
 				for (TreeMap.Entry<Integer, MutableInt> prevMineConfigs : prefixMineConfigs.get(subC).entrySet()) {//< ~4 ish
@@ -742,7 +739,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			TreeMap<Integer, ArrayList<MutableInt>> resultMineProbs = result.get(currMask).second;
 
 			for (TreeMap.Entry<Integer, MutableInt> mineConfigs : prefixMineConfigs.get(newSubComponents.size()).entrySet()) {//< ~4 ish
-				final int currKey = mineConfigs.getKey() - cntDuplicate + cntAlone;
+				final int currKey = mineConfigs.getKey() + cntToAdjustForDuplicates;
 				if (!resultMineConfigs.containsKey(currKey)) {
 					resultMineConfigs.put(currKey, new MutableInt(0));
 				}
@@ -772,21 +769,8 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			suffixMineConfigs.put(0, new MutableInt(1));
 
 			for (int subC = newSubComponents.size() - 1; subC >= 0; --subC) {//<7
-				//TODO this is duplicate code, put it in a function
-				int maskSubC = 0;
-				for (int bit = 0; bit < removedCellsList.size(); ++bit) {//<7
-					if ((mask & (1 << bit)) == 0) {
-						continue;
-					}
-					if (!toIndex.get(subC).containsKey(removedCellsList.get(bit))) {
-						continue;
-					}
-					final int currIndex = Objects.requireNonNull(toIndex.get(subC).get(removedCellsList.get(bit)));
-					maskSubC = (maskSubC | (1 << currIndex));
-				}
-
-				final TreeMap<Integer, MutableInt> currSubMineConfig = resultsSub.get(subC).get(maskSubC).first;
-				final TreeMap<Integer, ArrayList<MutableInt>> currSubProb = resultsSub.get(subC).get(maskSubC).second;
+				final TreeMap<Integer, MutableInt> currSubMineConfig = resultsSub.get(subC).get(maskSubC.get(subC)).first;
+				final TreeMap<Integer, ArrayList<MutableInt>> currSubProb = resultsSub.get(subC).get(maskSubC.get(subC)).second;
 
 				//update mine probabilities
 				//TODO: not sure if it's correct, but try to optimize this with the trick: total ways / curr ways
@@ -796,7 +780,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 							if (newSubComponents.get(subC).size() != currMineProbs.getValue().size()) {
 								throw new Exception("new sub component size doesn't match currMineProb size");
 							}
-							final int totalMines = currPrefixMineConfigs.getKey() + currSuffixMineConfigs.getKey() + currMineProbs.getKey() - cntDuplicate + cntAlone;
+							final int totalMines = currPrefixMineConfigs.getKey() + currSuffixMineConfigs.getKey() + currMineProbs.getKey() + cntToAdjustForDuplicates;
 							final int waysPrefixAndSuffix = currPrefixMineConfigs.getValue().get() * currSuffixMineConfigs.getValue().get();
 							pos = 0;
 							for (int node : newSubComponents.get(subC)) {
@@ -851,25 +835,12 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		ArrayList<Integer> allNodes = new ArrayList<>(nodes.size());
 		allNodes.addAll(nodes);
 		MutableInt currNumberOfMines = new MutableInt(0);
-
 		final int pow2 = (1 << toIndexOriginal.size());
 		ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result = new ArrayList<>(pow2);
 		for (int i = 0; i < pow2; ++i) {
 			result.add(new Pair<>(new TreeMap<>(), new TreeMap<>()));
 		}
-
 		solveComponentWithBacktracking(0, allNodes, toIndexOriginal, result, componentPos, currIterations, currNumberOfMines);
-
-		/*
-		System.out.println("here555555, returning first: " + result.size() + " " + componentPos);
-		for (int mask = 0; mask < result.size(); ++mask) {
-			System.out.println("mask: " + mask);
-			System.out.println("# mines, # configs");
-			for (TreeMap.Entry<Integer, MutableInt> entry : result.get(mask).first.entrySet()) {
-				System.out.println(entry.getKey() + " " + entry.getValue().get());
-			}
-		}
-		 */
 		return result;
 	}
 
@@ -992,13 +963,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result
 	) {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
-		/*
-		System.out.println("hi1");
-		System.out.println("hi2");
-		System.out.println("hi3");
-		System.out.println("found solution, component: " + componentPos);
-		 */
-
 		int mask = 0;
 		for (int node : allNodes) {
 			if (!toIndexOriginal.containsKey(node)) {
@@ -1027,14 +991,12 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			result.get(mask).second.put(currNumberOfMines, currSpotsArray);
 		}
 		ArrayList<MutableInt> currArrayList = Objects.requireNonNull(result.get(mask).second.get(currNumberOfMines));
-		//System.out.println("number of mines: " + currNumberOfMines);
 		for (int pos = 0; pos < allNodes.size(); ++pos) {
 			final int i = component.get(allNodes.get(pos)).first;
 			final int j = component.get(allNodes.get(pos)).second;
 			MutableInt curr = currArrayList.get(pos);
 
 			if (isMine[i][j]) {
-				//System.out.println(i + " " + j);
 				curr.addWith(1);
 			}
 		}
