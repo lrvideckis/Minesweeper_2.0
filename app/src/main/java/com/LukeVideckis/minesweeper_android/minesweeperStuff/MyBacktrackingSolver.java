@@ -457,7 +457,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 			boolean[] isRemoved = new boolean[components.get(i).size()];
 			ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result =
-					solveComponent(i, currIterations, Collections.unmodifiableSortedSet(subComponent), isRemoved);
+					solveComponent(i, Collections.unmodifiableSortedSet(subComponent), isRemoved);
 
 			if (Objects.requireNonNull(result).size() != 1) {
 				throw new Exception("result has size != 1, but it should be 1, size is: " + Objects.requireNonNull(result).size());
@@ -475,14 +475,9 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 	private ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> solveComponent(
 			final int componentPos,
-			MutableInt currIterations, //running total of iterations of both this function and backtracking
 			final SortedSet<Integer> subComponent, //list of indexes into components[componentPos]
 			boolean[] isRemoved //also list of indexes into components[componentPos]
 	) throws Exception {
-		currIterations.addWith(1);
-		if (currIterations.get() >= iterationLimit) {
-			throw new HitIterationLimitException("too many iterations");
-		}
 		ArrayList<Integer> removedCellsList = new ArrayList<>();
 		TreeMap<Integer, Integer> toIndexOriginal = new TreeMap<>();
 		int pos = 0;
@@ -498,6 +493,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			throw new Exception("starting with too many removed cells " + startNumRemoved);
 		}
 		if (subComponent.size() <= 5) {//TODO: play around with this number
+			MutableInt currIterations = new MutableInt(0);
 			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
 		}
 
@@ -528,13 +524,14 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
 				isRemoved[removedCellsList.get(i)] = false;
 			}
+			MutableInt currIterations = new MutableInt(0);
 			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
 		}
 
 		//recursing on new sub components
-		ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub = new ArrayList<>();
+		ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub = new ArrayList<>(newSubComponents.size());
 		for (SortedSet<Integer> currSubComponent : newSubComponents) {
-			resultsSub.add(solveComponent(componentPos, currIterations, currSubComponent, isRemoved));
+			resultsSub.add(solveComponent(componentPos, currSubComponent, isRemoved));
 		}
 
 		ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result =
