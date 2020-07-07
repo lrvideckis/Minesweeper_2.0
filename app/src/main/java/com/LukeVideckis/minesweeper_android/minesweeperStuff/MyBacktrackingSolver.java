@@ -449,8 +449,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 	private void findMineProbAndNumConfigsForEachComponent() throws Exception {
 		for (int i = 0; i < components.size(); ++i) {
-			MutableInt currIterations = new MutableInt(0);
-
 			TreeSet<Integer> subComponent = new TreeSet<>();
 			for (int j = 0; j < components.get(i).size(); ++j) {
 				subComponent.add(j);
@@ -493,8 +491,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			throw new Exception("starting with too many removed cells " + startNumRemoved);
 		}
 		if (subComponent.size() <= 5) {//TODO: play around with this number
-			MutableInt currIterations = new MutableInt(0);
-			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
+			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal);
 		}
 
 		//find split cells
@@ -524,8 +521,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
 				isRemoved[removedCellsList.get(i)] = false;
 			}
-			MutableInt currIterations = new MutableInt(0);
-			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal, currIterations);
+			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal);
 		}
 
 		//recursing on new sub components
@@ -820,8 +816,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 	private ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> solveComponentWithBacktracking(
 			int componentPos,
 			SortedSet<Integer> nodes,
-			TreeMap<Integer, Integer> toIndexOriginal,
-			MutableInt currIterations
+			TreeMap<Integer, Integer> toIndexOriginal
 	) throws Exception {
 		ArrayList<Integer> allNodes = new ArrayList<>(nodes.size());
 		allNodes.addAll(nodes);
@@ -831,7 +826,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		for (int i = 0; i < pow2; ++i) {
 			result.add(new Pair<>(new TreeMap<>(), new TreeMap<>()));
 		}
-		solveComponentWithBacktracking(0, allNodes, toIndexOriginal, result, componentPos, currIterations, currNumberOfMines);
+		solveComponentWithBacktracking(0, allNodes, toIndexOriginal, result, componentPos, new MutableInt(0), currNumberOfMines);
 		return result;
 	}
 
