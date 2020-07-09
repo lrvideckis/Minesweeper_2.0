@@ -17,20 +17,24 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 
 public class DrawCellHelpers {
 	private final Paint
-			backgroundGreyForVisibleCells = new Paint();
-	private final Paint backgroundRedForVisibleCells = new Paint();
-	private final Paint middleSquare = new Paint();
-	private final Paint middleRedSquare = new Paint();
-	private final Paint middleGreenSquare = new Paint();
-	private final Paint redFlag = new Paint();
-	private final Paint black = new Paint();
-	private final Paint blackX = new Paint();
+			backgroundGreyForVisibleCells = new Paint(),
+			backgroundRedForVisibleCells = new Paint(),
+			middleSquare = new Paint(),
+			middleRedSquare = new Paint(),
+			middleGreenSquare = new Paint(),
+			redFlag = new Paint(),
+			black = new Paint(),
+			blackX = new Paint(),
+			blackFractionLine = new Paint();
 	private final Paint[] numberColors;
 	private Rect[][] middleSquareRectangles, backgroundRectangles, lowerTriangleRectangles;
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
 		black.setTextSize(GameActivity.cellPixelLength / 3f);
+
+		blackFractionLine.setColor(Color.BLACK);
+		blackFractionLine.setStrokeWidth(4f);
 
 		backgroundGreyForVisibleCells.setColor(ContextCompat.getColor(context, R.color.backgroundGreyBlankVisibleCell));
 		backgroundGreyForVisibleCells.setStyle(Paint.Style.FILL);
@@ -164,19 +168,31 @@ public class DrawCellHelpers {
 		//fraction has too many digits, displaying double format
 		final int digitsNumerator = probability.getNumerator().toString().length();
 		final int digitsDenominator = probability.getDenominator().toString().length();
+
+		final int topAndLeftMargin = 15;
 		if (digitsNumerator + digitsDenominator >= 5) {
 			canvas.drawText(
 					String.format(resources.getString(R.string.two_decimal_places), probability.getDoubleValue()),
-					startX,
+					startX + topAndLeftMargin,
 					startY + GameActivity.cellPixelLength / 3f,
 					black
 			);
 		} else if (probability.equals(1)) {
-			canvas.drawText("1", startX, startY + GameActivity.cellPixelLength / 3f, black);
+			canvas.drawText("1", startX + topAndLeftMargin, startY + GameActivity.cellPixelLength / 3f, black);
 		} else if (probability.equals(0)) {
-			canvas.drawText("0", startX, startY + GameActivity.cellPixelLength / 3f, black);
+			canvas.drawText("0", startX + topAndLeftMargin, startY + GameActivity.cellPixelLength / 3f, black);
 		} else {
-			canvas.drawText(probability.getNumerator() + "/" + probability.getDenominator(), startX, startY + GameActivity.cellPixelLength / 3f, black);
+			final float widthNum = black.measureText(probability.getNumerator().toString());
+			final float widthDen = black.measureText(probability.getDenominator().toString());
+			canvas.drawText(probability.getNumerator().toString(), startX + topAndLeftMargin + (widthDen - widthNum) / 2f, startY + GameActivity.cellPixelLength / 3f, black);
+			canvas.drawText(probability.getDenominator().toString(), startX + topAndLeftMargin, startY + 2 * GameActivity.cellPixelLength / 3f, black);
+			canvas.drawLine(
+					startX + topAndLeftMargin,
+					startY + GameActivity.cellPixelLength / 3f + 8,
+					startX + topAndLeftMargin + black.measureText(probability.getDenominator().toString()),
+					startY + GameActivity.cellPixelLength / 3f + 8,
+					blackFractionLine
+			);
 		}
 	}
 }
