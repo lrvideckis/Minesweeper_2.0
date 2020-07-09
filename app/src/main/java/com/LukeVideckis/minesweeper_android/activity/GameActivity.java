@@ -50,7 +50,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			hasBeenAChangeSinceLastSolverRun = true,
 			gameEndedFromHelpButton = false;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
-	private PopupWindow solverHitLimitPopup;
+	private PopupWindow solverHitLimitPopup, getHelpModeIsDisabledPopup;
 	private volatile PopupWindow couldNotFindNoGuessBoardPopup;
 	private volatile MinesweeperGame minesweeperGame;
 	private BacktrackingSolver holyGrailSolver;
@@ -113,6 +113,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
+		setUpGetHelpDisabledPopup();
 		setUpNoGuessBoardPopup();
 
 		updateTimeThread = new TimeUpdateThread();
@@ -184,7 +185,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			}
 			if (!minesweeperGame.getIsGameLost() && !(toggleFlag && !minesweeperGame.getCell(row, col).getIsVisible())) {
 				if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
-					updateSolvedBoardWithBacktrackingSolver();
+					updateSolvedBoardWithBacktrackingSolver(false);
 				}
 			}
 		} catch (Exception e) {
@@ -225,22 +226,27 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void executeHelpButton() throws Exception {
-		updateSolvedBoardWithBacktrackingSolver();
+		boolean solverHitIterationLimit = false;
 		try {
-			minesweeperGame.revealRandomCellIfAllLogicalStuffIsCorrect();
+			updateSolvedBoardWithBacktrackingSolver(true);
+		} catch (HitIterationLimitException ignored) {
+			solverHitIterationLimit = true;
+		}
+		try {
+			minesweeperGame.revealRandomCellIfAllLogicalStuffIsCorrect(solverHitIterationLimit);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		hasBeenAChangeSinceLastSolverRun = true;
 		if (minesweeperGame.getIsGameLost()) {
 			gameEndedFromHelpButton = true;
-			updateSolvedBoardWithBacktrackingSolver();
+			updateSolvedBoardWithBacktrackingSolver(false);
 			if (!toggleBacktrackingHintsOn) {
 				handleHintToggle(true);
 			}
 		}
 		if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
-			updateSolvedBoardWithBacktrackingSolver();
+			updateSolvedBoardWithBacktrackingSolver(false);
 		}
 		findViewById(R.id.gridCanvas).invalidate();
 	}
@@ -295,7 +301,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		if (isChecked) {
 			//TODO: don't update if hints is already enabled, it will do nothing
 			try {
-				updateSolvedBoardWithBacktrackingSolver();
+				updateSolvedBoardWithBacktrackingSolver(false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -303,7 +309,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		findViewById(R.id.gridCanvas).invalidate();
 	}
 
-	public void updateSolvedBoardWithBacktrackingSolver() throws Exception {
+	public void updateSolvedBoardWithBacktrackingSolver(boolean updatingFromGetHintButtonPress) throws Exception {
 		if (!hasBeenAChangeSinceLastSolverRun) {
 			return;
 		}
@@ -311,7 +317,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		try {
 			holyGrailSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
 		} catch (HitIterationLimitException e) {
-			solverHitIterationLimit();
+			if (updatingFromGetHintButtonPress) {
+				displayGetHelpDisabledPopup();
+			} else {
+				solverHitIterationLimit();
+			}
+			return;
 		}
 
 		for (int i = 0; i < minesweeperGame.getRows(); ++i) {
@@ -333,7 +344,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
 		if (isChecked) {
 			try {
-				updateSolvedBoardWithBacktrackingSolver();
+				updateSolvedBoardWithBacktrackingSolver(false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -352,6 +363,17 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		textView.setText(text);
 	}
 
+	private void setUpGetHelpDisabledPopup() {
+		getHelpModeIsDisabledPopup = PopupHelper.initializePopup(this, R.layout.get_help_disabled_popup);
+		Button okButton = getHelpModeIsDisabledPopup.getContentView().findViewById(R.id.getHelpDisabledOkButton);
+		okButton.setOnClickListener(view -> getHelpModeIsDisabledPopup.dismiss());
+		TextView textView = getHelpModeIsDisabledPopup.getContentView().findViewById(R.id.getHelpDisabledText);
+		String text = "Solver took more than ";
+		text += NumberFormat.getNumberInstance(Locale.US).format(MyBacktrackingSolver.iterationLimit);
+		text += " iterations. A random square will be revealed without checking if there are missed deducible squares.";
+		textView.setText(text);
+	}
+
 	private void setUpNoGuessBoardPopup() {
 		couldNotFindNoGuessBoardPopup = PopupHelper.initializePopup(this, R.layout.couldnt_find_no_guess_board_popup);
 		Button okButton = couldNotFindNoGuessBoardPopup.getContentView().findViewById(R.id.noGuessBoardOkButton);
@@ -360,6 +382,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 	private void displayNoGuessBoardPopup() {
 		PopupHelper.displayPopup(couldNotFindNoGuessBoardPopup, findViewById(R.id.gameLayout), getResources());
+	}
+
+	private void displayGetHelpDisabledPopup() {
+		PopupHelper.displayPopup(getHelpModeIsDisabledPopup, findViewById(R.id.gameLayout), getResources());
 	}
 
 	public void solverHitIterationLimit() {

@@ -569,7 +569,7 @@ public class MinesweeperGame {
 		}
 	}
 
-	public void revealRandomCellIfAllLogicalStuffIsCorrect() throws Exception {
+	public void revealRandomCellIfAllLogicalStuffIsCorrect(boolean solverHitIterationLimit) throws Exception {
 		if (isGameLost || getIsGameWon()) {
 			return;
 		}
@@ -578,27 +578,29 @@ public class MinesweeperGame {
 			firstClickedCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1));
 			return;
 		}
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
-				if (getCell(i, j).isLogicalFree || getCell(i, j).isLogicalMine != getCell(i, j).isFlagged) {
-					isGameLost = true;
-					return;
+		if (!solverHitIterationLimit) {
+			for (int i = 0; i < rows; ++i) {
+				for (int j = 0; j < cols; ++j) {
+					if (getCell(i, j).isLogicalFree || getCell(i, j).isLogicalMine != getCell(i, j).isFlagged) {
+						isGameLost = true;
+						return;
+					}
 				}
 			}
 		}
-		ArrayList<ArrayList<Pair<Integer, Integer>>> freeCells = new ArrayList<>(9);
-		for (int mines = 0; mines <= 8; ++mines) {
+		ArrayList<ArrayList<Pair<Integer, Integer>>> freeCells = new ArrayList<>(2);
+		for (int i = 0; i < 2; ++i) {
 			freeCells.add(new ArrayList<>());
 		}
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				final Tile curr = getCell(i, j);
 				if (!curr.isVisible && !curr.isMine) {
-					freeCells.get(curr.numberSurroundingMines).add(new Pair<>(i, j));
+					freeCells.get(Math.min(curr.numberSurroundingMines, 1)).add(new Pair<>(i, j));
 				}
 			}
 		}
-		for (int mines = 0; mines <= 8; ++mines) {
+		for (int mines = 0; mines < 2; ++mines) {
 			if (freeCells.get(mines).isEmpty()) {
 				continue;
 			}
