@@ -21,7 +21,7 @@ public class MinesweeperGame {
 	private final int rows, cols, numberOfMines;
 	private final Tile[][] grid;
 	private int numberOfFlags, rowWith8 = -1, colWith8 = -1;
-	private boolean firstClick, isGameLost, hasAn8 = false;
+	private boolean firstClick, isGameLost, hasAn8 = false, revealedAHiddenCell = false;
 
 	public MinesweeperGame(int rows, int cols, int numberOfMines) throws Exception {
 		if (tooManyMinesForZeroStart(rows, cols, numberOfMines)) {
@@ -138,7 +138,9 @@ public class MinesweeperGame {
 		return grid[row][col];
 	}
 
-	public void clickCell(int row, int col, boolean toggleMines) throws Exception {
+	//returns true if the board has changed
+	public boolean clickCell(int row, int col, boolean toggleMines) throws Exception {
+		revealedAHiddenCell = false;
 		if (firstClick && !toggleMines) {
 			firstClick = false;
 			if (hasAn8) {
@@ -146,10 +148,10 @@ public class MinesweeperGame {
 			} else {
 				firstClickedCell(row, col);
 			}
-			return;
+			return revealedAHiddenCell;
 		}
 		if (isGameLost || getIsGameWon()) {
-			return;
+			return revealedAHiddenCell;
 		}
 		final Tile curr = getCell(row, col);
 		if (curr.getIsVisible()) {
@@ -164,16 +166,17 @@ public class MinesweeperGame {
 				}
 				curr.toggleFlag();
 			}
-			return;
+			return revealedAHiddenCell;
 		}
 		if (curr.isMine && !curr.isFlagged()) {
 			isGameLost = true;
-			return;
+			return revealedAHiddenCell;
 		}
 		if (curr.isFlagged()) {
-			return;
+			return revealedAHiddenCell;
 		}
 		revealCell(row, col);
+		return revealedAHiddenCell;
 	}
 
 	private void checkToRevealAdjacentMines(int row, int col) throws Exception {
@@ -564,7 +567,7 @@ public class MinesweeperGame {
 		}
 	}
 
-	public static class Tile extends BacktrackingSolver.VisibleTileWithProbability {
+	public class Tile extends BacktrackingSolver.VisibleTileWithProbability {
 		private boolean isFlagged, isMine;
 
 		private Tile() {
@@ -596,6 +599,9 @@ public class MinesweeperGame {
 		}
 
 		private void revealTile() throws Exception {
+			if (!isVisible) {
+				MinesweeperGame.this.revealedAHiddenCell = true;
+			}
 			isVisible = true;
 			isFlagged = isLogicalFree = false;
 			mineProbability.setValues(0, 1);

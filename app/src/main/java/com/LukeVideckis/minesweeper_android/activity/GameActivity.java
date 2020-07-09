@@ -46,7 +46,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	private boolean
 			toggleFlagModeOn = false,
 			toggleBacktrackingHintsOn = false,
-			toggleMineProbabilityOn = false;
+			toggleMineProbabilityOn = false,
+			hasBeenAChangeSinceLastSolverRun = true;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
 	private PopupWindow solverHitLimitPopup;
 	private volatile PopupWindow couldNotFindNoGuessBoardPopup;
@@ -171,7 +172,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		try {
 			//TODO: bug here: when you click a visible cell which results in revealing extra cells in easy/hard mode - make sure you win/lose
 			//TODO: don't change mine configuration when the current config matches what you want
-			minesweeperGame.clickCell(row, col, toggleFlag);
+			if (minesweeperGame.clickCell(row, col, toggleFlag)) {
+				hasBeenAChangeSinceLastSolverRun = true;
+			}
 			if (!minesweeperGame.getIsGameLost() && !(toggleFlag && !minesweeperGame.getCell(row, col).getIsVisible())) {
 				if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
 					updateSolvedBoardWithBacktrackingSolver();
@@ -256,11 +259,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	public void updateSolvedBoardWithBacktrackingSolver() throws Exception {
-		//TODO: only run solver if board has changed since last time
+		if (!hasBeenAChangeSinceLastSolverRun) {
+			return;
+		}
 		ConvertGameBoardFormat.convertToExistingBoard(minesweeperGame, board, false);
 		try {
 			holyGrailSolver.solvePosition(board, minesweeperGame.getNumberOfMines());
-
 		} catch (HitIterationLimitException e) {
 			solverHitIterationLimit();
 		}
@@ -276,6 +280,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			}
 		}
 		minesweeperGame.updateLogicalStuff(board);
+		hasBeenAChangeSinceLastSolverRun = false;
 	}
 
 	private void handleHintToggle(boolean isChecked) {
@@ -500,7 +505,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				finishedBoardGen.set(true);
 				updateTimeThread.start();
 				try {
-					minesweeperGame.clickCell(row, col, false);
+					if (minesweeperGame.clickCell(row, col, false)) {
+						hasBeenAChangeSinceLastSolverRun = true;
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

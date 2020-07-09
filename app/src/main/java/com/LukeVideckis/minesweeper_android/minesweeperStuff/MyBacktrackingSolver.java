@@ -308,7 +308,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 	@Override
 	public void solvePosition(VisibleTileWithProbability[][] board, int numberOfMines) throws Exception {
-
 		if (AllCellsAreHidden.allCellsAreHidden(board)) {
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {

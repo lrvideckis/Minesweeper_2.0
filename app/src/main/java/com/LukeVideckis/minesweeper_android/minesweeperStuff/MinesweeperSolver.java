@@ -1,7 +1,5 @@
 package com.LukeVideckis.minesweeper_android.minesweeperStuff;
 
-import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame.Tile;
-
 public interface MinesweeperSolver {
 	void solvePosition(VisibleTile[][] board, int numberOfMines) throws Exception;
 
@@ -72,13 +70,13 @@ public interface MinesweeperSolver {
 			return numberSurroundingMines;
 		}
 
-		public void updateVisibilityAndSurroundingMines(Tile tile) throws Exception {
+		public void updateVisibilityAndSurroundingMines(MinesweeperGame.Tile tile) throws Exception {
 			reset();
 			isVisible = tile.isVisible;
 			numberSurroundingMines = tile.numberSurroundingMines;
 		}
 
-		public void updateVisibilitySurroundingMinesAndLogicalStuff(Tile tile) throws Exception {
+		public void updateVisibilitySurroundingMinesAndLogicalStuff(MinesweeperGame.Tile tile) throws Exception {
 			if (tile.isLogicalFree && tile.isLogicalMine) {
 				throw new Exception("tile can't be both logical free and mine");
 			}

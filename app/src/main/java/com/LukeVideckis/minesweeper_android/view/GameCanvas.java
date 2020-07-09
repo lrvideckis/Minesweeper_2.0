@@ -10,9 +10,9 @@ import android.view.View;
 
 import com.LukeVideckis.minesweeper_android.activity.GameActivity;
 import com.LukeVideckis.minesweeper_android.activity.ScaleListener;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame;
 
 import static com.LukeVideckis.minesweeper_android.minesweeperStuff.BacktrackingSolver.VisibleTileWithProbability;
-import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperGame.Tile;
 
 public class GameCanvas extends View {
 
@@ -38,7 +38,7 @@ public class GameCanvas extends View {
 		scaleListener.setScreenWidthAndHeight(getWidth(), getHeight());
 	}
 
-	private void drawCell(Canvas canvas, VisibleTileWithProbability solverCell, Tile gameCell, int i, int j, int startX, int startY, boolean drawRedBackground) throws Exception {
+	private void drawCell(Canvas canvas, VisibleTileWithProbability solverCell, MinesweeperGame.Tile gameCell, int i, int j, int startX, int startY, boolean drawRedBackground) throws Exception {
 
 		//error checking
 		GameActivity gameActivity = (GameActivity) getContext();
