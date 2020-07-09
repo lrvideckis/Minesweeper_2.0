@@ -104,6 +104,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		Switch toggleProbability = findViewById(R.id.toggleMineProbability);
 		toggleProbability.setOnCheckedChangeListener(this);
 
+		ImageButton getHelpButton = findViewById(R.id.getHelpButton);
+		getHelpButton.setOnClickListener(this);
+		if (gameMode == R.id.get_help_mode) {
+			getHelpButton.setVisibility(View.VISIBLE);
+		}
+
 		updateNumberOfMines(numberOfMines);
 		setUpIterationLimitPopup();
 		setUpNoGuessBoardPopup();
@@ -207,7 +213,32 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 					toggleFlagMode.setText(mineEmoji);
 				}
 				break;
+			case R.id.getHelpButton:
+				executeHelpButton();
+				break;
 		}
+	}
+
+	private void executeHelpButton() {
+		try {
+			updateSolvedBoardWithBacktrackingSolver();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			minesweeperGame.revealRandomCellIfAllLogicalStuffIsCorrect();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		hasBeenAChangeSinceLastSolverRun = true;
+		if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
+			try {
+				updateSolvedBoardWithBacktrackingSolver();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		findViewById(R.id.gridCanvas).invalidate();
 	}
 
 	private void startNewGame() {
@@ -368,6 +399,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 		Button flagModeButton = findViewById(R.id.toggleFlagMode);
 		flagModeButton.setClickable(false);
+
+		ImageButton getHelp = findViewById(R.id.getHelpButton);
+		getHelp.setClickable(false);
 	}
 
 	public void enableButtonsAndSwitchesAndSetToFalse() {
@@ -383,6 +417,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		flagModeButton.setClickable(true);
 		flagModeButton.setText(mineEmoji);
 		toggleFlagModeOn = false;
+
+		ImageButton getHelp = findViewById(R.id.getHelpButton);
+		getHelp.setClickable(true);
 	}
 
 	public void setNewGameButtonDeadFace() {

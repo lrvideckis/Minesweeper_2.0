@@ -9,6 +9,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.Dsu;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.RowColToIndex;
 
 import java.util.ArrayList;
@@ -566,6 +567,48 @@ public class MinesweeperGame {
 				getCell(i, j).isFlagged = game.getCell(i, j).isFlagged;
 			}
 		}
+	}
+
+	public void revealRandomCellIfAllLogicalStuffIsCorrect() throws Exception {
+		if (isGameLost || getIsGameWon()) {
+			return;
+		}
+		if (firstClick) {
+			firstClick = false;
+			firstClickedCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1));
+			return;
+		}
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (getCell(i, j).isLogicalFree || getCell(i, j).isLogicalMine != getCell(i, j).isFlagged) {
+					isGameLost = true;
+					return;
+				}
+			}
+		}
+		ArrayList<ArrayList<Pair<Integer, Integer>>> freeCells = new ArrayList<>(9);
+		for (int mines = 0; mines <= 8; ++mines) {
+			freeCells.add(new ArrayList<>());
+		}
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				final Tile curr = getCell(i, j);
+				if (!curr.isVisible && !curr.isMine) {
+					freeCells.get(curr.numberSurroundingMines).add(new Pair<>(i, j));
+				}
+			}
+		}
+		for (int mines = 0; mines <= 8; ++mines) {
+			if (freeCells.get(mines).isEmpty()) {
+				continue;
+			}
+			Collections.shuffle(freeCells.get(mines));
+			final int i = freeCells.get(mines).get(0).first;
+			final int j = freeCells.get(mines).get(0).second;
+			revealCell(i, j);
+			return;
+		}
+		throw new Exception("there should have been at least 1 free cell since the game isn't won");
 	}
 
 	public class Tile extends BacktrackingSolver.VisibleTileWithProbability {
