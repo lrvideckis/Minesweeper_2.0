@@ -49,9 +49,9 @@ public class EdgePair {
 						continue;
 					}
 					++numberOfComponents;
-					MutableInt componentSize = new MutableInt(0);
-					dfs(node, subComponent, componentPos, isRemoved, visited, adjList, componentSize);
-					maxComponentSize = Math.max(maxComponentSize, componentSize.get());
+					TreeSet<Integer> nodesInComponent = new TreeSet<>();
+					dfs(node, subComponent, componentPos, isRemoved, visited, adjList, nodesInComponent);
+					maxComponentSize = Math.max(maxComponentSize, nodesInComponent.size());
 				}
 				isRemoved[edge1.first] = isRemoved[edge1.second] = isRemoved[edge2.first] = isRemoved[edge2.second] = false;
 				if (numberOfComponents == 0) {
@@ -73,9 +73,9 @@ public class EdgePair {
 			final boolean[] isRemoved,
 			final TreeSet<Integer> visited,
 			final ArrayList<ArrayList<SortedSet<Integer>>> adjList,
-			final MutableInt componentSize
+			final TreeSet<Integer> nodesInComponent
 	) {
-		componentSize.addWith(1);
+		nodesInComponent.add(node);
 		if (isRemoved[node]) {
 			return;
 		}
@@ -84,7 +84,7 @@ public class EdgePair {
 			if (visited.contains(next) || !subComponent.contains(next)) {
 				continue;
 			}
-			dfs(next, subComponent, componentPos, isRemoved, visited, adjList, componentSize);
+			dfs(next, subComponent, componentPos, isRemoved, visited, adjList, nodesInComponent);
 		}
 	}
 }
