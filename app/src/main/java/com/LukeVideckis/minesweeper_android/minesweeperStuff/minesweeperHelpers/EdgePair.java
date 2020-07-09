@@ -15,8 +15,11 @@ public class EdgePair {
 	) throws Exception {
 		TreeSet<MyPair> edges = new TreeSet<>();
 		for (int node : subComponent) {
+			if (isRemoved[node]) {
+				continue;
+			}
 			for (int next : adjList.get(componentPos).get(node)) {
-				if (!subComponent.contains(next)) {
+				if (!subComponent.contains(next) || isRemoved[next]) {
 					continue;
 				}
 				int u = node;
@@ -38,7 +41,7 @@ public class EdgePair {
 						isRemoved[edge2.first] ||
 						isRemoved[edge2.second]
 				) {
-					continue;
+					throw new Exception("edge with a removed node, but this was checked earlier");
 				}
 				isRemoved[edge1.first] = isRemoved[edge1.second] = isRemoved[edge2.first] = isRemoved[edge2.second] = true;
 				TreeSet<Integer> visited = new TreeSet<>();
@@ -54,9 +57,6 @@ public class EdgePair {
 					maxComponentSize = Math.max(maxComponentSize, nodesInComponent.size());
 				}
 				isRemoved[edge1.first] = isRemoved[edge1.second] = isRemoved[edge2.first] = isRemoved[edge2.second] = false;
-				if (numberOfComponents == 0) {
-					throw new Exception("0 components, but there should be at least 1");
-				}
 				if (numberOfComponents > 1 && smallestLargestComponentSize > maxComponentSize) {
 					smallestLargestComponentSize = maxComponentSize;
 					edgePairWithSmallestLargestComponent = new Pair<>(edge1, edge2);

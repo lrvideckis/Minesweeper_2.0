@@ -29,7 +29,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 	public final static int iterationLimit = 10000;
 	//TODO: play around with this number
-	private static final int maxNumberOfRemovedCells = 7;
+	private static final int maxNumberOfRemovedCells = 6;
 	private final int rows, cols;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
@@ -491,7 +491,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		if (startNumRemoved > maxNumberOfRemovedCells) {
 			throw new Exception("starting with too many removed cells " + startNumRemoved);
 		}
-		if (subComponent.size() <= 5) {//TODO: play around with this number
+		if (subComponent.size() <= 8) {//TODO: play around with this number
 			return solveComponentWithBacktracking(componentPos, subComponent, toIndexOriginal);
 		}
 
@@ -512,13 +512,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		//2nd try: find pairs of articulation nodes
 
 		//3rd try: find pairs of edges - only once there are no cut nodes, if there's >= 1 cut node, then we'll recurse again
-		int cntNonRemovedNodes = 0;
-		for (int node : subComponent) {
-			if (!isRemoved[node]) {
-				++cntNonRemovedNodes;
-			}
-		}
-		if (allCutNodes.isEmpty() && cntNonRemovedNodes > 4) {
+		if (allCutNodes.isEmpty()) {
 			Pair<MyPair, MyPair> edgePair = EdgePair.getPairOfEdges(subComponent, componentPos, isRemoved, adjList);
 			TreeSet<Integer> uniqueNodes = new TreeSet<>();
 			if (edgePair != null) {

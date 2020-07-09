@@ -28,6 +28,29 @@ public class Test {
 
 	private final static String[][] previousFailedBoards = {
 
+			//board such that at some point: there's no cut nodes, and there exists an edge pair which removes all nodes in sub-component
+			{
+					"UUUUU1.1UUUU",
+					"UUUUU422U2UU",
+					"UUUUUUU32UUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUU22UUUUUUU",
+					"UUUU2UUUUUUU",
+					"UU3UUUUUUUUU",
+					"12UUUUUUUUUU",
+					"12244UU4UUUU",
+					"U1.1U213UUUU",
+					"221221.2UUUU",
+					"U33U2223UUUU",
+					"4UU3UUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+
+					"61"
+			},
+
 			//every node is removed in some sub-component
 			{
 					"UUUUUUUUUUUU",
