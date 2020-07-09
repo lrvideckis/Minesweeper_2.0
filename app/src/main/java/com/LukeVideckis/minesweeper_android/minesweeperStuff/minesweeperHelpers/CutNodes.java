@@ -6,6 +6,7 @@ import java.util.TreeSet;
 
 public class CutNodes {
 	public static TreeSet<Integer> getCutNodes(SortedSet<Integer> nodes, ArrayList<SortedSet<Integer>> adjList, boolean[] isRemoved) throws Exception {
+		//TODO: change these to Trees, for better complexity
 		//initialize variables for finding cut nodes
 		final int[] minTime = new int[isRemoved.length];
 		final int[] timeIn = new int[isRemoved.length];
@@ -18,13 +19,13 @@ public class CutNodes {
 		TreeSet<Integer> allCutNodes = new TreeSet<>();
 		for (SortedSet<Integer> component : GetSubComponentByRemovedNodes.getSubComponentByRemovedNodes(nodes, adjList, isRemoved)) {
 			Integer startNode = null;
-			for(int node : component) {
-				if(!isRemoved[node]) {
+			for (int node : component) {
+				if (!isRemoved[node]) {
 					startNode = node;
 					break;
 				}
 			}
-			if(startNode == null) {
+			if (startNode == null) {
 				throw new Exception("each component should have at least 1 non-removed node");
 			}
 			for (int currCutNode : getCutNodesForASingleComponent(startNode, nodes, adjList, isRemoved, visited, timeIn, minTime, currTime, component)) {

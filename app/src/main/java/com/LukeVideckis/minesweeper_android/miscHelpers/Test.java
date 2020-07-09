@@ -14,7 +14,6 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.MyBacktrackingSolve
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.OldBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.SlowBacktrackingSolver;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ArrayBounds;
-import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.ConvertGameBoardFormat;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CreateSolvableBoard;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
@@ -28,6 +27,98 @@ public class Test {
 	@SuppressWarnings("SpellCheckingInspection")
 
 	private final static String[][] previousFailedBoards = {
+
+			//every node is removed in some sub-component
+			{
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUU212BU",
+					"UUUUUUU2112U",
+					"UUUUUUUB2.1U",
+					"UUUUUUBB2.1U",
+					"UUUUUU32112U",
+					"UUUUUU1.12BU",
+					"UUUUUU113B4U",
+					"UUUUUU2UUBUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"U3UUU33UUUUU",
+					"U322U2BUUUUU",
+					"BB11122UUUUU",
+					"2211U11UUUUU",
+					"..13U21UUUUU",
+					"..1BBUUUUUUU",
+					"..14BUUUUUUU",
+					"..13B5BUUUUU",
+					"112B24BUUUUU",
+					"2B3123BUUUUU",
+					"2B2.1B3UUUUU",
+					"FF212FUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+					"UUUUUUUUUUUU",
+
+					"119"
+			},
+
+			//smallish failing test for first try of implementing removing edge pairs
+			{
+					"UUUUUUU",
+					"UBUU2UU",
+					"U3212UU",
+					"U1..1UU",
+
+					"6"
+			},
+
+
+			{
+					"UUU3B2.",
+					"U2U3B31",
+					"U21324B",
+					"U3U4B4B",
+					"UUUUUUU",
+
+					"12"
+			},
+
+			{
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+					"UUUUUUUUUUUUUUUUUBB22BBB32U",
+					"UUUUUUUUUUUUU113BB31124B3UU",
+					"UUUUUUUUUUUUU1.2B31...123UU",
+					"UUUUUUUUUUUUU32211122112B21",
+					"UUUUUUUUUUUUUBB4211BB12B31.",
+					"UUUUUUUUUUUUUUBBB212223B2..",
+					"UUUUUUUUUUUUUFU5B2...1B21..",
+					"UUUUUUUUUUUUU1F211111111...",
+					"UUUUUUUUUUUUF223222B211....",
+					"UUUUUU2UUUUUU2UUBUU33B21211",
+					"UUUUUUUUUUUUUUUUUUUUU33B2B2",
+					"UUUUUUUUUU2UUUUUUUUUUUU233B",
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+					"UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+
+					"170"
+			},
 
 			//first failing test: new recursive solver thingy compared to old fast backtracking solver
 			{
@@ -515,7 +606,6 @@ public class Test {
 					System.out.println("i,j: " + i + " " + j);
 					System.out.println("fast solver " + fastTile.getMineProbability().getNumerator() + '/' + fastTile.getMineProbability().getDenominator());
 					System.out.println("slow solver " + slowTile.getMineProbability().getNumerator() + '/' + slowTile.getMineProbability().getDenominator());
-					System.out.println("number of away cells: " + AwayCell.getNumberOfAwayCells(boardFast));
 				}
 			}
 		}

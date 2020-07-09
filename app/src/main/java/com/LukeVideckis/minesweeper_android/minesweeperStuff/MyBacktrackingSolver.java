@@ -13,6 +13,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetSubComponentByRemovedNodes;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MutableInt;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyMath;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.MyPair;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.RowColToIndex;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 	public final static int iterationLimit = 10000;
 	//TODO: play around with this number
-	private static final int maxNumberOfRemovedCells = 5;
+	private static final int maxNumberOfRemovedCells = 7;
 	private final int rows, cols;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines, updatedNumberSurroundingMines;
@@ -497,11 +498,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		//find split cells
 		//1st try: find articulation nodes
 		TreeSet<Integer> allCutNodes = CutNodes.getCutNodes(subComponent, adjList.get(componentPos), isRemoved);
-		//TODO: these
-		//2nd try: find pairs of articulation nodes
-		//3rd try: find pairs of edges
-		//4th try: approximation algorithm
-
 		for (int node : allCutNodes) {
 			if (removedCellsList.size() < maxNumberOfRemovedCells) {
 				removedCellsList.add(node);
@@ -512,12 +508,40 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 
+		//TODO: these
+		//2nd try: find pairs of articulation nodes
+
+		//3rd try: find pairs of edges - only once there are no cut nodes, if there's >= 1 cut node, then we'll recurse again
+		int cntNonRemovedNodes = 0;
+		for (int node : subComponent) {
+			if (!isRemoved[node]) {
+				++cntNonRemovedNodes;
+			}
+		}
+		if (allCutNodes.isEmpty() && cntNonRemovedNodes > 4) {
+			Pair<MyPair, MyPair> edgePair = getPairOfEdges(subComponent, componentPos, isRemoved);
+			TreeSet<Integer> uniqueNodes = new TreeSet<>();
+			if (edgePair != null) {
+				uniqueNodes.add(edgePair.first.first);
+				uniqueNodes.add(edgePair.first.second);
+				uniqueNodes.add(edgePair.second.first);
+				uniqueNodes.add(edgePair.second.second);
+				if (removedCellsList.size() + uniqueNodes.size() <= maxNumberOfRemovedCells) {
+					for (int node : uniqueNodes) {
+						removedCellsList.add(node);
+						if (isRemoved[node]) {
+							throw new Exception("node is already removed, but this shouldn't happen");
+						}
+						isRemoved[node] = true;
+					}
+				}
+			}
+		}
+		//4th try: approximation algorithm
+
 		ArrayList<SortedSet<Integer>> newSubComponents = GetSubComponentByRemovedNodes.getSubComponentByRemovedNodes(subComponent, adjList.get(componentPos), isRemoved);
 
-		if (newSubComponents.isEmpty()) {
-			throw new Exception("there should be at least 1 sub component");
-		}
-		if (newSubComponents.size() == 1) {
+		if (newSubComponents.size() <= 1) {
 			for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
 				isRemoved[removedCellsList.get(i)] = false;
 			}
@@ -530,8 +554,10 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			resultsSub.add(solveComponent(componentPos, currSubComponent, isRemoved));
 		}
 
+		ArrayList<Integer> removedCellsListSorted = new ArrayList<>(removedCellsList);
+		Collections.sort(removedCellsListSorted);
 		ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result =
-				combineResultsFromRecursing(subComponent, componentPos, newSubComponents, toIndexOriginal, isRemoved, startNumRemoved, removedCellsList, resultsSub);
+				combineResultsFromRecursing(subComponent, componentPos, newSubComponents, toIndexOriginal, isRemoved, startNumRemoved, removedCellsListSorted, resultsSub);
 
 		//restore isRemoved to was it was at the beginning of the recursive call
 		for (int i = startNumRemoved; i < removedCellsList.size(); ++i) {
@@ -541,6 +567,80 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		return result;
 	}
 
+	//TODO: move this to helper file
+	//TODO: instead of short-circuiting out once you find a solution, find the edge pair which minimizes the size of the largest component; same complexity
+	private Pair<MyPair, MyPair> getPairOfEdges(
+			final SortedSet<Integer> subComponent,
+			final int componentPos,
+			final boolean[] isRemoved
+	) throws Exception {
+		TreeSet<MyPair> edges = new TreeSet<>();
+		for (int node : subComponent) {
+			for (int next : adjList.get(componentPos).get(node)) {
+				if (!subComponent.contains(next)) {
+					continue;
+				}
+				int u = node;
+				int v = next;
+				if (u > v) {
+					int temp = u;
+					u = v;
+					v = temp;
+				}
+				edges.add(new MyPair(u, v));
+			}
+		}
+		for (MyPair edge1 : edges) {
+			for (MyPair edge2 : edges) {
+				if (isRemoved[edge1.first] ||
+						isRemoved[edge1.second] ||
+						isRemoved[edge2.first] ||
+						isRemoved[edge2.second]
+				) {
+					continue;
+				}
+				isRemoved[edge1.first] = isRemoved[edge1.second] = isRemoved[edge2.first] = isRemoved[edge2.second] = true;
+				TreeSet<Integer> visited = new TreeSet<>();
+				int numberOfComponents = 0;
+				for (int node : subComponent) {
+					if (isRemoved[node] || visited.contains(node)) {
+						continue;
+					}
+					++numberOfComponents;
+					dfs(node, subComponent, componentPos, isRemoved, visited);
+				}
+				isRemoved[edge1.first] = isRemoved[edge1.second] = isRemoved[edge2.first] = isRemoved[edge2.second] = false;
+				if (numberOfComponents == 0) {
+					throw new Exception("0 components, but there should be at least 1");
+				}
+				if (numberOfComponents > 1) {
+					System.out.println("here, returning an edge pair");
+					return new Pair<>(edge1, edge2);
+				}
+			}
+		}
+		return null;
+	}
+
+	private void dfs(
+			int node,
+			final SortedSet<Integer> subComponent,
+			final int componentPos,
+			final boolean[] isRemoved,
+			final TreeSet<Integer> visited
+	) {
+		if (isRemoved[node]) {
+			return;
+		}
+		visited.add(node);
+		for (int next : adjList.get(componentPos).get(node)) {
+			if (visited.contains(next) || !subComponent.contains(next)) {
+				continue;
+			}
+			dfs(next, subComponent, componentPos, isRemoved, visited);
+		}
+	}
+
 	private ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> combineResultsFromRecursing(
 			SortedSet<Integer> subComponent,
 			final int componentPos,
@@ -548,7 +648,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			TreeMap<Integer, Integer> toIndexOriginal,
 			boolean[] isRemoved,
 			final int startNumRemoved,
-			ArrayList<Integer> removedCellsList,
+			ArrayList<Integer> removedCellsListSorted,
 			ArrayList<ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>>> resultsSub
 	) throws Exception {
 		TreeMap<Integer, Integer> toIndexOriginalAfterAddingNewRemoved = new TreeMap<>();
@@ -619,7 +719,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		}
 
 		//combine results
-		final int pow2 = (1 << removedCellsList.size());
+		final int pow2 = (1 << removedCellsListSorted.size());
 		for (int mask = 0; mask < pow2; ++mask) {//<32
 			/*
 			 * there could be some clues which are next to **only** removed cells
@@ -662,11 +762,11 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			 * For mines in removed cells, we only want to count then once in the total # of mines
 			 */
 			int cntToAdjustForDuplicates = 0;
-			for (int bit = 0; bit < removedCellsList.size(); ++bit) {
+			for (int bit = 0; bit < removedCellsListSorted.size(); ++bit) {
 				if ((mask & (1 << bit)) == 0) {
 					continue;
 				}
-				final int node = removedCellsList.get(bit);
+				final int node = removedCellsListSorted.get(bit);
 				int cntSubContains = 0;
 				for (SortedSet<Integer> currSubComponent : newSubComponents) {
 					if (currSubComponent.contains(node)) {
@@ -686,50 +786,51 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			prefixMineConfigs.get(0).put(0, new MutableInt(1));
 
 			ArrayList<Integer> maskSubC = new ArrayList<>(newSubComponents.size());
-			for (int subC = 0; subC < newSubComponents.size(); ++subC) {//<7
+			for (int subC = 0; subC < newSubComponents.size(); ++subC) {
 				int currMaskSubC = 0;
-				for (int bit = 0; bit < removedCellsList.size(); ++bit) {//<7
+				for (int bit = 0; bit < removedCellsListSorted.size(); ++bit) {
 					if ((mask & (1 << bit)) == 0) {
 						continue;
 					}
-					if (!toIndex.get(subC).containsKey(removedCellsList.get(bit))) {
+					if (!toIndex.get(subC).containsKey(removedCellsListSorted.get(bit))) {
 						continue;
 					}
-					final int currIndex = Objects.requireNonNull(toIndex.get(subC).get(removedCellsList.get(bit)));
+					final int currIndex = Objects.requireNonNull(toIndex.get(subC).get(removedCellsListSorted.get(bit)));
 					currMaskSubC = (currMaskSubC | (1 << currIndex));
 				}
 				maskSubC.add(currMaskSubC);
 				final TreeMap<Integer, MutableInt> currSubMineConfig = resultsSub.get(subC).get(maskSubC.get(subC)).first;
 
 				//update new mine configs
-				for (TreeMap.Entry<Integer, MutableInt> prevMineConfigs : prefixMineConfigs.get(subC).entrySet()) {//< ~4 ish
-					for (TreeMap.Entry<Integer, MutableInt> currMineConfigs : currSubMineConfig.entrySet()) {//< ~4 ish
+				for (TreeMap.Entry<Integer, MutableInt> prevMineConfigs : prefixMineConfigs.get(subC).entrySet()) {
+					for (TreeMap.Entry<Integer, MutableInt> currMineConfigs : currSubMineConfig.entrySet()) {
 						final int newKey = prevMineConfigs.getKey() + currMineConfigs.getKey();
 						if (!prefixMineConfigs.get(subC + 1).containsKey(newKey)) {
 							prefixMineConfigs.get(subC + 1).put(newKey, new MutableInt(0));
 						}
 						MutableInt curr = Objects.requireNonNull(prefixMineConfigs.get(subC + 1).get(newKey));
+						//TODO: consider switching here to big integers
 						curr.addWith(prevMineConfigs.getValue().get() * currMineConfigs.getValue().get());
 					}
 				}
 			}
 
 			int currMask = 0;
-			for (int bit = 0; bit < removedCellsList.size(); ++bit) {//<7
+			for (int bit = 0; bit < removedCellsListSorted.size(); ++bit) {
 				if ((mask & (1 << bit)) == 0) {
 					continue;
 				}
-				if (!toIndexOriginal.containsKey(removedCellsList.get(bit))) {
+				if (!toIndexOriginal.containsKey(removedCellsListSorted.get(bit))) {
 					continue;
 				}
-				final int currIndex = Objects.requireNonNull(toIndexOriginal.get(removedCellsList.get(bit)));
+				final int currIndex = Objects.requireNonNull(toIndexOriginal.get(removedCellsListSorted.get(bit)));
 				currMask = (currMask | (1 << currIndex));
 			}
 
 			TreeMap<Integer, MutableInt> resultMineConfigs = result.get(currMask).first;
 			TreeMap<Integer, ArrayList<MutableInt>> resultMineProbs = result.get(currMask).second;
 
-			for (TreeMap.Entry<Integer, MutableInt> mineConfigs : prefixMineConfigs.get(newSubComponents.size()).entrySet()) {//< ~4 ish
+			for (TreeMap.Entry<Integer, MutableInt> mineConfigs : prefixMineConfigs.get(newSubComponents.size()).entrySet()) {
 				final int currKey = mineConfigs.getKey() + cntToAdjustForDuplicates;
 				if (!resultMineConfigs.containsKey(currKey)) {
 					resultMineConfigs.put(currKey, new MutableInt(0));
@@ -759,7 +860,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			TreeMap<Integer, MutableInt> suffixMineConfigs = new TreeMap<>();
 			suffixMineConfigs.put(0, new MutableInt(1));
 
-			for (int subC = newSubComponents.size() - 1; subC >= 0; --subC) {//<7
+			for (int subC = newSubComponents.size() - 1; subC >= 0; --subC) {
 				final TreeMap<Integer, MutableInt> currSubMineConfig = resultsSub.get(subC).get(maskSubC.get(subC)).first;
 				final TreeMap<Integer, ArrayList<MutableInt>> currSubProb = resultsSub.get(subC).get(maskSubC.get(subC)).second;
 
@@ -795,8 +896,8 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 
 				//update prevMineConfigs
 				TreeMap<Integer, MutableInt> tempMineConfigs = new TreeMap<>();
-				for (TreeMap.Entry<Integer, MutableInt> currSuffixMineConfigs : suffixMineConfigs.entrySet()) {//< ~4 ish
-					for (TreeMap.Entry<Integer, MutableInt> currMineConfigs : currSubMineConfig.entrySet()) {//< ~4 ish
+				for (TreeMap.Entry<Integer, MutableInt> currSuffixMineConfigs : suffixMineConfigs.entrySet()) {
+					for (TreeMap.Entry<Integer, MutableInt> currMineConfigs : currSubMineConfig.entrySet()) {
 						final int currKey = currSuffixMineConfigs.getKey() + currMineConfigs.getKey();
 						if (!tempMineConfigs.containsKey(currKey)) {
 							tempMineConfigs.put(currKey, new MutableInt(0));

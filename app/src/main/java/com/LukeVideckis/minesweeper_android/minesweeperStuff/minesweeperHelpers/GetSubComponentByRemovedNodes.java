@@ -36,7 +36,7 @@ public class GetSubComponentByRemovedNodes {
 			boolean[] visited,
 			SortedSet<Integer> nodes,
 			ArrayList<SortedSet<Integer>> adjList
-			) throws Exception {
+	) throws Exception {
 		if (isRemoved[startNode]) {
 			throw new Exception("start node is removed");
 		}

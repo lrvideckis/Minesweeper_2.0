@@ -162,13 +162,4 @@ public class GetConnectedComponents {
 		}
 		return disjointSet;
 	}
-
-	private static class MyPair {
-		public final Integer first, second;
-
-		public MyPair(Integer first, Integer second) {
-			this.first = first;
-			this.second = second;
-		}
-	}
 }
