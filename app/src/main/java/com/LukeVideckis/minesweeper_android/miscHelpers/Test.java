@@ -459,14 +459,7 @@ public class Test {
 
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
-			int numberOfClicks = MyMath.getRand(0, 4);
-			while ((numberOfClicks--) > 0 && !minesweeperGame.getIsGameLost()) {
-				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
-			}
-			if (minesweeperGame.getIsGameLost()) {
-				System.out.println("game over, void test");
-				continue;
-			}
+			minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 
 			while (!minesweeperGame.getIsGameWon()) {
 				if (minesweeperGame.getIsGameLost()) {
@@ -503,7 +496,7 @@ public class Test {
 					}
 				}
 				if (!clickedFree) {
-					break;
+					minesweeperGame.revealRandomCellIfAllLogicalStuffIsCorrect(true);
 				}
 			}
 			if (minesweeperGame.getIsGameLost()) {
@@ -517,8 +510,8 @@ public class Test {
 	public static void performTestsForMineProbabilityLargeBoards(int numberOfTests) throws Exception {
 		for (int testID = 1; testID <= numberOfTests; ++testID) {
 			System.out.println("test number: " + testID);
-			final int rows = MyMath.getRand(10, 40);
-			final int cols = MyMath.getRand(10, 40);
+			final int rows = MyMath.getRand(10, 30);
+			final int cols = MyMath.getRand(10, 30);
 			int mines = Math.min((int) (rows * cols * 0.30), rows * cols - 9);
 
 			BacktrackingSolver holyGrailSolver = new HolyGrailSolver(rows, cols);
@@ -526,14 +519,7 @@ public class Test {
 
 			MinesweeperGame minesweeperGame;
 			minesweeperGame = new MinesweeperGame(rows, cols, mines);
-			int numberOfClicks = MyMath.getRand(0, 4);
-			while ((numberOfClicks--) > 0 && !minesweeperGame.getIsGameLost()) {
-				minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
-			}
-			if (minesweeperGame.getIsGameLost()) {
-				System.out.println("game over, void test");
-				continue;
-			}
+			minesweeperGame.clickCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1), false);
 
 			while (!minesweeperGame.getIsGameWon()) {
 				if (minesweeperGame.getIsGameLost()) {
@@ -570,7 +556,7 @@ public class Test {
 					}
 				}
 				if (!clickedFree) {
-					break;
+					minesweeperGame.revealRandomCellIfAllLogicalStuffIsCorrect(true);
 				}
 			}
 			if (minesweeperGame.getIsGameLost()) {
