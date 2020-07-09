@@ -231,6 +231,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			e.printStackTrace();
 		}
 		hasBeenAChangeSinceLastSolverRun = true;
+		if (minesweeperGame.getIsGameLost()) {
+			if (!toggleBacktrackingHintsOn) {
+				handleHintToggle(true);
+			}
+		}
 		if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
 			try {
 				updateSolvedBoardWithBacktrackingSolver();
@@ -248,6 +253,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			e.printStackTrace();
 		}
 		enableButtonsAndSwitchesAndSetToFalse();
+		handleHintToggle(false);
 
 		if (timerToBreakBoardGen.isAlive()) {
 			timerToBreakBoardGen.interrupt();
