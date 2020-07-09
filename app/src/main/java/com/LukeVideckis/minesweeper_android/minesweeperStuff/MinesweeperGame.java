@@ -53,6 +53,7 @@ public class MinesweeperGame {
 		numberOfFlags = minesweeperGame.numberOfFlags;
 		firstClick = minesweeperGame.firstClick;
 		isGameLost = minesweeperGame.isGameLost;
+		revealedAHiddenCell = minesweeperGame.revealedAHiddenCell;
 		grid = new Tile[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
