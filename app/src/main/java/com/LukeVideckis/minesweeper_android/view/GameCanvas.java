@@ -87,8 +87,12 @@ public class GameCanvas extends View {
 
 		if (gameCell.isFlagged()) {
 			drawCellHelpers.drawFlag(canvas, startX, startY);
-			if (gameActivity.getMinesweeperGame().getIsGameLost() && !gameCell.isMine()) {
-				drawCellHelpers.drawBlackX(canvas, startX, startY);
+			if (gameActivity.getMinesweeperGame().getIsGameLost()) {
+				if (!gameCell.isMine()) {
+					drawCellHelpers.drawBlackX(canvas, startX, startY);
+				} else if (gameActivity.isGetHintMode() && !gameCell.getIsLogicalMine()) {
+					drawCellHelpers.drawBlackX(canvas, startX, startY);
+				}
 			} else if (solverCell.getIsLogicalFree() && (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn())) {
 				drawCellHelpers.drawBlackX(canvas, startX, startY);
 			}
@@ -135,7 +139,16 @@ public class GameCanvas extends View {
 				haveDrawnACell = true;
 				haveDrawnARow = true;
 				try {
-					drawCell(canvas, visibleBoard[i][j], gameActivity.getMinesweeperGame().getCell(i, j), i, j, startX, startY, (gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol()));
+					drawCell(
+							canvas,
+							visibleBoard[i][j],
+							gameActivity.getMinesweeperGame().getCell(i, j),
+							i,
+							j,
+							startX,
+							startY,
+							(gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol() && !gameActivity.getGameEndedFromHelpButton())
+					);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

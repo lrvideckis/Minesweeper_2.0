@@ -47,7 +47,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleFlagModeOn = false,
 			toggleBacktrackingHintsOn = false,
 			toggleMineProbabilityOn = false,
-			hasBeenAChangeSinceLastSolverRun = true;
+			hasBeenAChangeSinceLastSolverRun = true,
+			gameEndedFromHelpButton = false;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
 	private PopupWindow solverHitLimitPopup;
 	private volatile PopupWindow couldNotFindNoGuessBoardPopup;
@@ -214,17 +215,17 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				}
 				break;
 			case R.id.getHelpButton:
-				executeHelpButton();
+				try {
+					executeHelpButton();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 		}
 	}
 
-	private void executeHelpButton() {
-		try {
-			updateSolvedBoardWithBacktrackingSolver();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	private void executeHelpButton() throws Exception {
+		updateSolvedBoardWithBacktrackingSolver();
 		try {
 			minesweeperGame.revealRandomCellIfAllLogicalStuffIsCorrect();
 		} catch (Exception e) {
@@ -232,18 +233,24 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 		hasBeenAChangeSinceLastSolverRun = true;
 		if (minesweeperGame.getIsGameLost()) {
+			gameEndedFromHelpButton = true;
+			updateSolvedBoardWithBacktrackingSolver();
 			if (!toggleBacktrackingHintsOn) {
 				handleHintToggle(true);
 			}
 		}
 		if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
-			try {
-				updateSolvedBoardWithBacktrackingSolver();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			updateSolvedBoardWithBacktrackingSolver();
 		}
 		findViewById(R.id.gridCanvas).invalidate();
+	}
+
+	public boolean getGameEndedFromHelpButton() {
+		return gameEndedFromHelpButton;
+	}
+
+	public boolean isGetHintMode() {
+		return gameMode == R.id.get_help_mode;
 	}
 
 	private void startNewGame() {
@@ -254,6 +261,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 		enableButtonsAndSwitchesAndSetToFalse();
 		handleHintToggle(false);
+		gameEndedFromHelpButton = false;
 
 		if (timerToBreakBoardGen.isAlive()) {
 			timerToBreakBoardGen.interrupt();
