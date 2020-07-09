@@ -175,11 +175,10 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		int rowsColsMin, rowsColsMax;
 		if (gameMode == R.id.no_guessing_mode || gameMode == R.id.no_guessing_mode_with_an_8) {
 			rowsColsMin = 10;
-			rowsColsMax = 30;
 		} else {
 			rowsColsMin = 3;
-			rowsColsMax = 30;
 		}
+		rowsColsMax = 30;
 
 		rows = Math.min(rowsColsMax, Math.max(rowsColsMin, rows));
 		cols = Math.min(rowsColsMax, Math.max(rowsColsMin, cols));
