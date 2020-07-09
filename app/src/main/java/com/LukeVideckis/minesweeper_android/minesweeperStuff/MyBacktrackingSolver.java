@@ -8,6 +8,7 @@ import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.AwayCell;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.BigFraction;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.CutNodes;
+import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.EdgePair;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetAdjacentCells;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetConnectedComponents;
 import com.LukeVideckis.minesweeper_android.minesweeperStuff.minesweeperHelpers.GetSubComponentByRemovedNodes;
@@ -519,7 +520,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			}
 		}
 		if (allCutNodes.isEmpty() && cntNonRemovedNodes > 4) {
-			Pair<MyPair, MyPair> edgePair = getPairOfEdges(subComponent, componentPos, isRemoved);
+			Pair<MyPair, MyPair> edgePair = EdgePair.getPairOfEdges(subComponent, componentPos, isRemoved, adjList);
 			TreeSet<Integer> uniqueNodes = new TreeSet<>();
 			if (edgePair != null) {
 				uniqueNodes.add(edgePair.first.first);
@@ -567,79 +568,6 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 		return result;
 	}
 
-	//TODO: move this to helper file
-	//TODO: instead of short-circuiting out once you find a solution, find the edge pair which minimizes the size of the largest component; same complexity
-	private Pair<MyPair, MyPair> getPairOfEdges(
-			final SortedSet<Integer> subComponent,
-			final int componentPos,
-			final boolean[] isRemoved
-	) throws Exception {
-		TreeSet<MyPair> edges = new TreeSet<>();
-		for (int node : subComponent) {
-			for (int next : adjList.get(componentPos).get(node)) {
-				if (!subComponent.contains(next)) {
-					continue;
-				}
-				int u = node;
-				int v = next;
-				if (u > v) {
-					int temp = u;
-					u = v;
-					v = temp;
-				}
-				edges.add(new MyPair(u, v));
-			}
-		}
-		for (MyPair edge1 : edges) {
-			for (MyPair edge2 : edges) {
-				if (isRemoved[edge1.first] ||
-						isRemoved[edge1.second] ||
-						isRemoved[edge2.first] ||
-						isRemoved[edge2.second]
-				) {
-					continue;
-				}
-				isRemoved[edge1.first] = isRemoved[edge1.second] = isRemoved[edge2.first] = isRemoved[edge2.second] = true;
-				TreeSet<Integer> visited = new TreeSet<>();
-				int numberOfComponents = 0;
-				for (int node : subComponent) {
-					if (isRemoved[node] || visited.contains(node)) {
-						continue;
-					}
-					++numberOfComponents;
-					dfs(node, subComponent, componentPos, isRemoved, visited);
-				}
-				isRemoved[edge1.first] = isRemoved[edge1.second] = isRemoved[edge2.first] = isRemoved[edge2.second] = false;
-				if (numberOfComponents == 0) {
-					throw new Exception("0 components, but there should be at least 1");
-				}
-				if (numberOfComponents > 1) {
-					System.out.println("here, returning an edge pair");
-					return new Pair<>(edge1, edge2);
-				}
-			}
-		}
-		return null;
-	}
-
-	private void dfs(
-			int node,
-			final SortedSet<Integer> subComponent,
-			final int componentPos,
-			final boolean[] isRemoved,
-			final TreeSet<Integer> visited
-	) {
-		if (isRemoved[node]) {
-			return;
-		}
-		visited.add(node);
-		for (int next : adjList.get(componentPos).get(node)) {
-			if (visited.contains(next) || !subComponent.contains(next)) {
-				continue;
-			}
-			dfs(next, subComponent, componentPos, isRemoved, visited);
-		}
-	}
 
 	private ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> combineResultsFromRecursing(
 			SortedSet<Integer> subComponent,
