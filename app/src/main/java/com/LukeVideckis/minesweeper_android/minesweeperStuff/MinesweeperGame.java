@@ -588,25 +588,41 @@ public class MinesweeperGame {
 				}
 			}
 		}
-		ArrayList<ArrayList<Pair<Integer, Integer>>> freeCells = new ArrayList<>(2);
-		for (int i = 0; i < 2; ++i) {
+		ArrayList<ArrayList<Pair<Integer, Integer>>> freeCells = new ArrayList<>(3);
+		for (int i = 0; i < 3; ++i) {
 			freeCells.add(new ArrayList<>());
 		}
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				final Tile curr = getCell(i, j);
 				if (!curr.isVisible && !curr.isMine) {
-					freeCells.get(Math.min(curr.numberSurroundingMines, 1)).add(new Pair<>(i, j));
+					if (curr.numberSurroundingMines == 0) {
+						freeCells.get(0).add(new Pair<>(i, j));
+					} else {
+						boolean cellIsNextToANumber = false;
+						for (int[] adj : GetAdjacentCells.getAdjacentCells(i, j, rows, cols)) {
+							final int adjI = adj[0], adjJ = adj[1];
+							if (getCell(adjI, adjJ).isVisible) {
+								cellIsNextToANumber = true;
+								break;
+							}
+						}
+						if (cellIsNextToANumber) {
+							freeCells.get(1).add(new Pair<>(i, j));
+						} else {
+							freeCells.get(2).add(new Pair<>(i, j));
+						}
+					}
 				}
 			}
 		}
-		for (int mines = 0; mines < 2; ++mines) {
-			if (freeCells.get(mines).isEmpty()) {
+		for (int type = 0; type < 3; ++type) {
+			if (freeCells.get(type).isEmpty()) {
 				continue;
 			}
-			Collections.shuffle(freeCells.get(mines));
-			final int i = freeCells.get(mines).get(0).first;
-			final int j = freeCells.get(mines).get(0).second;
+			Collections.shuffle(freeCells.get(type));
+			final int i = freeCells.get(type).get(0).first;
+			final int j = freeCells.get(type).get(0).second;
 			revealCell(i, j);
 			return;
 		}
