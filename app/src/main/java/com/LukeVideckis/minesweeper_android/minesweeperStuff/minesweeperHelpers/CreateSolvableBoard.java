@@ -35,29 +35,6 @@ public class CreateSolvableBoard {
 		this.mines = mines;
 	}
 
-	public static void printBoardDebug(VisibleTile[][] board, int mines) {
-		System.out.println("mines: " + mines + " visible board is:");
-		for (VisibleTile[] visibleTiles : board) {
-			for (VisibleTile visibleTile : visibleTiles) {
-				if (visibleTile.getIsVisible()) {
-					if (visibleTile.getNumberSurroundingMines() == 0) {
-						System.out.print('.');
-					} else {
-						System.out.print(visibleTile.getNumberSurroundingMines());
-					}
-				} else if (visibleTile.getIsLogicalFree()) {
-					System.out.print('F');
-				} else if (visibleTile.getIsLogicalMine()) {
-					System.out.print('B');
-				} else {
-					System.out.print('U');
-				}
-			}
-			System.out.println();
-		}
-		System.out.println();
-	}
-
 	@SuppressWarnings("unused")
 	public static void printBoardDebugMines(MinesweeperGame game) {
 		System.out.println("\nmines: " + game.getNumberOfMines());
