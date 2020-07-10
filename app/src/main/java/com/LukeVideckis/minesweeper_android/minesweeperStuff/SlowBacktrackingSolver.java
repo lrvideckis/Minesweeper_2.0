@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class SlowBacktrackingSolver implements BacktrackingSolver {
 
-	private final static int iterationLimit = 50000;
+	private final static int iterationLimit = 10000;
 	private final int[][][] lastUnvisitedSpot;
 	private final boolean[][] isMine;
 	private final int[][] cntSurroundingMines;

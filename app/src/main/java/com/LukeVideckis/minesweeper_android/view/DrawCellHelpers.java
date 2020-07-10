@@ -28,6 +28,7 @@ public class DrawCellHelpers {
 			blackFractionLine = new Paint();
 	private final Paint[] numberColors;
 	private Rect[][] middleSquareRectangles, backgroundRectangles, lowerTriangleRectangles;
+	private Rect textBounds = new Rect();
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
@@ -169,30 +170,42 @@ public class DrawCellHelpers {
 		final int digitsNumerator = probability.getNumerator().toString().length();
 		final int digitsDenominator = probability.getDenominator().toString().length();
 
-		final int topAndLeftMargin = 15;
-		if (digitsNumerator + digitsDenominator >= 5) {
-			canvas.drawText(
-					String.format(resources.getString(R.string.two_decimal_places), probability.getDoubleValue()),
-					startX + topAndLeftMargin,
-					startY + GameActivity.cellPixelLength / 3f,
-					black
-			);
-		} else if (probability.equals(1)) {
-			canvas.drawText("1", startX + topAndLeftMargin, startY + GameActivity.cellPixelLength / 3f, black);
-		} else if (probability.equals(0)) {
-			canvas.drawText("0", startX + topAndLeftMargin, startY + GameActivity.cellPixelLength / 3f, black);
-		} else {
+		if (digitsNumerator + digitsDenominator < 5 && !probability.equals(0) && !probability.equals(1)) {
+			final float pixelsBetweenNumAndDen = 16;
+
 			final float widthNum = black.measureText(probability.getNumerator().toString());
 			final float widthDen = black.measureText(probability.getDenominator().toString());
-			canvas.drawText(probability.getNumerator().toString(), startX + topAndLeftMargin + (widthDen - widthNum) / 2f, startY + GameActivity.cellPixelLength / 3f, black);
-			canvas.drawText(probability.getDenominator().toString(), startX + topAndLeftMargin, startY + 2 * GameActivity.cellPixelLength / 3f, black);
+
+			black.getTextBounds(probability.getDenominator().toString(), 0, digitsDenominator, textBounds);
+			float fractionHeight = -textBounds.top + pixelsBetweenNumAndDen;
+
+			black.getTextBounds(probability.getNumerator().toString(), 0, digitsNumerator, textBounds);
+			fractionHeight += -textBounds.top;
+
+			canvas.drawText(probability.getNumerator().toString(), startX + (GameActivity.cellPixelLength - widthNum) / 2f, startY + (-textBounds.top) + (GameActivity.cellPixelLength - fractionHeight) / 2f, black);
+			canvas.drawText(probability.getDenominator().toString(), startX + (GameActivity.cellPixelLength - widthDen) / 2f, startY + 2 * (-textBounds.top) + (GameActivity.cellPixelLength - fractionHeight) / 2f + pixelsBetweenNumAndDen, black);
+
 			canvas.drawLine(
-					startX + topAndLeftMargin,
-					startY + GameActivity.cellPixelLength / 3f + 8,
-					startX + topAndLeftMargin + black.measureText(probability.getDenominator().toString()),
-					startY + GameActivity.cellPixelLength / 3f + 8,
+					startX + (GameActivity.cellPixelLength - widthDen) / 2f,
+					startY + (-textBounds.top) + (GameActivity.cellPixelLength - fractionHeight) / 2f + pixelsBetweenNumAndDen / 2f,
+					startX + (GameActivity.cellPixelLength - widthDen) / 2f + black.measureText(probability.getDenominator().toString()),
+					startY + (-textBounds.top) + (GameActivity.cellPixelLength - fractionHeight) / 2f + pixelsBetweenNumAndDen / 2f,
 					blackFractionLine
 			);
+			return;
 		}
+
+		String text = "";
+		if (digitsNumerator + digitsDenominator >= 5) {
+			text = String.format(resources.getString(R.string.two_decimal_places), probability.getDoubleValue());
+		} else if (probability.equals(1)) {
+			text = "1";
+		} else if (probability.equals(0)) {
+			text = "0";
+		}
+		final float width = black.measureText(text);
+		black.getTextBounds(text, 0, text.length(), textBounds);
+		final float height = -textBounds.top;
+		canvas.drawText(text, startX + (GameActivity.cellPixelLength - width) / 2f, startY + height + (GameActivity.cellPixelLength - height) / 2f, black);
 	}
 }
