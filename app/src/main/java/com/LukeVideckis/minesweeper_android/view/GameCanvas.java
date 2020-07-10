@@ -90,7 +90,7 @@ public class GameCanvas extends View {
 			if (gameActivity.getMinesweeperGame().getIsGameLost()) {
 				if (!gameCell.isMine()) {
 					drawCellHelpers.drawBlackX(canvas, startX, startY);
-				} else if (gameActivity.isGetHintMode() && !gameCell.getIsLogicalMine()) {
+				} else if (gameActivity.isGetHelpMode() && !gameCell.getIsLogicalMine()) {
 					drawCellHelpers.drawBlackX(canvas, startX, startY);
 				}
 			} else if (solverCell.getIsLogicalFree() && (gameActivity.getToggleBacktrackingHintsOn() || gameActivity.getToggleMineProbabilityOn())) {

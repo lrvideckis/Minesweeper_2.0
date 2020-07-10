@@ -183,10 +183,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			if (minesweeperGame.clickCell(row, col, toggleFlag)) {
 				hasBeenAChangeSinceLastSolverRun = true;
 			}
-			if (!minesweeperGame.getIsGameLost() && !(toggleFlag && !minesweeperGame.getCell(row, col).getIsVisible())) {
-				if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
+			if (minesweeperGame.getIsGameLost()) {
+				//run solver if in get help mode to correctly display deducible stuff (after losing)
+				if (isGetHelpMode()) {
+					toggleBacktrackingHintsOn = hasBeenAChangeSinceLastSolverRun = true;
 					updateSolvedBoardWithBacktrackingSolver(false);
 				}
+			} else if (!(toggleFlag && !minesweeperGame.getCell(row, col).getIsVisible()) && (toggleBacktrackingHintsOn || toggleMineProbabilityOn)) {
+				updateSolvedBoardWithBacktrackingSolver(false);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -241,11 +245,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		if (minesweeperGame.getIsGameLost()) {
 			gameEndedFromHelpButton = true;
 			updateSolvedBoardWithBacktrackingSolver(false);
-			if (!toggleBacktrackingHintsOn) {
-				handleHintToggle(true);
-			}
-		}
-		if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
+			toggleBacktrackingHintsOn = true;
+		} else if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
 			updateSolvedBoardWithBacktrackingSolver(false);
 		}
 		findViewById(R.id.gridCanvas).invalidate();
@@ -255,7 +256,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		return gameEndedFromHelpButton;
 	}
 
-	public boolean isGetHintMode() {
+	public boolean isGetHelpMode() {
 		return gameMode == R.id.get_help_mode;
 	}
 
