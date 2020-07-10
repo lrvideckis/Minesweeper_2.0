@@ -27,8 +27,8 @@ public class DrawCellHelpers {
 			blackX = new Paint(),
 			blackFractionLine = new Paint();
 	private final Paint[] numberColors;
+	private final Rect textBounds = new Rect();
 	private Rect[][] middleSquareRectangles, backgroundRectangles, lowerTriangleRectangles;
-	private Rect textBounds = new Rect();
 
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
