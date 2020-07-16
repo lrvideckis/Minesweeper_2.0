@@ -34,7 +34,8 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	private static final float maxMinePercentage = 0.23f, maxMinePercentageWith8 = 0.22f;
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup, getHelpModeInfoPopup;
-	private int gameMode, rowsColsMin, rowsColsMax, minesMax;
+	private static final int rowsColsMax = 30;
+	private int gameMode, rowsColsMin, minesMin, minesMax;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -95,15 +96,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		final int previousMines = sharedPreferences.getInt(NUMBER_OF_MINES, 10);
 		gameMode = sharedPreferences.getInt(GAME_MODE, R.id.normal_mode);
 
-		rowsInput.setProgress(previousRows - rowsColsMin);
-		//test
-		/*
-		System.out.println("before");
-		rowsInput.setProgress(-5);
-		System.out.println("after");
-		 */
-		colsInput.setProgress(previousCols - rowsColsMin);
-		minesInput.setProgress(previousMines);
 		if (gameMode == R.id.no_guessing_mode) {
 			noGuessingMode.setChecked(true);
 		} else if (gameMode == R.id.no_guessing_mode_with_an_8) {
@@ -114,10 +106,17 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			normalMode.setChecked(true);
 		}
 		try {
-			setMinMaxText(previousRows, previousCols, previousMines);
+			setMinMaxText(previousRows, previousCols, previousMines, rowsInput, colsInput, minesInput);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		rowsInput.setMax(rowsColsMax - rowsColsMin);
+		colsInput.setMax(rowsColsMax - rowsColsMin);
+		minesInput.setMax(minesMax - minesMin);
+
+		rowsInput.setProgress(previousRows - rowsColsMin);
+		colsInput.setProgress(previousCols - rowsColsMin);
+		minesInput.setProgress(previousMines - minesMin);
 
 		Button startNewGameButton = findViewById(R.id.startNewGameButton);
 		startNewGameButton.setOnClickListener(new startNewGameButtonListener(rowsInput, colsInput, minesInput));
@@ -129,23 +128,23 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			 * with start click in the center. It was easier to just make 10x10 the default for
 			 * beginner boards
 			 */
-			rowsInput.setProgress(10);
-			colsInput.setProgress(10);
-			minesInput.setProgress(10);
+			rowsInput.setProgress(10 - rowsColsMin);
+			colsInput.setProgress(10 - rowsColsMin);
+			minesInput.setProgress(10 - minesMin);
 		});
 
 		Button intermediate = findViewById(R.id.intermediate);
 		intermediate.setOnClickListener(view -> {
-			rowsInput.setProgress(14);
-			colsInput.setProgress(16);
-			minesInput.setProgress(40);
+			rowsInput.setProgress(14 - rowsColsMin);
+			colsInput.setProgress(16 - rowsColsMin);
+			minesInput.setProgress(40 - minesMin);
 		});
 
 		Button expert = findViewById(R.id.expert);
 		expert.setOnClickListener(view -> {
-			rowsInput.setProgress(16);
-			colsInput.setProgress(30);
-			minesInput.setProgress(99);
+			rowsInput.setProgress(16 - rowsColsMin);
+			colsInput.setProgress(30 - rowsColsMin);
+			minesInput.setProgress(99 - minesMin);
 		});
 
 		TextView normalModeInfo = findViewById(R.id.normal_mode_info);
@@ -168,38 +167,35 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		final int rows = ((SeekBar) findViewById(R.id.rowsInput)).getProgress() + rowsColsMin;
-		final int cols = ((SeekBar) findViewById(R.id.colsInput)).getProgress() + rowsColsMin;
-		final int mines = ((SeekBar) findViewById(R.id.mineInput)).getProgress();
+		final SeekBar rowsInput = findViewById(R.id.rowsInput);
+		final SeekBar colsInput = findViewById(R.id.colsInput);
+		final SeekBar mineInput = findViewById(R.id.mineInput);
+
+		final int rows = rowsInput.getProgress() + rowsColsMin;
+		final int cols = colsInput.getProgress() + rowsColsMin;
+		final int mines = mineInput.getProgress() + minesMin;
 
 		System.out.println("here, on progress changed: rows, cols, mines: " + rows + " " + cols + " " + mines);
 
 		try {
-			setMinMaxText(rows, cols, mines);
+			setMinMaxText(rows, cols, mines, rowsInput, colsInput, mineInput);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void setMinMaxText(int rows, int cols, int mines) throws Exception {
+	private void setMinMaxText(int rows, int cols, int mines, SeekBar rowsInput, SeekBar colsInput, SeekBar mineInput) throws Exception {
 		if (gameMode == R.id.no_guessing_mode || gameMode == R.id.no_guessing_mode_with_an_8) {
 			rowsColsMin = 10;
 		} else {
 			rowsColsMin = 3;
 		}
-		rowsColsMax = 30;
+		rowsInput.setMax(rowsColsMax - rowsColsMin);
+		colsInput.setMax(rowsColsMax - rowsColsMin);
 
-		if (rowsColsMin > rows || rows > rowsColsMax) {
-			throw new Exception("rows is invalid");
-		}
-		if (rowsColsMin > cols || cols > rowsColsMax) {
-			throw new Exception("cols is invalid");
-		}
+		rows = Math.min(rowsColsMax, Math.max(rowsColsMin, rows));
+		cols = Math.min(rowsColsMax, Math.max(rowsColsMin, cols));
 
-		//rows = Math.min(rowsColsMax, Math.max(rowsColsMin, rows));
-		//cols = Math.min(rowsColsMax, Math.max(rowsColsMin, cols));
-
-		int minesMin, minesMax;
 		if (gameMode == R.id.no_guessing_mode) {
 			minesMin = 0;
 			minesMax = (int) (rows * cols * maxMinePercentage);
@@ -213,19 +209,16 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			minesMax = rows * cols - 9;
 			minesMax = Math.min(minesMax, 999);
 		}
+		mineInput.setMax(minesMax - minesMin);
 		if (minesMin > minesMax) {
 			throw new Exception("minesMin > minesMax");
 		}
 		mines = Math.max(minesMin, Math.min(minesMax, mines));
 
-		SeekBar rowsInput = findViewById(R.id.rowsInput);
+		System.out.println("here, setting progress at: " + (rows - rowsColsMin));
 		rowsInput.setProgress(rows - rowsColsMin);
-
-		SeekBar colsInput = findViewById(R.id.colsInput);
 		colsInput.setProgress(cols - rowsColsMin);
-
-		SeekBar minesInput = findViewById(R.id.mineInput);
-		minesInput.setProgress(mines);
+		mineInput.setProgress(mines - minesMin);
 
 		//update rows text
 		TextView rowsText = findViewById(R.id.rowsText);
@@ -258,11 +251,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 	public void onClick(View v) {
 		final SeekBar rowsInput = findViewById(R.id.rowsInput);
 		final SeekBar colsInput = findViewById(R.id.colsInput);
-		final SeekBar minesInput = findViewById(R.id.mineInput);
+		final SeekBar mineInput = findViewById(R.id.mineInput);
 
 		final int rows = rowsInput.getProgress() + rowsColsMin;
 		final int cols = colsInput.getProgress() + rowsColsMin;
-		final int mines = minesInput.getProgress();
+		final int mines = mineInput.getProgress() + minesMin;
 
 		switch (v.getId()) {
 			case R.id.normal_mode:
@@ -274,7 +267,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				getHelpMode.setChecked(false);
 				gameMode = R.id.normal_mode;
 				try {
-					setMinMaxText(rows, cols, mines);
+					setMinMaxText(rows, cols, mines, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -288,7 +281,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				getHelpMode.setChecked(false);
 				gameMode = R.id.no_guessing_mode;
 				try {
-					setMinMaxText(rows, cols, mines);
+					setMinMaxText(rows, cols, mines, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -302,7 +295,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				getHelpMode.setChecked(false);
 				gameMode = R.id.no_guessing_mode_with_an_8;
 				try {
-					setMinMaxText(rows, cols, mines);
+					setMinMaxText(rows, cols, mines, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -316,7 +309,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 				noGuessingModeWith8.setChecked(false);
 				gameMode = R.id.get_help_mode;
 				try {
-					setMinMaxText(rows, cols, mines);
+					setMinMaxText(rows, cols, mines, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -337,42 +330,42 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 			case R.id.rowsDecrement:
 				try {
-					setMinMaxText(rows - 1, cols, mines);
+					setMinMaxText(rows - 1, cols, mines, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 			case R.id.rowsIncrement:
 				try {
-					setMinMaxText(rows + 1, cols, mines);
+					setMinMaxText(rows + 1, cols, mines, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 			case R.id.colsDecrement:
 				try {
-					setMinMaxText(rows, cols - 1, mines);
+					setMinMaxText(rows, cols - 1, mines, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 			case R.id.colsIncrement:
 				try {
-					setMinMaxText(rows, cols + 1, mines);
+					setMinMaxText(rows, cols + 1, mines, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 			case R.id.minesDecrement:
 				try {
-					setMinMaxText(rows, cols, mines - 1);
+					setMinMaxText(rows, cols, mines - 1, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 			case R.id.minesIncrement:
 				try {
-					setMinMaxText(rows, cols, mines + 1);
+					setMinMaxText(rows, cols, mines + 1, rowsInput, colsInput, mineInput);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -440,7 +433,7 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		public void onClick(View v) {
 			final int numberOfRows = rowInput.getProgress() + rowsColsMin;
 			final int numberOfCols = colInput.getProgress() + rowsColsMin;
-			final int numberOfMines = mineInput.getProgress();
+			final int numberOfMines = mineInput.getProgress() + minesMin;
 
 			final RadioButton normalMode = findViewById(R.id.normal_mode);
 			final RadioButton noGuessMode = findViewById(R.id.no_guessing_mode);

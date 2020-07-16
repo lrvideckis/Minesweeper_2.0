@@ -149,38 +149,40 @@
 
 		</RelativeLayout>
 
-		<RelativeLayout
+		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="60dp">
+			android:layout_height="60dp"
+			android:orientation="horizontal">
 
 			<Button
 				android:id="@+id/beginner"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
 				android:layout_height="match_parent"
-				android:layout_alignParentStart="true"
 				android:layout_marginStart="10dp"
-				android:layout_toStartOf="@id/intermediate"
 				android:text="@string/beginner"
-				android:textColor="@color/black" />
+				android:layout_weight="1"
+				android:textColor="@color/black"
+				tools:ignore="ButtonStyle" />
 
 			<Button
 				android:id="@+id/intermediate"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
 				android:layout_height="match_parent"
-				android:layout_centerInParent="true"
 				android:text="@string/intermediate"
-				android:textColor="@color/black" />
+				android:layout_weight="1"
+				android:textColor="@color/black"
+				tools:ignore="ButtonStyle" />
 
 			<Button
 				android:id="@+id/expert"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
 				android:layout_height="match_parent"
-				android:layout_alignParentEnd="true"
 				android:layout_marginEnd="10dp"
-				android:layout_toEndOf="@id/intermediate"
 				android:text="@string/expert"
-				android:textColor="@color/black" />
-		</RelativeLayout>
+				android:layout_weight="1"
+				android:textColor="@color/black"
+				tools:ignore="ButtonStyle" />
+		</LinearLayout>
 
 		<LinearLayout
 			android:layout_width="wrap_content"
