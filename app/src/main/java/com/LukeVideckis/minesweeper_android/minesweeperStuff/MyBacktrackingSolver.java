@@ -969,7 +969,7 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			ArrayList<Integer> allNodes,
 			TreeMap<Integer, Integer> toIndexOriginal,
 			ArrayList<Pair<TreeMap<Integer, MutableInt>, TreeMap<Integer, ArrayList<MutableInt>>>> result
-	) {
+	) throws Exception {
 		ArrayList<Pair<Integer, Integer>> component = components.get(componentPos);
 		int mask = 0;
 		for (int node : allNodes) {

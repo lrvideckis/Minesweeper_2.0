@@ -73,4 +73,13 @@ public class MyMath {
 			++row;
 		}
 	}
+
+	public static int addExact(int x, int y) throws Exception {
+		int r = x + y;
+		// HD 2-12 Overflow iff both arguments have the opposite sign of the result
+		if (((x ^ r) & (y ^ r)) < 0) {
+			throw new Exception("integer overflow");
+		}
+		return r;
+	}
 }

@@ -43,7 +43,8 @@
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/rowsDecrement"
 				android:layout_toEndOf="@id/rowsText"
-				android:min="8"
+				android:paddingTop="10dp"
+				android:paddingBottom="10dp"
 				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 			<Button
@@ -85,7 +86,8 @@
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/colsDecrement"
 				android:layout_toEndOf="@id/colsText"
-				android:min="8"
+				android:paddingTop="10dp"
+				android:paddingBottom="10dp"
 				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 			<Button
@@ -126,8 +128,8 @@
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/minesDecrement"
 				android:layout_toEndOf="@id/mineText"
-				android:max="7"
-				android:min="0"
+				android:paddingTop="10dp"
+				android:paddingBottom="10dp"
 				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 			<Button
@@ -147,38 +149,43 @@
 
 		</RelativeLayout>
 
-		<RelativeLayout
+		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="60dp">
+			android:layout_height="60dp"
+			android:orientation="horizontal">
 
 			<Button
 				android:id="@+id/beginner"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
 				android:layout_height="match_parent"
-				android:layout_alignParentStart="true"
 				android:layout_marginStart="10dp"
-				android:layout_toStartOf="@id/intermediate"
+				android:layout_weight="1"
 				android:text="@string/beginner"
-				android:textColor="@color/black" />
+				android:textColor="@color/black"
+				android:textSize="12sp"
+				tools:ignore="ButtonStyle" />
 
 			<Button
 				android:id="@+id/intermediate"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
 				android:layout_height="match_parent"
-				android:layout_centerInParent="true"
+				android:layout_weight="1"
 				android:text="@string/intermediate"
-				android:textColor="@color/black" />
+				android:textColor="@color/black"
+				android:textSize="12sp"
+				tools:ignore="ButtonStyle" />
 
 			<Button
 				android:id="@+id/expert"
-				android:layout_width="wrap_content"
+				android:layout_width="0dp"
 				android:layout_height="match_parent"
-				android:layout_alignParentEnd="true"
 				android:layout_marginEnd="10dp"
-				android:layout_toEndOf="@id/intermediate"
+				android:layout_weight="1"
 				android:text="@string/expert"
-				android:textColor="@color/black" />
-		</RelativeLayout>
+				android:textColor="@color/black"
+				android:textSize="12sp"
+				tools:ignore="ButtonStyle" />
+		</LinearLayout>
 
 		<LinearLayout
 			android:layout_width="wrap_content"
