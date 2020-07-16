@@ -32,9 +32,9 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			NUMBER_OF_MINES = "numMines",
 			GAME_MODE = "gameMode";
 	private static final float maxMinePercentage = 0.23f, maxMinePercentageWith8 = 0.22f;
+	private static final int rowsColsMax = 30;
 	private SharedPreferences sharedPreferences;
 	private PopupWindow normalModeInfoPopup, noGuessingModeInfoPopup, noGuessingModeWith8InfoPopup, getHelpModeInfoPopup;
-	private static final int rowsColsMax = 30;
 	private int gameMode, rowsColsMin, minesMin, minesMax;
 
 	@Override

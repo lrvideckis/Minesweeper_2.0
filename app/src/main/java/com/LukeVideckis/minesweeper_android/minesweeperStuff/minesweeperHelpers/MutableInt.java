@@ -7,8 +7,8 @@ public class MutableInt {
 		value = startVal;
 	}
 
-	public void addWith(int delta) {
-		value = Math.addExact(value, delta);
+	public void addWith(int delta) throws Exception {
+		value = MyMath.addExact(value, delta);
 	}
 
 	public int get() {
