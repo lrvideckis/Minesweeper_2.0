@@ -43,7 +43,8 @@
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/rowsDecrement"
 				android:layout_toEndOf="@id/rowsText"
-				android:min="8"
+				android:paddingTop="10dp"
+				android:paddingBottom="10dp"
 				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 			<Button
@@ -85,7 +86,8 @@
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/colsDecrement"
 				android:layout_toEndOf="@id/colsText"
-				android:min="8"
+				android:paddingTop="10dp"
+				android:paddingBottom="10dp"
 				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 			<Button
@@ -126,8 +128,8 @@
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/minesDecrement"
 				android:layout_toEndOf="@id/mineText"
-				android:max="7"
-				android:min="0"
+				android:paddingTop="10dp"
+				android:paddingBottom="10dp"
 				android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />
 
 			<Button
