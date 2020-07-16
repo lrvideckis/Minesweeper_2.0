@@ -175,8 +175,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		final int cols = colsInput.getProgress() + rowsColsMin;
 		final int mines = mineInput.getProgress() + minesMin;
 
-		System.out.println("here, on progress changed: rows, cols, mines: " + rows + " " + cols + " " + mines);
-
 		try {
 			setMinMaxText(rows, cols, mines, rowsInput, colsInput, mineInput);
 		} catch (Exception e) {
@@ -204,7 +202,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			minesMin = 8;
 			minesMax = (int) (rows * cols * maxMinePercentageWith8);
 			minesMax = Math.min(minesMax, 100);
-		} else {//both normal mode and get help mode
+		} else if (gameMode == R.id.get_help_mode) {
+			minesMin = 0;
+			minesMax = rows * cols - 9;
+			minesMax = Math.min(minesMax, 100);
+		} else {//only normal mode
 			minesMin = 0;
 			minesMax = rows * cols - 9;
 			minesMax = Math.min(minesMax, 999);
@@ -215,7 +217,6 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 		}
 		mines = Math.max(minesMin, Math.min(minesMax, mines));
 
-		System.out.println("here, setting progress at: " + (rows - rowsColsMin));
 		rowsInput.setProgress(rows - rowsColsMin);
 		colsInput.setProgress(cols - rowsColsMin);
 		mineInput.setProgress(mines - minesMin);
