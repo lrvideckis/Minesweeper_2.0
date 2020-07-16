@@ -166,6 +166,9 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+		if (!fromUser) {
+			return;
+		}
 		final SeekBar rowsInput = findViewById(R.id.rowsInput);
 		final SeekBar colsInput = findViewById(R.id.colsInput);
 		final SeekBar mineInput = findViewById(R.id.mineInput);
