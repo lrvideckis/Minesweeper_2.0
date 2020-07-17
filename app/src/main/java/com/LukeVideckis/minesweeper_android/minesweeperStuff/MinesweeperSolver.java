@@ -16,20 +16,6 @@ public interface MinesweeperSolver {
 			set(other);
 		}
 
-		public VisibleTile(char c) throws Exception {
-			reset();
-			if (c == '.') {
-				updateVisibilityAndSurroundingMines(true, 0);
-			} else if (c == 'U') {
-				updateVisibilityAndSurroundingMines(false, 0);
-			} else if (c == 'B') {
-				updateVisibilityAndSurroundingMines(false, 0);
-				isLogicalMine = true;
-			} else {
-				updateVisibilityAndSurroundingMines(true, c - '0');
-			}
-		}
-
 		public void set(VisibleTile other) {
 			isVisible = other.isVisible;
 			isLogicalMine = other.isLogicalMine;
@@ -90,12 +76,6 @@ public interface MinesweeperSolver {
 			numberSurroundingMines = tile.numberSurroundingMines;
 			isLogicalMine = tile.isLogicalMine;
 			isLogicalFree = tile.isLogicalFree;
-		}
-
-		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) throws Exception {
-			reset();
-			this.isVisible = isVisible;
-			this.numberSurroundingMines = numberSurroundingMines;
 		}
 	}
 }
