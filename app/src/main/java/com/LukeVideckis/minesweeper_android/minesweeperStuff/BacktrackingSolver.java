@@ -8,7 +8,7 @@ public interface BacktrackingSolver extends MinesweeperSolver {
 
 	class VisibleTileWithProbability extends MinesweeperSolver.VisibleTile {
 
-		BigFraction mineProbability;
+		final BigFraction mineProbability;
 
 		public VisibleTileWithProbability() {
 			super();
@@ -24,11 +24,6 @@ public interface BacktrackingSolver extends MinesweeperSolver {
 		public VisibleTileWithProbability(VisibleTileWithProbability other) {
 			super(other);
 			mineProbability = new BigFraction(other.mineProbability);
-		}
-
-		public VisibleTileWithProbability(char c) throws Exception {
-			super(c);
-			mineProbability = new BigFraction(0);
 		}
 
 		public boolean isEverythingEqual(VisibleTileWithProbability other) {
@@ -53,15 +48,6 @@ public interface BacktrackingSolver extends MinesweeperSolver {
 			}
 			super.updateVisibilitySurroundingMinesAndLogicalStuff(tile);
 			mineProbability.setValue(tile.mineProbability);
-		}
-
-		public void updateVisibilityAndSurroundingMines(boolean isVisible, int numberSurroundingMines) throws Exception {
-			super.updateVisibilityAndSurroundingMines(isVisible, numberSurroundingMines);
-			if (mineProbability == null) {
-				mineProbability = new BigFraction(0);
-			} else {
-				mineProbability.setValues(0, 1);
-			}
 		}
 	}
 }

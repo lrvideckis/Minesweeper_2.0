@@ -29,15 +29,6 @@ public class BigFraction {
 		reduceAndSet(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
 	}
 
-	public void addWith(int delta) {
-		BigInteger currNumerator = numerator.add(BigInteger.valueOf(delta).multiply(denominator));
-		try {
-			reduceAndSet(currNumerator, denominator);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void addWith(BigFraction delta) {
 		try {
 			BigInteger newNumerator = numerator.multiply(delta.getDenominator()).add(denominator.multiply(delta.getNumerator()));
@@ -64,13 +55,6 @@ public class BigFraction {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	//only will throw if quotient == 0 (divide by zero error)
-	public void divideWith(BigFraction quotient) throws Exception {
-		this.numerator = this.numerator.multiply(quotient.getDenominator());
-		this.denominator = this.denominator.multiply(quotient.getNumerator());
-		reduceAndSet(this.numerator, this.denominator);
 	}
 
 	//should only throw if fraction initially equals 0
