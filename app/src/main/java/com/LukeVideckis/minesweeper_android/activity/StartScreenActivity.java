@@ -130,6 +130,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			rowsInput.setProgress(10 - rowsColsMin);
 			colsInput.setProgress(10 - rowsColsMin);
 			minesInput.setProgress(10 - minesMin);
+			try {
+				setMinMaxText(10, 10, 10, rowsInput, colsInput, minesInput);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		});
 
 		Button intermediate = findViewById(R.id.intermediate);
@@ -137,6 +142,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			rowsInput.setProgress(14 - rowsColsMin);
 			colsInput.setProgress(16 - rowsColsMin);
 			minesInput.setProgress(40 - minesMin);
+			try {
+				setMinMaxText(14, 16, 40, rowsInput, colsInput, minesInput);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		});
 
 		Button expert = findViewById(R.id.expert);
@@ -144,6 +154,11 @@ public class StartScreenActivity extends AppCompatActivity implements SeekBar.On
 			rowsInput.setProgress(16 - rowsColsMin);
 			colsInput.setProgress(30 - rowsColsMin);
 			minesInput.setProgress(99 - minesMin);
+			try {
+				setMinMaxText(16, 30, 99, rowsInput, colsInput, minesInput);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		});
 
 		TextView normalModeInfo = findViewById(R.id.normal_mode_info);
