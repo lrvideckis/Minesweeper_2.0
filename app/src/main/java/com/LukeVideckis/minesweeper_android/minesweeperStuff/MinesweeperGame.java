@@ -577,7 +577,9 @@ public class MinesweeperGame {
 		}
 		if (firstClick) {
 			firstClick = false;
-			firstClickedCell(MyMath.getRand(0, rows - 1), MyMath.getRand(0, cols - 1));
+			getHelpRow = MyMath.getRand(0, rows - 1);
+			getHelpCol = MyMath.getRand(0, cols - 1);
+			firstClickedCell(getHelpRow, getHelpCol);
 			return;
 		}
 		if (!solverHitIterationLimit) {
