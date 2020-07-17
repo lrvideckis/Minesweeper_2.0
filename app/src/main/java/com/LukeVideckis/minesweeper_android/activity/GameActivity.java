@@ -48,7 +48,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			toggleBacktrackingHintsOn = false,
 			toggleMineProbabilityOn = false,
 			hasBeenAChangeSinceLastSolverRun = true,
-			gameEndedFromHelpButton = false;
+			gameEndedFromHelpButton = false,
+			lastActionWasGetHelpButton = false;
 	private int numberOfRows, numberOfCols, numberOfMines, gameMode;
 	private PopupWindow solverHitLimitPopup, getHelpModeIsDisabledPopup;
 	private volatile PopupWindow couldNotFindNoGuessBoardPopup;
@@ -197,6 +198,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		}
 
 		updateNumberOfMines(minesweeperGame.getNumberOfMines() - minesweeperGame.getNumberOfFlags());
+		lastActionWasGetHelpButton = false;
 		findViewById(R.id.gridCanvas).invalidate();
 	}
 
@@ -208,6 +210,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				newGameButton.setImageResource(R.drawable.smiley_face);
 				startNewGame();
 				GameCanvas gameCanvas = findViewById(R.id.gridCanvas);
+				lastActionWasGetHelpButton = false;
 				gameCanvas.invalidate();
 				break;
 			case R.id.toggleFlagMode:
@@ -249,7 +252,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		} else if (toggleBacktrackingHintsOn || toggleMineProbabilityOn) {
 			updateSolvedBoardWithBacktrackingSolver(false);
 		}
+		lastActionWasGetHelpButton = true;
 		findViewById(R.id.gridCanvas).invalidate();
+	}
+
+	public boolean isGetHelp() {
+		return lastActionWasGetHelpButton;
 	}
 
 	public boolean getGameEndedFromHelpButton() {
@@ -308,6 +316,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				e.printStackTrace();
 			}
 		}
+		lastActionWasGetHelpButton = false;
 		findViewById(R.id.gridCanvas).invalidate();
 	}
 
@@ -351,6 +360,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				e.printStackTrace();
 			}
 		}
+		lastActionWasGetHelpButton = false;
 		gameCanvas.invalidate();
 	}
 
@@ -530,6 +540,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 			if (!finishedBoardGen.get()) {
 				runOnUiThread(() -> loadingScreenForSolvableBoardGeneration.show());
 			} else {
+				lastActionWasGetHelpButton = false;
 				findViewById(R.id.gridCanvas).invalidate();
 			}
 		}
@@ -578,6 +589,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				updateTimeThread.start();
 				runOnUiThread(() -> {
 					loadingScreenForSolvableBoardGeneration.dismiss();
+					lastActionWasGetHelpButton = false;
 					findViewById(R.id.gridCanvas).invalidate();
 				});
 			} catch (Exception ignored) {
@@ -593,6 +605,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 				runOnUiThread(() -> {
 					displayNoGuessBoardPopup();
 					loadingScreenForSolvableBoardGeneration.dismiss();
+					lastActionWasGetHelpButton = false;
 					findViewById(R.id.gridCanvas).invalidate();
 				});
 			}

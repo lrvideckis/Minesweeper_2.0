@@ -21,7 +21,7 @@ import static com.LukeVideckis.minesweeper_android.minesweeperStuff.MinesweeperS
 public class MinesweeperGame {
 	private final int rows, cols, numberOfMines;
 	private final Tile[][] grid;
-	private int numberOfFlags, rowWith8 = -1, colWith8 = -1;
+	private int numberOfFlags, rowWith8 = -1, colWith8 = -1, getHelpRow, getHelpCol;
 	private boolean firstClick, isGameLost, hasAn8 = false, revealedAHiddenCell = false;
 
 	public MinesweeperGame(int rows, int cols, int numberOfMines) throws Exception {
@@ -47,6 +47,8 @@ public class MinesweeperGame {
 	public MinesweeperGame(MinesweeperGame minesweeperGame) throws Exception {
 		rows = minesweeperGame.getRows();
 		cols = minesweeperGame.getCols();
+		getHelpRow = minesweeperGame.getHelpRow;
+		getHelpCol = minesweeperGame.getHelpCol;
 		numberOfMines = minesweeperGame.getNumberOfMines();
 		hasAn8 = minesweeperGame.hasAn8;
 		rowWith8 = minesweeperGame.rowWith8;
@@ -624,9 +626,19 @@ public class MinesweeperGame {
 			final int i = freeCells.get(type).get(0).first;
 			final int j = freeCells.get(type).get(0).second;
 			revealCell(i, j);
+			getHelpRow = i;
+			getHelpCol = j;
 			return;
 		}
 		throw new Exception("there should have been at least 1 free cell since the game isn't won");
+	}
+
+	public int getHelpRow() {
+		return getHelpRow;
+	}
+
+	public int getHelpCol() {
+		return getHelpCol;
 	}
 
 	public class Tile extends BacktrackingSolver.VisibleTileWithProbability {

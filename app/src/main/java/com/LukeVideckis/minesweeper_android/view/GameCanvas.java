@@ -38,7 +38,17 @@ public class GameCanvas extends View {
 		scaleListener.setScreenWidthAndHeight(getWidth(), getHeight());
 	}
 
-	private void drawCell(Canvas canvas, VisibleTileWithProbability solverCell, MinesweeperGame.Tile gameCell, int i, int j, int startX, int startY, boolean drawRedBackground) throws Exception {
+	private void drawCell(
+			Canvas canvas,
+			VisibleTileWithProbability solverCell,
+			MinesweeperGame.Tile gameCell,
+			int i,
+			int j,
+			int startX,
+			int startY,
+			boolean drawRedBackground,
+			boolean isGetHelp
+	) throws Exception {
 
 		//error checking
 		GameActivity gameActivity = (GameActivity) getContext();
@@ -64,6 +74,9 @@ public class GameCanvas extends View {
 
 		if (gameCell.getIsVisible()) {
 			drawCellHelpers.drawNumberedCell(canvas, gameCell.getNumberSurroundingMines(), i, j, startX, startY);
+			if (isGetHelp) {
+				drawCellHelpers.drawRedBoundary(canvas, startX, startY);
+			}
 			return;
 		}
 
@@ -147,7 +160,8 @@ public class GameCanvas extends View {
 							j,
 							startX,
 							startY,
-							(gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol() && !gameActivity.getGameEndedFromHelpButton())
+							(gameActivity.getMinesweeperGame().getIsGameLost() && i == gameActivity.getLastTapRow() && j == gameActivity.getLastTapCol() && !gameActivity.getGameEndedFromHelpButton()),
+							(gameActivity.isGetHelp() && i == gameActivity.getMinesweeperGame().getHelpRow() && j == gameActivity.getMinesweeperGame().getHelpCol())
 					);
 				} catch (Exception e) {
 					e.printStackTrace();

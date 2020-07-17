@@ -25,7 +25,8 @@ public class DrawCellHelpers {
 			redFlag = new Paint(),
 			black = new Paint(),
 			blackX = new Paint(),
-			blackFractionLine = new Paint();
+			blackFractionLine = new Paint(),
+			redBorderLine = new Paint();
 	private final Paint[] numberColors;
 	private final Rect textBounds = new Rect();
 	private Rect[][] middleSquareRectangles, backgroundRectangles, lowerTriangleRectangles;
@@ -33,6 +34,9 @@ public class DrawCellHelpers {
 	DrawCellHelpers(Context context, int numberOfRows, int numberOfCols) {
 		black.setColor(Color.BLACK);
 		black.setTextSize(GameActivity.cellPixelLength / 3f);
+
+		redBorderLine.setColor(Color.RED);
+		redBorderLine.setStrokeWidth(10);
 
 		blackFractionLine.setColor(Color.BLACK);
 		blackFractionLine.setStrokeWidth(4f);
@@ -105,6 +109,17 @@ public class DrawCellHelpers {
 				lowerTriangleRectangles[i][j] = lowerTriangleBounds;
 			}
 		}
+	}
+
+	void drawRedBoundary(Canvas canvas, int startX, int startY) {
+		final float margin = 5f;
+		final float endX = startX + GameActivity.cellPixelLength;
+		final float endY = startY + GameActivity.cellPixelLength;
+
+		canvas.drawLine(startX, startY + margin, endX, startY + margin, redBorderLine);
+		canvas.drawLine(startX, endY - margin, endX, endY - margin, redBorderLine);
+		canvas.drawLine(startX + margin, startY, startX + margin, endY, redBorderLine);
+		canvas.drawLine(endX - margin, startY, endX - margin, endY, redBorderLine);
 	}
 
 	void drawBlankCell(Canvas canvas, int i, int j, Resources resources) {
