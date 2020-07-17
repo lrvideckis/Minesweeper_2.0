@@ -101,7 +101,7 @@
 				android:id="@+id/toggleBacktrackingHints"
 				android:layout_width="wrap_content"
 				android:layout_height="match_parent"
-				android:text="@string/hints" />
+				android:text="@string/deducible_squares" />
 
 			<Switch
 				android:id="@+id/toggleMineProbability"

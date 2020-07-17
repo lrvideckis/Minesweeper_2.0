@@ -269,6 +269,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 		enableButtonsAndSwitchesAndSetToFalse();
 		handleHintToggle(false);
 		gameEndedFromHelpButton = false;
+		hasBeenAChangeSinceLastSolverRun = true;
 
 		if (timerToBreakBoardGen.isAlive()) {
 			timerToBreakBoardGen.interrupt();
