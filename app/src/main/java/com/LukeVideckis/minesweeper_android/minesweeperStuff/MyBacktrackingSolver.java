@@ -312,6 +312,12 @@ public class MyBacktrackingSolver implements BacktrackingSolver {
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) {
 					board[i][j].mineProbability.setValues(numberOfMines, rows * cols);
+					if (numberOfMines >= rows * cols) {
+						throw new Exception("too many mines, but this shouldn't happen");
+					}
+					if (numberOfMines == 0) {
+						board[i][j].isLogicalFree = true;
+					}
 				}
 			}
 			return;
